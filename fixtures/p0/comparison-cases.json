@@ -1,0 +1,2859 @@
+{
+  "schema_version": "1.0.0",
+  "fixture_set_id": "comparison-oracles-p0-v1",
+  "activation_status": "synthetic_oracle_not_b300_target_policy",
+  "status": "planned_runtime_not_run",
+  "numeric_data_origin": "synthetic; not HAT/B300 measurements",
+  "oracle_authoring_order": "expected tables frozen before product implementation",
+  "unit_registries": [
+    {
+      "registry_id": "p0-fixture-units",
+      "version": 1,
+      "canonical_units": [
+        "ms",
+        "W",
+        "J/session",
+        "tokens/s",
+        "ratio",
+        "K",
+        "1"
+      ],
+      "conversions": {
+        "1": {
+          "to": "1",
+          "factor": "1"
+        },
+        "ms": {
+          "to": "ms",
+          "factor": "1"
+        },
+        "s": {
+          "to": "ms",
+          "factor": "1000"
+        },
+        "W": {
+          "to": "W",
+          "factor": "1"
+        },
+        "kW": {
+          "to": "W",
+          "factor": "1000"
+        },
+        "J/session": {
+          "to": "J/session",
+          "factor": "1"
+        },
+        "kJ/session": {
+          "to": "J/session",
+          "factor": "1000"
+        },
+        "tokens/s": {
+          "to": "tokens/s",
+          "factor": "1"
+        },
+        "ratio": {
+          "to": "ratio",
+          "factor": "1"
+        },
+        "K": {
+          "to": "K",
+          "factor": "1"
+        }
+      }
+    }
+  ],
+  "policies": [
+    {
+      "schema_version": "1.0.0",
+      "policy_id": "cmp-p1-workload-v1",
+      "version": 1,
+      "unit_registry_ref": {
+        "registry_id": "p0-fixture-units",
+        "version": 1,
+        "content_sha256": "c681cda75cb5d5a48d79e21a6c4192d41bbb85fccb9fd3ec9783f5fbbe62c593"
+      },
+      "semantic_validation_version": "comparison-policy-validation-v1",
+      "required_metrics": [
+        "ttft",
+        "tpot",
+        "output_throughput",
+        "energy_per_session",
+        "power",
+        "quality"
+      ],
+      "objectives": [
+        {
+          "metric_id": "ttft",
+          "direction": "min",
+          "canonical_unit": "ms",
+          "absolute_improvement_threshold": "1"
+        },
+        {
+          "metric_id": "tpot",
+          "direction": "min",
+          "canonical_unit": "ms",
+          "absolute_improvement_threshold": "0.1"
+        },
+        {
+          "metric_id": "output_throughput",
+          "direction": "max",
+          "canonical_unit": "tokens/s",
+          "absolute_improvement_threshold": "1"
+        },
+        {
+          "metric_id": "energy_per_session",
+          "direction": "min",
+          "canonical_unit": "J/session",
+          "absolute_improvement_threshold": "1"
+        }
+      ],
+      "constraints": [
+        {
+          "metric_id": "power",
+          "operator": "le",
+          "canonical_unit": "W",
+          "upper": "1000"
+        },
+        {
+          "metric_id": "quality",
+          "operator": "ge",
+          "canonical_unit": "ratio",
+          "lower": "0.99"
+        }
+      ],
+      "cohort_keys": [
+        "scenario_digest",
+        "model_revision",
+        "tokenizer_revision",
+        "quality_profile",
+        "timing_policy",
+        "initial_kv_digest",
+        "system_boundary"
+      ],
+      "evidence_compatibility_keys": [
+        "coverage_signature",
+        "cost_policy_id",
+        "profile",
+        "decision_time_mode",
+        "state_access_policy",
+        "assumption_snapshot",
+        "metric_definition_digest"
+      ],
+      "allowed_method_profiles": [
+        {
+          "method": "replay",
+          "profile": "realizable"
+        }
+      ],
+      "uncertainty_mode": "point_observation",
+      "missing_policy": "incomplete_no_global_dominance",
+      "dominance_rule": "all_nonworse_bounds_and_one_strict_above_absolute_threshold",
+      "performance_claim_scope": "recorded_run_pair_only",
+      "hypervolume": {
+        "enabled": false
+      }
+    },
+    {
+      "schema_version": "1.0.0",
+      "policy_id": "cmp-p1-bounds-v1",
+      "version": 1,
+      "unit_registry_ref": {
+        "registry_id": "p0-fixture-units",
+        "version": 1,
+        "content_sha256": "c681cda75cb5d5a48d79e21a6c4192d41bbb85fccb9fd3ec9783f5fbbe62c593"
+      },
+      "semantic_validation_version": "comparison-policy-validation-v1",
+      "required_metrics": [
+        "ttft",
+        "tpot",
+        "output_throughput",
+        "energy_per_session",
+        "power",
+        "quality"
+      ],
+      "objectives": [
+        {
+          "metric_id": "ttft",
+          "direction": "min",
+          "canonical_unit": "ms",
+          "absolute_improvement_threshold": "1"
+        },
+        {
+          "metric_id": "tpot",
+          "direction": "min",
+          "canonical_unit": "ms",
+          "absolute_improvement_threshold": "0.1"
+        },
+        {
+          "metric_id": "output_throughput",
+          "direction": "max",
+          "canonical_unit": "tokens/s",
+          "absolute_improvement_threshold": "1"
+        },
+        {
+          "metric_id": "energy_per_session",
+          "direction": "min",
+          "canonical_unit": "J/session",
+          "absolute_improvement_threshold": "1"
+        }
+      ],
+      "constraints": [
+        {
+          "metric_id": "power",
+          "operator": "le",
+          "canonical_unit": "W",
+          "upper": "1000"
+        },
+        {
+          "metric_id": "quality",
+          "operator": "ge",
+          "canonical_unit": "ratio",
+          "lower": "0.99"
+        }
+      ],
+      "cohort_keys": [
+        "scenario_digest",
+        "model_revision",
+        "tokenizer_revision",
+        "quality_profile",
+        "timing_policy",
+        "initial_kv_digest",
+        "system_boundary"
+      ],
+      "evidence_compatibility_keys": [
+        "coverage_signature",
+        "cost_policy_id",
+        "profile",
+        "decision_time_mode",
+        "state_access_policy",
+        "assumption_snapshot",
+        "metric_definition_digest"
+      ],
+      "allowed_method_profiles": [
+        {
+          "method": "replay",
+          "profile": "realizable"
+        }
+      ],
+      "uncertainty_mode": "declared_bounds",
+      "missing_policy": "incomplete_no_global_dominance",
+      "dominance_rule": "all_nonworse_bounds_and_one_strict_above_absolute_threshold",
+      "performance_claim_scope": "conditional_on_declared_bounds",
+      "hypervolume": {
+        "enabled": false
+      }
+    },
+    {
+      "schema_version": "1.0.0",
+      "policy_id": "cmp-target-fixture-v1",
+      "version": 1,
+      "unit_registry_ref": {
+        "registry_id": "p0-fixture-units",
+        "version": 1,
+        "content_sha256": "c681cda75cb5d5a48d79e21a6c4192d41bbb85fccb9fd3ec9783f5fbbe62c593"
+      },
+      "semantic_validation_version": "comparison-policy-validation-v1",
+      "required_metrics": [
+        "temperature"
+      ],
+      "objectives": [
+        {
+          "metric_id": "temperature",
+          "direction": "target",
+          "canonical_unit": "K",
+          "absolute_improvement_threshold": "0",
+          "target": {
+            "lower": "300",
+            "upper": "310"
+          }
+        }
+      ],
+      "constraints": [],
+      "cohort_keys": [
+        "scenario_digest",
+        "model_revision",
+        "tokenizer_revision",
+        "quality_profile",
+        "timing_policy",
+        "initial_kv_digest",
+        "system_boundary"
+      ],
+      "evidence_compatibility_keys": [
+        "coverage_signature",
+        "cost_policy_id",
+        "profile",
+        "decision_time_mode",
+        "state_access_policy",
+        "assumption_snapshot",
+        "metric_definition_digest"
+      ],
+      "allowed_method_profiles": [
+        {
+          "method": "replay",
+          "profile": "realizable"
+        }
+      ],
+      "uncertainty_mode": "point_observation",
+      "missing_policy": "incomplete_no_global_dominance",
+      "dominance_rule": "all_nonworse_bounds_and_one_strict_above_absolute_threshold",
+      "performance_claim_scope": "recorded_run_pair_only",
+      "hypervolume": {
+        "enabled": false
+      }
+    },
+    {
+      "schema_version": "1.0.0",
+      "policy_id": "cmp-cycle-fixture-v1",
+      "version": 1,
+      "unit_registry_ref": {
+        "registry_id": "p0-fixture-units",
+        "version": 1,
+        "content_sha256": "c681cda75cb5d5a48d79e21a6c4192d41bbb85fccb9fd3ec9783f5fbbe62c593"
+      },
+      "semantic_validation_version": "comparison-policy-validation-v1",
+      "required_metrics": [
+        "cost_a",
+        "cost_b",
+        "cost_c"
+      ],
+      "objectives": [
+        {
+          "metric_id": "cost_a",
+          "direction": "min",
+          "canonical_unit": "1",
+          "absolute_improvement_threshold": "1"
+        },
+        {
+          "metric_id": "cost_b",
+          "direction": "min",
+          "canonical_unit": "1",
+          "absolute_improvement_threshold": "1"
+        },
+        {
+          "metric_id": "cost_c",
+          "direction": "min",
+          "canonical_unit": "1",
+          "absolute_improvement_threshold": "1"
+        }
+      ],
+      "constraints": [],
+      "cohort_keys": [
+        "scenario_digest",
+        "model_revision",
+        "tokenizer_revision",
+        "quality_profile",
+        "timing_policy",
+        "initial_kv_digest",
+        "system_boundary"
+      ],
+      "evidence_compatibility_keys": [
+        "coverage_signature",
+        "cost_policy_id",
+        "profile",
+        "decision_time_mode",
+        "state_access_policy",
+        "assumption_snapshot",
+        "metric_definition_digest"
+      ],
+      "allowed_method_profiles": [
+        {
+          "method": "replay",
+          "profile": "realizable"
+        }
+      ],
+      "uncertainty_mode": "point_observation",
+      "missing_policy": "incomplete_no_global_dominance",
+      "dominance_rule": "all_nonworse_bounds_and_one_strict_above_absolute_threshold",
+      "performance_claim_scope": "recorded_run_pair_only",
+      "hypervolume": {
+        "enabled": false
+      }
+    }
+  ],
+  "policy_negative_cases": [
+    {
+      "case_id": "CMP-POLICY-01",
+      "required_capability": "comparison_policy_validation",
+      "expected_decision": "invalid_policy",
+      "allowed_unknown_reasons": [
+        "target_bounds_reversed"
+      ],
+      "expected_execution_permission": "not_applicable",
+      "runtime_status": "not_run",
+      "input": {
+        "policy": {
+          "schema_version": "1.0.0",
+          "policy_id": "cmp-target-fixture-v1",
+          "version": 1,
+          "required_metrics": [
+            "temperature"
+          ],
+          "objectives": [
+            {
+              "metric_id": "temperature",
+              "direction": "target",
+              "canonical_unit": "K",
+              "absolute_improvement_threshold": "0",
+              "target": {
+                "lower": "310",
+                "upper": "300"
+              }
+            }
+          ],
+          "constraints": [],
+          "cohort_keys": [
+            "scenario_digest",
+            "model_revision",
+            "tokenizer_revision",
+            "quality_profile",
+            "timing_policy",
+            "initial_kv_digest",
+            "system_boundary"
+          ],
+          "evidence_compatibility_keys": [
+            "coverage_signature",
+            "cost_policy_id",
+            "profile",
+            "decision_time_mode",
+            "state_access_policy",
+            "assumption_snapshot",
+            "metric_definition_digest"
+          ],
+          "allowed_method_profiles": [
+            {
+              "method": "replay",
+              "profile": "realizable"
+            }
+          ],
+          "uncertainty_mode": "point_observation",
+          "missing_policy": "incomplete_no_global_dominance",
+          "dominance_rule": "all_nonworse_bounds_and_one_strict_above_absolute_threshold",
+          "performance_claim_scope": "recorded_run_pair_only",
+          "hypervolume": {
+            "enabled": false
+          },
+          "unit_registry_ref": {
+            "registry_id": "p0-fixture-units",
+            "version": 1,
+            "content_sha256": "c681cda75cb5d5a48d79e21a6c4192d41bbb85fccb9fd3ec9783f5fbbe62c593"
+          },
+          "semantic_validation_version": "comparison-policy-validation-v1"
+        }
+      },
+      "expected": {
+        "reason": "target_bounds_reversed"
+      }
+    },
+    {
+      "case_id": "CMP-POLICY-02",
+      "required_capability": "comparison_policy_validation",
+      "expected_decision": "invalid_policy",
+      "allowed_unknown_reasons": [
+        "constraint_bounds_reversed"
+      ],
+      "expected_execution_permission": "not_applicable",
+      "runtime_status": "not_run",
+      "input": {
+        "policy": {
+          "schema_version": "1.0.0",
+          "policy_id": "cmp-p1-workload-v1",
+          "version": 1,
+          "required_metrics": [
+            "ttft",
+            "tpot",
+            "output_throughput",
+            "energy_per_session",
+            "power",
+            "quality"
+          ],
+          "objectives": [
+            {
+              "metric_id": "ttft",
+              "direction": "min",
+              "canonical_unit": "ms",
+              "absolute_improvement_threshold": "1"
+            },
+            {
+              "metric_id": "tpot",
+              "direction": "min",
+              "canonical_unit": "ms",
+              "absolute_improvement_threshold": "0.1"
+            },
+            {
+              "metric_id": "output_throughput",
+              "direction": "max",
+              "canonical_unit": "tokens/s",
+              "absolute_improvement_threshold": "1"
+            },
+            {
+              "metric_id": "energy_per_session",
+              "direction": "min",
+              "canonical_unit": "J/session",
+              "absolute_improvement_threshold": "1"
+            }
+          ],
+          "constraints": [
+            {
+              "metric_id": "power",
+              "operator": "le",
+              "canonical_unit": "W",
+              "upper": "1000"
+            },
+            {
+              "metric_id": "quality",
+              "operator": "within",
+              "canonical_unit": "ratio",
+              "lower": "1",
+              "upper": "0.9"
+            }
+          ],
+          "cohort_keys": [
+            "scenario_digest",
+            "model_revision",
+            "tokenizer_revision",
+            "quality_profile",
+            "timing_policy",
+            "initial_kv_digest",
+            "system_boundary"
+          ],
+          "evidence_compatibility_keys": [
+            "coverage_signature",
+            "cost_policy_id",
+            "profile",
+            "decision_time_mode",
+            "state_access_policy",
+            "assumption_snapshot",
+            "metric_definition_digest"
+          ],
+          "allowed_method_profiles": [
+            {
+              "method": "replay",
+              "profile": "realizable"
+            }
+          ],
+          "uncertainty_mode": "point_observation",
+          "missing_policy": "incomplete_no_global_dominance",
+          "dominance_rule": "all_nonworse_bounds_and_one_strict_above_absolute_threshold",
+          "performance_claim_scope": "recorded_run_pair_only",
+          "hypervolume": {
+            "enabled": false
+          },
+          "unit_registry_ref": {
+            "registry_id": "p0-fixture-units",
+            "version": 1,
+            "content_sha256": "c681cda75cb5d5a48d79e21a6c4192d41bbb85fccb9fd3ec9783f5fbbe62c593"
+          },
+          "semantic_validation_version": "comparison-policy-validation-v1"
+        }
+      },
+      "expected": {
+        "reason": "constraint_bounds_reversed"
+      }
+    },
+    {
+      "case_id": "CMP-POLICY-03",
+      "required_capability": "comparison_policy_validation",
+      "expected_decision": "invalid_policy",
+      "allowed_unknown_reasons": [
+        "required_metric_set_mismatch"
+      ],
+      "expected_execution_permission": "not_applicable",
+      "runtime_status": "not_run",
+      "input": {
+        "policy": {
+          "schema_version": "1.0.0",
+          "policy_id": "cmp-p1-workload-v1",
+          "version": 1,
+          "required_metrics": [
+            "ttft",
+            "tpot",
+            "output_throughput",
+            "energy_per_session",
+            "quality"
+          ],
+          "objectives": [
+            {
+              "metric_id": "ttft",
+              "direction": "min",
+              "canonical_unit": "ms",
+              "absolute_improvement_threshold": "1"
+            },
+            {
+              "metric_id": "tpot",
+              "direction": "min",
+              "canonical_unit": "ms",
+              "absolute_improvement_threshold": "0.1"
+            },
+            {
+              "metric_id": "output_throughput",
+              "direction": "max",
+              "canonical_unit": "tokens/s",
+              "absolute_improvement_threshold": "1"
+            },
+            {
+              "metric_id": "energy_per_session",
+              "direction": "min",
+              "canonical_unit": "J/session",
+              "absolute_improvement_threshold": "1"
+            }
+          ],
+          "constraints": [
+            {
+              "metric_id": "power",
+              "operator": "le",
+              "canonical_unit": "W",
+              "upper": "1000"
+            },
+            {
+              "metric_id": "quality",
+              "operator": "ge",
+              "canonical_unit": "ratio",
+              "lower": "0.99"
+            }
+          ],
+          "cohort_keys": [
+            "scenario_digest",
+            "model_revision",
+            "tokenizer_revision",
+            "quality_profile",
+            "timing_policy",
+            "initial_kv_digest",
+            "system_boundary"
+          ],
+          "evidence_compatibility_keys": [
+            "coverage_signature",
+            "cost_policy_id",
+            "profile",
+            "decision_time_mode",
+            "state_access_policy",
+            "assumption_snapshot",
+            "metric_definition_digest"
+          ],
+          "allowed_method_profiles": [
+            {
+              "method": "replay",
+              "profile": "realizable"
+            }
+          ],
+          "uncertainty_mode": "point_observation",
+          "missing_policy": "incomplete_no_global_dominance",
+          "dominance_rule": "all_nonworse_bounds_and_one_strict_above_absolute_threshold",
+          "performance_claim_scope": "recorded_run_pair_only",
+          "hypervolume": {
+            "enabled": false
+          },
+          "unit_registry_ref": {
+            "registry_id": "p0-fixture-units",
+            "version": 1,
+            "content_sha256": "c681cda75cb5d5a48d79e21a6c4192d41bbb85fccb9fd3ec9783f5fbbe62c593"
+          },
+          "semantic_validation_version": "comparison-policy-validation-v1"
+        }
+      },
+      "expected": {
+        "reason": "required_metric_set_mismatch"
+      }
+    },
+    {
+      "case_id": "CMP-POLICY-04",
+      "required_capability": "comparison_policy_validation",
+      "expected_decision": "invalid_policy",
+      "allowed_unknown_reasons": [
+        "duplicate_objective_metric"
+      ],
+      "expected_execution_permission": "not_applicable",
+      "runtime_status": "not_run",
+      "input": {
+        "policy": {
+          "schema_version": "1.0.0",
+          "policy_id": "cmp-p1-workload-v1",
+          "version": 1,
+          "required_metrics": [
+            "ttft",
+            "tpot",
+            "output_throughput",
+            "energy_per_session",
+            "power",
+            "quality"
+          ],
+          "objectives": [
+            {
+              "metric_id": "ttft",
+              "direction": "min",
+              "canonical_unit": "ms",
+              "absolute_improvement_threshold": "1"
+            },
+            {
+              "metric_id": "tpot",
+              "direction": "min",
+              "canonical_unit": "ms",
+              "absolute_improvement_threshold": "0.1"
+            },
+            {
+              "metric_id": "output_throughput",
+              "direction": "max",
+              "canonical_unit": "tokens/s",
+              "absolute_improvement_threshold": "1"
+            },
+            {
+              "metric_id": "energy_per_session",
+              "direction": "min",
+              "canonical_unit": "J/session",
+              "absolute_improvement_threshold": "1"
+            },
+            {
+              "metric_id": "ttft",
+              "direction": "min",
+              "canonical_unit": "ms",
+              "absolute_improvement_threshold": "1"
+            }
+          ],
+          "constraints": [
+            {
+              "metric_id": "power",
+              "operator": "le",
+              "canonical_unit": "W",
+              "upper": "1000"
+            },
+            {
+              "metric_id": "quality",
+              "operator": "ge",
+              "canonical_unit": "ratio",
+              "lower": "0.99"
+            }
+          ],
+          "cohort_keys": [
+            "scenario_digest",
+            "model_revision",
+            "tokenizer_revision",
+            "quality_profile",
+            "timing_policy",
+            "initial_kv_digest",
+            "system_boundary"
+          ],
+          "evidence_compatibility_keys": [
+            "coverage_signature",
+            "cost_policy_id",
+            "profile",
+            "decision_time_mode",
+            "state_access_policy",
+            "assumption_snapshot",
+            "metric_definition_digest"
+          ],
+          "allowed_method_profiles": [
+            {
+              "method": "replay",
+              "profile": "realizable"
+            }
+          ],
+          "uncertainty_mode": "point_observation",
+          "missing_policy": "incomplete_no_global_dominance",
+          "dominance_rule": "all_nonworse_bounds_and_one_strict_above_absolute_threshold",
+          "performance_claim_scope": "recorded_run_pair_only",
+          "hypervolume": {
+            "enabled": false
+          },
+          "unit_registry_ref": {
+            "registry_id": "p0-fixture-units",
+            "version": 1,
+            "content_sha256": "c681cda75cb5d5a48d79e21a6c4192d41bbb85fccb9fd3ec9783f5fbbe62c593"
+          },
+          "semantic_validation_version": "comparison-policy-validation-v1"
+        }
+      },
+      "expected": {
+        "reason": "duplicate_objective_metric"
+      }
+    },
+    {
+      "case_id": "CMP-POLICY-05",
+      "required_capability": "comparison_policy_validation",
+      "expected_decision": "invalid_policy",
+      "allowed_unknown_reasons": [
+        "duplicate_constraint_metric"
+      ],
+      "expected_execution_permission": "not_applicable",
+      "runtime_status": "not_run",
+      "input": {
+        "policy": {
+          "schema_version": "1.0.0",
+          "policy_id": "cmp-p1-workload-v1",
+          "version": 1,
+          "required_metrics": [
+            "ttft",
+            "tpot",
+            "output_throughput",
+            "energy_per_session",
+            "power",
+            "quality"
+          ],
+          "objectives": [
+            {
+              "metric_id": "ttft",
+              "direction": "min",
+              "canonical_unit": "ms",
+              "absolute_improvement_threshold": "1"
+            },
+            {
+              "metric_id": "tpot",
+              "direction": "min",
+              "canonical_unit": "ms",
+              "absolute_improvement_threshold": "0.1"
+            },
+            {
+              "metric_id": "output_throughput",
+              "direction": "max",
+              "canonical_unit": "tokens/s",
+              "absolute_improvement_threshold": "1"
+            },
+            {
+              "metric_id": "energy_per_session",
+              "direction": "min",
+              "canonical_unit": "J/session",
+              "absolute_improvement_threshold": "1"
+            }
+          ],
+          "constraints": [
+            {
+              "metric_id": "power",
+              "operator": "le",
+              "canonical_unit": "W",
+              "upper": "1000"
+            },
+            {
+              "metric_id": "quality",
+              "operator": "ge",
+              "canonical_unit": "ratio",
+              "lower": "0.99"
+            },
+            {
+              "metric_id": "power",
+              "operator": "le",
+              "canonical_unit": "W",
+              "upper": "1000"
+            }
+          ],
+          "cohort_keys": [
+            "scenario_digest",
+            "model_revision",
+            "tokenizer_revision",
+            "quality_profile",
+            "timing_policy",
+            "initial_kv_digest",
+            "system_boundary"
+          ],
+          "evidence_compatibility_keys": [
+            "coverage_signature",
+            "cost_policy_id",
+            "profile",
+            "decision_time_mode",
+            "state_access_policy",
+            "assumption_snapshot",
+            "metric_definition_digest"
+          ],
+          "allowed_method_profiles": [
+            {
+              "method": "replay",
+              "profile": "realizable"
+            }
+          ],
+          "uncertainty_mode": "point_observation",
+          "missing_policy": "incomplete_no_global_dominance",
+          "dominance_rule": "all_nonworse_bounds_and_one_strict_above_absolute_threshold",
+          "performance_claim_scope": "recorded_run_pair_only",
+          "hypervolume": {
+            "enabled": false
+          },
+          "unit_registry_ref": {
+            "registry_id": "p0-fixture-units",
+            "version": 1,
+            "content_sha256": "c681cda75cb5d5a48d79e21a6c4192d41bbb85fccb9fd3ec9783f5fbbe62c593"
+          },
+          "semantic_validation_version": "comparison-policy-validation-v1"
+        }
+      },
+      "expected": {
+        "reason": "duplicate_constraint_metric"
+      }
+    },
+    {
+      "case_id": "CMP-POLICY-06",
+      "required_capability": "comparison_policy_validation",
+      "expected_decision": "invalid_policy",
+      "allowed_unknown_reasons": [
+        "unregistered_canonical_unit"
+      ],
+      "expected_execution_permission": "not_applicable",
+      "runtime_status": "not_run",
+      "input": {
+        "policy": {
+          "schema_version": "1.0.0",
+          "policy_id": "cmp-p1-workload-v1",
+          "version": 1,
+          "required_metrics": [
+            "ttft",
+            "tpot",
+            "output_throughput",
+            "energy_per_session",
+            "power",
+            "quality"
+          ],
+          "objectives": [
+            {
+              "metric_id": "ttft",
+              "direction": "min",
+              "canonical_unit": "GB",
+              "absolute_improvement_threshold": "1"
+            },
+            {
+              "metric_id": "tpot",
+              "direction": "min",
+              "canonical_unit": "ms",
+              "absolute_improvement_threshold": "0.1"
+            },
+            {
+              "metric_id": "output_throughput",
+              "direction": "max",
+              "canonical_unit": "tokens/s",
+              "absolute_improvement_threshold": "1"
+            },
+            {
+              "metric_id": "energy_per_session",
+              "direction": "min",
+              "canonical_unit": "J/session",
+              "absolute_improvement_threshold": "1"
+            }
+          ],
+          "constraints": [
+            {
+              "metric_id": "power",
+              "operator": "le",
+              "canonical_unit": "W",
+              "upper": "1000"
+            },
+            {
+              "metric_id": "quality",
+              "operator": "ge",
+              "canonical_unit": "ratio",
+              "lower": "0.99"
+            }
+          ],
+          "cohort_keys": [
+            "scenario_digest",
+            "model_revision",
+            "tokenizer_revision",
+            "quality_profile",
+            "timing_policy",
+            "initial_kv_digest",
+            "system_boundary"
+          ],
+          "evidence_compatibility_keys": [
+            "coverage_signature",
+            "cost_policy_id",
+            "profile",
+            "decision_time_mode",
+            "state_access_policy",
+            "assumption_snapshot",
+            "metric_definition_digest"
+          ],
+          "allowed_method_profiles": [
+            {
+              "method": "replay",
+              "profile": "realizable"
+            }
+          ],
+          "uncertainty_mode": "point_observation",
+          "missing_policy": "incomplete_no_global_dominance",
+          "dominance_rule": "all_nonworse_bounds_and_one_strict_above_absolute_threshold",
+          "performance_claim_scope": "recorded_run_pair_only",
+          "hypervolume": {
+            "enabled": false
+          },
+          "unit_registry_ref": {
+            "registry_id": "p0-fixture-units",
+            "version": 1,
+            "content_sha256": "c681cda75cb5d5a48d79e21a6c4192d41bbb85fccb9fd3ec9783f5fbbe62c593"
+          },
+          "semantic_validation_version": "comparison-policy-validation-v1"
+        }
+      },
+      "expected": {
+        "reason": "unregistered_canonical_unit"
+      }
+    },
+    {
+      "case_id": "CMP-POLICY-07",
+      "required_capability": "comparison_policy_validation",
+      "expected_decision": "invalid_policy",
+      "allowed_unknown_reasons": [
+        "unit_registry_hash_mismatch"
+      ],
+      "expected_execution_permission": "not_applicable",
+      "runtime_status": "not_run",
+      "input": {
+        "policy": {
+          "schema_version": "1.0.0",
+          "policy_id": "cmp-p1-workload-v1",
+          "version": 1,
+          "required_metrics": [
+            "ttft",
+            "tpot",
+            "output_throughput",
+            "energy_per_session",
+            "power",
+            "quality"
+          ],
+          "objectives": [
+            {
+              "metric_id": "ttft",
+              "direction": "min",
+              "canonical_unit": "ms",
+              "absolute_improvement_threshold": "1"
+            },
+            {
+              "metric_id": "tpot",
+              "direction": "min",
+              "canonical_unit": "ms",
+              "absolute_improvement_threshold": "0.1"
+            },
+            {
+              "metric_id": "output_throughput",
+              "direction": "max",
+              "canonical_unit": "tokens/s",
+              "absolute_improvement_threshold": "1"
+            },
+            {
+              "metric_id": "energy_per_session",
+              "direction": "min",
+              "canonical_unit": "J/session",
+              "absolute_improvement_threshold": "1"
+            }
+          ],
+          "constraints": [
+            {
+              "metric_id": "power",
+              "operator": "le",
+              "canonical_unit": "W",
+              "upper": "1000"
+            },
+            {
+              "metric_id": "quality",
+              "operator": "ge",
+              "canonical_unit": "ratio",
+              "lower": "0.99"
+            }
+          ],
+          "cohort_keys": [
+            "scenario_digest",
+            "model_revision",
+            "tokenizer_revision",
+            "quality_profile",
+            "timing_policy",
+            "initial_kv_digest",
+            "system_boundary"
+          ],
+          "evidence_compatibility_keys": [
+            "coverage_signature",
+            "cost_policy_id",
+            "profile",
+            "decision_time_mode",
+            "state_access_policy",
+            "assumption_snapshot",
+            "metric_definition_digest"
+          ],
+          "allowed_method_profiles": [
+            {
+              "method": "replay",
+              "profile": "realizable"
+            }
+          ],
+          "uncertainty_mode": "point_observation",
+          "missing_policy": "incomplete_no_global_dominance",
+          "dominance_rule": "all_nonworse_bounds_and_one_strict_above_absolute_threshold",
+          "performance_claim_scope": "recorded_run_pair_only",
+          "hypervolume": {
+            "enabled": false
+          },
+          "unit_registry_ref": {
+            "registry_id": "p0-fixture-units",
+            "version": 1,
+            "content_sha256": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
+          },
+          "semantic_validation_version": "comparison-policy-validation-v1"
+        }
+      },
+      "expected": {
+        "reason": "unit_registry_hash_mismatch"
+      }
+    }
+  ],
+  "cases": [
+    {
+      "case_id": "CMP-01",
+      "fixture_kind": "synthetic_contract_oracle",
+      "required_capability": "metric_comparison",
+      "allowed_unknown_reasons": [],
+      "expected_execution_permission": "not_applicable",
+      "runtime_status": "not_run",
+      "policy_id": "cmp-p1-workload-v1",
+      "input": {
+        "candidates": [
+          {
+            "candidate_id": "A",
+            "context": {
+              "scenario_digest": "synthetic-scenario-v1",
+              "model_revision": "synthetic-model-v1",
+              "tokenizer_revision": "synthetic-tokenizer-v1",
+              "quality_profile": "fixed-quality-v1",
+              "timing_policy": "predecessor_completion_plus_think_time",
+              "initial_kv_digest": "cold-kv-v1",
+              "system_boundary": "whole-system-fixture",
+              "coverage_signature": "synthetic-logical-units-v1",
+              "cost_policy_id": "synthetic-effective-cost-v1",
+              "method": "replay",
+              "profile": "realizable",
+              "decision_time_mode": "offline_design",
+              "state_access_policy": "past_observations_only",
+              "assumption_snapshot": "synthetic-assumptions-v1",
+              "metric_definition_digest": "synthetic-metric-definitions-v1"
+            },
+            "uncertainty_mode": "point_observation",
+            "metrics": {
+              "ttft": {
+                "value": "90",
+                "unit": "ms"
+              },
+              "tpot": {
+                "value": "9",
+                "unit": "ms"
+              },
+              "output_throughput": {
+                "value": "110",
+                "unit": "tokens/s"
+              },
+              "energy_per_session": {
+                "value": "100",
+                "unit": "J/session"
+              },
+              "power": {
+                "value": "900",
+                "unit": "W"
+              },
+              "quality": {
+                "value": "1",
+                "unit": "ratio"
+              }
+            }
+          },
+          {
+            "candidate_id": "B",
+            "context": {
+              "scenario_digest": "synthetic-scenario-v1",
+              "model_revision": "synthetic-model-v1",
+              "tokenizer_revision": "synthetic-tokenizer-v1",
+              "quality_profile": "fixed-quality-v1",
+              "timing_policy": "predecessor_completion_plus_think_time",
+              "initial_kv_digest": "cold-kv-v1",
+              "system_boundary": "whole-system-fixture",
+              "coverage_signature": "synthetic-logical-units-v1",
+              "cost_policy_id": "synthetic-effective-cost-v1",
+              "method": "replay",
+              "profile": "realizable",
+              "decision_time_mode": "offline_design",
+              "state_access_policy": "past_observations_only",
+              "assumption_snapshot": "synthetic-assumptions-v1",
+              "metric_definition_digest": "synthetic-metric-definitions-v1"
+            },
+            "uncertainty_mode": "point_observation",
+            "metrics": {
+              "ttft": {
+                "value": "100",
+                "unit": "ms"
+              },
+              "tpot": {
+                "value": "10",
+                "unit": "ms"
+              },
+              "output_throughput": {
+                "value": "100",
+                "unit": "tokens/s"
+              },
+              "energy_per_session": {
+                "value": "110",
+                "unit": "J/session"
+              },
+              "power": {
+                "value": "950",
+                "unit": "W"
+              },
+              "quality": {
+                "value": "1",
+                "unit": "ratio"
+              }
+            }
+          }
+        ]
+      },
+      "expected_decision": "complete_within_policy_scope",
+      "expected": {
+        "non_dominated_under_policy": [
+          "A"
+        ],
+        "dominance_edges": [
+          [
+            "A",
+            "B"
+          ]
+        ],
+        "candidate_states": {
+          "A": "feasible",
+          "B": "feasible"
+        }
+      }
+    },
+    {
+      "case_id": "CMP-02",
+      "fixture_kind": "synthetic_contract_oracle",
+      "required_capability": "metric_comparison",
+      "allowed_unknown_reasons": [],
+      "expected_execution_permission": "not_applicable",
+      "runtime_status": "not_run",
+      "policy_id": "cmp-p1-workload-v1",
+      "input": {
+        "candidates": [
+          {
+            "candidate_id": "A_units",
+            "context": {
+              "scenario_digest": "synthetic-scenario-v1",
+              "model_revision": "synthetic-model-v1",
+              "tokenizer_revision": "synthetic-tokenizer-v1",
+              "quality_profile": "fixed-quality-v1",
+              "timing_policy": "predecessor_completion_plus_think_time",
+              "initial_kv_digest": "cold-kv-v1",
+              "system_boundary": "whole-system-fixture",
+              "coverage_signature": "synthetic-logical-units-v1",
+              "cost_policy_id": "synthetic-effective-cost-v1",
+              "method": "replay",
+              "profile": "realizable",
+              "decision_time_mode": "offline_design",
+              "state_access_policy": "past_observations_only",
+              "assumption_snapshot": "synthetic-assumptions-v1",
+              "metric_definition_digest": "synthetic-metric-definitions-v1"
+            },
+            "uncertainty_mode": "point_observation",
+            "metrics": {
+              "ttft": {
+                "value": "0.09",
+                "unit": "s"
+              },
+              "tpot": {
+                "value": "0.009",
+                "unit": "s"
+              },
+              "output_throughput": {
+                "value": "110",
+                "unit": "tokens/s"
+              },
+              "energy_per_session": {
+                "value": "0.1",
+                "unit": "kJ/session"
+              },
+              "power": {
+                "value": "0.9",
+                "unit": "kW"
+              },
+              "quality": {
+                "value": "1",
+                "unit": "ratio"
+              }
+            }
+          },
+          {
+            "candidate_id": "B",
+            "context": {
+              "scenario_digest": "synthetic-scenario-v1",
+              "model_revision": "synthetic-model-v1",
+              "tokenizer_revision": "synthetic-tokenizer-v1",
+              "quality_profile": "fixed-quality-v1",
+              "timing_policy": "predecessor_completion_plus_think_time",
+              "initial_kv_digest": "cold-kv-v1",
+              "system_boundary": "whole-system-fixture",
+              "coverage_signature": "synthetic-logical-units-v1",
+              "cost_policy_id": "synthetic-effective-cost-v1",
+              "method": "replay",
+              "profile": "realizable",
+              "decision_time_mode": "offline_design",
+              "state_access_policy": "past_observations_only",
+              "assumption_snapshot": "synthetic-assumptions-v1",
+              "metric_definition_digest": "synthetic-metric-definitions-v1"
+            },
+            "uncertainty_mode": "point_observation",
+            "metrics": {
+              "ttft": {
+                "value": "100",
+                "unit": "ms"
+              },
+              "tpot": {
+                "value": "10",
+                "unit": "ms"
+              },
+              "output_throughput": {
+                "value": "100",
+                "unit": "tokens/s"
+              },
+              "energy_per_session": {
+                "value": "110",
+                "unit": "J/session"
+              },
+              "power": {
+                "value": "950",
+                "unit": "W"
+              },
+              "quality": {
+                "value": "1",
+                "unit": "ratio"
+              }
+            }
+          }
+        ]
+      },
+      "expected_decision": "complete_within_policy_scope",
+      "expected": {
+        "non_dominated_under_policy": [
+          "A_units"
+        ],
+        "dominance_edges": [
+          [
+            "A_units",
+            "B"
+          ]
+        ],
+        "candidate_states": {
+          "A_units": "feasible",
+          "B": "feasible"
+        }
+      }
+    },
+    {
+      "case_id": "CMP-03",
+      "fixture_kind": "synthetic_contract_oracle",
+      "required_capability": "metric_comparison",
+      "allowed_unknown_reasons": [],
+      "expected_execution_permission": "not_applicable",
+      "runtime_status": "not_run",
+      "policy_id": "cmp-p1-workload-v1",
+      "input": {
+        "candidates": [
+          {
+            "candidate_id": "B",
+            "context": {
+              "scenario_digest": "synthetic-scenario-v1",
+              "model_revision": "synthetic-model-v1",
+              "tokenizer_revision": "synthetic-tokenizer-v1",
+              "quality_profile": "fixed-quality-v1",
+              "timing_policy": "predecessor_completion_plus_think_time",
+              "initial_kv_digest": "cold-kv-v1",
+              "system_boundary": "whole-system-fixture",
+              "coverage_signature": "synthetic-logical-units-v1",
+              "cost_policy_id": "synthetic-effective-cost-v1",
+              "method": "replay",
+              "profile": "realizable",
+              "decision_time_mode": "offline_design",
+              "state_access_policy": "past_observations_only",
+              "assumption_snapshot": "synthetic-assumptions-v1",
+              "metric_definition_digest": "synthetic-metric-definitions-v1"
+            },
+            "uncertainty_mode": "point_observation",
+            "metrics": {
+              "ttft": {
+                "value": "100",
+                "unit": "ms"
+              },
+              "tpot": {
+                "value": "10",
+                "unit": "ms"
+              },
+              "output_throughput": {
+                "value": "100",
+                "unit": "tokens/s"
+              },
+              "energy_per_session": {
+                "value": "110",
+                "unit": "J/session"
+              },
+              "power": {
+                "value": "950",
+                "unit": "W"
+              },
+              "quality": {
+                "value": "1",
+                "unit": "ratio"
+              }
+            }
+          },
+          {
+            "candidate_id": "A",
+            "context": {
+              "scenario_digest": "synthetic-scenario-v1",
+              "model_revision": "synthetic-model-v1",
+              "tokenizer_revision": "synthetic-tokenizer-v1",
+              "quality_profile": "fixed-quality-v1",
+              "timing_policy": "predecessor_completion_plus_think_time",
+              "initial_kv_digest": "cold-kv-v1",
+              "system_boundary": "whole-system-fixture",
+              "coverage_signature": "synthetic-logical-units-v1",
+              "cost_policy_id": "synthetic-effective-cost-v1",
+              "method": "replay",
+              "profile": "realizable",
+              "decision_time_mode": "offline_design",
+              "state_access_policy": "past_observations_only",
+              "assumption_snapshot": "synthetic-assumptions-v1",
+              "metric_definition_digest": "synthetic-metric-definitions-v1"
+            },
+            "uncertainty_mode": "point_observation",
+            "metrics": {
+              "ttft": {
+                "value": "90",
+                "unit": "ms"
+              },
+              "tpot": {
+                "value": "9",
+                "unit": "ms"
+              },
+              "output_throughput": {
+                "value": "110",
+                "unit": "tokens/s"
+              },
+              "energy_per_session": {
+                "value": "100",
+                "unit": "J/session"
+              },
+              "power": {
+                "value": "900",
+                "unit": "W"
+              },
+              "quality": {
+                "value": "1",
+                "unit": "ratio"
+              }
+            }
+          }
+        ]
+      },
+      "expected_decision": "complete_within_policy_scope",
+      "expected": {
+        "non_dominated_under_policy": [
+          "A"
+        ],
+        "dominance_edges": [
+          [
+            "A",
+            "B"
+          ]
+        ],
+        "candidate_states": {
+          "A": "feasible",
+          "B": "feasible"
+        }
+      }
+    },
+    {
+      "case_id": "CMP-04",
+      "fixture_kind": "synthetic_contract_oracle",
+      "required_capability": "metric_comparison",
+      "allowed_unknown_reasons": [
+        "required_metric_missing"
+      ],
+      "expected_execution_permission": "not_applicable",
+      "runtime_status": "not_run",
+      "policy_id": "cmp-p1-workload-v1",
+      "input": {
+        "candidates": [
+          {
+            "candidate_id": "A",
+            "context": {
+              "scenario_digest": "synthetic-scenario-v1",
+              "model_revision": "synthetic-model-v1",
+              "tokenizer_revision": "synthetic-tokenizer-v1",
+              "quality_profile": "fixed-quality-v1",
+              "timing_policy": "predecessor_completion_plus_think_time",
+              "initial_kv_digest": "cold-kv-v1",
+              "system_boundary": "whole-system-fixture",
+              "coverage_signature": "synthetic-logical-units-v1",
+              "cost_policy_id": "synthetic-effective-cost-v1",
+              "method": "replay",
+              "profile": "realizable",
+              "decision_time_mode": "offline_design",
+              "state_access_policy": "past_observations_only",
+              "assumption_snapshot": "synthetic-assumptions-v1",
+              "metric_definition_digest": "synthetic-metric-definitions-v1"
+            },
+            "uncertainty_mode": "point_observation",
+            "metrics": {
+              "ttft": {
+                "value": "90",
+                "unit": "ms"
+              },
+              "tpot": {
+                "value": "9",
+                "unit": "ms"
+              },
+              "output_throughput": {
+                "value": "110",
+                "unit": "tokens/s"
+              },
+              "energy_per_session": {
+                "value": "100",
+                "unit": "J/session"
+              },
+              "power": {
+                "value": "900",
+                "unit": "W"
+              },
+              "quality": {
+                "value": "1",
+                "unit": "ratio"
+              }
+            }
+          },
+          {
+            "candidate_id": "M",
+            "context": {
+              "scenario_digest": "synthetic-scenario-v1",
+              "model_revision": "synthetic-model-v1",
+              "tokenizer_revision": "synthetic-tokenizer-v1",
+              "quality_profile": "fixed-quality-v1",
+              "timing_policy": "predecessor_completion_plus_think_time",
+              "initial_kv_digest": "cold-kv-v1",
+              "system_boundary": "whole-system-fixture",
+              "coverage_signature": "synthetic-logical-units-v1",
+              "cost_policy_id": "synthetic-effective-cost-v1",
+              "method": "replay",
+              "profile": "realizable",
+              "decision_time_mode": "offline_design",
+              "state_access_policy": "past_observations_only",
+              "assumption_snapshot": "synthetic-assumptions-v1",
+              "metric_definition_digest": "synthetic-metric-definitions-v1"
+            },
+            "uncertainty_mode": "point_observation",
+            "metrics": {
+              "ttft": {
+                "value": "100",
+                "unit": "ms"
+              },
+              "tpot": {
+                "value": "10",
+                "unit": "ms"
+              },
+              "output_throughput": {
+                "value": "100",
+                "unit": "tokens/s"
+              },
+              "power": {
+                "value": "950",
+                "unit": "W"
+              },
+              "quality": {
+                "value": "1",
+                "unit": "ratio"
+              }
+            }
+          }
+        ]
+      },
+      "expected_decision": "incomplete",
+      "expected": {
+        "non_dominated_under_policy": [
+          "A"
+        ],
+        "dominance_edges": [],
+        "candidate_states": {
+          "A": "feasible",
+          "M": "comparison_incomplete"
+        }
+      }
+    },
+    {
+      "case_id": "CMP-05",
+      "fixture_kind": "synthetic_contract_oracle",
+      "required_capability": "metric_comparison",
+      "allowed_unknown_reasons": [],
+      "expected_execution_permission": "not_applicable",
+      "runtime_status": "not_run",
+      "policy_id": "cmp-p1-workload-v1",
+      "input": {
+        "candidates": [
+          {
+            "candidate_id": "A",
+            "context": {
+              "scenario_digest": "synthetic-scenario-v1",
+              "model_revision": "synthetic-model-v1",
+              "tokenizer_revision": "synthetic-tokenizer-v1",
+              "quality_profile": "fixed-quality-v1",
+              "timing_policy": "predecessor_completion_plus_think_time",
+              "initial_kv_digest": "cold-kv-v1",
+              "system_boundary": "whole-system-fixture",
+              "coverage_signature": "synthetic-logical-units-v1",
+              "cost_policy_id": "synthetic-effective-cost-v1",
+              "method": "replay",
+              "profile": "realizable",
+              "decision_time_mode": "offline_design",
+              "state_access_policy": "past_observations_only",
+              "assumption_snapshot": "synthetic-assumptions-v1",
+              "metric_definition_digest": "synthetic-metric-definitions-v1"
+            },
+            "uncertainty_mode": "point_observation",
+            "metrics": {
+              "ttft": {
+                "value": "90",
+                "unit": "ms"
+              },
+              "tpot": {
+                "value": "9",
+                "unit": "ms"
+              },
+              "output_throughput": {
+                "value": "110",
+                "unit": "tokens/s"
+              },
+              "energy_per_session": {
+                "value": "100",
+                "unit": "J/session"
+              },
+              "power": {
+                "value": "900",
+                "unit": "W"
+              },
+              "quality": {
+                "value": "1",
+                "unit": "ratio"
+              }
+            }
+          },
+          {
+            "candidate_id": "B",
+            "context": {
+              "scenario_digest": "synthetic-scenario-v1",
+              "model_revision": "synthetic-model-v1",
+              "tokenizer_revision": "synthetic-tokenizer-v1",
+              "quality_profile": "fixed-quality-v1",
+              "timing_policy": "predecessor_completion_plus_think_time",
+              "initial_kv_digest": "cold-kv-v1",
+              "system_boundary": "whole-system-fixture",
+              "coverage_signature": "synthetic-logical-units-v1",
+              "cost_policy_id": "synthetic-effective-cost-v1",
+              "method": "replay",
+              "profile": "realizable",
+              "decision_time_mode": "offline_design",
+              "state_access_policy": "past_observations_only",
+              "assumption_snapshot": "synthetic-assumptions-v1",
+              "metric_definition_digest": "synthetic-metric-definitions-v1"
+            },
+            "uncertainty_mode": "point_observation",
+            "metrics": {
+              "ttft": {
+                "value": "100",
+                "unit": "ms"
+              },
+              "tpot": {
+                "value": "10",
+                "unit": "ms"
+              },
+              "output_throughput": {
+                "value": "100",
+                "unit": "tokens/s"
+              },
+              "energy_per_session": {
+                "value": "110",
+                "unit": "J/session"
+              },
+              "power": {
+                "value": "950",
+                "unit": "W"
+              },
+              "quality": {
+                "value": "1",
+                "unit": "ratio"
+              }
+            }
+          },
+          {
+            "candidate_id": "V",
+            "context": {
+              "scenario_digest": "synthetic-scenario-v1",
+              "model_revision": "synthetic-model-v1",
+              "tokenizer_revision": "synthetic-tokenizer-v1",
+              "quality_profile": "fixed-quality-v1",
+              "timing_policy": "predecessor_completion_plus_think_time",
+              "initial_kv_digest": "cold-kv-v1",
+              "system_boundary": "whole-system-fixture",
+              "coverage_signature": "synthetic-logical-units-v1",
+              "cost_policy_id": "synthetic-effective-cost-v1",
+              "method": "replay",
+              "profile": "realizable",
+              "decision_time_mode": "offline_design",
+              "state_access_policy": "past_observations_only",
+              "assumption_snapshot": "synthetic-assumptions-v1",
+              "metric_definition_digest": "synthetic-metric-definitions-v1"
+            },
+            "uncertainty_mode": "point_observation",
+            "metrics": {
+              "ttft": {
+                "value": "90",
+                "unit": "ms"
+              },
+              "tpot": {
+                "value": "9",
+                "unit": "ms"
+              },
+              "output_throughput": {
+                "value": "110",
+                "unit": "tokens/s"
+              },
+              "energy_per_session": {
+                "value": "100",
+                "unit": "J/session"
+              },
+              "power": {
+                "value": "1100",
+                "unit": "W"
+              },
+              "quality": {
+                "value": "1",
+                "unit": "ratio"
+              }
+            }
+          }
+        ]
+      },
+      "expected_decision": "complete_within_policy_scope",
+      "expected": {
+        "non_dominated_under_policy": [
+          "A"
+        ],
+        "dominance_edges": [
+          [
+            "A",
+            "B"
+          ]
+        ],
+        "candidate_states": {
+          "A": "feasible",
+          "B": "feasible",
+          "V": "constraint_violated"
+        }
+      }
+    },
+    {
+      "case_id": "CMP-06",
+      "fixture_kind": "synthetic_contract_oracle",
+      "required_capability": "metric_comparison",
+      "allowed_unknown_reasons": [],
+      "expected_execution_permission": "not_applicable",
+      "runtime_status": "not_run",
+      "policy_id": "cmp-p1-bounds-v1",
+      "input": {
+        "candidates": [
+          {
+            "candidate_id": "UA",
+            "context": {
+              "scenario_digest": "synthetic-scenario-v1",
+              "model_revision": "synthetic-model-v1",
+              "tokenizer_revision": "synthetic-tokenizer-v1",
+              "quality_profile": "fixed-quality-v1",
+              "timing_policy": "predecessor_completion_plus_think_time",
+              "initial_kv_digest": "cold-kv-v1",
+              "system_boundary": "whole-system-fixture",
+              "coverage_signature": "synthetic-logical-units-v1",
+              "cost_policy_id": "synthetic-effective-cost-v1",
+              "method": "replay",
+              "profile": "realizable",
+              "decision_time_mode": "offline_design",
+              "state_access_policy": "past_observations_only",
+              "assumption_snapshot": "synthetic-assumptions-v1",
+              "metric_definition_digest": "synthetic-metric-definitions-v1"
+            },
+            "uncertainty_mode": "declared_bounds",
+            "metrics": {
+              "ttft": {
+                "lower": "90",
+                "upper": "105",
+                "unit": "ms"
+              },
+              "tpot": {
+                "lower": "9",
+                "upper": "11",
+                "unit": "ms"
+              },
+              "output_throughput": {
+                "lower": "95",
+                "upper": "115",
+                "unit": "tokens/s"
+              },
+              "energy_per_session": {
+                "lower": "100",
+                "upper": "115",
+                "unit": "J/session"
+              },
+              "power": {
+                "unit": "W",
+                "lower": "900",
+                "upper": "900"
+              },
+              "quality": {
+                "unit": "ratio",
+                "lower": "1",
+                "upper": "1"
+              }
+            }
+          },
+          {
+            "candidate_id": "UB",
+            "context": {
+              "scenario_digest": "synthetic-scenario-v1",
+              "model_revision": "synthetic-model-v1",
+              "tokenizer_revision": "synthetic-tokenizer-v1",
+              "quality_profile": "fixed-quality-v1",
+              "timing_policy": "predecessor_completion_plus_think_time",
+              "initial_kv_digest": "cold-kv-v1",
+              "system_boundary": "whole-system-fixture",
+              "coverage_signature": "synthetic-logical-units-v1",
+              "cost_policy_id": "synthetic-effective-cost-v1",
+              "method": "replay",
+              "profile": "realizable",
+              "decision_time_mode": "offline_design",
+              "state_access_policy": "past_observations_only",
+              "assumption_snapshot": "synthetic-assumptions-v1",
+              "metric_definition_digest": "synthetic-metric-definitions-v1"
+            },
+            "uncertainty_mode": "declared_bounds",
+            "metrics": {
+              "ttft": {
+                "unit": "ms",
+                "lower": "100",
+                "upper": "100"
+              },
+              "tpot": {
+                "unit": "ms",
+                "lower": "10",
+                "upper": "10"
+              },
+              "output_throughput": {
+                "unit": "tokens/s",
+                "lower": "100",
+                "upper": "100"
+              },
+              "energy_per_session": {
+                "unit": "J/session",
+                "lower": "110",
+                "upper": "110"
+              },
+              "power": {
+                "unit": "W",
+                "lower": "950",
+                "upper": "950"
+              },
+              "quality": {
+                "unit": "ratio",
+                "lower": "1",
+                "upper": "1"
+              }
+            }
+          }
+        ]
+      },
+      "expected_decision": "complete_within_policy_scope",
+      "expected": {
+        "non_dominated_under_policy": [
+          "UA",
+          "UB"
+        ],
+        "dominance_edges": [],
+        "candidate_states": {
+          "UA": "feasible",
+          "UB": "feasible"
+        }
+      }
+    },
+    {
+      "case_id": "CMP-07",
+      "fixture_kind": "synthetic_contract_oracle",
+      "required_capability": "metric_comparison",
+      "allowed_unknown_reasons": [],
+      "expected_execution_permission": "not_applicable",
+      "runtime_status": "not_run",
+      "policy_id": "cmp-target-fixture-v1",
+      "input": {
+        "candidates": [
+          {
+            "candidate_id": "Inside",
+            "context": {
+              "scenario_digest": "synthetic-scenario-v1",
+              "model_revision": "synthetic-model-v1",
+              "tokenizer_revision": "synthetic-tokenizer-v1",
+              "quality_profile": "fixed-quality-v1",
+              "timing_policy": "predecessor_completion_plus_think_time",
+              "initial_kv_digest": "cold-kv-v1",
+              "system_boundary": "whole-system-fixture",
+              "coverage_signature": "synthetic-logical-units-v1",
+              "cost_policy_id": "synthetic-effective-cost-v1",
+              "method": "replay",
+              "profile": "realizable",
+              "decision_time_mode": "offline_design",
+              "state_access_policy": "past_observations_only",
+              "assumption_snapshot": "synthetic-assumptions-v1",
+              "metric_definition_digest": "synthetic-metric-definitions-v1"
+            },
+            "uncertainty_mode": "point_observation",
+            "metrics": {
+              "temperature": {
+                "value": "305",
+                "unit": "K"
+              }
+            }
+          },
+          {
+            "candidate_id": "Below",
+            "context": {
+              "scenario_digest": "synthetic-scenario-v1",
+              "model_revision": "synthetic-model-v1",
+              "tokenizer_revision": "synthetic-tokenizer-v1",
+              "quality_profile": "fixed-quality-v1",
+              "timing_policy": "predecessor_completion_plus_think_time",
+              "initial_kv_digest": "cold-kv-v1",
+              "system_boundary": "whole-system-fixture",
+              "coverage_signature": "synthetic-logical-units-v1",
+              "cost_policy_id": "synthetic-effective-cost-v1",
+              "method": "replay",
+              "profile": "realizable",
+              "decision_time_mode": "offline_design",
+              "state_access_policy": "past_observations_only",
+              "assumption_snapshot": "synthetic-assumptions-v1",
+              "metric_definition_digest": "synthetic-metric-definitions-v1"
+            },
+            "uncertainty_mode": "point_observation",
+            "metrics": {
+              "temperature": {
+                "value": "290",
+                "unit": "K"
+              }
+            }
+          },
+          {
+            "candidate_id": "Above",
+            "context": {
+              "scenario_digest": "synthetic-scenario-v1",
+              "model_revision": "synthetic-model-v1",
+              "tokenizer_revision": "synthetic-tokenizer-v1",
+              "quality_profile": "fixed-quality-v1",
+              "timing_policy": "predecessor_completion_plus_think_time",
+              "initial_kv_digest": "cold-kv-v1",
+              "system_boundary": "whole-system-fixture",
+              "coverage_signature": "synthetic-logical-units-v1",
+              "cost_policy_id": "synthetic-effective-cost-v1",
+              "method": "replay",
+              "profile": "realizable",
+              "decision_time_mode": "offline_design",
+              "state_access_policy": "past_observations_only",
+              "assumption_snapshot": "synthetic-assumptions-v1",
+              "metric_definition_digest": "synthetic-metric-definitions-v1"
+            },
+            "uncertainty_mode": "point_observation",
+            "metrics": {
+              "temperature": {
+                "value": "320",
+                "unit": "K"
+              }
+            }
+          }
+        ]
+      },
+      "expected_decision": "complete_within_policy_scope",
+      "expected": {
+        "non_dominated_under_policy": [
+          "Inside"
+        ],
+        "dominance_edges": [
+          [
+            "Inside",
+            "Above"
+          ],
+          [
+            "Inside",
+            "Below"
+          ]
+        ],
+        "candidate_states": {
+          "Inside": "feasible",
+          "Above": "feasible",
+          "Below": "feasible"
+        }
+      }
+    },
+    {
+      "case_id": "CMP-08",
+      "fixture_kind": "synthetic_contract_oracle",
+      "required_capability": "metric_comparison",
+      "allowed_unknown_reasons": [],
+      "expected_execution_permission": "not_applicable",
+      "runtime_status": "not_run",
+      "policy_id": "cmp-cycle-fixture-v1",
+      "input": {
+        "candidates": [
+          {
+            "candidate_id": "C1",
+            "context": {
+              "scenario_digest": "synthetic-scenario-v1",
+              "model_revision": "synthetic-model-v1",
+              "tokenizer_revision": "synthetic-tokenizer-v1",
+              "quality_profile": "fixed-quality-v1",
+              "timing_policy": "predecessor_completion_plus_think_time",
+              "initial_kv_digest": "cold-kv-v1",
+              "system_boundary": "whole-system-fixture",
+              "coverage_signature": "synthetic-logical-units-v1",
+              "cost_policy_id": "synthetic-effective-cost-v1",
+              "method": "replay",
+              "profile": "realizable",
+              "decision_time_mode": "offline_design",
+              "state_access_policy": "past_observations_only",
+              "assumption_snapshot": "synthetic-assumptions-v1",
+              "metric_definition_digest": "synthetic-metric-definitions-v1"
+            },
+            "uncertainty_mode": "point_observation",
+            "metrics": {
+              "cost_a": {
+                "value": "0",
+                "unit": "1"
+              },
+              "cost_b": {
+                "value": "1",
+                "unit": "1"
+              },
+              "cost_c": {
+                "value": "2",
+                "unit": "1"
+              }
+            }
+          },
+          {
+            "candidate_id": "C2",
+            "context": {
+              "scenario_digest": "synthetic-scenario-v1",
+              "model_revision": "synthetic-model-v1",
+              "tokenizer_revision": "synthetic-tokenizer-v1",
+              "quality_profile": "fixed-quality-v1",
+              "timing_policy": "predecessor_completion_plus_think_time",
+              "initial_kv_digest": "cold-kv-v1",
+              "system_boundary": "whole-system-fixture",
+              "coverage_signature": "synthetic-logical-units-v1",
+              "cost_policy_id": "synthetic-effective-cost-v1",
+              "method": "replay",
+              "profile": "realizable",
+              "decision_time_mode": "offline_design",
+              "state_access_policy": "past_observations_only",
+              "assumption_snapshot": "synthetic-assumptions-v1",
+              "metric_definition_digest": "synthetic-metric-definitions-v1"
+            },
+            "uncertainty_mode": "point_observation",
+            "metrics": {
+              "cost_a": {
+                "value": "2",
+                "unit": "1"
+              },
+              "cost_b": {
+                "value": "0",
+                "unit": "1"
+              },
+              "cost_c": {
+                "value": "1",
+                "unit": "1"
+              }
+            }
+          },
+          {
+            "candidate_id": "C3",
+            "context": {
+              "scenario_digest": "synthetic-scenario-v1",
+              "model_revision": "synthetic-model-v1",
+              "tokenizer_revision": "synthetic-tokenizer-v1",
+              "quality_profile": "fixed-quality-v1",
+              "timing_policy": "predecessor_completion_plus_think_time",
+              "initial_kv_digest": "cold-kv-v1",
+              "system_boundary": "whole-system-fixture",
+              "coverage_signature": "synthetic-logical-units-v1",
+              "cost_policy_id": "synthetic-effective-cost-v1",
+              "method": "replay",
+              "profile": "realizable",
+              "decision_time_mode": "offline_design",
+              "state_access_policy": "past_observations_only",
+              "assumption_snapshot": "synthetic-assumptions-v1",
+              "metric_definition_digest": "synthetic-metric-definitions-v1"
+            },
+            "uncertainty_mode": "point_observation",
+            "metrics": {
+              "cost_a": {
+                "value": "1",
+                "unit": "1"
+              },
+              "cost_b": {
+                "value": "2",
+                "unit": "1"
+              },
+              "cost_c": {
+                "value": "0",
+                "unit": "1"
+              }
+            }
+          }
+        ]
+      },
+      "expected_decision": "complete_within_policy_scope",
+      "expected": {
+        "non_dominated_under_policy": [
+          "C1",
+          "C2",
+          "C3"
+        ],
+        "dominance_edges": [],
+        "candidate_states": {
+          "C1": "feasible",
+          "C2": "feasible",
+          "C3": "feasible"
+        }
+      }
+    },
+    {
+      "case_id": "CMP-09",
+      "fixture_kind": "synthetic_contract_oracle",
+      "required_capability": "metric_comparison",
+      "allowed_unknown_reasons": [
+        "method_profile_mismatch"
+      ],
+      "expected_execution_permission": "not_applicable",
+      "runtime_status": "not_run",
+      "policy_id": "cmp-p1-workload-v1",
+      "input": {
+        "candidates": [
+          {
+            "candidate_id": "A",
+            "context": {
+              "scenario_digest": "synthetic-scenario-v1",
+              "model_revision": "synthetic-model-v1",
+              "tokenizer_revision": "synthetic-tokenizer-v1",
+              "quality_profile": "fixed-quality-v1",
+              "timing_policy": "predecessor_completion_plus_think_time",
+              "initial_kv_digest": "cold-kv-v1",
+              "system_boundary": "whole-system-fixture",
+              "coverage_signature": "synthetic-logical-units-v1",
+              "cost_policy_id": "synthetic-effective-cost-v1",
+              "method": "replay",
+              "profile": "realizable",
+              "decision_time_mode": "offline_design",
+              "state_access_policy": "past_observations_only",
+              "assumption_snapshot": "synthetic-assumptions-v1",
+              "metric_definition_digest": "synthetic-metric-definitions-v1"
+            },
+            "uncertainty_mode": "point_observation",
+            "metrics": {
+              "ttft": {
+                "value": "90",
+                "unit": "ms"
+              },
+              "tpot": {
+                "value": "9",
+                "unit": "ms"
+              },
+              "output_throughput": {
+                "value": "110",
+                "unit": "tokens/s"
+              },
+              "energy_per_session": {
+                "value": "100",
+                "unit": "J/session"
+              },
+              "power": {
+                "value": "900",
+                "unit": "W"
+              },
+              "quality": {
+                "value": "1",
+                "unit": "ratio"
+              }
+            }
+          },
+          {
+            "candidate_id": "Oracle",
+            "context": {
+              "scenario_digest": "synthetic-scenario-v1",
+              "model_revision": "synthetic-model-v1",
+              "tokenizer_revision": "synthetic-tokenizer-v1",
+              "quality_profile": "fixed-quality-v1",
+              "timing_policy": "predecessor_completion_plus_think_time",
+              "initial_kv_digest": "cold-kv-v1",
+              "system_boundary": "whole-system-fixture",
+              "coverage_signature": "synthetic-logical-units-v1",
+              "cost_policy_id": "synthetic-effective-cost-v1",
+              "method": "replay",
+              "profile": "oracle",
+              "decision_time_mode": "offline_design",
+              "state_access_policy": "past_observations_only",
+              "assumption_snapshot": "synthetic-assumptions-v1",
+              "metric_definition_digest": "synthetic-metric-definitions-v1"
+            },
+            "uncertainty_mode": "point_observation",
+            "metrics": {
+              "ttft": {
+                "value": "100",
+                "unit": "ms"
+              },
+              "tpot": {
+                "value": "10",
+                "unit": "ms"
+              },
+              "output_throughput": {
+                "value": "100",
+                "unit": "tokens/s"
+              },
+              "energy_per_session": {
+                "value": "110",
+                "unit": "J/session"
+              },
+              "power": {
+                "value": "950",
+                "unit": "W"
+              },
+              "quality": {
+                "value": "1",
+                "unit": "ratio"
+              }
+            }
+          }
+        ]
+      },
+      "expected_decision": "incompatible_cohort",
+      "expected": {
+        "non_dominated_under_policy": [],
+        "dominance_edges": [],
+        "candidate_states": {}
+      }
+    },
+    {
+      "case_id": "CMP-10",
+      "fixture_kind": "synthetic_contract_oracle",
+      "required_capability": "metric_comparison",
+      "allowed_unknown_reasons": [
+        "constraint_bound_overlap"
+      ],
+      "expected_execution_permission": "not_applicable",
+      "runtime_status": "not_run",
+      "policy_id": "cmp-p1-bounds-v1",
+      "input": {
+        "candidates": [
+          {
+            "candidate_id": "UB",
+            "context": {
+              "scenario_digest": "synthetic-scenario-v1",
+              "model_revision": "synthetic-model-v1",
+              "tokenizer_revision": "synthetic-tokenizer-v1",
+              "quality_profile": "fixed-quality-v1",
+              "timing_policy": "predecessor_completion_plus_think_time",
+              "initial_kv_digest": "cold-kv-v1",
+              "system_boundary": "whole-system-fixture",
+              "coverage_signature": "synthetic-logical-units-v1",
+              "cost_policy_id": "synthetic-effective-cost-v1",
+              "method": "replay",
+              "profile": "realizable",
+              "decision_time_mode": "offline_design",
+              "state_access_policy": "past_observations_only",
+              "assumption_snapshot": "synthetic-assumptions-v1",
+              "metric_definition_digest": "synthetic-metric-definitions-v1"
+            },
+            "uncertainty_mode": "declared_bounds",
+            "metrics": {
+              "ttft": {
+                "unit": "ms",
+                "lower": "100",
+                "upper": "100"
+              },
+              "tpot": {
+                "unit": "ms",
+                "lower": "10",
+                "upper": "10"
+              },
+              "output_throughput": {
+                "unit": "tokens/s",
+                "lower": "100",
+                "upper": "100"
+              },
+              "energy_per_session": {
+                "unit": "J/session",
+                "lower": "110",
+                "upper": "110"
+              },
+              "power": {
+                "unit": "W",
+                "lower": "950",
+                "upper": "950"
+              },
+              "quality": {
+                "unit": "ratio",
+                "lower": "1",
+                "upper": "1"
+              }
+            }
+          },
+          {
+            "candidate_id": "UC",
+            "context": {
+              "scenario_digest": "synthetic-scenario-v1",
+              "model_revision": "synthetic-model-v1",
+              "tokenizer_revision": "synthetic-tokenizer-v1",
+              "quality_profile": "fixed-quality-v1",
+              "timing_policy": "predecessor_completion_plus_think_time",
+              "initial_kv_digest": "cold-kv-v1",
+              "system_boundary": "whole-system-fixture",
+              "coverage_signature": "synthetic-logical-units-v1",
+              "cost_policy_id": "synthetic-effective-cost-v1",
+              "method": "replay",
+              "profile": "realizable",
+              "decision_time_mode": "offline_design",
+              "state_access_policy": "past_observations_only",
+              "assumption_snapshot": "synthetic-assumptions-v1",
+              "metric_definition_digest": "synthetic-metric-definitions-v1"
+            },
+            "uncertainty_mode": "declared_bounds",
+            "metrics": {
+              "ttft": {
+                "unit": "ms",
+                "lower": "100",
+                "upper": "100"
+              },
+              "tpot": {
+                "unit": "ms",
+                "lower": "10",
+                "upper": "10"
+              },
+              "output_throughput": {
+                "unit": "tokens/s",
+                "lower": "100",
+                "upper": "100"
+              },
+              "energy_per_session": {
+                "unit": "J/session",
+                "lower": "110",
+                "upper": "110"
+              },
+              "power": {
+                "lower": "900",
+                "upper": "1100",
+                "unit": "W"
+              },
+              "quality": {
+                "unit": "ratio",
+                "lower": "1",
+                "upper": "1"
+              }
+            }
+          }
+        ]
+      },
+      "expected_decision": "incomplete",
+      "expected": {
+        "non_dominated_under_policy": [
+          "UB"
+        ],
+        "dominance_edges": [],
+        "candidate_states": {
+          "UB": "feasible",
+          "UC": "constraint_unknown"
+        }
+      }
+    },
+    {
+      "case_id": "CMP-11",
+      "fixture_kind": "synthetic_contract_oracle",
+      "required_capability": "metric_comparison",
+      "allowed_unknown_reasons": [
+        "empty_population"
+      ],
+      "expected_execution_permission": "not_applicable",
+      "runtime_status": "not_run",
+      "policy_id": "cmp-p1-workload-v1",
+      "input": {
+        "candidates": []
+      },
+      "expected_decision": "invalid_input",
+      "expected": {
+        "non_dominated_under_policy": [],
+        "dominance_edges": [],
+        "candidate_states": {}
+      }
+    },
+    {
+      "case_id": "CMP-12",
+      "fixture_kind": "synthetic_contract_oracle",
+      "required_capability": "metric_comparison",
+      "allowed_unknown_reasons": [
+        "unit_dimension_mismatch"
+      ],
+      "expected_execution_permission": "not_applicable",
+      "runtime_status": "not_run",
+      "policy_id": "cmp-p1-workload-v1",
+      "input": {
+        "candidates": [
+          {
+            "candidate_id": "BadUnit",
+            "context": {
+              "scenario_digest": "synthetic-scenario-v1",
+              "model_revision": "synthetic-model-v1",
+              "tokenizer_revision": "synthetic-tokenizer-v1",
+              "quality_profile": "fixed-quality-v1",
+              "timing_policy": "predecessor_completion_plus_think_time",
+              "initial_kv_digest": "cold-kv-v1",
+              "system_boundary": "whole-system-fixture",
+              "coverage_signature": "synthetic-logical-units-v1",
+              "cost_policy_id": "synthetic-effective-cost-v1",
+              "method": "replay",
+              "profile": "realizable",
+              "decision_time_mode": "offline_design",
+              "state_access_policy": "past_observations_only",
+              "assumption_snapshot": "synthetic-assumptions-v1",
+              "metric_definition_digest": "synthetic-metric-definitions-v1"
+            },
+            "uncertainty_mode": "point_observation",
+            "metrics": {
+              "ttft": {
+                "value": "90",
+                "unit": "GB"
+              },
+              "tpot": {
+                "value": "9",
+                "unit": "ms"
+              },
+              "output_throughput": {
+                "value": "110",
+                "unit": "tokens/s"
+              },
+              "energy_per_session": {
+                "value": "100",
+                "unit": "J/session"
+              },
+              "power": {
+                "value": "900",
+                "unit": "W"
+              },
+              "quality": {
+                "value": "1",
+                "unit": "ratio"
+              }
+            }
+          },
+          {
+            "candidate_id": "B",
+            "context": {
+              "scenario_digest": "synthetic-scenario-v1",
+              "model_revision": "synthetic-model-v1",
+              "tokenizer_revision": "synthetic-tokenizer-v1",
+              "quality_profile": "fixed-quality-v1",
+              "timing_policy": "predecessor_completion_plus_think_time",
+              "initial_kv_digest": "cold-kv-v1",
+              "system_boundary": "whole-system-fixture",
+              "coverage_signature": "synthetic-logical-units-v1",
+              "cost_policy_id": "synthetic-effective-cost-v1",
+              "method": "replay",
+              "profile": "realizable",
+              "decision_time_mode": "offline_design",
+              "state_access_policy": "past_observations_only",
+              "assumption_snapshot": "synthetic-assumptions-v1",
+              "metric_definition_digest": "synthetic-metric-definitions-v1"
+            },
+            "uncertainty_mode": "point_observation",
+            "metrics": {
+              "ttft": {
+                "value": "100",
+                "unit": "ms"
+              },
+              "tpot": {
+                "value": "10",
+                "unit": "ms"
+              },
+              "output_throughput": {
+                "value": "100",
+                "unit": "tokens/s"
+              },
+              "energy_per_session": {
+                "value": "110",
+                "unit": "J/session"
+              },
+              "power": {
+                "value": "950",
+                "unit": "W"
+              },
+              "quality": {
+                "value": "1",
+                "unit": "ratio"
+              }
+            }
+          }
+        ]
+      },
+      "expected_decision": "invalid_input",
+      "expected": {
+        "non_dominated_under_policy": [],
+        "dominance_edges": [],
+        "candidate_states": {}
+      }
+    },
+    {
+      "case_id": "CMP-13",
+      "fixture_kind": "synthetic_contract_oracle",
+      "required_capability": "metric_comparison",
+      "allowed_unknown_reasons": [],
+      "expected_execution_permission": "not_applicable",
+      "runtime_status": "not_run",
+      "policy_id": "cmp-p1-workload-v1",
+      "input": {
+        "candidates": [
+          {
+            "candidate_id": "A",
+            "context": {
+              "scenario_digest": "synthetic-scenario-v1",
+              "model_revision": "synthetic-model-v1",
+              "tokenizer_revision": "synthetic-tokenizer-v1",
+              "quality_profile": "fixed-quality-v1",
+              "timing_policy": "predecessor_completion_plus_think_time",
+              "initial_kv_digest": "cold-kv-v1",
+              "system_boundary": "whole-system-fixture",
+              "coverage_signature": "synthetic-logical-units-v1",
+              "cost_policy_id": "synthetic-effective-cost-v1",
+              "method": "replay",
+              "profile": "realizable",
+              "decision_time_mode": "offline_design",
+              "state_access_policy": "past_observations_only",
+              "assumption_snapshot": "synthetic-assumptions-v1",
+              "metric_definition_digest": "synthetic-metric-definitions-v1"
+            },
+            "uncertainty_mode": "point_observation",
+            "metrics": {
+              "ttft": {
+                "value": "90",
+                "unit": "ms"
+              },
+              "tpot": {
+                "value": "9",
+                "unit": "ms"
+              },
+              "output_throughput": {
+                "value": "110",
+                "unit": "tokens/s"
+              },
+              "energy_per_session": {
+                "value": "100",
+                "unit": "J/session"
+              },
+              "power": {
+                "value": "900",
+                "unit": "W"
+              },
+              "quality": {
+                "value": "1",
+                "unit": "ratio"
+              }
+            }
+          },
+          {
+            "candidate_id": "A_tie",
+            "context": {
+              "scenario_digest": "synthetic-scenario-v1",
+              "model_revision": "synthetic-model-v1",
+              "tokenizer_revision": "synthetic-tokenizer-v1",
+              "quality_profile": "fixed-quality-v1",
+              "timing_policy": "predecessor_completion_plus_think_time",
+              "initial_kv_digest": "cold-kv-v1",
+              "system_boundary": "whole-system-fixture",
+              "coverage_signature": "synthetic-logical-units-v1",
+              "cost_policy_id": "synthetic-effective-cost-v1",
+              "method": "replay",
+              "profile": "realizable",
+              "decision_time_mode": "offline_design",
+              "state_access_policy": "past_observations_only",
+              "assumption_snapshot": "synthetic-assumptions-v1",
+              "metric_definition_digest": "synthetic-metric-definitions-v1"
+            },
+            "uncertainty_mode": "point_observation",
+            "metrics": {
+              "ttft": {
+                "value": "90",
+                "unit": "ms"
+              },
+              "tpot": {
+                "value": "9",
+                "unit": "ms"
+              },
+              "output_throughput": {
+                "value": "110",
+                "unit": "tokens/s"
+              },
+              "energy_per_session": {
+                "value": "100",
+                "unit": "J/session"
+              },
+              "power": {
+                "value": "900",
+                "unit": "W"
+              },
+              "quality": {
+                "value": "1",
+                "unit": "ratio"
+              }
+            }
+          }
+        ]
+      },
+      "expected_decision": "complete_within_policy_scope",
+      "expected": {
+        "non_dominated_under_policy": [
+          "A",
+          "A_tie"
+        ],
+        "dominance_edges": [],
+        "candidate_states": {
+          "A": "feasible",
+          "A_tie": "feasible"
+        }
+      }
+    },
+    {
+      "case_id": "CMP-14",
+      "fixture_kind": "synthetic_contract_oracle",
+      "required_capability": "metric_comparison",
+      "allowed_unknown_reasons": [],
+      "expected_execution_permission": "not_applicable",
+      "runtime_status": "not_run",
+      "policy_id": "cmp-p1-workload-v1",
+      "input": {
+        "candidates": [
+          {
+            "candidate_id": "A",
+            "context": {
+              "scenario_digest": "synthetic-scenario-v1",
+              "model_revision": "synthetic-model-v1",
+              "tokenizer_revision": "synthetic-tokenizer-v1",
+              "quality_profile": "fixed-quality-v1",
+              "timing_policy": "predecessor_completion_plus_think_time",
+              "initial_kv_digest": "cold-kv-v1",
+              "system_boundary": "whole-system-fixture",
+              "coverage_signature": "synthetic-logical-units-v1",
+              "cost_policy_id": "synthetic-effective-cost-v1",
+              "method": "replay",
+              "profile": "realizable",
+              "decision_time_mode": "offline_design",
+              "state_access_policy": "past_observations_only",
+              "assumption_snapshot": "synthetic-assumptions-v1",
+              "metric_definition_digest": "synthetic-metric-definitions-v1"
+            },
+            "uncertainty_mode": "point_observation",
+            "metrics": {
+              "ttft": {
+                "value": "90",
+                "unit": "ms"
+              },
+              "tpot": {
+                "value": "9",
+                "unit": "ms"
+              },
+              "output_throughput": {
+                "value": "110",
+                "unit": "tokens/s"
+              },
+              "energy_per_session": {
+                "value": "100",
+                "unit": "J/session"
+              },
+              "power": {
+                "value": "900",
+                "unit": "W"
+              },
+              "quality": {
+                "value": "1",
+                "unit": "ratio"
+              }
+            }
+          },
+          {
+            "candidate_id": "MissingAndViolated",
+            "context": {
+              "scenario_digest": "synthetic-scenario-v1",
+              "model_revision": "synthetic-model-v1",
+              "tokenizer_revision": "synthetic-tokenizer-v1",
+              "quality_profile": "fixed-quality-v1",
+              "timing_policy": "predecessor_completion_plus_think_time",
+              "initial_kv_digest": "cold-kv-v1",
+              "system_boundary": "whole-system-fixture",
+              "coverage_signature": "synthetic-logical-units-v1",
+              "cost_policy_id": "synthetic-effective-cost-v1",
+              "method": "replay",
+              "profile": "realizable",
+              "decision_time_mode": "offline_design",
+              "state_access_policy": "past_observations_only",
+              "assumption_snapshot": "synthetic-assumptions-v1",
+              "metric_definition_digest": "synthetic-metric-definitions-v1"
+            },
+            "uncertainty_mode": "point_observation",
+            "metrics": {
+              "ttft": {
+                "value": "100",
+                "unit": "ms"
+              },
+              "tpot": {
+                "value": "10",
+                "unit": "ms"
+              },
+              "output_throughput": {
+                "value": "100",
+                "unit": "tokens/s"
+              },
+              "power": {
+                "value": "1100",
+                "unit": "W"
+              },
+              "quality": {
+                "value": "1",
+                "unit": "ratio"
+              }
+            }
+          }
+        ]
+      },
+      "expected_decision": "complete_within_policy_scope",
+      "expected": {
+        "non_dominated_under_policy": [
+          "A"
+        ],
+        "dominance_edges": [],
+        "candidate_states": {
+          "A": "feasible",
+          "MissingAndViolated": "constraint_violated"
+        }
+      }
+    },
+    {
+      "case_id": "CMP-15",
+      "fixture_kind": "synthetic_contract_oracle",
+      "required_capability": "metric_comparison",
+      "allowed_unknown_reasons": [
+        "cohort_key_mismatch"
+      ],
+      "expected_execution_permission": "not_applicable",
+      "runtime_status": "not_run",
+      "policy_id": "cmp-p1-workload-v1",
+      "input": {
+        "candidates": [
+          {
+            "candidate_id": "A",
+            "context": {
+              "scenario_digest": "synthetic-scenario-v1",
+              "model_revision": "synthetic-model-v1",
+              "tokenizer_revision": "synthetic-tokenizer-v1",
+              "quality_profile": "fixed-quality-v1",
+              "timing_policy": "predecessor_completion_plus_think_time",
+              "initial_kv_digest": "cold-kv-v1",
+              "system_boundary": "whole-system-fixture",
+              "coverage_signature": "synthetic-logical-units-v1",
+              "cost_policy_id": "synthetic-effective-cost-v1",
+              "method": "replay",
+              "profile": "realizable",
+              "decision_time_mode": "offline_design",
+              "state_access_policy": "past_observations_only",
+              "assumption_snapshot": "synthetic-assumptions-v1",
+              "metric_definition_digest": "synthetic-metric-definitions-v1"
+            },
+            "uncertainty_mode": "point_observation",
+            "metrics": {
+              "ttft": {
+                "value": "90",
+                "unit": "ms"
+              },
+              "tpot": {
+                "value": "9",
+                "unit": "ms"
+              },
+              "output_throughput": {
+                "value": "110",
+                "unit": "tokens/s"
+              },
+              "energy_per_session": {
+                "value": "100",
+                "unit": "J/session"
+              },
+              "power": {
+                "value": "900",
+                "unit": "W"
+              },
+              "quality": {
+                "value": "1",
+                "unit": "ratio"
+              }
+            }
+          },
+          {
+            "candidate_id": "B",
+            "context": {
+              "scenario_digest": "synthetic-scenario-v1",
+              "model_revision": "synthetic-model-v1",
+              "tokenizer_revision": "synthetic-tokenizer-v1",
+              "quality_profile": "fixed-quality-v1",
+              "timing_policy": "predecessor_completion_plus_think_time",
+              "initial_kv_digest": "cold-kv-v1",
+              "system_boundary": "whole-system-fixture",
+              "coverage_signature": "synthetic-logical-units-v1",
+              "cost_policy_id": "synthetic-effective-cost-v1",
+              "method": "replay",
+              "profile": "realizable",
+              "decision_time_mode": "offline_design",
+              "state_access_policy": "past_observations_only",
+              "assumption_snapshot": "synthetic-assumptions-v1",
+              "metric_definition_digest": "different-metric-definitions-v2"
+            },
+            "uncertainty_mode": "point_observation",
+            "metrics": {
+              "ttft": {
+                "value": "100",
+                "unit": "ms"
+              },
+              "tpot": {
+                "value": "10",
+                "unit": "ms"
+              },
+              "output_throughput": {
+                "value": "100",
+                "unit": "tokens/s"
+              },
+              "energy_per_session": {
+                "value": "110",
+                "unit": "J/session"
+              },
+              "power": {
+                "value": "950",
+                "unit": "W"
+              },
+              "quality": {
+                "value": "1",
+                "unit": "ratio"
+              }
+            }
+          }
+        ]
+      },
+      "expected_decision": "incompatible_cohort",
+      "expected": {
+        "non_dominated_under_policy": [],
+        "dominance_edges": [],
+        "candidate_states": {},
+        "mismatch_fields": [
+          "metric_definition_digest"
+        ]
+      }
+    }
+  ]
+}

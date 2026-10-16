@@ -1,6 +1,6 @@
 # DSE KG 저장·검색 후보 조사
 
-조사 기준일: 2026-10-16 KST. 초기 corpus는 없으며 공식 제품/프로젝트 문서로만 후보를 비교했다. 범위는 저장소와 검색 계층이며, 계정·서비스 생성, 설치, 수집, 성능 실험은 하지 않았다. 대상 요구와 용어는 [README.md](https://github.com/jimmylegendary/dse-knowledge/blob/main/README.md), [CONTEXT.md](https://github.com/jimmylegendary/dse-knowledge/blob/main/CONTEXT.md)를 따른다.
+조사 기준일: 2026-10-16 KST. 초기 corpus는 없으며 공식 제품/프로젝트 문서로만 후보를 비교했다. 범위는 저장소와 검색 계층이며, 계정·서비스 생성, 설치, 수집, 성능 실험은 하지 않았다. 대상 요구와 용어는 [README.md](https://github.com/jimmylegendary/dse-knowledge/blob/docs/p0-episode-contracts/README.md), [CONTEXT.md](https://github.com/jimmylegendary/dse-knowledge/blob/docs/p0-episode-contracts/CONTEXT.md)를 따른다.
 
 ## 권고
 
@@ -14,7 +14,7 @@
 
 사내 Confluence에서 Supabase와 Neo4j를 사용한 경험은 초기 학습 부담을 낮출 수 있지만, 해당 계정·자료·권한을 이 프로젝트에서 쓸 수 있다고 가정하지 않는다.
 
-**주 선택 기준:** all-HW hierarchy의 legality가 초기 gate라면 3번을 우선 설계한다. LLM이 만든 추출 결과만으로 합법성을 정하지 않고, SHACL 또는 결정론적 validator와 HAT 검사로 판정한다. 먼저 1번을 전체 흐름 기준선으로 세우면 2번·3번의 그래프 이득도 같은 query set으로 비교할 수 있다.
+**선택 경계:** P1 요구는 typed graph semantics다(typed node/edge, endpoint/relationship constraints, provenance와 temporal validity). 실행 기준선은 PostgreSQL의 정규화된 node/edge/Claim/Evidence 테이블과 recursive query/validator다. Neo4j Aura는 같은 graph IDs와 paired query set을 사용하는 challenger projection이며, relation-path quality/p95/operations gate를 통과하기 전에는 mandatory deployment가 아니다. Neo4j를 채택해도 Claim/Evidence ACL과 metric SoR는 PostgreSQL에 남기고 query 시 권한을 재검사한다. RDF/SHACL은 현재 기본안이 아니며 ontology/표준 상호운용 요구가 확인되면 별도 ADR로 평가한다. 판단 기록은 [0001-graph-backend-selection.md](https://github.com/jimmylegendary/dse-knowledge/blob/docs/p0-episode-contracts/docs/adr/0001-graph-backend-selection.md)에 맞춘다.
 
 ## 후보와 점수
 

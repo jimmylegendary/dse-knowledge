@@ -1,0 +1,16 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "P0 common case oracle envelope",
+  "type": "object",
+  "required": ["case_id", "expected_decision", "allowed_unknown_reasons", "required_capability", "expected_execution_permission"],
+  "properties": {
+    "case_id": {"type": "string", "minLength": 1},
+    "expected_decision": {"type": "string", "minLength": 1},
+    "allowed_unknown_reasons": {"type": "array", "uniqueItems": true, "items": {"type": "string", "minLength": 1}},
+    "required_capability": {"type": "string", "minLength": 1},
+    "expected_execution_permission": {"enum": ["denied", "exploratory_only", "validated_profile_only", "not_applicable"]},
+    "runtime_status": {"enum": ["not_run", "blocked"]},
+    "expected": {"type": "object"}
+  },
+  "additionalProperties": true
+}

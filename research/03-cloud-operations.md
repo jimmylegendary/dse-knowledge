@@ -4,7 +4,7 @@
 
 ## 목적과 결정 경계
 
-[README.md](https://github.com/jimmylegendary/dse-knowledge/blob/main/README.md)와 [CONTEXT.md](https://github.com/jimmylegendary/dse-knowledge/blob/main/CONTEXT.md)를 기준으로 한다. 소스 corpus, cloud 접근권, region, 공급자, monthly budget이 아직 없다. 사내 Confluence RAG의 Supabase·Neo4j 경험은 참고 배경일 뿐, 이 프로젝트에 계정·credential·내부 자료가 제공됐다는 뜻이 아니다. 새 corpus는 수집하지 않는다.
+[README.md](https://github.com/jimmylegendary/dse-knowledge/blob/docs/p0-episode-contracts/README.md)와 [CONTEXT.md](https://github.com/jimmylegendary/dse-knowledge/blob/docs/p0-episode-contracts/CONTEXT.md)를 기준으로 한다. 소스 corpus, cloud 접근권, region, 공급자, monthly budget이 아직 없다. 사내 Confluence RAG의 Supabase·Neo4j 경험은 참고 배경일 뿐, 이 프로젝트에 계정·credential·내부 자료가 제공됐다는 뜻이 아니다. 새 corpus는 수집하지 않는다.
 
 이 문서는 AWS/GCP/Azure native, Supabase+Neo4j Aura 관리형 혼합, portable 관리형/자체 운영 혼합을 비교하지만 vendor·region·monthly cap을 선택하지 않는다. 점수는 요구가 채워질 때 재평가할 상대 우선순위다. component 범주가 다르면 가중점수를 서로 더해 최종 순위를 만들지 않는다.
 
@@ -12,7 +12,7 @@
 
 ## 후보 점수
 
-가중치는 quality 25, fit 20, provenance 20, operability 15, portability 10, economics 10이다. 각 항목은 0–5점이며 가중점수는 Σ(weight × score) / 5, 0–100이다. Quality는 service/security/availability 성숙도, fit은 전체 DSE 흐름, provenance는 version/artifact/audit/export, operability는 day-2 부담, portability는 이동성, economics는 최소·사용량 과금 조건을 뜻한다. Embedding relevance나 HW 성능 benchmark 점수는 포함하지 않는다. 상세 근거·제한·공식 출처는 [03-cloud-operations.json](https://github.com/jimmylegendary/dse-knowledge/blob/main/research/03-cloud-operations.json)에 있다.
+가중치는 quality 25, fit 20, provenance 20, operability 15, portability 10, economics 10이다. 각 항목은 0–5점이며 가중점수는 Σ(weight × score) / 5, 0–100이다. Quality는 service/security/availability 성숙도, fit은 전체 DSE 흐름, provenance는 version/artifact/audit/export, operability는 day-2 부담, portability는 이동성, economics는 최소·사용량 과금 조건을 뜻한다. Embedding relevance나 HW 성능 benchmark 점수는 포함하지 않는다. 상세 근거·제한·공식 출처는 [03-cloud-operations.json](https://github.com/jimmylegendary/dse-knowledge/blob/docs/p0-episode-contracts/research/03-cloud-operations.json)에 있다.
 
 | 후보 | 범주 | Q/F/P/O/Port/Econ | 가중점수 |
 |---|---|---:|---:|
@@ -44,7 +44,7 @@ Jev 1.13의 제한된 후보 검토는 portable-mix 0.57, AWS native 0.26을 제
 - **AWS native:** S3 raw source/artifact, RDS PostgreSQL+pgvector 또는 OpenSearch vector/hybrid retrieval, Neptune graph, SQS/Step Functions/AWS Batch, CloudTrail/CloudWatch/KMS. IAM, audit, queue, network가 결합되고 S3 gateway endpoint는 추가 endpoint charge 없이 VPC에서 연결된다. Neptune과 OpenSearch는 별도 운영단위다. OpenSearch Serverless 비용은 collection generation과 standby mode에 따라 다르다. Classic redundant 첫 collection/account은 2 OCU, dev-test no-standby는 1 OCU이며, NextGen은 min=0/scale-to-zero를 지원한다. AWS API와 infra schema에 lock-in이 있다.
 - **GCP native:** GCS, Cloud SQL/AlloyDB 또는 Spanner Enterprise Graph+Vector, Pub/Sub, Workflows, Cloud Batch, Cloud Audit Logs/KMS. Spanner는 relational+graph+vector 통합 후보지만 Graph와 Vector Search는 Enterprise 이상, Graph는 GoogleSQL dialect이며 PostgreSQL interface가 아니다. 운영 통합성이 강하고 compute/replica edition floor를 확인해야 한다.
 - **Azure native:** Blob, Azure Database for PostgreSQL+pgvector, Cosmos DB for Apache Gremlin, Azure AI Search, Service Bus/Azure Batch, Entra ID/Key Vault/Monitor. Private endpoint와 workload identity federation이 있다. Cosmos Gremlin과 Search/PostgreSQL이 분리된다. Gremlin driver 제한을 검증하고 Azure AI Search Serverless Developer preview는 비-SLA라 production 후보에 넣지 않는다.
-- **Supabase + Neo4j Aura:** Supabase PostgreSQL/pgvector/RLS를 event/vector store로, Aura를 graph projection으로 쓴다. 관리 단순성과 사용 경험은 장점이다. Supabase Pro는 $25/month, Team은 $599/month이며 SSO/backup 차이가 있다. Aura Professional은 $0.09/GB-hour, 최소 1GB이고 pricing chart상 private endpoint와 fine-grained RBAC/SSO가 없다. VPC 격리는 custom-priced Aura VDC 조건이다. Supabase/Aura region 일치, private path, egress, ACL propagation을 SKU/계약서로 확인하지 않으면 private source에 쓰지 않는다.
+- **Supabase + Neo4j Aura:** Supabase PostgreSQL/pgvector/RLS를 event/vector store로, Aura를 graph projection으로 쓴다. 관리 단순성과 사용 경험은 장점이다. Supabase Pro는 $25/month, Team은 $599/month이며 SSO/backup 차이가 있다. Aura Professional은 $0.09/GB-hour, 최소 1GB이고 pricing chart상 private endpoint와 fine-grained RBAC/SSO가 없다. VPC 격리는 custom-priced Aura VDC 조건이다. `public-pilot-v1`은 profile이 허용한 승인 데이터로 authenticated TLS public endpoint를 사용할 수 있고, `internal-v1`은 승인된 private network equivalent를 요구한다. Aura Pro의 private 기능 공백은 `internal-v1` blocker가 될 수 있지만 `public-pilot-v1`의 보편적 blocker는 아니다. Supabase/Aura region 일치, egress, ACL propagation을 SKU/계약서로 확인한다.
 - **Portable managed/self-hosted mix:** cloud object store + PostgreSQL/pgvector + Apache AGE graph extension 또는 별도 graph store + Temporal/Kubernetes jobs. Export/schema 이동성은 좋지만 Kubernetes, graph extension, patching, failover, secrets, backup/restore, GPU scheduling을 운영자가 소유한다. Apache AGE repository license는 Apache-2.0, Temporal server license는 MIT로 확인했다. Transitive dependencies, notices, hosted Temporal Cloud contract, Kubernetes distribution/support는 별도 검토한다.
 
 ## 운영 목표 구조
@@ -62,7 +62,7 @@ Jev 1.13의 제한된 후보 검토는 portable-mix 0.57, AWS native 0.26을 제
 - Workforce SSO/MFA를 IAM에 연동하고 평소 역할을 read, deploy, data access, billing으로 분리한다. Persistent admin은 break-glass만 둔다.
 - CI는 GitHub Actions OIDC 또는 조직 CI의 workload identity federation으로 짧은 수명 credentials를 받는다. Long-lived cloud keys를 repository secret으로 저장하지 않는다. Trust subject는 repository, branch/tag, protected environment로 제한한다.
 - API/DB/encryption key는 secret manager/Key Vault에서 회전한다. Logs, trace, URL, prompt에 secret이나 private corpus를 기록하지 않는다.
-- DB/graph/vector public ingress를 닫고 private subnet/service endpoint/PrivateLink/Private Service Connect를 쓴다. Region, cross-account/project, DNS, edition, hourly+GB charge를 SKU별 확인한다. Aura Pro private endpoint 미포함, Aura VDC 조건, Supabase private-network 지원, GCP PSC producer 지원을 문서로 검증하기 전에는 mixed provider 경로를 승인하지 않는다.
+- Network profile은 [deployment-profiles.md](https://github.com/jimmylegendary/dse-knowledge/blob/docs/p0-episode-contracts/docs/deployment-profiles.md)의 canonical rule을 따른다. `public-pilot-v1`은 authenticated TLS public managed endpoint를 허용하되 source/network restrictions, ACL/RLS, rate/egress controls와 승인된 공개·합성·pilot data를 요구한다; anonymous ingress는 허용하지 않는다. `internal-v1`은 승인된 private endpoint/network equivalent와 data-residency 조건을 요구하며, 그런 경로가 없는 edition은 internal-source blocker다. 선택 profile에 따라 region, DNS, hourly/GB charge, cross-provider egress를 확인한다.
 - Manifest와 derived chunks/vectors/claims/edges에 tenant/workspace, source owner/ID/version, classification, allowed principal/group, retention, deletion state를 연결한다. ACL을 retrieval 이후가 아니라 vector/graph candidate 생성 전 적용한다. 여러 source가 claim에 연결돼도 unauthorized evidence를 노출하지 않는다. Access deny를 audit하고 HAT/Melete로 넘기는 excerpt/artifact URI에도 같은 ACL을 적용한다.
 
 ### Provenance, retention, deletion, export
@@ -99,15 +99,15 @@ Monthly dollar cap은 정하지 않았다. 미래의 예시 planning cap은 승�
 
 ### 데이터와 요청 가정
 
-Chunk 512 tokens, overlap 64, float32, dimension 1536은 비교용이다. N_chunks = docs × ceil((tokens_per_doc - overlap)/(chunk_size - overlap)); V_raw_GiB = N_chunks × dimension × 4 / 2^30. Serving bytes = V_raw × pilot-measured index overhead × replica count. Index overhead는 vendor universal constant로 가정하지 않는다.
+Chunk 512 tokens, overlap 64, float32, dimension 1536은 비교용이다. `N=tokens_per_doc`, `C=chunk_size`, `O=overlap`로 두며 입력은 `N>=0`, `0<=O<C`를 만족해야 한다. 청크 수는 `N=0`이면 `chunks_per_doc=0`, 그 외에는 `1 + ceil(max(0, N-C)/(C-O))`다. 청크 입력 토큰은 chunk가 없으면 0, 그 외에는 `N + O × (chunks_per_doc - 1)`다. 따라서 빈 문서는 청크와 과금 입력이 모두 0이고, 길이가 짧더라도 비어 있지 않은 문서는 청크 하나를 만든다. API 입력 토큰은 원문 token 합만이 아니라 후속 청크마다 반복되는 overlap을 포함한다. 마지막 청크는 실제 tail 길이만 계산하고 padding하지 않는다. 경계값과 월간 문서 Batch 및 온라인 query 산식은 [cost-cases.json](https://github.com/jimmylegendary/dse-knowledge/blob/docs/p0-episode-contracts/fixtures/p0/cost-cases.json)에 고정했다. `V_raw_GiB = N_chunks × dimension × 4 / 2^30`; serving bytes = V_raw × pilot-measured index overhead × replica count. Index overhead는 vendor 공통 상수로 가정하지 않는다.
 
-| Scale | Docs × tokens/doc | Source tokens | Chunks | Raw vectors | Index copies sensitivity | Queries/mo × tokens/query | Monthly content delta |
-|---|---:|---:|---:|---:|---:|---:|---:|
-| Small | 10k × 4k | 40M | 90k | 0.515 GiB | 1 | 10k × 1k = 10M | 5% = 2M tokens |
-| Medium | 100k × 8k | 800M | 1.8M | 10.30 GiB | 2 | 250k × 1k = 250M | 10% = 80M |
-| Large | 1M × 12k | 12B | 27M | 154.5 GiB | 3 | 2M × 1k = 2B | 20% = 2.4B |
+| Scale | Docs × tokens/doc | Source tokens | Chunks | Document tokens billed after overlap | Raw vectors | Index copies sensitivity | Monthly changed-docs | Changed-doc tokens billed | Query tokens/mo (real-time) |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| Small | 10k × 4k | 40M | 90k | 45.12M | 0.515 GiB | 1 | 5% = 500 docs | 2.256M | 10M |
+| Medium | 100k × 8k | 800M | 1.8M | 908.8M | 10.30 GiB | 2 | 10% = 10k docs | 90.88M | 250M |
+| Large | 1M × 12k | 12B | 27M | 13.664B | 154.5 GiB | 3 | 20% = 200k docs | 2.7328B | 2B |
 
-Index copies 1/2/3은 storage sensitivity 입력일 뿐 provider HA/replica 구성이나 운영 목표가 아니다. 실제 service replica semantics와 minimum floor는 선택 후 다시 산정한다. Initial embedding tokens는 source tokens이고 monthly tokens는 changed-document + query embeddings: 12M/330M/4.4B다. Retry/dual-index/re-embed는 별도 더한다. OpenAI text-embedding-3은 dimensions를 줄일 수 있고 Titan Embeddings V2는 256/512/1024를 지원하지만 quality gate 전 채택하지 않는다.
+Index copies 1/2/3은 storage sensitivity 입력일 뿐 provider HA/replica 구성이나 운영 목표가 아니다. 실제 service replica semantics와 minimum floor는 선택 후 다시 산정한다. API 비용은 source tokens가 아니라 청크 중복을 포함한 document input tokens를 사용한다. Initial one-time document load는 45.12M/908.8M/13.664B tokens이고, monthly document batch input은 2.256M/90.88M/2.7328B, realtime query input은 10M/250M/2B tokens다. Changed documents는 corpus 문서와 같은 길이 분포라고 가정한다. Retry, dual-index, full re-embed/migration은 제외하며 별도 수량화한다. OpenAI text-embedding-3은 dimensions를 줄일 수 있고 Titan Embeddings V2는 256/512/1024를 지원하지만 quality gate 전 채택하지 않는다.
 
 ### Public price anchors (2026-10-16 확인, USD, before tax)
 
@@ -127,13 +127,15 @@ Future price evidence must save official URL, region/zone, SKU/edition, OS/licen
 
 ### Embedding API vs batch GPU
 
-API-only figures below are calculated from the explicit assumptions, not total platform monthly cost. Initial corpus load is one-time; monthly cost is changed documents plus query embeddings. OpenAI Batch uses the official 50% discount. No generation/reranking or model quality comparison is included. Google’s current public table exposes an input price per 1,000 count but not the unit definition in the visible pricing row, so these token-based envelopes are not converted to a Vertex total.
+API-only figures below are calculated from the explicit assumptions, not total platform monthly cost. Initial corpus load is a one-time document batch. Monthly changed-document embeddings use the OpenAI Batch rate; query embeddings use realtime standard rate. OpenAI Batch has the published 50% discount and up-to-24h completion window. Retries, full re-embedding, dual-index migrations, generation and reranking are excluded. Google’s current public table exposes an input price per 1,000 count but not the unit definition in the visible pricing row, so these token-based envelopes are not converted to a Vertex total.
 
-| Scale | OpenAI small initial sync/batch | OpenAI large initial sync/batch | OpenAI small monthly sync/batch | OpenAI large monthly sync/batch |
-|---|---:|---:|---:|---:|
-| Small | $0.80 / $0.40 | $5.20 / $2.60 | $0.24 / $0.12 | $1.56 / $0.78 |
-| Medium | $16 / $8 | $104 / $52 | $6.60 / $3.30 | $42.90 / $21.45 |
-| Large | $240 / $120 | $1,560 / $780 | $88 / $44 | $572 / $286 |
+For OpenAI, keep the billable components separate: `C_month = (changed_doc_tokens + retry_doc_tokens + reembed_doc_tokens) × batch_rate + query_tokens × realtime_rate`. `retry_doc_tokens` count each attempted chunk payload including overlap; `reembed_doc_tokens` count every document input generated for a new model/dimension/formatter space. The table assumes retries/re-embedding are zero; populate them from job events, not the raw source-token total. Initial one-time ingestion is likewise billed on chunked document input, not source tokens.
+
+| Scale | Small initial document batch | Large initial document batch | Small monthly document batch | Small realtime query | Small monthly total | Large monthly document batch | Large realtime query | Large monthly total |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|
+| Small | $0.4512 | $2.9328 | $0.02256 | $0.20 | $0.22256 | $0.14664 | $1.30 | $1.44664 |
+| Medium | $9.088 | $59.072 | $0.9088 | $5.00 | $5.9088 | $5.9072 | $32.50 | $38.4072 |
+| Large | $136.64 | $888.16 | $27.328 | $40.00 | $67.328 | $177.632 | $260.00 | $437.632 |
 
 GPU batch equation: C_gpu = GPU_hours × selected-region-SKU rate + CPU/memory/disk + artifact storage + transfer + logs + retries/preemption + operator cost. GPU-hours cannot be inferred without model, GPU, container, throughput, and region; no GPU price/benchmark is invented. API equation: C_api = provider-billed input units × public API price; OpenAI’s cited embedding API meters input tokens, while the current Vertex price row needs unit confirmation before token-envelope conversion. Batch GPU is cheaper only if measured all-in C_gpu < C_api and meets the same privacy, throughput, failure-recovery, and separate relevance gates. Price sources: [AWS EC2 On-Demand](https://aws.amazon.com/ec2/pricing/on-demand/), [GCP GPU pricing](https://cloud.google.com/compute/gpus-pricing), [Azure Linux VM pricing](https://azure.microsoft.com/en-us/pricing/details/virtual-machines/linux/). Region/zone capacity and GPU quotas are unknown.
 
@@ -159,7 +161,7 @@ Every stage keeps the same end-to-end slice: source approval→parse/version/pro
 |---|---|---|
 | 0. Decision inputs | Project/source owner, ACL/privacy/retention, cloud organization owner if a company account is used, region/data residency, HAT location, monthly B, GPU allowance/quota, RPO/RTO, WORM need, support owner. Apply security/finance/org approval only where company policy or source terms require it. | Owner decision record; source/license register; price export; service/region/quota table. No credential or production corpus required. |
 | 1. Foundation (dev only) | Org tree, environment isolation, audit, billing tags, SSO/MFA, OIDC CI, secret/KMS, budget alerts, hard GPU/job quotas, encrypted IaC state. | OIDC short-lived credential; trust denies other branch/env; dev cannot write prod; audit event visible; tag and budget/quota kill-switch dry run. |
-| 2. Network/data boundary | Private VPC/VNet, private DB/search endpoint, egress allowlist/DNS, source ACL policies; owner-approved connector only. | No public DB; access allow/deny matrix passes at API/retrieval/graph; endpoint edition, DNS, egress, fees recorded. |
+| 2. Network/data boundary | Apply the selected [deployment-profiles.md](https://github.com/jimmylegendary/dse-knowledge/blob/docs/p0-episode-contracts/docs/deployment-profiles.md): `public-pilot-v1` may use authenticated TLS public managed endpoints plus network/source restrictions; `internal-v1` uses approved private networking. In both, source ACL, secrets, outbound allowlist and owner-approved connectors apply. | `public-pilot-v1`: no anonymous ingress; source/network restrictions and ACL allow/deny matrix pass. `internal-v1`: private-path and residency matrix pass. In either profile record endpoint edition, DNS, egress, fees and verify no cross-profile access. |
 | 3. Canonical stores | Versioned source/artifact object, manifest/event ledger, lifecycle, stage-only DB/graph/vector projections, public/synthetic fixture. Keep immutable lock off pending legal approval. | Source/run ID maps to hash/version; duplicate ingest idempotent; deletion/supersede cascades; portable export restores in clean dev with citations. |
 | 4. First full-flow stage | Representative B300 baseline workload: cited retrieval, missing proof=unknown, candidate Design Point, legality validation, HAT run with pinned manifest/seed/fidelity, all steps/errors/retries/hashes, metric vector, insight/evidence distinction, next experiment. | Independent replay attempts and records reproducibility outcome; partial/failing runs visible; changed HW/kernel triggers new timeline; metric units/uncertainty/citations/ACL proven; no claim that B300 or a cloud GPU is faster without calibration. |
 | 5. Reliability/cost gate | Queue backpressure, replay, index rebuild, deletion, API/GPU quotas, export/rollback, backup and incident drills. Update envelope from measured invoice/hours. | RPO/RTO drill; hash parity; delete evidence across stores/projections; observed cost against envelope; stop procedure verified. |

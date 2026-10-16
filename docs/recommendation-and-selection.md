@@ -1,17 +1,19 @@
 # 추천 조합·검토 순서·선정 계약
 
+2026-10-17 보완: **P1의 physical graph backend는 PostgreSQL 관계·recursive 조회를 baseline으로, Neo4j를 동일 질의의 challenger로 평가한다.** Typed graph 의미·provenance는 P1부터 필수다. 아래 조합 점수는 기술 조사 prior이며 Neo4j를 즉시 배포하라는 결정이 아니다. 단일 기준은 [0001-graph-backend-selection.md](https://github.com/jimmylegendary/dse-knowledge/blob/docs/p0-episode-contracts/docs/adr/0001-graph-backend-selection.md)와 [deployment-profiles.md](https://github.com/jimmylegendary/dse-knowledge/blob/docs/p0-episode-contracts/docs/deployment-profiles.md)다.
+
 상태: P0 설계 추천. 후보의 실제 DSE 성능과 총비용은 아직 측정하지 않았다. 현재 선택은 **무엇을 먼저 검증할지**이며 cloud 설정이나 production 채택 승인과 다르다.
 
 ## 1. 먼저 검증할 조합
 
-**추천 A: managed PostgreSQL 정본 + Neo4j graph projection + object/columnar artifacts + 단계적 hybrid retrieval.**
+**검토 후보 A: managed PostgreSQL 정본 + 필요성이 검증된 graph projection + object/columnar artifacts + 단계적 hybrid retrieval.** 초기 PG typed graph baseline과 별도 Neo4j projection 도입 여부를 구분한다.
 
 | 역할 | 먼저 검토할 구성 | 함께 비교할 대안 | 확정 조건 |
 |---|---|---|---|
 | Canonical ledger | Supabase managed PostgreSQL | 다른 managed PostgreSQL | ACL·outbox·export·backup·region·가격 profile 확인 |
 | Dense index | pgvector | Qdrant | 실제 filtered recall·p95·memory·index rebuild 비교 |
 | Lexical/exact | PostgreSQL native FTS + exact fields | 독립 BM25/OpenSearch/Vespa | 식별자·단위·영문/한국어 query recall 부족 시 확장 |
-| Graph projection | Neo4j Aura | RDF/Stardog/Jena, cloud-native graph | graph traversal/권한/재생성·edition·co-region gate |
+| Typed graph 조회/projection | PG 관계·recursive 조회 baseline | Neo4j Aura challenger, 이후 RDF/기타 대안 | 같은 필수 질의의 의미·권한·snapshot parity 후 latency/TCO gate |
 | Raw source·run artifacts | ledger/job cloud와 가까운 object store | S3/GCS/Azure Blob | rights·retention·egress·restore 조건 |
 | Metric/timeline 분석 | Parquet + DuckDB 방식의 batch 분석 | ClickHouse, Iceberg catalog | scan latency/concurrency·evolution이 필요할 때 확장 |
 | Parsing | Docling + native format parser | GROBID/PaddleOCR/Mathpix 등 | 표·수식·code slice 정확도와 license gate |
@@ -38,11 +40,11 @@ DuckDB는 분석 실행 방식의 제안이다. 상시 서비스가 필요한 �
 
 모든 조합의 economics=3은 실제 TCO를 모르기 때문이다. A가 가장 싸다고 결론 내리지 않는다. B의 세부 cloud는 AWS/GCP/Azure 후보 점수와 region/서비스 availability를 다시 비교한다. 이 표는 component 문서의 범주별 점수나 cloud 단독 점수와 서로 다른 평가 단위를 가진다.
 
-Jev `typesafe/jev-1.13-20260917`도 A를 첫 pilot 검토 대상으로 제안했다. 반환값은 [decision-advice.json](https://github.com/jimmylegendary/dse-knowledge/blob/main/docs/decision-advice.json)에 요청·후보·응답과 함께 보존했다. 응답 확률은 실제 최적일 확률이 아니며, 배포 준비도와 성능 검증을 대체하지 않는다.
+Jev `typesafe/jev-1.13-20260917`도 A를 첫 pilot 검토 대상으로 제안했다. 반환값은 [decision-advice.json](https://github.com/jimmylegendary/dse-knowledge/blob/docs/p0-episode-contracts/docs/decision-advice.json)에 요청·후보·응답과 함께 보존했다. 응답 확률은 실제 최적일 확률이 아니며, 배포 준비도와 성능 검증을 대체하지 않는다.
 
 ## 3. 후보 순서대로 검토하는 실제 방법
 
-1. [scorecards.md](https://github.com/jimmylegendary/dse-knowledge/blob/main/docs/scorecards.md)의 **동일 역할 내** 상위 후보를 순서대로 확인한다.
+1. [scorecards.md](https://github.com/jimmylegendary/dse-knowledge/blob/docs/p0-episode-contracts/docs/scorecards.md)의 **동일 역할 내** 상위 후보를 순서대로 확인한다.
 2. hard gate에 실패한 후보는 다음 후보로 넘어가되 reason과 필요한 조건을 남긴다. score만으로 rights/ACL/compatibility gate를 덮지 않는다.
 3. 각 역할의 첫 후보와 유력 대조군을 작은 같은 corpus/query/run fixture로 비교한다.
 4. 후보를 붙인 조합의 whole-loop 성능·정합성·운영·비용을 검증한다.
@@ -57,11 +59,11 @@ Jev `typesafe/jev-1.13-20260917`도 A를 첫 pilot 검토 대상으로 제안했
 
 Embedding은 작은 표본에서 API 대조군과 batch local model을 비교한다. 로컬 open-weight model을 추천했다는 이유로 상시 GPU를 provision하지 않는다. CPU/GPU 시간·batch throughput·실패 retry를 측정해 API 또는 ephemeral worker의 실제 TCO를 비교한다.
 
-초기에는 canonical ledger 하나, graph projection 하나, object store 하나, job/runtime 하나를 기본으로 둔다. 별도 vector DB·lexical engine·analytics service는 실제 gate 미달 또는 규모 요구가 생길 때만 추가한다. 이 구성도 같은 의미의 전체 flow를 갖는다.
+초기에는 canonical ledger와 typed graph 조회를 PG에 두고 object store·job/runtime을 연결한다. 별도 graph service, vector DB, lexical engine, analytics service는 명시된 비교 gate가 충족될 때 추가한다. 이 선택은 KG 의미나 전체 flow를 생략하지 않는다. Embedding model의 출력 차원·dtype·ANN method·distance·managed extension version은 [embedding-index-compatibility.md](https://github.com/jimmylegendary/dse-knowledge/blob/docs/p0-episode-contracts/docs/contracts/embedding-index-compatibility.md)로 확인한다.
 
 ## 5. 가격·용량 산정에 사용할 입력
 
-구체 산식·공개 가격 근거·서비스 edition은 [03-cloud-operations.md](https://github.com/jimmylegendary/dse-knowledge/blob/main/research/03-cloud-operations.md)를 따른다. 가격 조회일·currency·region·billing unit·replica/standby 조건을 비용 행마다 붙인다.
+구체 산식·공개 가격 근거·서비스 edition은 [03-cloud-operations.md](https://github.com/jimmylegendary/dse-knowledge/blob/docs/p0-episode-contracts/research/03-cloud-operations.md)를 따른다. 가격 조회일·currency·region·billing unit·replica/standby 조건을 비용 행마다 붙인다.
 
 필수 입력은 documents, 평균 pages/tokens, parse complexity, chunk/overlap, vector dimensions/dtype/replicas/index overhead, graph node/edge 수, reindex rate, QPS/monthly queries, rerank candidates, agent rounds, HAT run hours, artifact retention, backup factor, network egress, extraction/embedding input units다.
 

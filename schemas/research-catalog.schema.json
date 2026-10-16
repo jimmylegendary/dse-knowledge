@@ -1,0 +1,114 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/jimmylegendary/dse-knowledge/blob/docs/p0-episode-contracts/schemas/research-catalog.schema.json",
+  "title": "DSE research candidate catalog",
+  "description": "Shared schema for source catalogs and technology-candidate catalogs. assessment_confidence records a reviewer assessment, not truth probability. evidence_stage is a workflow/legacy stage, not a claim's truth or verification status; evidence[].verification_status controls whether each source claim is located and checked. E1 may coexist with prior_review_unlocated records.",
+  "oneOf": [
+    { "$ref": "#/$defs/sourceCatalog" },
+    { "$ref": "#/$defs/technologyCatalog" }
+  ],
+  "$defs": {
+    "evidenceRecord": {
+      "type": "object",
+      "required": ["claim", "source_url", "source_revision", "locator", "verification_status"],
+      "properties": {
+        "claim": { "type": "string", "minLength": 1 },
+        "source_url": { "type": ["string", "null"], "format": "uri" },
+        "source_revision": { "type": ["string", "null"] },
+        "locator": { "type": ["string", "null"] },
+        "verification_status": {
+          "type": "string",
+          "enum": ["verified_primary", "verified_secondary", "source_link_unlocated", "prior_review_unlocated", "proposal", "derived_deterministic"]
+        }
+      },
+      "additionalProperties": false
+    },
+    "candidateBase": {
+      "type": "object",
+      "required": ["id", "category", "evidence_stage", "assessment_confidence", "evidence"],
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "category": { "type": "string", "minLength": 1 },
+        "evidence_stage": { "type": "string", "enum": ["E1", "proposal", "prior_review_unlocated"] },
+        "assessment_confidence": { "type": ["number", "null"], "minimum": 0, "maximum": 1 },
+        "evidence": { "type": "array", "items": { "$ref": "#/$defs/evidenceRecord" } },
+        "scores": { "type": "object", "additionalProperties": { "type": "number" } },
+        "reason": { "type": "string" }
+      },
+      "not": { "required": ["confidence"] },
+      "additionalProperties": true
+    },
+    "sourceCandidate": {
+      "allOf": [
+        { "$ref": "#/$defs/candidateBase" },
+        {
+          "type": "object",
+          "required": ["name", "url", "companions", "extract", "formats", "metadata", "access", "refresh", "quality", "priority", "phase_coverage", "total"],
+          "properties": {
+            "name": { "type": "string" },
+            "url": { "type": "string", "format": "uri" },
+            "companions": { "type": "array", "items": { "type": "string", "format": "uri" } },
+            "extract": { "type": "string" },
+            "formats": { "type": "array", "items": { "type": "string" } },
+            "metadata": { "type": "string" },
+            "access": { "type": "string" },
+            "refresh": { "type": "string" },
+            "quality": { "type": "string" },
+            "priority": { "type": "string" },
+            "phase_coverage": { "type": "array", "items": { "type": "string" } },
+            "total": { "type": "number" },
+            "authority_chain": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "required": ["role", "source_url", "source_revision"],
+                "properties": {
+                  "role": { "type": "string" },
+                  "source_url": { "type": "string", "format": "uri" },
+                  "source_revision": { "type": ["string", "null"] }
+                },
+                "additionalProperties": false
+              }
+            }
+          }
+        }
+      ]
+    },
+    "technologyCandidate": {
+      "allOf": [
+        { "$ref": "#/$defs/candidateBase" },
+        {
+          "type": "object",
+          "required": ["name", "role", "source_urls", "limitations"],
+          "properties": {
+            "name": { "type": "string" },
+            "role": { "type": "string" },
+            "source_urls": { "type": "array", "items": { "type": "string", "format": "uri" } },
+            "limitations": { "type": ["string", "array"], "items": { "type": "string" } }
+          }
+        }
+      ]
+    },
+    "sourceCatalog": {
+      "type": "object",
+      "required": ["schema_version", "catalog_kind", "rubric", "candidates"],
+      "properties": {
+        "schema_version": { "const": "1.0.0" },
+        "catalog_kind": { "const": "source" },
+        "rubric": { "type": "object" },
+        "candidates": { "type": "array", "items": { "$ref": "#/$defs/sourceCandidate" } }
+      },
+      "additionalProperties": true
+    },
+    "technologyCatalog": {
+      "type": "object",
+      "required": ["schema_version", "catalog_kind", "candidates"],
+      "properties": {
+        "schema_version": { "const": "1.0.0" },
+        "catalog_kind": { "const": "technology" },
+        "candidates": { "type": "array", "items": { "$ref": "#/$defs/technologyCandidate" } }
+      },
+      "additionalProperties": true
+    }
+  }
+}

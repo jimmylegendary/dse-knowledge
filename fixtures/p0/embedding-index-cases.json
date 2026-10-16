@@ -1,0 +1,109 @@
+{
+  "schema_version": "p0-embedding-index-cases/v1",
+  "description": "Pre-deployment dimensional compatibility oracle for pgvector exact storage, HNSW/IVFFlat ceilings, model-specific reduced dimensions, and managed extension verification.",
+  "runtime_status": "not_run",
+  "source_basis": {
+    "pgvector_release": "v0.8.7",
+    "pgvector_commit": "f37c13f68b57d2c3472b2214fbcff699d6d34876",
+    "qwen3_embedding_8b_revision": "1d8ad4ca9b3dd8059ad90a75d4983776a23d44af"
+  },
+  "limits": {
+    "exact_storage_dimensions_vector": 16000,
+    "exact_storage_dimensions_halfvec": 16000,
+    "ann_dimensions_vector": 2000,
+    "ann_dimensions_halfvec": 4000,
+    "ann_methods": ["hnsw", "ivfflat"]
+  },
+  "cases": [
+    {
+      "case_id": "vector_ann_at_2000",
+      "expected_decision": "vector_exact_storage_and_ann_dimension_limit_allow_2000",
+      "allowed_unknown_reasons": [],
+      "required_capability": "pgvector_exact_and_ann_dimension_limit_checker",
+      "expected_execution_permission": "not_applicable",
+      "runtime_status": "not_run",
+      "inputs": {"storage_type": "vector", "output_dimension": 2000, "index_methods": ["hnsw", "ivfflat"], "managed_extension_version": "upstream_comparator_v0.8.7"},
+      "expected": {"exact_storage": "yes", "ann_dimension_compatibility": "yes_for_both_methods", "managed_instance_compatibility": "not_verified_without_deployment_check"}
+    },
+    {
+      "case_id": "vector_ann_over_limit_2001",
+      "expected_decision": "vector_exact_storage_allows_2001_but_ann_dimension_limit_does_not",
+      "allowed_unknown_reasons": [],
+      "required_capability": "pgvector_exact_and_ann_dimension_limit_checker",
+      "expected_execution_permission": "not_applicable",
+      "runtime_status": "not_run",
+      "inputs": {"storage_type": "vector", "output_dimension": 2001, "index_methods": ["hnsw", "ivfflat"], "managed_extension_version": "upstream_comparator_v0.8.7"},
+      "expected": {"exact_storage": "yes", "ann_dimension_compatibility": "no_for_both_methods", "managed_instance_compatibility": "not_verified_without_deployment_check"}
+    },
+    {
+      "case_id": "vector_ann_over_limit_2048",
+      "expected_decision": "vector_exact_storage_allows_2048_but_ann_dimension_limit_does_not",
+      "allowed_unknown_reasons": [],
+      "required_capability": "pgvector_exact_and_ann_dimension_limit_checker",
+      "expected_execution_permission": "not_applicable",
+      "runtime_status": "not_run",
+      "inputs": {"storage_type": "vector", "output_dimension": 2048, "index_methods": ["hnsw", "ivfflat"], "managed_extension_version": "upstream_comparator_v0.8.7"},
+      "expected": {"exact_storage": "yes", "ann_dimension_compatibility": "no_for_both_methods", "managed_instance_compatibility": "not_verified_without_deployment_check"}
+    },
+    {
+      "case_id": "halfvec_ann_at_4000",
+      "expected_decision": "halfvec_exact_storage_and_ann_dimension_limit_allow_4000",
+      "allowed_unknown_reasons": [],
+      "required_capability": "pgvector_exact_and_ann_dimension_limit_checker",
+      "expected_execution_permission": "not_applicable",
+      "runtime_status": "not_run",
+      "inputs": {"storage_type": "halfvec", "output_dimension": 4000, "index_methods": ["hnsw", "ivfflat"], "managed_extension_version": "upstream_comparator_v0.8.7"},
+      "expected": {"exact_storage": "yes", "ann_dimension_compatibility": "yes_for_both_methods", "managed_instance_compatibility": "not_verified_without_deployment_check", "precision_quality_gate_required": true}
+    },
+    {
+      "case_id": "halfvec_ann_over_limit_4001",
+      "expected_decision": "halfvec_exact_storage_allows_4001_but_ann_dimension_limit_does_not",
+      "allowed_unknown_reasons": [],
+      "required_capability": "pgvector_exact_and_ann_dimension_limit_checker",
+      "expected_execution_permission": "not_applicable",
+      "runtime_status": "not_run",
+      "inputs": {"storage_type": "halfvec", "output_dimension": 4001, "index_methods": ["hnsw", "ivfflat"], "managed_extension_version": "upstream_comparator_v0.8.7"},
+      "expected": {"exact_storage": "yes", "ann_dimension_compatibility": "no_for_both_methods", "managed_instance_compatibility": "not_verified_without_deployment_check"}
+    },
+    {
+      "case_id": "halfvec_ann_over_limit_4096",
+      "expected_decision": "halfvec_exact_storage_allows_4096_but_ann_dimension_limit_does_not",
+      "allowed_unknown_reasons": [],
+      "required_capability": "pgvector_exact_and_ann_dimension_limit_checker",
+      "expected_execution_permission": "not_applicable",
+      "runtime_status": "not_run",
+      "inputs": {"storage_type": "halfvec", "output_dimension": 4096, "index_methods": ["hnsw", "ivfflat"], "managed_extension_version": "upstream_comparator_v0.8.7"},
+      "expected": {"exact_storage": "yes", "ann_dimension_compatibility": "no_for_both_methods", "managed_instance_compatibility": "not_verified_without_deployment_check"}
+    },
+    {
+      "case_id": "qwen8_default_4096_exact_only_for_ann_types",
+      "expected_decision": "qwen8_default_4096_is_exact_storable_but_exceeds_vector_and_halfvec_ann_limits",
+      "allowed_unknown_reasons": [],
+      "required_capability": "model_dimension_and_pgvector_index_compatibility_checker",
+      "expected_execution_permission": "not_applicable",
+      "runtime_status": "not_run",
+      "inputs": {"model_id": "Qwen/Qwen3-Embedding-8B", "model_variant": "default", "output_dimension": 4096, "storage_types": ["vector", "halfvec"], "index_methods": ["hnsw", "ivfflat"]},
+      "expected": {"exact_storage": "yes_for_both_types", "vector_ann_dimension_compatibility": "no", "halfvec_ann_dimension_compatibility": "no"}
+    },
+    {
+      "case_id": "qwen8_mrl_1024_dimension_fit_is_conditional",
+      "expected_decision": "supported_mrl_1024_fits_both_ann_dimension_limits_but_quality_and_extension_gates_remain",
+      "allowed_unknown_reasons": ["retrieval_quality_unmeasured", "managed_extension_version_unknown"],
+      "required_capability": "model_mrl_dimension_gate_plus_retrieval_quality_and_extension_verification",
+      "expected_execution_permission": "not_applicable",
+      "runtime_status": "not_run",
+      "inputs": {"model_id": "Qwen/Qwen3-Embedding-8B", "model_variant": "mrl_reduced", "output_dimension": 1024, "storage_types": ["vector", "halfvec"], "index_methods": ["hnsw", "ivfflat"], "quality_result": "not_measured", "managed_extension_version": null},
+      "expected": {"exact_storage": "yes_for_both_types", "vector_ann_dimension_compatibility": "yes", "halfvec_ann_dimension_compatibility": "yes", "index_readiness": "conditional", "quality_gate_required": true, "managed_instance_compatibility": "not_verified"}
+    },
+    {
+      "case_id": "managed_extension_unknown_is_not_verified",
+      "expected_decision": "dimension_fit_does_not_verify_unknown_managed_extension",
+      "allowed_unknown_reasons": ["managed_extension_version_unknown"],
+      "required_capability": "query_deployed_pg_extension_version_and_probe_index_creation",
+      "expected_execution_permission": "not_applicable",
+      "runtime_status": "not_run",
+      "inputs": {"provider_mode": "managed", "storage_type": "vector", "output_dimension": 1024, "index_methods": ["hnsw", "ivfflat"], "upstream_dimension_compatible": true, "managed_extension_version": null},
+      "expected": {"upstream_dimension_compatibility": "yes", "managed_instance_compatibility": "not_verified", "deployment_probe_required": true}
+    }
+  ]
+}

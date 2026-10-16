@@ -1,4 +1,6 @@
 {
+  "schema_version": "1.0.0",
+  "catalog_kind": "technology",
   "candidates": [
     {
       "id": "postgres_pgvector",
@@ -10,7 +12,13 @@
         "https://www.postgresql.org/docs/current/gin.html"
       ],
       "evidence": [
-        "pgvector provides exact and approximate vector search, HNSW/IVFFlat, filtering and hybrid-search examples; PostgreSQL GIN is a preferred full-text index."
+        {
+          "claim": "pgvector provides exact and approximate vector search, HNSW/IVFFlat, filtering and hybrid-search examples; PostgreSQL GIN is a preferred full-text index.",
+          "source_url": null,
+          "source_revision": null,
+          "locator": null,
+          "verification_status": "prior_review_unlocated"
+        }
       ],
       "limitations": [
         "Approximate vector indexes can reduce recall or filtered result counts; compare against exact search on the target workload.",
@@ -24,8 +32,9 @@
         "portability": 5,
         "economics": 3
       },
-      "confidence": 0.91,
-      "reason": "Relational-first category leader; joins exact numeric facts, source references, ACL filters, lexical search and vectors with low index drift. Self-host TCO remains unmeasured, so economics is neutral. Weighted expert prior 81/100."
+      "reason": "Relational-first category leader; joins exact numeric facts, source references, ACL filters, lexical search and vectors with low index drift. Self-host TCO remains unmeasured, so economics is neutral. Weighted expert prior 81/100.",
+      "evidence_stage": "prior_review_unlocated",
+      "assessment_confidence": 0.91
     },
     {
       "id": "supabase_pgvector",
@@ -38,7 +47,13 @@
         "https://supabase.com/docs/guides/database/postgres/row-level-security"
       ],
       "evidence": [
-        "Supabase documents pgvector storage, SQL RPC for vector operators, keyword+dense hybrid retrieval with RRF, and database-enforced RLS."
+        {
+          "claim": "Supabase documents pgvector storage, SQL RPC for vector operators, keyword+dense hybrid retrieval with RRF, and database-enforced RLS.",
+          "source_url": null,
+          "source_revision": null,
+          "locator": null,
+          "verification_status": "prior_review_unlocated"
+        }
       ],
       "limitations": [
         "Requires a Supabase account and project; no existing account or region is assumed.",
@@ -52,8 +67,9 @@
         "portability": 3,
         "economics": 3
       },
-      "confidence": 0.9,
-      "reason": "Lower-operations managed alternative to generic PostgreSQL; provider coupling and unpriced workload keep it below the portable category leader. Weighted expert prior 79/100."
+      "reason": "Lower-operations managed alternative to generic PostgreSQL; provider coupling and unpriced workload keep it below the portable category leader. Weighted expert prior 79/100.",
+      "evidence_stage": "prior_review_unlocated",
+      "assessment_confidence": 0.9
     },
     {
       "id": "neo4j_aura",
@@ -64,7 +80,13 @@
         "https://neo4j.com/docs/cypher-manual/current/indexes/search-indexes/"
       ],
       "evidence": [
-        "Neo4j provides graph traversal plus full-text and approximate vector search indexes; official docs recommend ranking independent lexical and vector results before combining them."
+        {
+          "claim": "Neo4j provides graph traversal plus full-text and approximate vector search indexes; official docs recommend ranking independent lexical and vector results before combining them.",
+          "source_url": null,
+          "source_revision": null,
+          "locator": null,
+          "verification_status": "prior_review_unlocated"
+        }
       ],
       "limitations": [
         "Search syntax and filtering capabilities vary by Neo4j version and Aura tier.",
@@ -78,8 +100,9 @@
         "portability": 3,
         "economics": 3
       },
-      "confidence": 0.84,
-      "reason": "Property-graph projection leader over Neptune Database for the provider-unspecified scenario; source facts and ACL authority stay in PostgreSQL. Weighted expert prior 80/100."
+      "reason": "Property-graph projection leader over Neptune Database for the provider-unspecified scenario; source facts and ACL authority stay in PostgreSQL. Weighted expert prior 80/100.",
+      "evidence_stage": "prior_review_unlocated",
+      "assessment_confidence": 0.84
     },
     {
       "id": "neptune_database",
@@ -92,7 +115,13 @@
         "https://docs.aws.amazon.com/neptune/latest/userguide/feature-overview-data-model.html"
       ],
       "evidence": [
-        "Neptune Database supports SPARQL 1.1 and property-graph query languages on managed graph infrastructure."
+        {
+          "claim": "Neptune Database supports SPARQL 1.1 and property-graph query languages on managed graph infrastructure.",
+          "source_url": null,
+          "source_revision": null,
+          "locator": null,
+          "verification_status": "prior_review_unlocated"
+        }
       ],
       "limitations": [
         "VPC, IAM, AWS data plane and service-specific query semantics increase cloud coupling.",
@@ -106,8 +135,9 @@
         "portability": 2,
         "economics": 3
       },
-      "confidence": 0.82,
-      "reason": "Good managed graph/RDF candidate when AWS is selected; held below Neo4j Aura until provider and graph-model requirements are known. Weighted expert prior 75/100."
+      "reason": "Good managed graph/RDF candidate when AWS is selected; held below Neo4j Aura until provider and graph-model requirements are known. Weighted expert prior 75/100.",
+      "evidence_stage": "prior_review_unlocated",
+      "assessment_confidence": 0.82
     },
     {
       "id": "neptune_analytics",
@@ -119,7 +149,13 @@
         "https://docs.aws.amazon.com/neptune-analytics/latest/userguide/vector-index.html"
       ],
       "evidence": [
-        "Neptune Analytics can load graphs from Neptune Database or S3 and supports analytics, graph queries and vector similarity."
+        {
+          "claim": "Neptune Analytics can load graphs from Neptune Database or S3 and supports analytics, graph queries and vector similarity.",
+          "source_url": null,
+          "source_revision": null,
+          "locator": null,
+          "verification_status": "prior_review_unlocated"
+        }
       ],
       "limitations": [
         "It complements rather than replaces Neptune Database for a mutable application graph.",
@@ -133,8 +169,9 @@
         "portability": 2,
         "economics": 2
       },
-      "confidence": 0.8,
-      "reason": "Useful optional analytical companion, not a primary DSE KG store; assessed only in the graph-analytics role. Weighted expert prior 63/100."
+      "reason": "Useful optional analytical companion, not a primary DSE KG store; assessed only in the graph-analytics role. Weighted expert prior 63/100.",
+      "evidence_stage": "prior_review_unlocated",
+      "assessment_confidence": 0.8
     },
     {
       "id": "stardog_cloud",
@@ -148,7 +185,13 @@
         "https://docs.stardog.com/data-quality-constraints"
       ],
       "evidence": [
-        "Stardog documents SPARQL 1.1, query-time OWL/rule reasoning, SHACL constraints and a fully managed cloud offering."
+        {
+          "claim": "Stardog documents SPARQL 1.1, query-time OWL/rule reasoning, SHACL constraints and a fully managed cloud offering.",
+          "source_url": null,
+          "source_revision": null,
+          "locator": null,
+          "verification_status": "prior_review_unlocated"
+        }
       ],
       "limitations": [
         "License, cloud region, cost, service boundary and exact supported SHACL profile need vendor confirmation.",
@@ -162,8 +205,9 @@
         "portability": 3,
         "economics": 2
       },
-      "confidence": 0.83,
-      "reason": "RDF/SHACL category leader for legality-first DSE knowledge; higher proprietary and unknown-cost risk than self-managed Jena. Weighted expert prior 87/100."
+      "reason": "RDF/SHACL category leader for legality-first DSE knowledge; higher proprietary and unknown-cost risk than self-managed Jena. Weighted expert prior 87/100.",
+      "evidence_stage": "prior_review_unlocated",
+      "assessment_confidence": 0.83
     },
     {
       "id": "apache_jena",
@@ -175,7 +219,13 @@
         "https://jena.apache.org/documentation/shacl/index.html"
       ],
       "evidence": [
-        "Jena documents Fuseki HTTP SPARQL service, TDB2 persistent storage, and SHACL Core/SPARQL constraint processing."
+        {
+          "claim": "Jena documents Fuseki HTTP SPARQL service, TDB2 persistent storage, and SHACL Core/SPARQL constraint processing.",
+          "source_url": null,
+          "source_revision": null,
+          "locator": null,
+          "verification_status": "prior_review_unlocated"
+        }
       ],
       "limitations": [
         "The team owns deployment, upgrades, backups, HA, security and capacity planning.",
@@ -189,8 +239,9 @@
         "portability": 5,
         "economics": 3
       },
-      "confidence": 0.86,
-      "reason": "Strong open, portable option when operations ownership is acceptable; category runner-up to managed Stardog Cloud. Self-host TCO is unmeasured, so economics is neutral. Weighted expert prior 78/100."
+      "reason": "Strong open, portable option when operations ownership is acceptable; category runner-up to managed Stardog Cloud. Self-host TCO is unmeasured, so economics is neutral. Weighted expert prior 78/100.",
+      "evidence_stage": "prior_review_unlocated",
+      "assessment_confidence": 0.86
     },
     {
       "id": "qdrant",
@@ -202,7 +253,13 @@
         "https://qdrant.tech/documentation/tutorials/multiple-partitions/"
       ],
       "evidence": [
-        "Qdrant documents prefetch/multi-stage hybrid search, payload-based tenant filtering and tiered multitenancy."
+        {
+          "claim": "Qdrant documents prefetch/multi-stage hybrid search, payload-based tenant filtering and tiered multitenancy.",
+          "source_url": null,
+          "source_revision": null,
+          "locator": null,
+          "verification_status": "prior_review_unlocated"
+        }
       ],
       "limitations": [
         "It is not a knowledge graph or ontology/SHACL validator.",
@@ -216,8 +273,9 @@
         "portability": 5,
         "economics": 3
       },
-      "confidence": 0.88,
-      "reason": "Vector category leader for provider-neutral hybrid candidate generation and many-session tenant filtering. Cloud/self-host TCO is unmeasured, so economics is neutral. Weighted expert prior 80/100."
+      "reason": "Vector category leader for provider-neutral hybrid candidate generation and many-session tenant filtering. Cloud/self-host TCO is unmeasured, so economics is neutral. Weighted expert prior 80/100.",
+      "evidence_stage": "prior_review_unlocated",
+      "assessment_confidence": 0.88
     },
     {
       "id": "weaviate",
@@ -228,7 +286,13 @@
         "https://docs.weaviate.io/weaviate/search/hybrid"
       ],
       "evidence": [
-        "Weaviate hybrid queries combine BM25F and vector result sets with a configurable fusion method and relative weights."
+        {
+          "claim": "Weaviate hybrid queries combine BM25F and vector result sets with a configurable fusion method and relative weights.",
+          "source_url": null,
+          "source_revision": null,
+          "locator": null,
+          "verification_status": "prior_review_unlocated"
+        }
       ],
       "limitations": [
         "Do not treat object references as the authoritative typed hardware legality model without separate validation.",
@@ -242,8 +306,9 @@
         "portability": 4,
         "economics": 3
       },
-      "confidence": 0.85,
-      "reason": "Convenient hybrid vector option with usable metadata filters; category second behind Qdrant on portability and source-role separation. Weighted expert prior 74/100."
+      "reason": "Convenient hybrid vector option with usable metadata filters; category second behind Qdrant on portability and source-role separation. Weighted expert prior 74/100.",
+      "evidence_stage": "prior_review_unlocated",
+      "assessment_confidence": 0.85
     },
     {
       "id": "milvus",
@@ -255,7 +320,13 @@
         "https://milvus.io/docs/filtered-search.md"
       ],
       "evidence": [
-        "Milvus documents dense/sparse hybrid candidates, RRF or weighted rankers, and both pre-filtered and iterative-filtered ANN search."
+        {
+          "claim": "Milvus documents dense/sparse hybrid candidates, RRF or weighted rankers, and both pre-filtered and iterative-filtered ANN search.",
+          "source_url": null,
+          "source_revision": null,
+          "locator": null,
+          "verification_status": "prior_review_unlocated"
+        }
       ],
       "limitations": [
         "Complex filtering can increase search latency.",
@@ -269,8 +340,9 @@
         "portability": 4,
         "economics": 3
       },
-      "confidence": 0.86,
-      "reason": "Strong vector/scale feature set but higher operational burden in self-managed form; category third. Self-host TCO is unmeasured, so economics is neutral. Weighted expert prior 68/100."
+      "reason": "Strong vector/scale feature set but higher operational burden in self-managed form; category third. Self-host TCO is unmeasured, so economics is neutral. Weighted expert prior 68/100.",
+      "evidence_stage": "prior_review_unlocated",
+      "assessment_confidence": 0.86
     },
     {
       "id": "pinecone",
@@ -282,7 +354,13 @@
         "https://docs.pinecone.io/guides/search/filter-by-metadata"
       ],
       "evidence": [
-        "Pinecone documents managed vector indexes, namespace partitioning, metadata filters and sparse/dense search."
+        {
+          "claim": "Pinecone documents managed vector indexes, namespace partitioning, metadata filters and sparse/dense search.",
+          "source_url": null,
+          "source_revision": null,
+          "locator": null,
+          "verification_status": "prior_review_unlocated"
+        }
       ],
       "limitations": [
         "Provider coupling and region choices require explicit review.",
@@ -296,8 +374,9 @@
         "portability": 2,
         "economics": 2
       },
-      "confidence": 0.82,
-      "reason": "Highest managed convenience but weakest portability and unpriced scale uncertainty in this vector category. Weighted expert prior 67/100."
+      "reason": "Highest managed convenience but weakest portability and unpriced scale uncertainty in this vector category. Weighted expert prior 67/100.",
+      "evidence_stage": "prior_review_unlocated",
+      "assessment_confidence": 0.82
     },
     {
       "id": "vespa",
@@ -309,7 +388,13 @@
         "https://docs.vespa.ai/en/querying/nearest-neighbor-search-guide.html"
       ],
       "evidence": [
-        "Vespa supports sparse and dense top-k retrieval with configurable ranking phases, including RRF examples and later reranking."
+        {
+          "claim": "Vespa supports sparse and dense top-k retrieval with configurable ranking phases, including RRF examples and later reranking.",
+          "source_url": null,
+          "source_revision": null,
+          "locator": null,
+          "verification_status": "prior_review_unlocated"
+        }
       ],
       "limitations": [
         "Schema and rank-profile design create a steeper learning and operations curve.",
@@ -323,8 +408,9 @@
         "portability": 4,
         "economics": 3
       },
-      "confidence": 0.85,
-      "reason": "Hybrid-search category leader when ranking flexibility is a central experimental requirement; not the simplest first deployment. Weighted expert prior 81/100."
+      "reason": "Hybrid-search category leader when ranking flexibility is a central experimental requirement; not the simplest first deployment. Weighted expert prior 81/100.",
+      "evidence_stage": "prior_review_unlocated",
+      "assessment_confidence": 0.85
     },
     {
       "id": "opensearch",
@@ -337,7 +423,13 @@
         "https://docs.opensearch.org/latest/vector-search/filter-search-knn/index/"
       ],
       "evidence": [
-        "OpenSearch combines keyword and semantic queries using normalization or RRF and documents efficient ANN filtering."
+        {
+          "claim": "OpenSearch combines keyword and semantic queries using normalization or RRF and documents efficient ANN filtering.",
+          "source_url": null,
+          "source_revision": null,
+          "locator": null,
+          "verification_status": "prior_review_unlocated"
+        }
       ],
       "limitations": [
         "RRF and filtering support depend on engine/version; managed-service feature parity must be checked.",
@@ -351,8 +443,9 @@
         "portability": 5,
         "economics": 3
       },
-      "confidence": 0.88,
-      "reason": "Good open hybrid baseline with portability and RRF; category second behind Vespa's ranking flexibility. Managed/self-host TCO is unmeasured, so economics is neutral. Weighted expert prior 77/100."
+      "reason": "Good open hybrid baseline with portability and RRF; category second behind Vespa's ranking flexibility. Managed/self-host TCO is unmeasured, so economics is neutral. Weighted expert prior 77/100.",
+      "evidence_stage": "prior_review_unlocated",
+      "assessment_confidence": 0.88
     },
     {
       "id": "elasticsearch",
@@ -364,7 +457,13 @@
         "https://www.elastic.co/docs/reference/elasticsearch/rest-apis/reciprocal-rank-fusion"
       ],
       "evidence": [
-        "Elastic documents full-text+vector hybrid search and recommends RRF to combine result ranks."
+        {
+          "claim": "Elastic documents full-text+vector hybrid search and recommends RRF to combine result ranks.",
+          "source_url": null,
+          "source_revision": null,
+          "locator": null,
+          "verification_status": "prior_review_unlocated"
+        }
       ],
       "limitations": [
         "Elastic Cloud, serverless and self-managed tiers can differ in features and commercial terms.",
@@ -378,8 +477,9 @@
         "portability": 3,
         "economics": 2
       },
-      "confidence": 0.86,
-      "reason": "Capable managed hybrid search but product/edition and commercial dependencies reduce fit while provider requirements are open. Weighted expert prior 74/100."
+      "reason": "Capable managed hybrid search but product/edition and commercial dependencies reduce fit while provider requirements are open. Weighted expert prior 74/100.",
+      "evidence_stage": "prior_review_unlocated",
+      "assessment_confidence": 0.86
     },
     {
       "id": "object_iceberg",
@@ -392,7 +492,13 @@
         "https://iceberg.apache.org/docs/latest/branching/"
       ],
       "evidence": [
-        "S3 Versioning preserves object versions, S3 Object Lock protects versions under retention, and Iceberg records snapshots for time travel and branch/tag lifecycle."
+        {
+          "claim": "S3 Versioning preserves object versions, S3 Object Lock protects versions under retention, and Iceberg records snapshots for time travel and branch/tag lifecycle.",
+          "source_url": null,
+          "source_revision": null,
+          "locator": null,
+          "verification_status": "prior_review_unlocated"
+        }
       ],
       "limitations": [
         "Object/table formats do not provide graph, lexical or vector retrieval on their own.",
@@ -406,8 +512,9 @@
         "portability": 5,
         "economics": 3
       },
-      "confidence": 0.84,
-      "reason": "Strong evidence-lake role and format portability; no within-category competitor is scored because storage is its own required role. Retention, query and egress TCO are unmeasured, so economics is neutral. Weighted expert prior 85/100."
+      "reason": "Strong evidence-lake role and format portability; no within-category competitor is scored because storage is its own required role. Retention, query and egress TCO are unmeasured, so economics is neutral. Weighted expert prior 85/100.",
+      "evidence_stage": "prior_review_unlocated",
+      "assessment_confidence": 0.84
     },
     {
       "id": "clickhouse",
@@ -418,7 +525,13 @@
         "https://clickhouse.com/docs/use-cases/data-lake/getting-started"
       ],
       "evidence": [
-        "ClickHouse can query Iceberg tables in object storage and load selected data into MergeTree tables for repeated analytical queries."
+        {
+          "claim": "ClickHouse can query Iceberg tables in object storage and load selected data into MergeTree tables for repeated analytical queries.",
+          "source_url": null,
+          "source_revision": null,
+          "locator": null,
+          "verification_status": "prior_review_unlocated"
+        }
       ],
       "limitations": [
         "It is not the graph legality or claim-provenance authority.",
@@ -432,8 +545,9 @@
         "portability": 4,
         "economics": 3
       },
-      "confidence": 0.78,
-      "reason": "Useful optional metric serving plane; compare only against columnar analytics alternatives, not against the evidence lake. Weighted expert prior 78/100."
+      "reason": "Useful optional metric serving plane; compare only against columnar analytics alternatives, not against the evidence lake. Weighted expert prior 78/100.",
+      "evidence_stage": "prior_review_unlocated",
+      "assessment_confidence": 0.78
     },
     {
       "id": "microsoft_graphrag",
@@ -446,7 +560,13 @@
         "https://microsoft.github.io/graphrag/query/overview/"
       ],
       "evidence": [
-        "GraphRAG extracts entities, relationships and claims, builds communities and multi-level summaries, then offers global, local, DRIFT and basic search."
+        {
+          "claim": "GraphRAG extracts entities, relationships and claims, builds communities and multi-level summaries, then offers global, local, DRIFT and basic search.",
+          "source_url": null,
+          "source_revision": null,
+          "locator": null,
+          "verification_status": "prior_review_unlocated"
+        }
       ],
       "limitations": [
         "Global search and index generation can be resource-intensive.",
@@ -460,8 +580,9 @@
         "portability": 4,
         "economics": 2
       },
-      "confidence": 0.84,
-      "reason": "Best considered for demonstrated whole-corpus question classes; it is not a database and is not ranked against storage candidates. Weighted expert prior 69/100."
+      "reason": "Best considered for demonstrated whole-corpus question classes; it is not a database and is not ranked against storage candidates. Weighted expert prior 69/100.",
+      "evidence_stage": "prior_review_unlocated",
+      "assessment_confidence": 0.84
     },
     {
       "id": "lightrag",
@@ -473,7 +594,13 @@
         "https://github.com/HKUDS/LightRAG/blob/main/lightrag/tools/README_REBUILD_VDB.md"
       ],
       "evidence": [
-        "The project documents incremental update/selective deletion and multiple graph/vector/KV storage backends; its rebuild tool treats graph/KV data as authoritative over vector indexes."
+        {
+          "claim": "The project documents incremental update/selective deletion and multiple graph/vector/KV storage backends; its rebuild tool treats graph/KV data as authoritative over vector indexes.",
+          "source_url": null,
+          "source_revision": null,
+          "locator": null,
+          "verification_status": "prior_review_unlocated"
+        }
       ],
       "limitations": [
         "Project documentation says default local persistence is for small-scale testing/evaluation, not production.",
@@ -487,8 +614,9 @@
         "portability": 4,
         "economics": 3
       },
-      "confidence": 0.7,
-      "reason": "Potential dynamic local/multihop retrieval framework; backend consistency and fast-changing project API lower confidence. Runtime and LLM-call TCO are unmeasured, so economics is neutral. Weighted expert prior 71/100."
+      "reason": "Potential dynamic local/multihop retrieval framework; backend consistency and fast-changing project API lower confidence. Runtime and LLM-call TCO are unmeasured, so economics is neutral. Weighted expert prior 71/100.",
+      "evidence_stage": "prior_review_unlocated",
+      "assessment_confidence": 0.7
     }
   ]
 }

@@ -5,7 +5,19 @@
 문서 내부 링크는 GitHub 공개본을 가리킨다. HAT·Melete 통합 근거의 일부는 별도 접근 권한이 필요한 저장소를 참조하며, 해당 저장소의 코드를 이 저장소에 복사하지 않았다.
 
 
-상태: **v0.1 검토용 설계·계획안 / 구현 및 실제 infrastructure 변경 금지**. 기준일: 2026-10-16 KST.
+상태: **v0.2 P0 판정 계약 보완안 / 제품 구현·runtime·infrastructure 변경 미실행**. 기준일: 2026-10-17 KST. 검토 baseline은 `2a460a0`이다. 지정 source에 B300 target twin과 전체 native chain이 없어 **B300 episode binding과 실행 acceptance는 blocked**다.
+
+## P0 보완부터 읽기
+
+| 문서 | 내용 |
+|---|---|
+| [integration-state-map.md](https://github.com/jimmylegendary/dse-knowledge/blob/docs/p0-episode-contracts/docs/contracts/integration-state-map.md) | HAT 네 판정 축, cost/fidelity, Melete receipt/readiness의 정확한 의미 |
+| [p1-first-episode.md](https://github.com/jimmylegendary/dse-knowledge/blob/docs/p0-episode-contracts/docs/episodes/p1-first-episode.md) | 실제 pinned component input/call/artifact와 B300 미지원 경계 |
+| [evaluation-oracles.md](https://github.com/jimmylegendary/dse-knowledge/blob/docs/p0-episode-contracts/docs/contracts/evaluation-oracles.md) | 정상·거부·unknown·실행 실패 gold, positive completion, 독립 증거·budget |
+| [p0-remediation-report.md](https://github.com/jimmylegendary/dse-knowledge/blob/docs/p0-episode-contracts/docs/p0-remediation-report.md) | 보완 결과·실제 정적 검증·남은 blocker |
+| [handoff.md](https://github.com/jimmylegendary/dse-knowledge/blob/docs/p0-episode-contracts/docs/handoff.md) | 현재 mode, 다음 task, 승인 범위, 계속할 작업과 완료 판정 |
+
+P1의 실제 작업 순서는 native integration preflight → 그 결과에 따른 cloud/data-plane 구축이다. B200/SmolLM2 dummy/meta probe는 source에서 확인한 구조적 진단 입력이며 B300 성능·전체 hierarchy·수치 정확성 또는 통합 episode의 성공을 뜻하지 않는다.
 
 ## 사용자가 정한 요구
 
@@ -31,7 +43,7 @@ Root: 전체 설계, 데이터 계약·검색 설계, 점수 통합, phase 계�
 
 ## 먼저 볼 결론
 
-첫 검토 조합은 **managed PostgreSQL 정본 + Neo4j graph projection + object/columnar artifacts + exact/lexical/dense/graph 검색**이다. Supabase/Neo4j 경험을 참고하되 기존 사내 계정이나 데이터 접근을 가정하지 않는다. 실제 model·DB·cloud 설정은 domain 평가와 region/edition/비용 조건을 확인하는 계획에 따른다.
+초기 논리 구조는 **managed PostgreSQL 정본 + typed graph 의미 + object/columnar artifacts + exact/lexical/dense/graph 검색**이다. P1은 PG 관계·recursive graph 조회를 기준선으로 두고 Neo4j를 같은 필수 질의의 challenger로 비교한다. [0001-graph-backend-selection.md](https://github.com/jimmylegendary/dse-knowledge/blob/docs/p0-episode-contracts/docs/adr/0001-graph-backend-selection.md)와 [deployment-profiles.md](https://github.com/jimmylegendary/dse-knowledge/blob/docs/p0-episode-contracts/docs/deployment-profiles.md)가 graph/network 선택의 단일 기준이다. 기존 사내 계정이나 자료 접근은 가정하지 않는다.
 
 조사 범위는 **source family 40개와 기술·구성·알고리즘 후보 평가 73개**다. 같은 제품을 다른 역할에서 평가한 항목이 있으므로 73개를 모두 설치하거나 독립 제품 73개라는 뜻은 아니다. 추천 점수는 역할별 검토 우선순위이며 실제 DSE 성능 점수가 아니다.
 
@@ -39,20 +51,20 @@ Root: 전체 설계, 데이터 계약·검색 설계, 점수 통합, phase 계�
 
 | 순서 | 문서 | 볼 내용 |
 |---:|---|---|
-| 1 | [recommendation-and-selection.md](https://github.com/jimmylegendary/dse-knowledge/blob/main/docs/recommendation-and-selection.md) | 추천 조합, 검토 순서, 대안·전환 조건 |
-| 2 | [2026-10-16-dse-knowledge-system-design.md](https://github.com/jimmylegendary/dse-knowledge/blob/main/docs/superpowers/specs/2026-10-16-dse-knowledge-system-design.md) | 전체 설계와 HAT·Melete 책임 경계 |
-| 3 | [scorecards.md](https://github.com/jimmylegendary/dse-knowledge/blob/main/docs/scorecards.md) | 전체 후보 추천 순서·점수·가중치 민감도 |
-| 4 | [01-source-catalog.md](https://github.com/jimmylegendary/dse-knowledge/blob/main/research/01-source-catalog.md) | 어디에서 무엇을 어떤 방법으로 수집하고 검증·갱신할지 |
-| 5 | [data-contracts.md](https://github.com/jimmylegendary/dse-knowledge/blob/main/docs/data-contracts.md) | source·Claim·asset·kernel·metric·trajectory metadata/schema |
-| 6 | [retrieval-and-decision.md](https://github.com/jimmylegendary/dse-knowledge/blob/main/docs/retrieval-and-decision.md) | hybrid 검색, agent 도구, 검증, DSE 탐색 알고리즘 |
-| 7 | [2026-10-16-dse-resolution-plan.md](https://github.com/jimmylegendary/dse-knowledge/blob/main/docs/superpowers/plans/2026-10-16-dse-resolution-plan.md) | P0–P5 전체 coverage와 phase acceptance |
-| 8 | [phase-work-packages.md](https://github.com/jimmylegendary/dse-knowledge/blob/main/docs/phase-work-packages.md) | P2–P5 세부 작업·파일·입출력·검증 command |
-| 9 | [03-cloud-operations.md](https://github.com/jimmylegendary/dse-knowledge/blob/main/research/03-cloud-operations.md) | cloud 비교, 설정 순서, 용량·비용 산식, 복구·운영 |
-| 10 | [validation-and-governance.md](https://github.com/jimmylegendary/dse-knowledge/blob/main/docs/validation-and-governance.md) | 추천 운영, gold/eval/ablation, 단계 승격·품질 기준 |
-| 11 | [decisions-and-open-inputs.md](https://github.com/jimmylegendary/dse-knowledge/blob/main/docs/decisions-and-open-inputs.md) | 사용자 요구, root 제안, 실행 전 운영 입력, 검토 반영 |
-| 12 | [verification-report.md](https://github.com/jimmylegendary/dse-knowledge/blob/main/docs/verification-report.md) | 실제 문서 검증과 한계 |
+| 1 | [recommendation-and-selection.md](https://github.com/jimmylegendary/dse-knowledge/blob/docs/p0-episode-contracts/docs/recommendation-and-selection.md) | 추천 조합, 검토 순서, 대안·전환 조건 |
+| 2 | [2026-10-16-dse-knowledge-system-design.md](https://github.com/jimmylegendary/dse-knowledge/blob/docs/p0-episode-contracts/docs/superpowers/specs/2026-10-16-dse-knowledge-system-design.md) | 전체 설계와 HAT·Melete 책임 경계 |
+| 3 | [scorecards.md](https://github.com/jimmylegendary/dse-knowledge/blob/docs/p0-episode-contracts/docs/scorecards.md) | 전체 후보 추천 순서·점수·가중치 민감도 |
+| 4 | [01-source-catalog.md](https://github.com/jimmylegendary/dse-knowledge/blob/docs/p0-episode-contracts/research/01-source-catalog.md) | 어디에서 무엇을 어떤 방법으로 수집하고 검증·갱신할지 |
+| 5 | [data-contracts.md](https://github.com/jimmylegendary/dse-knowledge/blob/docs/p0-episode-contracts/docs/data-contracts.md) | source·Claim·asset·kernel·metric·trajectory metadata/schema |
+| 6 | [retrieval-and-decision.md](https://github.com/jimmylegendary/dse-knowledge/blob/docs/p0-episode-contracts/docs/retrieval-and-decision.md) | hybrid 검색, agent 도구, 검증, DSE 탐색 알고리즘 |
+| 7 | [2026-10-16-dse-resolution-plan.md](https://github.com/jimmylegendary/dse-knowledge/blob/docs/p0-episode-contracts/docs/superpowers/plans/2026-10-16-dse-resolution-plan.md) | P0–P5 전체 coverage와 phase acceptance |
+| 8 | [phase-work-packages.md](https://github.com/jimmylegendary/dse-knowledge/blob/docs/p0-episode-contracts/docs/phase-work-packages.md) | P2–P5 세부 작업·파일·입출력·검증 command |
+| 9 | [03-cloud-operations.md](https://github.com/jimmylegendary/dse-knowledge/blob/docs/p0-episode-contracts/research/03-cloud-operations.md) | cloud 비교, 설정 순서, 용량·비용 산식, 복구·운영 |
+| 10 | [validation-and-governance.md](https://github.com/jimmylegendary/dse-knowledge/blob/docs/p0-episode-contracts/docs/validation-and-governance.md) | 추천 운영, gold/eval/ablation, 단계 승격·품질 기준 |
+| 11 | [decisions-and-open-inputs.md](https://github.com/jimmylegendary/dse-knowledge/blob/docs/p0-episode-contracts/docs/decisions-and-open-inputs.md) | 사용자 요구, root 제안, 실행 전 운영 입력, 검토 반영 |
+| 12 | [verification-report.md](https://github.com/jimmylegendary/dse-knowledge/blob/docs/p0-episode-contracts/docs/verification-report.md) | 실제 문서 검증과 한계 |
 
-상세 대안: [02-storage-retrieval.md](https://github.com/jimmylegendary/dse-knowledge/blob/main/research/02-storage-retrieval.md), [04-models-ingestion-evaluation.md](https://github.com/jimmylegendary/dse-knowledge/blob/main/research/04-models-ingestion-evaluation.md). 용어는 [CONTEXT.md](https://github.com/jimmylegendary/dse-knowledge/blob/main/CONTEXT.md)에 있다.
+상세 대안: [02-storage-retrieval.md](https://github.com/jimmylegendary/dse-knowledge/blob/docs/p0-episode-contracts/research/02-storage-retrieval.md), [04-models-ingestion-evaluation.md](https://github.com/jimmylegendary/dse-knowledge/blob/docs/p0-episode-contracts/research/04-models-ingestion-evaluation.md). 용어는 [CONTEXT.md](https://github.com/jimmylegendary/dse-knowledge/blob/docs/p0-episode-contracts/CONTEXT.md)에 있다.
 
 ## 전체가 선명해지는 phase
 
@@ -65,7 +77,7 @@ Root: 전체 설계, 데이터 계약·검색 설계, 점수 통합, phase 계�
 | P4 | 제한된 예산 안의 자율성 | 동일 전체 흐름 + agent 제어·취소·실패·반례 처리 |
 | P5 | 운영 규모와 지속 갱신 | 동일 전체 흐름 + SLO·복구·삭제·migration·비용 |
 
-P1 이후 작업은 모두 미실행이다. 실제 corpus, cloud 자원, 제품 코드, IaC apply, HAT 실험 campaign은 만들거나 실행하지 않았다. 현재는 공개 공식 자료 조회, 기존 코드의 읽기 확인, 문서·점수 데이터 작성과 검토만 수행했다.
+P1 이후 작업은 모두 미실행이다. 실제 corpus, cloud 자원, 제품 코드, IaC apply, HAT/Melete runtime은 만들거나 실행하지 않았다. P0에서는 pinned source 확인, 판정표·JSON Schema·합성 oracle 작성, 산식·schema·provenance·링크의 정적 검증과 독립 review를 수행한다. B300 target positive가 아직 bound/실행되지 않았으므로 전체 P0 target binding 또는 P1 완료를 주장하지 않는다.
 
 ## 바로 결정하지 않은 항목
 

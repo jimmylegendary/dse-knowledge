@@ -1,6 +1,8 @@
 # P2–P5 상세 작업 패키지
 
-이 문서는 [2026-10-16-dse-resolution-plan.md](https://github.com/jimmylegendary/dse-knowledge/blob/main/docs/superpowers/plans/2026-10-16-dse-resolution-plan.md)의 후속 phase를 구현자가 파일·입출력·실패 사례 단위로 볼 수 있게 보완한다. 모두 미래 작업이며 파일 생성·command 실행을 아직 하지 않았다. 경로는 제안 구현 root `<repository-root>` 아래의 경로 표기다.
+P0 보완과 P1 native-first preflight를 전제로 한다. [integration-state-map.md](https://github.com/jimmylegendary/dse-knowledge/blob/docs/p0-episode-contracts/docs/contracts/integration-state-map.md)의 판정, [evaluation-oracles.md](https://github.com/jimmylegendary/dse-knowledge/blob/docs/p0-episode-contracts/docs/contracts/evaluation-oracles.md)의 completion/abstention/budget, [deployment-profiles.md](https://github.com/jimmylegendary/dse-knowledge/blob/docs/p0-episode-contracts/docs/deployment-profiles.md)를 모든 task에 적용한다. B300 blocked를 해결하지 않고 후속 phase 완료를 주장하지 않는다.
+
+이 문서는 [2026-10-16-dse-resolution-plan.md](https://github.com/jimmylegendary/dse-knowledge/blob/docs/p0-episode-contracts/docs/superpowers/plans/2026-10-16-dse-resolution-plan.md)의 후속 phase를 구현자가 파일·입출력·실패 사례 단위로 볼 수 있게 보완한다. 모두 미래 작업이며 파일 생성·command 실행을 아직 하지 않았다. 경로는 제안 구현 root `<repository-root>` 아래의 경로 표기다.
 
 ## 공통 task 실행·검토 계약
 

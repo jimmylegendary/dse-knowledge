@@ -1,0 +1,51 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/jimmylegendary/dse-knowledge/blob/docs/p0-episode-contracts/schemas/comparison-policy.schema.json",
+  "title": "ComparisonPolicy v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "policy_id", "version", "unit_registry_ref", "semantic_validation_version", "required_metrics", "objectives", "constraints", "cohort_keys", "evidence_compatibility_keys", "allowed_method_profiles", "uncertainty_mode", "missing_policy", "dominance_rule", "performance_claim_scope", "hypervolume"],
+  "properties": {
+    "schema_version": {"const": "1.0.0"},
+    "policy_id": {"type": "string", "minLength": 1},
+    "version": {"type": "integer", "minimum": 1},
+    "semantic_validation_version": {"const": "comparison-policy-validation-v1"},
+    "unit_registry_ref": {"type": "object", "additionalProperties": false, "required": ["registry_id", "version", "content_sha256"], "properties": {"registry_id": {"type": "string", "minLength": 1}, "version": {"type": "integer", "minimum": 1}, "content_sha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"}}},
+    "required_metrics": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"type": "string", "minLength": 1}},
+    "objectives": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/objective"}},
+    "constraints": {"type": "array", "items": {"$ref": "#/$defs/constraint"}},
+    "cohort_keys": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"type": "string"}},
+    "evidence_compatibility_keys": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"type": "string"}},
+    "allowed_method_profiles": {"type": "array", "minItems": 1, "items": {"type": "object", "additionalProperties": false, "required": ["method", "profile"], "properties": {"method": {"enum": ["analytical", "replay", "measured"]}, "profile": {"type": "string", "minLength": 1}}}},
+    "uncertainty_mode": {"enum": ["point_observation", "declared_bounds"]},
+    "missing_policy": {"const": "incomplete_no_global_dominance"},
+    "dominance_rule": {"const": "all_nonworse_bounds_and_one_strict_above_absolute_threshold"},
+    "performance_claim_scope": {"enum": ["recorded_run_pair_only", "conditional_on_declared_bounds", "component_diagnostic_only"]},
+    "hypervolume": {"type": "object", "additionalProperties": false, "required": ["enabled"], "properties": {"enabled": {"const": false}}}
+  },
+  "$defs": {
+    "decimal": {"type": "string", "pattern": "^-?[0-9]+(?:\\.[0-9]+)?$"},
+    "objective": {
+      "type": "object", "additionalProperties": false,
+      "required": ["metric_id", "direction", "canonical_unit", "absolute_improvement_threshold"],
+      "properties": {
+        "metric_id": {"type": "string", "minLength": 1},
+        "direction": {"enum": ["min", "max", "target"]},
+        "canonical_unit": {"type": "string", "minLength": 1},
+        "absolute_improvement_threshold": {"type": "string", "pattern": "^[0-9]+(?:\\.[0-9]+)?$"},
+        "target": {"type": "object", "additionalProperties": false, "required": ["lower", "upper"], "properties": {"lower": {"$ref": "#/$defs/decimal"}, "upper": {"$ref": "#/$defs/decimal"}}}
+      },
+      "allOf": [{"if": {"properties": {"direction": {"const": "target"}}}, "then": {"required": ["target"]}, "else": {"not": {"required": ["target"]}}}]
+    },
+    "constraint": {
+      "type": "object", "additionalProperties": false,
+      "required": ["metric_id", "operator", "canonical_unit"],
+      "properties": {"metric_id": {"type": "string"}, "operator": {"enum": ["le", "ge", "within"]}, "canonical_unit": {"type": "string"}, "lower": {"$ref": "#/$defs/decimal"}, "upper": {"$ref": "#/$defs/decimal"}},
+      "allOf": [
+        {"if": {"properties": {"operator": {"const": "le"}}}, "then": {"required": ["upper"], "not": {"required": ["lower"]}}},
+        {"if": {"properties": {"operator": {"const": "ge"}}}, "then": {"required": ["lower"], "not": {"required": ["upper"]}}},
+        {"if": {"properties": {"operator": {"const": "within"}}}, "then": {"required": ["lower", "upper"]}}
+      ]
+    }
+  }
+}

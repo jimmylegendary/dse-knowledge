@@ -1,8 +1,8 @@
 # DSE 지식 시스템 source catalog
 
-기준일은 2026-10-16이다. 이 문서는 향후 수집할 source family와 정보·취득·권리·검증 계획만 정한다. 초기 corpus가 있다고 가정하지 않으며, 웹에서 확인한 공개 원문 페이지를 넘어 대량 수집·보관·색인·배포를 시작하지 않는다. 기계 판독용 후보 목록과 잠정 점수는 [01-source-catalog.json](https://github.com/jimmylegendary/dse-knowledge/blob/main/research/01-source-catalog.json)에 있다.
+기준일은 2026-10-16이다. 이 문서는 향후 수집할 source family와 정보·취득·권리·검증 계획만 정한다. 초기 corpus가 있다고 가정하지 않으며, 웹에서 확인한 공개 원문 페이지를 넘어 대량 수집·보관·색인·배포를 시작하지 않는다. 기계 판독용 후보 목록과 잠정 점수는 [01-source-catalog.json](https://github.com/jimmylegendary/dse-knowledge/blob/docs/p0-episode-contracts/research/01-source-catalog.json)에 있다.
 
-범위는 사용자가 정한 [README.md](https://github.com/jimmylegendary/dse-knowledge/blob/main/README.md)와 용어 초안 [CONTEXT.md](https://github.com/jimmylegendary/dse-knowledge/blob/main/CONTEXT.md)를 따른다. 핵심 대상은 재현 가능한 Workload Scenario, 버전 고정 Design Point, 조합 가능하고 근거가 있는 Hardware Asset, 검토 가능한 Claim과 Evidence, 외부에서 관찰 가능한 Experiment Trajectory 및 비축약형 Metric Vector다. trajectory에는 요청·turn·model call·tool call·결과·시각·실패·재시도 같은 외부 사건을 담고 숨겨진 chain-of-thought는 수집 대상으로 삼지 않는다.
+범위는 사용자가 정한 [README.md](https://github.com/jimmylegendary/dse-knowledge/blob/docs/p0-episode-contracts/README.md)와 용어 초안 [CONTEXT.md](https://github.com/jimmylegendary/dse-knowledge/blob/docs/p0-episode-contracts/CONTEXT.md)를 따른다. 핵심 대상은 재현 가능한 Workload Scenario, 버전 고정 Design Point, 조합 가능하고 근거가 있는 Hardware Asset, 검토 가능한 Claim과 Evidence, 외부에서 관찰 가능한 Experiment Trajectory 및 비축약형 Metric Vector다. trajectory에는 요청·turn·model call·tool call·결과·시각·실패·재시도 같은 외부 사건을 담고 숨겨진 chain-of-thought는 수집 대상으로 삼지 않는다.
 
 ## 전체 흐름과 해상도
 
@@ -114,7 +114,7 @@ JSON의 각 후보는 공식 URL, 뽑을 항목, 예상 표현 형식, source/�
 | model-hf-cards | [Hugging Face Model Cards](https://huggingface.co/docs/hub/model-cards) | model/dataset context, revision and license metadata | P1 |
 | agent-agentbench | [AgentBench](https://github.com/THUDM/AgentBench) | multi-turn environments, tools and task failures | P1 |
 | agent-tau3 | [τ³-bench repository](https://github.com/sierra-research/tau2-bench) | user-agent-tool conversations, policy and pass-k | P1 |
-| agent-bfcl | [BFCL dataset README](https://github.com/EnlightenedAI/BFCL/blob/main/berkeley-function-call-leaderboard/bfcl_eval/data/README.md) | function/tool calls and multi-turn backend tasks | P1 |
+| agent-bfcl | Authority chain: Berkeley-hosted [BFCL V4 leaderboard](https://gorilla.cs.berkeley.edu/leaderboard.html) → ShishirPatil/gorilla [BFCL evaluator/code/data at commit `f7cf7359b7ac615a0b294831c5ba2bc95ee4a000`](https://github.com/ShishirPatil/gorilla/tree/f7cf7359b7ac615a0b294831c5ba2bc95ee4a000/berkeley-function-call-leaderboard) | Official leaderboard names this reproduction checkpoint and `bfcl-eval==2025.12.17`; pin task split and verify dataset-specific rights | P1 |
 | dse-ax-botorch | [Ax Multi-Objective Optimization](https://ax.dev/docs/recipes/multi-objective-optimization/) | constrained/noisy trials and Pareto/hypervolume search | P1 |
 | trace-otel-genai | [OpenTelemetry GenAI Conventions](https://opentelemetry.io/docs/specs/semconv/gen-ai/) | session/agent/model/tool spans and metric semantics | P0 |
 | experiment-mlflow | [MLflow Tracking](https://www.mlflow.org/docs/latest/tracking/) | run parameters, metrics, code and artifact identity | P1 |

@@ -1,0 +1,103 @@
+{
+  "schema_version": "1.0.0",
+  "recorded_at_utc": "2026-10-16 21:32:35 UTC",
+  "basis_commit": "2a460a0a57d13db6753481a26074e3fb3b4f2aa9",
+  "branch": "docs/p0-episode-contracts",
+  "verification_scope": "Document/schema/fixture arithmetic and pinned source parity only; no product engine, HAT or Melete runtime execution.",
+  "master_static_audit": {
+    "counts": {
+      "schemas": 7,
+      "json_files": 22,
+      "evidence_records": 199,
+      "catalogs": 5,
+      "candidates": 113,
+      "evidence_stages": {
+        "prior_review_unlocated": 102,
+        "E1": 10,
+        "proposal": 1
+      },
+      "csv_rows": 113,
+      "case_counts": {
+        "comparison-cases.json": 22,
+        "cost-cases.json": 12,
+        "embedding-index-cases.json": 9,
+        "episode-cases.json": 12,
+        "melete-cases.json": 21,
+        "snapshot-cases.json": 13,
+        "validation-cases.json": 14
+      },
+      "case_total": 103,
+      "frozen_validation_profiles": 2,
+      "claim_use_policies": 1,
+      "melete_cases": 21,
+      "melete_confirmed_bindings": 4,
+      "melete_identity_auth_negatives": 6,
+      "cost_cases": 12,
+      "embedding_index_cases": 9,
+      "native_source_parity_checks": 4,
+      "branch_links": 115,
+      "phase_cells": 55,
+      "oracle_artifacts": 15,
+      "oracle_hash_matches": 15
+    },
+    "errors": [],
+    "native_runtime_executed": false
+  },
+  "comparison_contract_math": {
+    "policy_schemas_valid": 4,
+    "oracle_cases": 15,
+    "case_failures": [],
+    "permutation_checks": 41,
+    "forbidden_epsilon_cycle_edges": [
+      [
+        "C1",
+        "C2"
+      ],
+      [
+        "C2",
+        "C3"
+      ],
+      [
+        "C3",
+        "C1"
+      ]
+    ],
+    "policy_negative_cases": 7,
+    "policy_negative_failures": [],
+    "native_runtime_executed": false
+  },
+  "snapshot_contract_semantics": {
+    "snapshot_schema_valid": true,
+    "purpose_templates_valid": 3,
+    "snapshot_cases_checked": 13,
+    "failures": [],
+    "native_runtime_executed": false
+  },
+  "evidence_lanes": {
+    "document_consistency": "verified_static",
+    "pinned_source_contract": "verified_by_source_with_explicit_missing_bindings",
+    "adapter_conformance": "not_run",
+    "native_component_probe": "not_run",
+    "integrated_episode": "blocked",
+    "b300_target_positive": "blocked_unbound"
+  },
+  "execution": {
+    "product_implementation": false,
+    "native_runtime": false,
+    "cloud_provisioning": false,
+    "model_weights_download": false
+  },
+  "target_blockers": [
+    "B300 twin absent at pinned revisions",
+    "package/SoC/die all-level assembly not bound",
+    "end-to-end capture/recipe/RP/Melete adapters not present as one verified native lane",
+    "diagnostic image digest and per-model-file checksums unbound",
+    "target ComparisonPolicy/ValidationProfile activation dependencies not bound"
+  ],
+  "verification_commands": [
+    "mcp__context_mode__ctx_execute(language='python'): json.loads, jsonschema.Draft202012Validator, csv.DictReader, hashlib.sha256, Decimal arithmetic and source/fixture comparisons",
+    "git -C <pinned-source-repository> show <commit>:<path>",
+    "git diff --check"
+  ],
+  "gold_policy": "Fixture expected tables were authored before product implementation, independently reviewed, then content-hash locked. Static calculations are not adapter or episode execution."
+}

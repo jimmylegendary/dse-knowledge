@@ -1,0 +1,189 @@
+{
+  "schema_version": "p0-cost-cases/v1",
+  "description": "Pre-implementation deterministic oracle for chunk boundaries and monthly document Batch plus online query arithmetic; no runtime or provider calls were performed.",
+  "runtime_status": "not_run",
+  "chunking_defaults": {
+    "chunk_size_tokens": 512,
+    "overlap_tokens": 64,
+    "input_constraints": "document_tokens >= 0 and 0 <= overlap_tokens < chunk_size_tokens",
+    "chunk_count_rule": "0 when document_tokens is 0; otherwise 1 + ceil(max(0, document_tokens - chunk_size_tokens) / (chunk_size_tokens - overlap_tokens))",
+    "document_input_rule": "0 when chunk_count is 0; otherwise document_tokens + overlap_tokens * (chunk_count - 1)"
+  },
+  "monthly_cost_rule": "((document_batch_tokens + retry_document_tokens + reembed_document_tokens) / 1000000 * document_batch_rate_usd_per_million) + (online_query_tokens / 1000000 * online_query_rate_usd_per_million)",
+  "cases": [
+    {
+      "case_id": "zero_tokens",
+      "expected_decision": "zero_length_yields_zero_chunks_and_zero_billable_input",
+      "allowed_unknown_reasons": [],
+      "required_capability": "deterministic_chunk_count_and_billable_input_calculator",
+      "expected_execution_permission": "not_applicable",
+      "runtime_status": "not_run",
+      "inputs": {"document_tokens": 0, "chunk_size_tokens": 512, "overlap_tokens": 64},
+      "expected": {"chunk_count": 0, "document_input_tokens": 0}
+    },
+    {
+      "case_id": "one_token",
+      "expected_decision": "nonempty_document_shorter_than_overlap_yields_one_chunk",
+      "allowed_unknown_reasons": [],
+      "required_capability": "deterministic_chunk_count_and_billable_input_calculator",
+      "expected_execution_permission": "not_applicable",
+      "runtime_status": "not_run",
+      "inputs": {"document_tokens": 1, "chunk_size_tokens": 512, "overlap_tokens": 64},
+      "expected": {"chunk_count": 1, "document_input_tokens": 1}
+    },
+    {
+      "case_id": "ten_tokens_below_overlap",
+      "expected_decision": "short_document_yields_one_chunk_without_negative_tail",
+      "allowed_unknown_reasons": [],
+      "required_capability": "deterministic_chunk_count_and_billable_input_calculator",
+      "expected_execution_permission": "not_applicable",
+      "runtime_status": "not_run",
+      "inputs": {"document_tokens": 10, "chunk_size_tokens": 512, "overlap_tokens": 64},
+      "expected": {"chunk_count": 1, "document_input_tokens": 10}
+    },
+    {
+      "case_id": "exactly_overlap_tokens",
+      "expected_decision": "overlap_length_document_yields_one_chunk",
+      "allowed_unknown_reasons": [],
+      "required_capability": "deterministic_chunk_count_and_billable_input_calculator",
+      "expected_execution_permission": "not_applicable",
+      "runtime_status": "not_run",
+      "inputs": {"document_tokens": 64, "chunk_size_tokens": 512, "overlap_tokens": 64},
+      "expected": {"chunk_count": 1, "document_input_tokens": 64}
+    },
+    {
+      "case_id": "exactly_one_chunk",
+      "expected_decision": "exact_chunk_size_yields_one_chunk_without_padding",
+      "allowed_unknown_reasons": [],
+      "required_capability": "deterministic_chunk_count_and_billable_input_calculator",
+      "expected_execution_permission": "not_applicable",
+      "runtime_status": "not_run",
+      "inputs": {"document_tokens": 512, "chunk_size_tokens": 512, "overlap_tokens": 64},
+      "expected": {"chunk_count": 1, "document_input_tokens": 512}
+    },
+    {
+      "case_id": "one_token_over_chunk_size",
+      "expected_decision": "first_token_past_chunk_size_starts_second_overlapped_chunk",
+      "allowed_unknown_reasons": [],
+      "required_capability": "deterministic_chunk_count_and_billable_input_calculator",
+      "expected_execution_permission": "not_applicable",
+      "runtime_status": "not_run",
+      "inputs": {"document_tokens": 513, "chunk_size_tokens": 512, "overlap_tokens": 64},
+      "expected": {"chunk_count": 2, "document_input_tokens": 577}
+    },
+    {
+      "case_id": "small_envelope_document",
+      "expected_decision": "four_thousand_tokens_produces_nine_chunks_and_overlap_input",
+      "allowed_unknown_reasons": [],
+      "required_capability": "deterministic_chunk_count_and_billable_input_calculator",
+      "expected_execution_permission": "not_applicable",
+      "runtime_status": "not_run",
+      "inputs": {"document_tokens": 4000, "chunk_size_tokens": 512, "overlap_tokens": 64},
+      "expected": {"chunk_count": 9, "document_input_tokens": 4512}
+    },
+    {
+      "case_id": "medium_envelope_document",
+      "expected_decision": "eight_thousand_tokens_produces_eighteen_chunks_and_overlap_input",
+      "allowed_unknown_reasons": [],
+      "required_capability": "deterministic_chunk_count_and_billable_input_calculator",
+      "expected_execution_permission": "not_applicable",
+      "runtime_status": "not_run",
+      "inputs": {"document_tokens": 8000, "chunk_size_tokens": 512, "overlap_tokens": 64},
+      "expected": {"chunk_count": 18, "document_input_tokens": 9088}
+    },
+    {
+      "case_id": "large_envelope_document",
+      "expected_decision": "twelve_thousand_tokens_produces_twenty_seven_chunks_and_overlap_input",
+      "allowed_unknown_reasons": [],
+      "required_capability": "deterministic_chunk_count_and_billable_input_calculator",
+      "expected_execution_permission": "not_applicable",
+      "runtime_status": "not_run",
+      "inputs": {"document_tokens": 12000, "chunk_size_tokens": 512, "overlap_tokens": 64},
+      "expected": {"chunk_count": 27, "document_input_tokens": 13664}
+    },
+    {
+      "case_id": "monthly_small_doc_batch_and_online_query",
+      "expected_decision": "monthly_document_batch_and_online_query_costs_use_separate_token_bases_and_rates",
+      "allowed_unknown_reasons": [],
+      "required_capability": "deterministic_chunking_and_separate_batch_online_cost_arithmetic",
+      "expected_execution_permission": "not_applicable",
+      "runtime_status": "not_run",
+      "inputs": {
+        "scale": "small",
+        "changed_documents": 500,
+        "tokens_per_document": 4000,
+        "online_query_tokens_per_month": 10000000,
+        "retry_document_tokens": 0,
+        "reembed_document_tokens": 0,
+        "rates_usd_per_million_input_tokens": {
+          "text-embedding-3-small": {"document_batch": 0.01, "online_query": 0.02},
+          "text-embedding-3-large": {"document_batch": 0.065, "online_query": 0.13}
+        }
+      },
+      "expected": {
+        "chunks_per_document": 9,
+        "source_document_tokens": 2000000,
+        "document_batch_tokens": 2256000,
+        "online_query_tokens": 10000000,
+        "text-embedding-3-small": {"document_batch_usd": 0.02256, "retry_batch_usd": 0, "reembed_batch_usd": 0, "online_query_usd": 0.2, "monthly_total_usd": 0.22256},
+        "text-embedding-3-large": {"document_batch_usd": 0.14664, "retry_batch_usd": 0, "reembed_batch_usd": 0, "online_query_usd": 1.3, "monthly_total_usd": 1.44664}
+      }
+    },
+    {
+      "case_id": "monthly_medium_doc_batch_and_online_query",
+      "expected_decision": "monthly_document_batch_and_online_query_costs_use_separate_token_bases_and_rates",
+      "allowed_unknown_reasons": [],
+      "required_capability": "deterministic_chunking_and_separate_batch_online_cost_arithmetic",
+      "expected_execution_permission": "not_applicable",
+      "runtime_status": "not_run",
+      "inputs": {
+        "scale": "medium",
+        "changed_documents": 10000,
+        "tokens_per_document": 8000,
+        "online_query_tokens_per_month": 250000000,
+        "retry_document_tokens": 0,
+        "reembed_document_tokens": 0,
+        "rates_usd_per_million_input_tokens": {
+          "text-embedding-3-small": {"document_batch": 0.01, "online_query": 0.02},
+          "text-embedding-3-large": {"document_batch": 0.065, "online_query": 0.13}
+        }
+      },
+      "expected": {
+        "chunks_per_document": 18,
+        "source_document_tokens": 80000000,
+        "document_batch_tokens": 90880000,
+        "online_query_tokens": 250000000,
+        "text-embedding-3-small": {"document_batch_usd": 0.9088, "retry_batch_usd": 0, "reembed_batch_usd": 0, "online_query_usd": 5, "monthly_total_usd": 5.9088},
+        "text-embedding-3-large": {"document_batch_usd": 5.9072, "retry_batch_usd": 0, "reembed_batch_usd": 0, "online_query_usd": 32.5, "monthly_total_usd": 38.4072}
+      }
+    },
+    {
+      "case_id": "monthly_large_doc_batch_and_online_query",
+      "expected_decision": "monthly_document_batch_and_online_query_costs_use_separate_token_bases_and_rates",
+      "allowed_unknown_reasons": [],
+      "required_capability": "deterministic_chunking_and_separate_batch_online_cost_arithmetic",
+      "expected_execution_permission": "not_applicable",
+      "runtime_status": "not_run",
+      "inputs": {
+        "scale": "large",
+        "changed_documents": 200000,
+        "tokens_per_document": 12000,
+        "online_query_tokens_per_month": 2000000000,
+        "retry_document_tokens": 0,
+        "reembed_document_tokens": 0,
+        "rates_usd_per_million_input_tokens": {
+          "text-embedding-3-small": {"document_batch": 0.01, "online_query": 0.02},
+          "text-embedding-3-large": {"document_batch": 0.065, "online_query": 0.13}
+        }
+      },
+      "expected": {
+        "chunks_per_document": 27,
+        "source_document_tokens": 2400000000,
+        "document_batch_tokens": 2732800000,
+        "online_query_tokens": 2000000000,
+        "text-embedding-3-small": {"document_batch_usd": 27.328, "retry_batch_usd": 0, "reembed_batch_usd": 0, "online_query_usd": 40, "monthly_total_usd": 67.328},
+        "text-embedding-3-large": {"document_batch_usd": 177.632, "retry_batch_usd": 0, "reembed_batch_usd": 0, "online_query_usd": 260, "monthly_total_usd": 437.632}
+      }
+    }
+  ]
+}

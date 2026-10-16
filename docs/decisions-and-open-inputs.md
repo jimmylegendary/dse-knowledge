@@ -1,5 +1,7 @@
 # 요구·설계 결정·운영 입력 기록
 
+2026-10-17 추가 결정: P0 계약·actual source support 상태는 [p0-remediation-report.md](https://github.com/jimmylegendary/dse-knowledge/blob/docs/p0-episode-contracts/docs/p0-remediation-report.md)가 기준이다. 아래 과거 기술 추천은 조사 prior로 보존하며, P1 graph baseline은 [0001-graph-backend-selection.md](https://github.com/jimmylegendary/dse-knowledge/blob/docs/p0-episode-contracts/docs/adr/0001-graph-backend-selection.md)로 갱신한다.
+
 기준일: 2026-10-16. 사용자 확정 사항, root의 제안, 앞으로 실행할 때 필요한 입력을 분리한다. 이 기록은 구현 승인서가 아니다.
 
 ## 1. 사용자 확정 사항
@@ -23,7 +25,7 @@
 
 | ID | 제안 | 이유·변경 조건 |
 |---|---|---|
-| D01 | managed PG ledger + graph projection 조합을 먼저 평가 | 기존 경험·근거 추적·교체 가능성. 실제 edition/region gate 미달이면 native/RDF 대안 검토 |
+| D01 | managed PG ledger/typed graph baseline + 동일 질의 Neo4j challenger | 의미·권한·snapshot parity 이후 성능/TCO gate. Neo4j 선배포를 가정하지 않음 |
 | D02 | canonical knowledge/experiment record와 graph/vector view 분리 | 권위 충돌과 stale projection을 드러내고 재구성 가능하게 함 |
 | D03 | 초기 data profile은 공개 사용 허용 자료, 사용자 소유 HAT/Melete 계약의 필요한 범위, synthetic workload | 사내 Confluence 연결은 현재 요구에 포함하지 않고 future connector로 둠 |
 | D04 | 초기 model은 BGE/Qwen/허용 API의 비교 절차로 선정 | domain gold 없이 특정 embedding이 최상이라고 단정하지 않음 |

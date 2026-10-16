@@ -1,6 +1,8 @@
 # 검색·판단·실험 탐색 설계
 
-상태: 구현 전 설계. 설정값은 최초 비교 실험을 위한 제안이며 성능 측정값이 아니다. 기술별 후보와 근거는 [02-storage-retrieval.md](https://github.com/jimmylegendary/dse-knowledge/blob/main/research/02-storage-retrieval.md), [04-models-ingestion-evaluation.md](https://github.com/jimmylegendary/dse-knowledge/blob/main/research/04-models-ingestion-evaluation.md)를 함께 읽는다.
+P0 판정 보완: [validation-and-claim-use.md](https://github.com/jimmylegendary/dse-knowledge/blob/docs/p0-episode-contracts/docs/contracts/validation-and-claim-use.md)의 ValidationProfile/ClaimUsePolicy와 [comparison-policy.md](https://github.com/jimmylegendary/dse-knowledge/blob/docs/p0-episode-contracts/docs/contracts/comparison-policy.md)가 규범적 기준이다. Graph backend 선택은 [0001-graph-backend-selection.md](https://github.com/jimmylegendary/dse-knowledge/blob/docs/p0-episode-contracts/docs/adr/0001-graph-backend-selection.md)를 따른다.
+
+상태: 구현 전 설계. 설정값은 최초 비교 실험을 위한 제안이며 성능 측정값이 아니다. 기술별 후보와 근거는 [02-storage-retrieval.md](https://github.com/jimmylegendary/dse-knowledge/blob/docs/p0-episode-contracts/research/02-storage-retrieval.md), [04-models-ingestion-evaluation.md](https://github.com/jimmylegendary/dse-knowledge/blob/docs/p0-episode-contracts/research/04-models-ingestion-evaluation.md)를 함께 읽는다.
 
 ## 1. 검색 문제를 나누는 기준
 
@@ -18,12 +20,12 @@
 1. **권한·snapshot 고정:** requester의 namespace/ACL과 공개 가능한 source만 선택한다. Query cache key에 권한·snapshot·model version을 포함한다.
 2. **질의 구조화:** task, entity, HW scope, ISA/toolchain version, required claim type, numerical vs exploratory intent를 추출한다. structured input을 우선하고 LLM routing은 제안으로 검증한다.
 3. **Entity resolution:** canonical ID와 alias를 찾는다. ambiguity가 남으면 후보를 분리한 채 반환한다. B300의 이름 유사성을 다른 제품 수치의 동치 근거로 사용하지 않는다.
-4. **정확 조회:** binding된 entity·version의 규격·constraint·measurement를 조회한다. critical constraints는 retrieval top-k로 탈락시키지 않는다.
+4. **필수 validation 경로와 설명 검색 분리:** frozen ValidationProfile이 요구하는 complete rule/input/applicability 집합을 canonical ledger에서 조회한다. 이 경로에는 top-k·LLM context·rerank limit을 적용하지 않는다. Registry completeness/digest 또는 required input이 없으면 incomplete_unknown이다. 모든 applicable required rule 결과를 validator가 기록한 뒤 설명 검색 결과와 연결한다.
 5. **병렬 후보 수집:** 최초 비교 설정은 lexical top-40, dense top-40, scoped graph seed top-20이다. 이 수는 recall/latency sweep의 출발점이다.
 6. **Graph 확장:** typed relation과 applicability를 따라 evidence-bearing Claim을 찾는다. hierarchy 조회는 필요한 전체 계층을 명시적으로 traverse한다. 일반 탐색은 기본 depth 3, 최대 6, expanded node 200과 비용 budget을 두며, 잘린 경로는 truncation으로 보고한다.
 7. **Rank fusion:** lexical·dense·graph 순위를 RRF(k=60 시작값)로 병합한다. raw similarity score를 서로 같은 척도로 가정하지 않는다. exact matching은 별도 우선 그룹으로 유지한다.
 8. **중복·다양성:** 같은 source를 재인용한 후보를 lineage 기준으로 묶고, conflicting/alternative evidence를 한 개 요약으로 합치지 않는다.
-9. **Rerank:** 상위 60개 후보를 DSE evidence relevance 기준으로 재평가하고 최대 12개 evidence item을 초기 bundle에 넣는다. 길이·표·code 처리와 비용을 함께 측정한다.
+9. **설명 evidence rerank:** 상위 60개 참고 후보를 재평가하고 최대 12개를 초기 narrative evidence bundle에 넣는다. 이 숫자는 validator의 전체 rule 집합이나 입력 수를 제한하지 않는다. Bundle은 전체 ValidationReport reference를 별도로 가진다. Required DSE-R13 fail이 narrative top-12에서 빠져도 verdict는 reject다.
 10. **Coverage·충돌 확인:** 요청된 판단 항목과 evidence mapping을 대조한다. 누락된 핵심 항목은 2회 이내 query expansion/parent retrieval을 수행한다. query rewriting은 entity와 version을 바꾸지 않는다.
 11. **출력 검증:** Claim과 인용 span의 의미·수치·단위를 검사하고 conflict/unknown을 표시한다. 모델 답변보다 evidence bundle을 먼저 구조화한다.
 12. **기록:** retriever/reranker/model versions, top-k, filter, query expansion, 선택 evidence, latency/token/cost, denied/stale 결과를 audit한다. 민감 원문을 관찰 로그에 중복 저장하지 않는다.

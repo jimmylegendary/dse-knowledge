@@ -1,0 +1,643 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "SnapshotManifest v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "snapshot_id",
+    "manifest_state",
+    "purpose",
+    "captured_at",
+    "dependency_refs",
+    "policy_refs",
+    "information_access",
+    "authorization_epoch",
+    "lineage",
+    "availability",
+    "root_digest",
+    "semantic_validation_version",
+    "closure",
+    "temporal_access"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "1.0.0"
+    },
+    "snapshot_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "manifest_state": {
+      "enum": [
+        "plan_template",
+        "captured"
+      ]
+    },
+    "purpose": {
+      "enum": [
+        "audit_decision",
+        "replay_original_inputs",
+        "reevaluate_current_knowledge"
+      ]
+    },
+    "captured_at": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date-time"
+    },
+    "derived_from_snapshot": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "dependency_refs": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/ref"
+      }
+    },
+    "policy_refs": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/ref"
+      }
+    },
+    "information_access": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "design_mode",
+        "workload_visibility",
+        "controller_profile",
+        "state_access_policy"
+      ],
+      "properties": {
+        "design_mode": {
+          "enum": [
+            "offline",
+            "online"
+          ]
+        },
+        "workload_visibility": {
+          "enum": [
+            "full_scenario",
+            "prefix_only"
+          ]
+        },
+        "controller_profile": {
+          "enum": [
+            "realizable",
+            "oracle",
+            "not_applicable"
+          ]
+        },
+        "state_access_policy": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "kind",
+            "version"
+          ],
+          "properties": {
+            "kind": {
+              "enum": [
+                "realizable_past_only",
+                "oracle_future_allowed",
+                "no_runtime_state"
+              ]
+            },
+            "version": {
+              "const": 1
+            }
+          }
+        }
+      }
+    },
+    "authorization_epoch": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "lineage": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "primary_observation_id",
+        "lineage_root_id",
+        "independence_class"
+      ],
+      "properties": {
+        "primary_observation_id": {
+          "type": "string"
+        },
+        "lineage_root_id": {
+          "type": "string"
+        },
+        "independence_class": {
+          "enum": [
+            "original_measurement",
+            "independent_replication",
+            "deterministic_replay",
+            "reinterpretation",
+            "duplicate_copy"
+          ]
+        },
+        "replicates_lineage_root_id": {
+          "type": "string"
+        },
+        "independence_evidence": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "primary_measurement_run_ref",
+            "replicates_run_ref",
+            "new_capture_ref",
+            "assessment_ref"
+          ],
+          "properties": {
+            "primary_measurement_run_ref": {
+              "type": "string",
+              "minLength": 1
+            },
+            "replicates_run_ref": {
+              "type": "string",
+              "minLength": 1
+            },
+            "new_capture_ref": {
+              "type": "string",
+              "minLength": 1
+            },
+            "assessment_ref": {
+              "type": "string",
+              "minLength": 1
+            }
+          }
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "independence_class": {
+                "const": "independent_replication"
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "replicates_lineage_root_id",
+              "independence_evidence"
+            ]
+          }
+        }
+      ]
+    },
+    "availability": {
+      "enum": [
+        "not_captured",
+        "available",
+        "partially_available",
+        "unavailable"
+      ]
+    },
+    "root_digest": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "semantic_validation_version": {
+      "const": "snapshot-semantic-validation-v1"
+    },
+    "closure": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "decision_record": {
+          "type": "string",
+          "minLength": 1
+        },
+        "decision_input": {
+          "type": "string",
+          "minLength": 1
+        },
+        "evidence_bundle": {
+          "type": "string",
+          "minLength": 1
+        },
+        "native_report": {
+          "type": "string",
+          "minLength": 1
+        },
+        "validation_report": {
+          "type": "string",
+          "minLength": 1
+        },
+        "policy_bundle": {
+          "type": "string",
+          "minLength": 1
+        },
+        "run_manifest": {
+          "type": "string",
+          "minLength": 1
+        },
+        "workload": {
+          "type": "string",
+          "minLength": 1
+        },
+        "assembly": {
+          "type": "string",
+          "minLength": 1
+        },
+        "recipe": {
+          "type": "string",
+          "minLength": 1
+        },
+        "toolchain": {
+          "type": "string",
+          "minLength": 1
+        },
+        "initial_state": {
+          "type": "string",
+          "minLength": 1
+        },
+        "calibration": {
+          "type": "string",
+          "minLength": 1
+        },
+        "original_decision": {
+          "type": "string",
+          "minLength": 1
+        },
+        "original_design": {
+          "type": "string",
+          "minLength": 1
+        },
+        "original_run": {
+          "type": "string",
+          "minLength": 1
+        },
+        "current_knowledge": {
+          "type": "string",
+          "minLength": 1
+        },
+        "new_policy_bundle": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "temporal_access": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "status",
+        "clock",
+        "encoding"
+      ],
+      "properties": {
+        "status": {
+          "enum": [
+            "planned",
+            "recorded",
+            "not_applicable"
+          ]
+        },
+        "clock": {
+          "const": "run_monotonic_us"
+        },
+        "encoding": {
+          "enum": [
+            "inline",
+            "artifact"
+          ]
+        },
+        "decisions": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/temporalDecision"
+          }
+        },
+        "artifact_ref": {
+          "type": "string"
+        },
+        "artifact_schema_version": {
+          "const": "temporal-access-events-v1"
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "status": {
+                "const": "recorded"
+              },
+              "encoding": {
+                "const": "inline"
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "decisions"
+            ],
+            "properties": {
+              "decisions": {
+                "minItems": 1
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "status": {
+                "const": "recorded"
+              },
+              "encoding": {
+                "const": "artifact"
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "artifact_ref",
+              "artifact_schema_version"
+            ]
+          }
+        }
+      ]
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "manifest_state": {
+            "const": "captured"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "captured_at": {
+            "type": "string"
+          },
+          "root_digest": {
+            "type": "string"
+          },
+          "dependency_refs": {
+            "items": {
+              "properties": {
+                "content_sha256": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "policy_refs": {
+            "items": {
+              "properties": {
+                "content_sha256": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "purpose": {
+            "const": "reevaluate_current_knowledge"
+          }
+        }
+      },
+      "then": {
+        "required": [
+          "derived_from_snapshot"
+        ],
+        "properties": {
+          "derived_from_snapshot": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "purpose": {
+            "const": "audit_decision"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "closure": {
+            "required": [
+              "decision_record",
+              "decision_input",
+              "evidence_bundle",
+              "native_report",
+              "validation_report",
+              "policy_bundle"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "purpose": {
+            "const": "replay_original_inputs"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "closure": {
+            "required": [
+              "run_manifest",
+              "workload",
+              "assembly",
+              "recipe",
+              "toolchain",
+              "initial_state",
+              "calibration",
+              "policy_bundle"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "purpose": {
+            "const": "reevaluate_current_knowledge"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "closure": {
+            "required": [
+              "original_decision",
+              "original_design",
+              "original_run",
+              "current_knowledge",
+              "new_policy_bundle"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "manifest_state": {
+            "const": "captured"
+          },
+          "information_access": {
+            "properties": {
+              "controller_profile": {
+                "enum": [
+                  "realizable",
+                  "oracle"
+                ]
+              }
+            }
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "temporal_access": {
+            "properties": {
+              "status": {
+                "const": "recorded"
+              }
+            }
+          }
+        }
+      }
+    }
+  ],
+  "$defs": {
+    "ref": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "kind",
+        "revision",
+        "content_sha256",
+        "required",
+        "availability"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "kind": {
+          "type": "string",
+          "minLength": 1
+        },
+        "revision": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "content_sha256": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "required": {
+          "type": "boolean"
+        },
+        "availability": {
+          "enum": [
+            "planned",
+            "available",
+            "revoked",
+            "deleted",
+            "missing",
+            "provider_revision_unavailable"
+          ]
+        }
+      }
+    },
+    "temporalDecision": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "decision_id",
+        "decision_tick",
+        "observations"
+      ],
+      "properties": {
+        "decision_id": {
+          "type": "string"
+        },
+        "decision_tick": {
+          "$ref": "#/$defs/timeValue"
+        },
+        "observations": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "observation_id",
+              "observed_at_tick",
+              "available_at_tick",
+              "source_ref",
+              "derived_from_observation_ids"
+            ],
+            "properties": {
+              "observation_id": {
+                "type": "string"
+              },
+              "observed_at_tick": {
+                "$ref": "#/$defs/timeValue"
+              },
+              "available_at_tick": {
+                "$ref": "#/$defs/timeValue"
+              },
+              "source_ref": {
+                "type": "string"
+              },
+              "derived_from_observation_ids": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "uniqueItems": true
+              }
+            }
+          }
+        }
+      }
+    },
+    "timeValue": {
+      "type": "string",
+      "pattern": "^[0-9]+(?:\\.[0-9]+)?$"
+    }
+  }
+}
