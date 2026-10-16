@@ -1,0 +1,41 @@
+key,category,name,relevance,authority,extractability,rights,freshness,diversity,score_100,evidence_stage,confidence_raw,official_url,research_file
+01:agent-tau3,agent_benchmark,τ³-bench tool-agent-user conversation benchmark,5,4,5,2,5,5,86.0,E1,0.84,https://github.com/sierra-research/tau2-bench,01-source-catalog.json
+01:agent-bfcl,agent_benchmark,Berkeley Function Calling Leaderboard dataset/evaluator,4,4,5,2,4,5,78.0,E1,0.78,https://github.com/EnlightenedAI/BFCL,01-source-catalog.json
+01:agent-agentbench,agent_benchmark,AgentBench multi-turn environments and evaluation package,4,4,4,2,3,5,73.0,E1,0.72,https://github.com/THUDM/AgentBench,01-source-catalog.json
+01:benchmark-mlperf,benchmark,"MLCommons MLPerf Inference rules, LoadGen and results",5,5,5,5,4,5,98.0,E1,0.9,https://docs.mlcommons.org/inference/submission/,01-source-catalog.json
+01:circuit-openroad-sky130,circuit_eda,OpenROAD RTL-to-GDS flow and SkyWater SKY130 PDK,3,4,5,5,4,5,81.0,E1,0.8,https://openroad-flow-scripts.readthedocs.io/en/latest/,01-source-catalog.json
+01:compiler-mlir,compiler,"MLIR language, dialect, rewrite and pass specifications",4,5,5,5,5,5,94.0,E1,0.86,https://mlir.llvm.org/docs/,01-source-catalog.json
+01:dse-ax-botorch,dse,Ax/BoTorch constrained multi-objective optimization,4,4,5,5,5,4,88.0,E1,0.85,https://ax.dev/docs/recipes/multi-objective-optimization/,01-source-catalog.json
+01:experiment-mlflow,experiment_tracking,MLflow experiment/run/metric/artifact tracking,4,4,5,5,5,4,88.0,E1,0.84,https://www.mlflow.org/docs/latest/tracking/,01-source-catalog.json
+01:hw-nvidia-b300,hardware,NVIDIA B300 / GB300 / DGX B300 primary system documents,5,5,5,3,5,5,94.0,E1,0.92,https://www.nvidia.com/en-us/data-center/gb300-nvl72/,01-source-catalog.json
+01:hw-amd-mi350,hardware,AMD MI350/CDNA4 and ROCm technical documentation,4,5,4,3,4,5,83.0,E1,0.84,https://rocm.docs.amd.com/en/develop/reference/gpu-arch/mi350.html,01-source-catalog.json
+01:hat-internal,internal,"HAT system, hat-schema and HATIR canonical repositories",5,5,4,4,5,5,94.0,E1,0.86,https://github.com/jimmylegendary/hat-system,01-source-catalog.json
+01:melete-internal,internal,Melete experience/provenance and conditional-judgment contracts,3,4,4,3,5,4,73.0,E1,0.8,https://github.com/jimmylegendary/melete,01-source-catalog.json
+01:isa-cuda-ptx,isa,CUDA programming and PTX ISA documentation,5,5,5,4,5,4,96.0,E1,0.88,https://docs.nvidia.com/cuda/cuda-programming-guide/,01-source-catalog.json
+01:kernel-triton,kernel,"Triton language tutorials, API and examples",5,5,5,4,5,5,97.0,E1,0.88,https://triton-lang.org/main/getting-started/tutorials/,01-source-catalog.json
+01:kernel-cutlass,kernel,NVIDIA CUTLASS/CuTe kernel library and profiler,5,5,5,4,4,4,94.0,E1,0.9,https://github.com/NVIDIA/cutlass,01-source-catalog.json
+01:research-arxiv,literature,arXiv metadata/API/OAI and licensed-version preprints,5,4,5,4,5,5,92.0,E1,0.9,https://info.arxiv.org/help/bulk_data.html,01-source-catalog.json
+01:index-crossref,literature_index,Crossref DOI metadata/update/deposit REST API,4,5,5,5,5,5,94.0,E1,0.87,https://www.crossref.org/documentation/retrieve-metadata/rest-api/,01-source-catalog.json
+01:index-openalex,literature_index,OpenAlex scholarly metadata and citation graph,4,4,5,5,5,5,89.0,E1,0.82,https://help.openalex.org/api/,01-source-catalog.json
+01:index-semantic-scholar,literature_index,Semantic Scholar Academic Graph API,4,4,5,3,5,4,82.0,E1,0.78,https://api.semanticscholar.org/api-docs/,01-source-catalog.json
+01:measure-dcgm,measurement,NVIDIA DCGM and DCGM Exporter metrics,5,5,5,3,5,4,93.0,E1,0.9,https://docs.nvidia.com/datacenter/dcgm/latest/reference/dcgm-exporter-metrics.html,01-source-catalog.json
+01:measure-nsight,measurement,NVIDIA Nsight Compute profiling guide and metric reference,5,5,5,3,5,4,93.0,E1,0.9,https://docs.nvidia.com/nsight-compute/ProfilingGuide/index.html,01-source-catalog.json
+01:model-cacti,model,"CACTI cache, memory, 3D and IO model",4,3,5,5,3,4,79.0,E1,0.73,https://github.com/HewlettPackard/cacti,01-source-catalog.json
+01:model-hf-cards,model_card,"Hugging Face model cards, dataset cards and Hub revisions",4,4,4,2,5,5,77.0,E1,0.8,https://huggingface.co/docs/hub/model-cards,01-source-catalog.json
+01:prov-w3c-provo,provenance,W3C PROV-O provenance ontology,4,5,4,5,2,5,85.0,E1,0.83,https://www.w3.org/TR/prov-o/,01-source-catalog.json
+01:publisher-usenix,publisher,USENIX proceedings and author-retained research papers,4,5,5,4,4,4,88.0,E1,0.83,https://www.usenix.org/conference/osdi24/technical-sessions,01-source-catalog.json
+01:publisher-acm-ieee,publisher,ACM Digital Library and IEEE Xplore article access/rights,4,5,2,1,4,4,70.0,E1,0.75,https://libraries.acm.org/digital-library/platform-and-features,01-source-catalog.json
+01:serving-vllm,serving,"vLLM serving, benchmark, scheduler and metric docs",5,5,5,4,5,4,96.0,E1,0.9,https://docs.vllm.ai/en/stable/benchmarking/cli/,01-source-catalog.json
+01:serving-tensorrtllm,serving,"NVIDIA TensorRT-LLM serving, benchmark and telemetry docs",5,5,5,3,5,4,93.0,E1,0.87,https://nvidia.github.io/TensorRT-LLM/,01-source-catalog.json
+01:sim-ramulator,simulation,Ramulator 2.1 DRAM/controller simulator,4,4,5,5,5,4,88.0,E1,0.86,https://github.com/CMU-SAFARI/ramulator2,01-source-catalog.json
+01:sim-sst,simulation,Structural Simulation Toolkit and Elements,4,4,4,5,4,5,84.0,E1,0.76,https://sst-simulator.org/sst-docs/docs/guides/start,01-source-catalog.json
+01:sim-gem5,simulation,gem5 architecture and memory-system simulator,3,4,5,5,4,4,80.0,E1,0.78,https://www.gem5.org/documentation/,01-source-catalog.json
+01:sim-booksim,simulation,BookSim cycle-accurate interconnection network simulator,4,4,4,2,3,4,72.0,E1,0.67,https://github.com/booksim/booksim2,01-source-catalog.json
+01:std-ocp,standard,"OCP Open Rack, OAM/OAI and cooling specifications",5,4,4,3,4,5,84.0,E1,0.8,https://www.opencompute.org/projects/cooling-environments/,01-source-catalog.json
+01:std-cxl,standard,"CXL Consortium specifications, revisions and evaluation terms",4,5,4,1,5,5,79.0,E1,0.82,https://computeexpresslink.org/cxl-specification/,01-source-catalog.json
+01:std-ieee8023,standard,IEEE 802.3 Ethernet and PHY standards,4,5,4,0,5,5,76.0,E1,0.88,https://standards.ieee.org/ieee/7003/10422/,01-source-catalog.json
+01:std-ashrae,standard,ASHRAE TC 9.9 data-center thermal guidance,5,5,2,1,3,4,74.0,E1,0.78,https://www.ashrae.org/technical-resources/topics-and-initiatives/ai-data-center/site-planning,01-source-catalog.json
+01:std-ucie,standard,UCIe Consortium die-to-die/package specification family,4,5,3,1,4,5,74.0,E1,0.77,https://www.uciexpress.org/specifications,01-source-catalog.json
+01:std-jedec,standard,JEDEC HBM/DDR/LPDDR standards registry,5,5,2,0,4,4,73.0,E1,0.73,https://www.jedec.org/,01-source-catalog.json
+01:std-pcisig,standard,PCI-SIG PCIe base/CEM/ECN/compliance specifications,4,5,3,0,5,4,72.0,E1,0.88,https://pcisig.com/specifications,01-source-catalog.json
+01:trace-otel-genai,telemetry,OpenTelemetry GenAI/session/agent and hardware conventions,5,5,5,5,4,5,98.0,E1,0.89,https://opentelemetry.io/docs/specs/semconv/gen-ai/,01-source-catalog.json

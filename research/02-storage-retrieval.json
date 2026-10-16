@@ -1,0 +1,494 @@
+{
+  "candidates": [
+    {
+      "id": "postgres_pgvector",
+      "category": "relational_vector",
+      "name": "PostgreSQL + pgvector",
+      "role": "Portable authoritative source/Claim/Evidence registry and exact metrics, with full-text and vector retrieval.",
+      "source_urls": [
+        "https://github.com/pgvector/pgvector",
+        "https://www.postgresql.org/docs/current/gin.html"
+      ],
+      "evidence": [
+        "pgvector provides exact and approximate vector search, HNSW/IVFFlat, filtering and hybrid-search examples; PostgreSQL GIN is a preferred full-text index."
+      ],
+      "limitations": [
+        "Approximate vector indexes can reduce recall or filtered result counts; compare against exact search on the target workload.",
+        "Horizontal scale and ANN filtering may need tuning or a separate retrieval service at higher load."
+      ],
+      "scores": {
+        "quality": 4,
+        "fit": 4,
+        "provenance": 5,
+        "operability": 3,
+        "portability": 5,
+        "economics": 3
+      },
+      "confidence": 0.91,
+      "reason": "Relational-first category leader; joins exact numeric facts, source references, ACL filters, lexical search and vectors with low index drift. Self-host TCO remains unmeasured, so economics is neutral. Weighted expert prior 81/100."
+    },
+    {
+      "id": "supabase_pgvector",
+      "category": "relational_vector",
+      "name": "Supabase Postgres + pgvector",
+      "role": "Managed PostgreSQL vector/FTS service with Supabase Auth and Row Level Security.",
+      "source_urls": [
+        "https://supabase.com/docs/guides/ai/vector-columns",
+        "https://supabase.com/docs/guides/ai/hybrid-search",
+        "https://supabase.com/docs/guides/database/postgres/row-level-security"
+      ],
+      "evidence": [
+        "Supabase documents pgvector storage, SQL RPC for vector operators, keyword+dense hybrid retrieval with RRF, and database-enforced RLS."
+      ],
+      "limitations": [
+        "Requires a Supabase account and project; no existing account or region is assumed.",
+        "Vector RPC and policies add product-specific integration and security configuration."
+      ],
+      "scores": {
+        "quality": 4,
+        "fit": 4,
+        "provenance": 4,
+        "operability": 5,
+        "portability": 3,
+        "economics": 3
+      },
+      "confidence": 0.9,
+      "reason": "Lower-operations managed alternative to generic PostgreSQL; provider coupling and unpriced workload keep it below the portable category leader. Weighted expert prior 79/100."
+    },
+    {
+      "id": "neo4j_aura",
+      "category": "property_graph",
+      "name": "Neo4j Aura",
+      "role": "Rebuildable derived property-graph projection for multi-hop hardware, kernel, recipe, Claim and Evidence retrieval; PostgreSQL remains the authoritative ledger.",
+      "source_urls": [
+        "https://neo4j.com/docs/cypher-manual/current/indexes/search-indexes/"
+      ],
+      "evidence": [
+        "Neo4j provides graph traversal plus full-text and approximate vector search indexes; official docs recommend ranking independent lexical and vector results before combining them."
+      ],
+      "limitations": [
+        "Search syntax and filtering capabilities vary by Neo4j version and Aura tier.",
+        "This projection and its ACL fields are not authoritative for facts, typed legality or authorization; validate against PostgreSQL and deterministic rules."
+      ],
+      "scores": {
+        "quality": 4,
+        "fit": 5,
+        "provenance": 4,
+        "operability": 4,
+        "portability": 3,
+        "economics": 3
+      },
+      "confidence": 0.84,
+      "reason": "Property-graph projection leader over Neptune Database for the provider-unspecified scenario; source facts and ACL authority stay in PostgreSQL. Weighted expert prior 80/100."
+    },
+    {
+      "id": "neptune_database",
+      "category": "property_graph",
+      "name": "Amazon Neptune Database",
+      "role": "Managed AWS graph projection candidate for RDF/SPARQL and property-graph Gremlin/openCypher retrieval; canonical Claim/Evidence/ACL ledger remains outside.",
+      "source_urls": [
+        "https://docs.aws.amazon.com/neptune/",
+        "https://docs.aws.amazon.com/neptune/latest/userguide/access-graph-sparql.html",
+        "https://docs.aws.amazon.com/neptune/latest/userguide/feature-overview-data-model.html"
+      ],
+      "evidence": [
+        "Neptune Database supports SPARQL 1.1 and property-graph query languages on managed graph infrastructure."
+      ],
+      "limitations": [
+        "VPC, IAM, AWS data plane and service-specific query semantics increase cloud coupling.",
+        "Separate Neptune Database and Neptune Analytics documentation must be checked before assigning features."
+      ],
+      "scores": {
+        "quality": 4,
+        "fit": 4,
+        "provenance": 5,
+        "operability": 3,
+        "portability": 2,
+        "economics": 3
+      },
+      "confidence": 0.82,
+      "reason": "Good managed graph/RDF candidate when AWS is selected; held below Neo4j Aura until provider and graph-model requirements are known. Weighted expert prior 75/100."
+    },
+    {
+      "id": "neptune_analytics",
+      "category": "graph_analytics",
+      "name": "Amazon Neptune Analytics",
+      "role": "Separate memory-optimized graph analytics and vector-in-traversal service for exploration.",
+      "source_urls": [
+        "https://docs.aws.amazon.com/neptune-analytics/latest/userguide/what-is-neptune-analytics.html",
+        "https://docs.aws.amazon.com/neptune-analytics/latest/userguide/vector-index.html"
+      ],
+      "evidence": [
+        "Neptune Analytics can load graphs from Neptune Database or S3 and supports analytics, graph queries and vector similarity."
+      ],
+      "limitations": [
+        "It complements rather than replaces Neptune Database for a mutable application graph.",
+        "A graph has one vector index with a fixed dimension at creation; embedding updates are not ACID/atomic."
+      ],
+      "scores": {
+        "quality": 3,
+        "fit": 3,
+        "provenance": 4,
+        "operability": 4,
+        "portability": 2,
+        "economics": 2
+      },
+      "confidence": 0.8,
+      "reason": "Useful optional analytical companion, not a primary DSE KG store; assessed only in the graph-analytics role. Weighted expert prior 63/100."
+    },
+    {
+      "id": "stardog_cloud",
+      "category": "rdf_store",
+      "name": "Stardog Cloud",
+      "role": "Managed RDF projection and SPARQL/reasoning/SHACL validation plane over the canonical Claim/Evidence ledger.",
+      "source_urls": [
+        "https://docs.stardog.com/stardog-cloud/",
+        "https://docs.stardog.com/query-stardog/",
+        "https://docs.stardog.com/inference-engine/index",
+        "https://docs.stardog.com/data-quality-constraints"
+      ],
+      "evidence": [
+        "Stardog documents SPARQL 1.1, query-time OWL/rule reasoning, SHACL constraints and a fully managed cloud offering."
+      ],
+      "limitations": [
+        "License, cloud region, cost, service boundary and exact supported SHACL profile need vendor confirmation.",
+        "Dense retrieval may require a separate derived vector index."
+      ],
+      "scores": {
+        "quality": 5,
+        "fit": 5,
+        "provenance": 5,
+        "operability": 4,
+        "portability": 3,
+        "economics": 2
+      },
+      "confidence": 0.83,
+      "reason": "RDF/SHACL category leader for legality-first DSE knowledge; higher proprietary and unknown-cost risk than self-managed Jena. Weighted expert prior 87/100."
+    },
+    {
+      "id": "apache_jena",
+      "category": "rdf_store",
+      "name": "Apache Jena Fuseki + TDB2",
+      "role": "Portable self-managed RDF/SPARQL projection with persistent triple store and SHACL validation over the canonical Claim/Evidence ledger.",
+      "source_urls": [
+        "https://jena.apache.org/documentation/",
+        "https://jena.apache.org/documentation/shacl/index.html"
+      ],
+      "evidence": [
+        "Jena documents Fuseki HTTP SPARQL service, TDB2 persistent storage, and SHACL Core/SPARQL constraint processing."
+      ],
+      "limitations": [
+        "The team owns deployment, upgrades, backups, HA, security and capacity planning.",
+        "Managed operation requires a separate hosting decision."
+      ],
+      "scores": {
+        "quality": 4,
+        "fit": 5,
+        "provenance": 4,
+        "operability": 2,
+        "portability": 5,
+        "economics": 3
+      },
+      "confidence": 0.86,
+      "reason": "Strong open, portable option when operations ownership is acceptable; category runner-up to managed Stardog Cloud. Self-host TCO is unmeasured, so economics is neutral. Weighted expert prior 78/100."
+    },
+    {
+      "id": "qdrant",
+      "category": "vector_search",
+      "name": "Qdrant",
+      "role": "Vector-first derived retrieval index for dense/sparse candidates, payload filters and multi-stage reranking.",
+      "source_urls": [
+        "https://qdrant.tech/documentation/search/hybrid-queries/",
+        "https://qdrant.tech/documentation/tutorials/multiple-partitions/"
+      ],
+      "evidence": [
+        "Qdrant documents prefetch/multi-stage hybrid search, payload-based tenant filtering and tiered multitenancy."
+      ],
+      "limitations": [
+        "It is not a knowledge graph or ontology/SHACL validator.",
+        "Full-text support is intentionally narrower than general lexical search engines."
+      ],
+      "scores": {
+        "quality": 4,
+        "fit": 4,
+        "provenance": 4,
+        "operability": 4,
+        "portability": 5,
+        "economics": 3
+      },
+      "confidence": 0.88,
+      "reason": "Vector category leader for provider-neutral hybrid candidate generation and many-session tenant filtering. Cloud/self-host TCO is unmeasured, so economics is neutral. Weighted expert prior 80/100."
+    },
+    {
+      "id": "weaviate",
+      "category": "vector_search",
+      "name": "Weaviate",
+      "role": "Vector database with built-in BM25/vector hybrid, property filters and configurable fusion.",
+      "source_urls": [
+        "https://docs.weaviate.io/weaviate/search/hybrid"
+      ],
+      "evidence": [
+        "Weaviate hybrid queries combine BM25F and vector result sets with a configurable fusion method and relative weights."
+      ],
+      "limitations": [
+        "Do not treat object references as the authoritative typed hardware legality model without separate validation.",
+        "Cloud and self-managed behavior should be checked at the pinned release."
+      ],
+      "scores": {
+        "quality": 4,
+        "fit": 4,
+        "provenance": 3,
+        "operability": 4,
+        "portability": 4,
+        "economics": 3
+      },
+      "confidence": 0.85,
+      "reason": "Convenient hybrid vector option with usable metadata filters; category second behind Qdrant on portability and source-role separation. Weighted expert prior 74/100."
+    },
+    {
+      "id": "milvus",
+      "category": "vector_search",
+      "name": "Milvus",
+      "role": "Vector database for dense/sparse multi-vector search, scalar filtering and reranking.",
+      "source_urls": [
+        "https://milvus.io/docs/milvus_hybrid_search_retriever.md",
+        "https://milvus.io/docs/filtered-search.md"
+      ],
+      "evidence": [
+        "Milvus documents dense/sparse hybrid candidates, RRF or weighted rankers, and both pre-filtered and iterative-filtered ANN search."
+      ],
+      "limitations": [
+        "Complex filtering can increase search latency.",
+        "Deployment, consistency level, storage and managed Zilliz Cloud features need separate review."
+      ],
+      "scores": {
+        "quality": 4,
+        "fit": 4,
+        "provenance": 3,
+        "operability": 2,
+        "portability": 4,
+        "economics": 3
+      },
+      "confidence": 0.86,
+      "reason": "Strong vector/scale feature set but higher operational burden in self-managed form; category third. Self-host TCO is unmeasured, so economics is neutral. Weighted expert prior 68/100."
+    },
+    {
+      "id": "pinecone",
+      "category": "vector_search",
+      "name": "Pinecone",
+      "role": "Fully managed vector search with namespaces, metadata filters and sparse/dense hybrid options.",
+      "source_urls": [
+        "https://www.pinecone.io/learn/search-with-pinecone/",
+        "https://docs.pinecone.io/guides/search/filter-by-metadata"
+      ],
+      "evidence": [
+        "Pinecone documents managed vector indexes, namespace partitioning, metadata filters and sparse/dense search."
+      ],
+      "limitations": [
+        "Provider coupling and region choices require explicit review.",
+        "Usage-based cost cannot be estimated without corpus, query and retention volumes; metadata namespaces are not a substitute for authorization design."
+      ],
+      "scores": {
+        "quality": 4,
+        "fit": 3,
+        "provenance": 3,
+        "operability": 5,
+        "portability": 2,
+        "economics": 2
+      },
+      "confidence": 0.82,
+      "reason": "Highest managed convenience but weakest portability and unpriced scale uncertainty in this vector category. Weighted expert prior 67/100."
+    },
+    {
+      "id": "vespa",
+      "category": "hybrid_search_engine",
+      "name": "Vespa",
+      "role": "Search/ranking platform for configurable BM25, nearest-neighbor retrieval, ranking profiles and reranking.",
+      "source_urls": [
+        "https://docs.vespa.ai/en/learn/tutorials/hybrid-search",
+        "https://docs.vespa.ai/en/querying/nearest-neighbor-search-guide.html"
+      ],
+      "evidence": [
+        "Vespa supports sparse and dense top-k retrieval with configurable ranking phases, including RRF examples and later reranking."
+      ],
+      "limitations": [
+        "Schema and rank-profile design create a steeper learning and operations curve.",
+        "No workload benchmark exists to justify its extra ranking flexibility yet."
+      ],
+      "scores": {
+        "quality": 5,
+        "fit": 5,
+        "provenance": 4,
+        "operability": 2,
+        "portability": 4,
+        "economics": 3
+      },
+      "confidence": 0.85,
+      "reason": "Hybrid-search category leader when ranking flexibility is a central experimental requirement; not the simplest first deployment. Weighted expert prior 81/100."
+    },
+    {
+      "id": "opensearch",
+      "category": "hybrid_search_engine",
+      "name": "OpenSearch",
+      "role": "Portable lexical/vector search engine with hybrid queries and score- or rank-based combination.",
+      "source_urls": [
+        "https://docs.opensearch.org/latest/vector-search/ai-search/hybrid-search/index/",
+        "https://docs.opensearch.org/latest/vector-search/ai-search/hybrid-search/rrf/",
+        "https://docs.opensearch.org/latest/vector-search/filter-search-knn/index/"
+      ],
+      "evidence": [
+        "OpenSearch combines keyword and semantic queries using normalization or RRF and documents efficient ANN filtering."
+      ],
+      "limitations": [
+        "RRF and filtering support depend on engine/version; managed-service feature parity must be checked.",
+        "It is redundant with Elastic or Vespa as the same lexical/vector serving plane."
+      ],
+      "scores": {
+        "quality": 4,
+        "fit": 4,
+        "provenance": 4,
+        "operability": 3,
+        "portability": 5,
+        "economics": 3
+      },
+      "confidence": 0.88,
+      "reason": "Good open hybrid baseline with portability and RRF; category second behind Vespa's ranking flexibility. Managed/self-host TCO is unmeasured, so economics is neutral. Weighted expert prior 77/100."
+    },
+    {
+      "id": "elasticsearch",
+      "category": "hybrid_search_engine",
+      "name": "Elasticsearch / Elastic Cloud",
+      "role": "Managed or self-managed BM25 and vector search with hybrid RRF retrieval.",
+      "source_urls": [
+        "https://www.elastic.co/docs/solutions/search/hybrid-search",
+        "https://www.elastic.co/docs/reference/elasticsearch/rest-apis/reciprocal-rank-fusion"
+      ],
+      "evidence": [
+        "Elastic documents full-text+vector hybrid search and recommends RRF to combine result ranks."
+      ],
+      "limitations": [
+        "Elastic Cloud, serverless and self-managed tiers can differ in features and commercial terms.",
+        "Avoid pairing with OpenSearch unless a measured migration or product boundary warrants both."
+      ],
+      "scores": {
+        "quality": 4,
+        "fit": 4,
+        "provenance": 4,
+        "operability": 4,
+        "portability": 3,
+        "economics": 2
+      },
+      "confidence": 0.86,
+      "reason": "Capable managed hybrid search but product/edition and commercial dependencies reduce fit while provider requirements are open. Weighted expert prior 74/100."
+    },
+    {
+      "id": "object_iceberg",
+      "category": "evidence_lake",
+      "name": "Versioned object storage + Parquet/Iceberg",
+      "role": "Canonical, immutable/versioned storage for raw sources, traces, run manifests and analytical tables.",
+      "source_urls": [
+        "https://docs.aws.amazon.com/AmazonS3/latest/userguide/Versioning.html",
+        "https://docs.aws.amazon.com/AmazonS3/latest/userguide/object-lock.html",
+        "https://iceberg.apache.org/docs/latest/branching/"
+      ],
+      "evidence": [
+        "S3 Versioning preserves object versions, S3 Object Lock protects versions under retention, and Iceberg records snapshots for time travel and branch/tag lifecycle."
+      ],
+      "limitations": [
+        "Object/table formats do not provide graph, lexical or vector retrieval on their own.",
+        "Snapshot retention and object versions increase storage costs; provider-neutral object-store feature parity needs checking."
+      ],
+      "scores": {
+        "quality": 4,
+        "fit": 5,
+        "provenance": 5,
+        "operability": 3,
+        "portability": 5,
+        "economics": 3
+      },
+      "confidence": 0.84,
+      "reason": "Strong evidence-lake role and format portability; no within-category competitor is scored because storage is its own required role. Retention, query and egress TCO are unmeasured, so economics is neutral. Weighted expert prior 85/100."
+    },
+    {
+      "id": "clickhouse",
+      "category": "columnar_metrics",
+      "name": "ClickHouse",
+      "role": "Columnar SQL serving/analytics layer for repeated aggregation of run and event metric tables.",
+      "source_urls": [
+        "https://clickhouse.com/docs/use-cases/data-lake/getting-started"
+      ],
+      "evidence": [
+        "ClickHouse can query Iceberg tables in object storage and load selected data into MergeTree tables for repeated analytical queries."
+      ],
+      "limitations": [
+        "It is not the graph legality or claim-provenance authority.",
+        "A serving copy duplicates data and adds freshness/reconciliation work; validate only if PostgreSQL/Iceberg aggregate workloads require it."
+      ],
+      "scores": {
+        "quality": 4,
+        "fit": 4,
+        "provenance": 4,
+        "operability": 4,
+        "portability": 4,
+        "economics": 3
+      },
+      "confidence": 0.78,
+      "reason": "Useful optional metric serving plane; compare only against columnar analytics alternatives, not against the evidence lake. Weighted expert prior 78/100."
+    },
+    {
+      "id": "microsoft_graphrag",
+      "category": "corpus_wide_graph_indexing",
+      "name": "Microsoft GraphRAG",
+      "role": "Optional indexing/retrieval framework for community summaries and whole-corpus/global questions.",
+      "source_urls": [
+        "https://microsoft.github.io/graphrag/index/overview/",
+        "https://microsoft.github.io/graphrag/query/global_search/",
+        "https://microsoft.github.io/graphrag/query/overview/"
+      ],
+      "evidence": [
+        "GraphRAG extracts entities, relationships and claims, builds communities and multi-level summaries, then offers global, local, DRIFT and basic search."
+      ],
+      "limitations": [
+        "Global search and index generation can be resource-intensive.",
+        "Generated communities/reports are derived summaries; exact metrics and source truth must come from structured evidence."
+      ],
+      "scores": {
+        "quality": 4,
+        "fit": 4,
+        "provenance": 3,
+        "operability": 3,
+        "portability": 4,
+        "economics": 2
+      },
+      "confidence": 0.84,
+      "reason": "Best considered for demonstrated whole-corpus question classes; it is not a database and is not ranked against storage candidates. Weighted expert prior 69/100."
+    },
+    {
+      "id": "lightrag",
+      "category": "dynamic_graph_rag",
+      "name": "LightRAG",
+      "role": "Optional graph/vector RAG framework emphasizing local/global retrieval and incremental updates.",
+      "source_urls": [
+        "https://github.com/HKUDS/LightRAG",
+        "https://github.com/HKUDS/LightRAG/blob/main/lightrag/tools/README_REBUILD_VDB.md"
+      ],
+      "evidence": [
+        "The project documents incremental update/selective deletion and multiple graph/vector/KV storage backends; its rebuild tool treats graph/KV data as authoritative over vector indexes."
+      ],
+      "limitations": [
+        "Project documentation says default local persistence is for small-scale testing/evaluation, not production.",
+        "Graph/vector multi-write drift, deletion behavior and embedding-model changes require consistency checks and rebuild procedures."
+      ],
+      "scores": {
+        "quality": 4,
+        "fit": 4,
+        "provenance": 3,
+        "operability": 3,
+        "portability": 4,
+        "economics": 3
+      },
+      "confidence": 0.7,
+      "reason": "Potential dynamic local/multihop retrieval framework; backend consistency and fast-changing project API lower confidence. Runtime and LLM-call TCO are unmeasured, so economics is neutral. Weighted expert prior 71/100."
+    }
+  ]
+}

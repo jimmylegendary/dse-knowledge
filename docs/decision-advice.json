@@ -1,0 +1,128 @@
+{
+  "recorded_at_utc": "2026-10-15",
+  "advisory_only": true,
+  "request": {
+    "profile": "general",
+    "project": "dse-knowledge-design",
+    "purpose": "Advisory review of complete cloud knowledge-stack pilot choices; no execution authorization",
+    "state": {
+      "stage": "design only; no corpus or deployment; future phases must each cover sources, graph+retrieval, all HW levels, kernels, HAT, metrics, Melete and feedback",
+      "priorities": "quality and evidence correctness before latency and cost; all metric dimensions retained; no cloud/region/budget selected; staff operations capacity unknown",
+      "known_context": "Company uses Supabase and Neo4j for Confluence RAG, but project access/accounts/data not granted.",
+      "nonnegotiable": [
+        "immutable source references",
+        "canonical Claim/Evidence/ACL ledger",
+        "versioned derived vector/lexical/graph indices",
+        "fail-closed ACL epoch checks",
+        "no graph-retrieval score as physical proof",
+        "HAT+Melete adapters with original contracts",
+        "no perpetual GPU/Kubernetes assumed for a small pilot"
+      ],
+      "candidates": {
+        "managed_projection": {
+          "components": "Managed PostgreSQL (Supabase candidate) canonical ledger + pgvector/native full-text baseline; Neo4j Aura evidence-bearing graph projection; same-provider/region object storage+Parquet; provider Batch/workflow; Docling and BGE/Qwen/API bake-off.",
+          "strengths": "Fits existing familiarity and explicit graph traversal while preserving exportable SoR; extra search DB optional.",
+          "risks": "Multi-provider network/ACL/backup consistency; region/private endpoint requires higher editions; no proven cost quote.",
+          "phase_fit": "Small full-flow pilot; re-evaluate scale and formal RDF needs."
+        },
+        "native_cloud": {
+          "components": "One AWS account hierarchy with managed Postgres, S3, Neptune, provider jobs; optional OpenSearch after lexical scale evidence.",
+          "strengths": "IAM/network/operations cohesion, broad cloud infrastructure.",
+          "risks": "Provider-specific graph/query/ops, overlapping stores, minimum provisioned costs; no operator preference."
+        },
+        "semantic_rdf": {
+          "components": "Managed PostgreSQL ledger + RDF/SPARQL/SHACL projection using Stardog or Jena + object store; vector/lexical selected independently.",
+          "strengths": "Explicit semantic/schema interoperability and shape reasoning.",
+          "risks": "Additional mapping and SPARQL skill; Stardog quote/Jena ops; not a substitute for numeric/physical validators."
+        },
+        "portable_selfhost": {
+          "components": "Portable Postgres+pgvector+graph projection+object storage+Temporal/Kubernetes.",
+          "strengths": "Control, export and portability.",
+          "risks": "Most operational ownership, upgrade/HA/security/load unknown; no operating team or cost proof."
+        }
+      }
+    },
+    "questions": {
+      "pilot_choice": {
+        "type": "choice",
+        "instructions": "Choose which stack to evaluate FIRST for a small but real full-flow pilot, not which production stack is proven best. Quality first, then operational feasibility; unfamiliar operations team and unverified private connectivity matter. Do not infer existing account access.",
+        "criteria": {
+          "managed_projection": "Evaluate the managed Postgres plus Neo4j projection stack first.",
+          "native_cloud": "Evaluate one native cloud stack first.",
+          "semantic_rdf": "Evaluate an RDF semantic projection stack first.",
+          "portable_selfhost": "Evaluate a portable self-hosted orchestration stack first."
+        }
+      },
+      "managed_readiness": {
+        "type": "score",
+        "instructions": "Score documentary readiness of managed_projection for detailed planning; distinguish functional fit from deployment or measured performance readiness.",
+        "criteria": [
+          "0: core contradiction",
+          "1: major missing roles",
+          "2: substantial unknowns affect architecture",
+          "3: coherent planning candidate with explicit external gates",
+          "4: validated interfaces and costs for the target",
+          "5: measured end-to-end production readiness"
+        ]
+      },
+      "complete_plan": {
+        "type": "noul",
+        "instructions": "Do these candidate descriptions alone justify provisioning cloud resources now? The user forbids implementation until full design and plans are reviewed."
+      }
+    }
+  },
+  "result": {
+    "content": [
+      {
+        "type": "text",
+        "text": "{\"profile\":\"general\",\"requestedModel\":\"typesafe/jev-1.13\",\"returnedModel\":\"typesafe/jev-1.13-20260917\",\"answers\":{\"pilot_choice\":{\"type\":\"choice\",\"probabilities\":{\"managed_projection\":0.85,\"native_cloud\":0.08,\"semantic_rdf\":0,\"portable_selfhost\":0.07},\"confidence\":0.8,\"choice\":\"managed_projection\"},\"managed_readiness\":{\"type\":\"score\",\"probabilities\":{\"0\":0,\"1\":0.01,\"2\":0.16,\"3\":0.83,\"4\":0,\"5\":0},\"confidence\":0.88,\"score\":2.81,\"legend\":{\"0\":\"0: core contradiction\",\"1\":\"1: major missing roles\",\"2\":\"2: substantial unknowns affect architecture\",\"3\":\"3: coherent planning candidate with explicit external gates\",\"4\":\"4: validated interfaces and costs for the target\",\"5\":\"5: measured end-to-end production readiness\"}},\"complete_plan\":{\"type\":\"noul\",\"noul\":0.08}},\"advisoryOnly\":true,\"project\":\"dse-knowledge-design\"}"
+      }
+    ],
+    "structuredContent": {
+      "profile": "general",
+      "requestedModel": "typesafe/jev-1.13",
+      "returnedModel": "typesafe/jev-1.13-20260917",
+      "answers": {
+        "pilot_choice": {
+          "type": "choice",
+          "probabilities": {
+            "managed_projection": 0.85,
+            "native_cloud": 0.08,
+            "semantic_rdf": 0,
+            "portable_selfhost": 0.07
+          },
+          "confidence": 0.8,
+          "choice": "managed_projection"
+        },
+        "managed_readiness": {
+          "type": "score",
+          "probabilities": {
+            "0": 0,
+            "1": 0.01,
+            "2": 0.16,
+            "3": 0.83,
+            "4": 0,
+            "5": 0
+          },
+          "confidence": 0.88,
+          "score": 2.81,
+          "legend": {
+            "0": "0: core contradiction",
+            "1": "1: major missing roles",
+            "2": "2: substantial unknowns affect architecture",
+            "3": "3: coherent planning candidate with explicit external gates",
+            "4": "4: validated interfaces and costs for the target",
+            "5": "5: measured end-to-end production readiness"
+          }
+        },
+        "complete_plan": {
+          "type": "noul",
+          "noul": 0.08
+        }
+      },
+      "advisoryOnly": true,
+      "project": "dse-knowledge-design"
+    }
+  },
+  "publication_note": "Internal request identifiers and usage/billing telemetry omitted from the public copy; decision inputs, advisory answers and model identities retained."
+}

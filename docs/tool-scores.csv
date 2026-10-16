@@ -1,0 +1,74 @@
+key,category,name,quality,fit,provenance,operability,portability,economics,score_100,evidence_stage,confidence_raw,official_url,research_file
+02:clickhouse,columnar_metrics,ClickHouse,4,4,4,4,4,3,78.0,E1,0.78,https://clickhouse.com/docs/use-cases/data-lake/getting-started,02-storage-retrieval.json
+02:microsoft_graphrag,corpus_wide_graph_indexing,Microsoft GraphRAG,4,4,3,3,4,2,69.0,E1,0.84,https://microsoft.github.io/graphrag/index/overview/,02-storage-retrieval.json
+04:tree_sitter_rules,deterministic_extraction,Native parsers + Tree-sitter/AST + unit/schema rules,5,5,5,4,5,3,93.0,E1,0.65,https://tree-sitter.github.io/tree-sitter/using-parsers/,04-models-ingestion-evaluation.json
+05:botorch_mobo,dse_search,BoTorch multi-objective Bayesian optimization,4,5,4,3,4,3,79.0,E1,E1,https://botorch.org/docs/v0.17.2/tutorials/multi_objective_bo,05-dse-search-candidates.json
+05:optuna_tpe,dse_search,Optuna conditional TPE,4,4,4,4,4,3,78.0,E1,E1,https://optuna.readthedocs.io/en/stable/reference/samplers/index.html,05-dse-search-candidates.json
+05:random_qmc,dse_search,Seeded random / QMC,3,3,5,5,5,3,78.0,E1,E1,https://optuna.readthedocs.io/en/stable/reference/samplers/index.html,05-dse-search-candidates.json
+05:pymoo_nsga,dse_search,pymoo NSGA-II / NSGA-III,4,4,4,3,4,3,75.0,E1,E1,https://www.pymoo.org/algorithms/moo/nsga2.html,05-dse-search-candidates.json
+05:grid,dse_search,Finite enumeration / grid,3,2,5,5,5,3,74.0,E1,E1,https://optuna.readthedocs.io/en/stable/reference/samplers/index.html,05-dse-search-candidates.json
+05:kg_guided_beam,dse_search,KG/LLM-guided bounded beam (proposed),3,4,3,2,3,3,61.0,proposal,proposal,https://microsoft.github.io/graphrag/,05-dse-search-candidates.json
+02:lightrag,dynamic_graph_rag,LightRAG,4,4,3,3,4,3,71.0,E1,0.7,https://github.com/HKUDS/LightRAG,02-storage-retrieval.json
+04:bge_m3,embedding,BAAI/bge-m3,4,5,5,3,5,3,85.0,E1,0.55,https://huggingface.co/BAAI/bge-m3,04-models-ingestion-evaluation.json
+04:qwen3_embedding_4b,embedding,Qwen/Qwen3-Embedding-4B,5,5,4,2,5,3,83.0,E1,0.44,https://huggingface.co/Qwen/Qwen3-Embedding-4B,04-models-ingestion-evaluation.json
+04:cohere_embed_v5_pro,embedding,Cohere embed-v5.0-pro,5,5,3,4,3,3,81.0,E1,0.43,https://docs.cohere.com/docs/cohere-embed,04-models-ingestion-evaluation.json
+04:qwen3_embedding_06b,embedding,Qwen/Qwen3-Embedding-0.6B,4,5,4,3,5,3,81.0,E1,0.5,https://huggingface.co/Qwen/Qwen3-Embedding-0.6B,04-models-ingestion-evaluation.json
+04:voyage_4_large,embedding,voyage-4-large,5,4,3,5,3,3,80.0,E1,0.46,https://docs.voyageai.com/docs/embeddings,04-models-ingestion-evaluation.json
+04:multilingual_e5_large_instruct,embedding,intfloat/multilingual-e5-large-instruct,3,4,5,4,5,3,79.0,E1,0.49,https://huggingface.co/intfloat/multilingual-e5-large-instruct,04-models-ingestion-evaluation.json
+04:qwen3_embedding_8b,embedding,Qwen/Qwen3-Embedding-8B,5,4,4,1,5,3,76.0,E1,0.4,https://huggingface.co/Qwen/Qwen3-Embedding-8B,04-models-ingestion-evaluation.json
+04:openai_text_embedding_3_large,embedding,OpenAI text-embedding-3-large,4,4,3,5,3,3,75.0,E1,0.45,https://developers.openai.com/api/docs/guides/embeddings,04-models-ingestion-evaluation.json
+04:gemini_embedding_2,embedding,Google Gemini Embedding 2,4,4,3,4,3,4,74.0,E1,0.48,https://ai.google.dev/gemini-api/docs/embeddings,04-models-ingestion-evaluation.json
+04:openai_text_embedding_3_small,embedding,OpenAI text-embedding-3-small,3,4,3,5,3,5,74.0,E1,0.47,https://developers.openai.com/api/docs/models/text-embedding-3-small,04-models-ingestion-evaluation.json
+04:jina_v5_small_retrieval,embedding,jina-embeddings-v5-text-small-retrieval,4,4,2,3,2,3,63.0,E1,0.41,https://huggingface.co/jinaai/jina-embeddings-v5-text-small-retrieval,04-models-ingestion-evaluation.json
+03:embedding-api,embedding-execution,"Hosted embedding API, online or batch",4,5,3,5,3,5,83.0,E1,0.82,https://developers.openai.com/api/docs/models/text-embedding-3-large,03-cloud-operations.json
+03:embedding-gpu-batch,embedding-execution,Ephemeral batch GPU workers,4,4,5,2,5,3,78.0,E1,0.56,https://aws.amazon.com/ec2/pricing/on-demand/,03-cloud-operations.json
+02:object_iceberg,evidence_lake,Versioned object storage + Parquet/Iceberg,4,5,5,3,5,3,85.0,E1,0.84,https://docs.aws.amazon.com/AmazonS3/latest/userguide/Versioning.html,02-storage-retrieval.json
+03:gcp-spanner-graph,graph-store,Cloud Spanner Graph,5,5,5,4,2,2,85.0,E1,0.77,https://docs.cloud.google.com/spanner/docs/graph/overview,03-cloud-operations.json
+03:neo4j-aura,graph-store,Neo4j AuraDB,5,4,4,5,3,3,84.0,E1,0.79,https://neo4j.com/pricing/,03-cloud-operations.json
+03:aws-neptune,graph-store,Amazon Neptune,4,4,5,4,2,2,76.0,E1,0.71,https://aws.amazon.com/neptune/pricing/,03-cloud-operations.json
+03:azure-cosmos-gremlin,graph-store,Azure Cosmos DB for Apache Gremlin,4,3,4,4,3,3,72.0,E1,0.77,https://learn.microsoft.com/en-us/azure/cosmos-db/gremlin/,03-cloud-operations.json
+02:neptune_analytics,graph_analytics,Amazon Neptune Analytics,3,3,4,4,2,2,63.0,E1,0.8,https://docs.aws.amazon.com/neptune-analytics/latest/userguide/what-is-neptune-analytics.html,02-storage-retrieval.json
+02:vespa,hybrid_search_engine,Vespa,5,5,4,2,4,3,81.0,E1,0.85,https://docs.vespa.ai/en/learn/tutorials/hybrid-search,02-storage-retrieval.json
+02:opensearch,hybrid_search_engine,OpenSearch,4,4,4,3,5,3,77.0,E1,0.88,https://docs.opensearch.org/latest/vector-search/ai-search/hybrid-search/index/,02-storage-retrieval.json
+02:elasticsearch,hybrid_search_engine,Elasticsearch / Elastic Cloud,4,4,4,4,3,2,74.0,E1,0.86,https://www.elastic.co/docs/solutions/search/hybrid-search,02-storage-retrieval.json
+03:aws-native,integrated-cloud-stack,AWS native,5,5,5,4,2,3,87.0,E1,0.72,https://docs.aws.amazon.com/wellarchitected/latest/security-pillar/aws-account-management-and-separation.html,03-cloud-operations.json
+03:gcp-native,integrated-cloud-stack,Google Cloud native,5,5,5,4,2,2,85.0,E1,0.74,https://docs.cloud.google.com/spanner/docs/graph/overview,03-cloud-operations.json
+03:azure-native,integrated-cloud-stack,Microsoft Azure native,5,4,4,4,2,3,79.0,E1,0.66,https://learn.microsoft.com/en-us/azure/cosmos-db/gremlin/faq,03-cloud-operations.json
+03:supabase-aura,managed-multi-provider-stack,Supabase PostgreSQL/pgvector + Neo4j AuraDB,4,4,4,3,4,3,75.0,E1,0.72,https://supabase.com/pricing,03-cloud-operations.json
+03:aws-s3,object-store,Amazon S3,5,5,5,5,3,4,94.0,E1,0.78,https://aws.amazon.com/s3/pricing/,03-cloud-operations.json
+03:azure-blob,object-store,Azure Blob Storage,5,5,5,5,3,4,94.0,E1,0.76,https://azure.microsoft.com/en-us/pricing/details/storage/blobs/,03-cloud-operations.json
+03:gcp-gcs,object-store,Google Cloud Storage,5,5,5,5,3,4,94.0,E1,0.8,https://cloud.google.com/storage/pricing,03-cloud-operations.json
+04:docling,parsing,Docling + Docling Models,4,5,4,4,5,3,84.0,E1,0.52,https://github.com/docling-project/docling,04-models-ingestion-evaluation.json
+04:mathpix_ocr_api,parsing,Mathpix OCR API,5,4,4,4,2,3,79.0,E1,0.47,https://mathpix.com/pricing/api,04-models-ingestion-evaluation.json
+04:paddleocr_pp_structure_v3,parsing,PaddleOCR PP-StructureV3,4,4,4,3,4,3,75.0,E1,0.48,https://github.com/PaddlePaddle/PaddleOCR,04-models-ingestion-evaluation.json
+04:grobid,parsing,GROBID,2,4,5,4,5,3,74.0,E1,0.53,https://github.com/grobidOrg/grobid,04-models-ingestion-evaluation.json
+04:azure_document_intelligence_layout,parsing,Azure Document Intelligence prebuilt-layout,3,4,4,4,3,3,71.0,E1,0.4,https://learn.microsoft.com/en-us/azure/ai-services/document-intelligence/prebuilt/layout?view=doc-intel-4.0.0,04-models-ingestion-evaluation.json
+04:google_document_ai_layout,parsing,Google Document AI Layout Parser,3,4,4,4,3,3,71.0,E1,0.43,https://docs.cloud.google.com/document-ai/docs/layout-parse-chunk,04-models-ingestion-evaluation.json
+04:mineru,parsing,MinerU 4.0,4,4,3,3,4,3,71.0,E1,0.43,https://github.com/opendatalab/MinerU,04-models-ingestion-evaluation.json
+04:aws_textract_analyze_document,parsing,Amazon Textract AnalyzeDocument,3,3,4,4,3,3,67.0,E1,0.38,https://docs.aws.amazon.com/textract/latest/APIReference/API_AnalyzeDocument.html,04-models-ingestion-evaluation.json
+04:marker,parsing,Marker / Surya,4,4,2,3,3,3,65.0,E1,0.45,https://github.com/datalab-to/marker,04-models-ingestion-evaluation.json
+03:portable-mix,portable-managed-self-hosted-stack,Portable object + PostgreSQL/pgvector + Apache AGE + Temporal/Kubernetes,4,4,5,2,5,4,80.0,E1,0.61,https://github.com/pgvector/pgvector,03-cloud-operations.json
+02:neo4j_aura,property_graph,Neo4j Aura,4,5,4,4,3,3,80.0,E1,0.84,https://neo4j.com/docs/cypher-manual/current/indexes/search-indexes/,02-storage-retrieval.json
+02:neptune_database,property_graph,Amazon Neptune Database,4,4,5,3,2,3,75.0,E1,0.82,https://docs.aws.amazon.com/neptune/,02-storage-retrieval.json
+03:provider-batch,queue-workflow-compute,Provider-managed queue + workflow + Batch jobs,5,5,5,4,2,4,89.0,E1,0.74,https://aws.amazon.com/batch/pricing/,03-cloud-operations.json
+03:temporal-kubernetes,queue-workflow-compute,Temporal + Kubernetes jobs,4,4,5,2,5,4,80.0,E1,0.64,https://docs.temporal.io/,03-cloud-operations.json
+02:stardog_cloud,rdf_store,Stardog Cloud,5,5,5,4,3,2,87.0,E1,0.83,https://docs.stardog.com/stardog-cloud/,02-storage-retrieval.json
+02:apache_jena,rdf_store,Apache Jena Fuseki + TDB2,4,5,4,2,5,3,78.0,E1,0.86,https://jena.apache.org/documentation/,02-storage-retrieval.json
+02:postgres_pgvector,relational_vector,PostgreSQL + pgvector,4,4,5,3,5,3,81.0,E1,0.91,https://github.com/pgvector/pgvector,02-storage-retrieval.json
+02:supabase_pgvector,relational_vector,Supabase Postgres + pgvector,4,4,4,5,3,3,79.0,E1,0.9,https://supabase.com/docs/guides/ai/vector-columns,02-storage-retrieval.json
+04:bge_reranker_v2_m3,reranker,BAAI/bge-reranker-v2-m3,4,5,5,4,5,3,88.0,E1,0.48,https://huggingface.co/BAAI/bge-reranker-v2-m3,04-models-ingestion-evaluation.json
+04:qwen3_reranker_06b,reranker,Qwen/Qwen3-Reranker-0.6B,4,4,5,3,5,3,81.0,E1,0.44,https://huggingface.co/Qwen/Qwen3-Reranker-0.6B,04-models-ingestion-evaluation.json
+04:cohere_rerank_v4_pro,reranker,Cohere rerank-v4.0-pro,5,4,3,4,3,3,77.0,E1,0.42,https://docs.cohere.com/v2/docs/rerank,04-models-ingestion-evaluation.json
+04:cohere_rerank_v4_fast,reranker,Cohere rerank-v4.0-fast,4,4,3,5,3,3,75.0,E1,0.42,https://docs.cohere.com/v2/docs/rerank,04-models-ingestion-evaluation.json
+04:bm25_exact,retrieval_baseline,BM25 + exact identifier/unit/field search,4,5,5,5,5,3,91.0,E1,0.63,https://www.elastic.co/docs/reference/elasticsearch/index-settings/similarity,04-models-ingestion-evaluation.json
+04:gemini_structured_output,semantic_extraction,Gemini 3.1 Pro Structured Output,4,4,3,4,3,3,72.0,E1,0.4,https://ai.google.dev/gemini-api/docs/models/gemini-3.1-pro-preview,04-models-ingestion-evaluation.json
+04:vllm_local_json_schema,semantic_extraction,vLLM JSON Schema/XGrammar or Guidance + pinned local model,3,4,4,2,5,3,69.0,E1,0.37,https://docs.vllm.ai/en/latest/features/structured_outputs.html,04-models-ingestion-evaluation.json
+04:openai_gpt6_structured_outputs,semantic_extraction,OpenAI Structured Outputs + gpt-6-astra,4,4,3,4,3,1,68.0,E1,0.46,https://developers.openai.com/api/docs/guides/structured-outputs,04-models-ingestion-evaluation.json
+03:managed-pgvector,vector-rag-store,Managed PostgreSQL + pgvector,4,4,5,4,5,4,86.0,E1,0.72,https://supabase.com/docs/guides/ai/vector-columns,03-cloud-operations.json
+03:gcp-spanner-vector,vector-rag-store,Spanner Vector Search,5,4,5,4,2,2,81.0,E1,0.73,https://docs.cloud.google.com/spanner/docs/vector-indexes,03-cloud-operations.json
+03:azure-ai-search,vector-rag-store,Azure AI Search,5,4,4,4,2,3,79.0,E1,0.71,https://learn.microsoft.com/en-us/azure/search/search-sku-tier,03-cloud-operations.json
+03:aws-opensearch-serverless,vector-rag-store,Amazon OpenSearch Serverless,4,4,4,4,2,3,74.0,E1,0.78,https://aws.amazon.com/opensearch-service/pricing/,03-cloud-operations.json
+02:qdrant,vector_search,Qdrant,4,4,4,4,5,3,80.0,E1,0.88,https://qdrant.tech/documentation/search/hybrid-queries/,02-storage-retrieval.json
+02:weaviate,vector_search,Weaviate,4,4,3,4,4,3,74.0,E1,0.85,https://docs.weaviate.io/weaviate/search/hybrid,02-storage-retrieval.json
+02:milvus,vector_search,Milvus,4,4,3,2,4,3,68.0,E1,0.86,https://milvus.io/docs/milvus_hybrid_search_retriever.md,02-storage-retrieval.json
+02:pinecone,vector_search,Pinecone,4,3,3,5,2,2,67.0,E1,0.82,https://www.pinecone.io/learn/search-with-pinecone/,02-storage-retrieval.json
