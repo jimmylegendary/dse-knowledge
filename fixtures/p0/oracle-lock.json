@@ -1,0 +1,103 @@
+{
+  "schema_version": "1.0.0",
+  "oracle_lock_id": "p0-review-contract-oracles-v1",
+  "created_at_utc": "2026-10-16 21:28:45 UTC",
+  "basis_commit": "2a460a0a57d13db6753481a26074e3fb3b4f2aa9",
+  "status": "reviewed_document_gold_not_runtime_acceptance",
+  "authoring_rule": "Expected cases fixed before product implementation; changes require a new lock revision and independent review.",
+  "prohibited_promotion": "Static/schema/oracle checks do not authorize execution or prove adapter conformance/B300 readiness.",
+  "native_runtime_executed": false,
+  "b300_positive_binding_status": "blocked_unbound",
+  "artifacts": [
+    {
+      "path": "schemas/case-oracle.schema.json",
+      "sha256": "ec8430836af72c05e57da7dedac5b6d64d999da243c621bfecab0921830d40f6",
+      "bytes": 820,
+      "case_count": 0
+    },
+    {
+      "path": "schemas/claim-use-policy.schema.json",
+      "sha256": "9ed79dfaec6b0fde18abab3f4f3a21b2fc48ee353bb89daa0c4cf529fa8582f0",
+      "bytes": 10188,
+      "case_count": 0
+    },
+    {
+      "path": "schemas/comparison-policy.schema.json",
+      "sha256": "ce34d6b7c2c79869788c978576dbdee65c34fdd9a713197e8ac30ea5366b370f",
+      "bytes": 4151,
+      "case_count": 0
+    },
+    {
+      "path": "schemas/melete-bridge.schema.json",
+      "sha256": "8a30c22ef5a7d13b3826057b04ed12ec14a9e94a5e47209598c849d3053b8e34",
+      "bytes": 12712,
+      "case_count": 0
+    },
+    {
+      "path": "schemas/research-catalog.schema.json",
+      "sha256": "4b26c1fcc820146ce8139ca1433fcb4ace39663b38b6e7be256ae3911a2f0633",
+      "bytes": 5061,
+      "case_count": 0
+    },
+    {
+      "path": "schemas/snapshot-manifest.schema.json",
+      "sha256": "5155178543e55f02338c6bbaaad3dffc2976495c76e0312b5a268b3d828f0a97",
+      "bytes": 13914,
+      "case_count": 0
+    },
+    {
+      "path": "schemas/validation-profile.schema.json",
+      "sha256": "b2590eae597a64d2efc9c4ca17741dfada9119aae5703d740beba91e5fa108cb",
+      "bytes": 6833,
+      "case_count": 0
+    },
+    {
+      "path": "fixtures/p0/comparison-cases.json",
+      "sha256": "e5e2ea6a3d0ef02031ea514ea24aacaf19ba1a8d88c0ecabe09e4463d06d9ece",
+      "bytes": 93528,
+      "case_count": 22
+    },
+    {
+      "path": "fixtures/p0/cost-cases.json",
+      "sha256": "1da782790573702f26cdec735586ae39cd4d5f8b3b480b7750cff9e5297cfb9b",
+      "bytes": 9821,
+      "case_count": 12
+    },
+    {
+      "path": "fixtures/p0/embedding-index-cases.json",
+      "sha256": "e22e431611c7cc83fecdbfaae30963d089467736d80942c40ebfec8a1de79577",
+      "bytes": 7492,
+      "case_count": 9
+    },
+    {
+      "path": "fixtures/p0/episode-cases.json",
+      "sha256": "cd04739b687d830243d4a6eb740b7e9024b09a3f59ae62d9f57044e878a3a5dd",
+      "bytes": 8858,
+      "case_count": 12
+    },
+    {
+      "path": "fixtures/p0/episode-manifest.json",
+      "sha256": "3b9651e496e9bb9377d6980d7432826379c7b53a73e6ac25fdf404835e6c8264",
+      "bytes": 16745,
+      "case_count": 0
+    },
+    {
+      "path": "fixtures/p0/melete-cases.json",
+      "sha256": "0ffdfae56326fc58dbab2726b78ab0454695d7afbc9f4a17cd6e72be60992dad",
+      "bytes": 48090,
+      "case_count": 21
+    },
+    {
+      "path": "fixtures/p0/snapshot-cases.json",
+      "sha256": "26e03929e4482ffb11a9feaacbbdfd96ebfdab0bbf646cc2ffde365d7a70cf4a",
+      "bytes": 45259,
+      "case_count": 13
+    },
+    {
+      "path": "fixtures/p0/validation-cases.json",
+      "sha256": "e32e3523bdb512e40181c06015792ec6d854ec74e3b3907e96d0c90eafe2615e",
+      "bytes": 47450,
+      "case_count": 14
+    }
+  ]
+}

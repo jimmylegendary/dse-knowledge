@@ -1,0 +1,1389 @@
+{
+  "schema_version": "1.0.0",
+  "fixture_set_id": "snapshot-oracles-p0-v1",
+  "fixture_origin": "synthetic contract data; no captured runtime snapshot",
+  "manifest_examples": [
+    {
+      "schema_version": "1.0.0",
+      "snapshot_id": "synthetic-plan-snapshot-v1",
+      "manifest_state": "plan_template",
+      "purpose": "audit_decision",
+      "captured_at": null,
+      "dependency_refs": [
+        {
+          "id": "synthetic-source-v1",
+          "kind": "source_revision",
+          "revision": "v1",
+          "content_sha256": null,
+          "required": true,
+          "availability": "planned"
+        },
+        {
+          "id": "decision-record-v1",
+          "kind": "decision_record",
+          "revision": "v1",
+          "content_sha256": null,
+          "required": true,
+          "availability": "planned"
+        },
+        {
+          "id": "decision-input-v1",
+          "kind": "decision_input",
+          "revision": "v1",
+          "content_sha256": null,
+          "required": true,
+          "availability": "planned"
+        },
+        {
+          "id": "evidence-bundle-v1",
+          "kind": "evidence_bundle",
+          "revision": "v1",
+          "content_sha256": null,
+          "required": true,
+          "availability": "planned"
+        },
+        {
+          "id": "native-report-v1",
+          "kind": "native_report",
+          "revision": "v1",
+          "content_sha256": null,
+          "required": true,
+          "availability": "planned"
+        },
+        {
+          "id": "validation-report-v1",
+          "kind": "validation_report",
+          "revision": "v1",
+          "content_sha256": null,
+          "required": true,
+          "availability": "planned"
+        }
+      ],
+      "policy_refs": [
+        {
+          "id": "validation-profile-v1",
+          "kind": "validation_profile",
+          "revision": "1",
+          "content_sha256": null,
+          "required": true,
+          "availability": "planned"
+        },
+        {
+          "id": "policy-bundle-v1",
+          "kind": "policy_bundle",
+          "revision": "v1",
+          "content_sha256": null,
+          "required": true,
+          "availability": "planned"
+        }
+      ],
+      "information_access": {
+        "design_mode": "offline",
+        "workload_visibility": "full_scenario",
+        "controller_profile": "realizable",
+        "state_access_policy": {
+          "kind": "realizable_past_only",
+          "version": 1
+        }
+      },
+      "authorization_epoch": 1,
+      "lineage": {
+        "primary_observation_id": "synthetic-observation-1",
+        "lineage_root_id": "synthetic-root-1",
+        "independence_class": "original_measurement"
+      },
+      "availability": "not_captured",
+      "root_digest": null,
+      "semantic_validation_version": "snapshot-semantic-validation-v1",
+      "closure": {
+        "decision_record": "decision-record-v1",
+        "decision_input": "decision-input-v1",
+        "evidence_bundle": "evidence-bundle-v1",
+        "native_report": "native-report-v1",
+        "validation_report": "validation-report-v1",
+        "policy_bundle": "policy-bundle-v1"
+      },
+      "temporal_access": {
+        "status": "planned",
+        "clock": "run_monotonic_us",
+        "encoding": "inline",
+        "decisions": []
+      }
+    },
+    {
+      "schema_version": "1.0.0",
+      "snapshot_id": "synthetic-replay_original_inputs-plan-v1",
+      "manifest_state": "plan_template",
+      "purpose": "replay_original_inputs",
+      "captured_at": null,
+      "dependency_refs": [
+        {
+          "id": "synthetic-replay_original_inputs-run_manifest",
+          "kind": "run_manifest",
+          "revision": "v1",
+          "content_sha256": null,
+          "required": true,
+          "availability": "planned"
+        },
+        {
+          "id": "synthetic-replay_original_inputs-workload",
+          "kind": "workload",
+          "revision": "v1",
+          "content_sha256": null,
+          "required": true,
+          "availability": "planned"
+        },
+        {
+          "id": "synthetic-replay_original_inputs-assembly",
+          "kind": "hardware_assembly",
+          "revision": "v1",
+          "content_sha256": null,
+          "required": true,
+          "availability": "planned"
+        },
+        {
+          "id": "synthetic-replay_original_inputs-recipe",
+          "kind": "kernel_recipe",
+          "revision": "v1",
+          "content_sha256": null,
+          "required": true,
+          "availability": "planned"
+        },
+        {
+          "id": "synthetic-replay_original_inputs-toolchain",
+          "kind": "toolchain_lock",
+          "revision": "v1",
+          "content_sha256": null,
+          "required": true,
+          "availability": "planned"
+        },
+        {
+          "id": "synthetic-replay_original_inputs-initial_state",
+          "kind": "runtime_state_snapshot",
+          "revision": "v1",
+          "content_sha256": null,
+          "required": true,
+          "availability": "planned"
+        },
+        {
+          "id": "synthetic-replay_original_inputs-calibration",
+          "kind": "calibration_profile",
+          "revision": "v1",
+          "content_sha256": null,
+          "required": true,
+          "availability": "planned"
+        }
+      ],
+      "policy_refs": [
+        {
+          "id": "synthetic-replay_original_inputs-policy_bundle",
+          "kind": "policy_bundle",
+          "revision": "v1",
+          "content_sha256": null,
+          "required": true,
+          "availability": "planned"
+        }
+      ],
+      "information_access": {
+        "design_mode": "offline",
+        "workload_visibility": "full_scenario",
+        "controller_profile": "realizable",
+        "state_access_policy": {
+          "kind": "realizable_past_only",
+          "version": 1
+        }
+      },
+      "authorization_epoch": 1,
+      "lineage": {
+        "primary_observation_id": "synthetic-observation-1",
+        "lineage_root_id": "synthetic-root-1",
+        "independence_class": "original_measurement"
+      },
+      "availability": "not_captured",
+      "root_digest": null,
+      "semantic_validation_version": "snapshot-semantic-validation-v1",
+      "closure": {
+        "run_manifest": "synthetic-replay_original_inputs-run_manifest",
+        "workload": "synthetic-replay_original_inputs-workload",
+        "assembly": "synthetic-replay_original_inputs-assembly",
+        "recipe": "synthetic-replay_original_inputs-recipe",
+        "toolchain": "synthetic-replay_original_inputs-toolchain",
+        "initial_state": "synthetic-replay_original_inputs-initial_state",
+        "calibration": "synthetic-replay_original_inputs-calibration",
+        "policy_bundle": "synthetic-replay_original_inputs-policy_bundle"
+      },
+      "temporal_access": {
+        "status": "planned",
+        "clock": "run_monotonic_us",
+        "encoding": "inline",
+        "decisions": []
+      }
+    },
+    {
+      "schema_version": "1.0.0",
+      "snapshot_id": "synthetic-reevaluate_current_knowledge-plan-v1",
+      "manifest_state": "plan_template",
+      "purpose": "reevaluate_current_knowledge",
+      "captured_at": null,
+      "dependency_refs": [
+        {
+          "id": "synthetic-reevaluate_current_knowledge-original_decision",
+          "kind": "decision_record",
+          "revision": "v1",
+          "content_sha256": null,
+          "required": true,
+          "availability": "planned"
+        },
+        {
+          "id": "synthetic-reevaluate_current_knowledge-original_design",
+          "kind": "design_point",
+          "revision": "v1",
+          "content_sha256": null,
+          "required": true,
+          "availability": "planned"
+        },
+        {
+          "id": "synthetic-reevaluate_current_knowledge-original_run",
+          "kind": "run_manifest",
+          "revision": "v1",
+          "content_sha256": null,
+          "required": true,
+          "availability": "planned"
+        },
+        {
+          "id": "synthetic-reevaluate_current_knowledge-current_knowledge",
+          "kind": "knowledge_snapshot",
+          "revision": "v1",
+          "content_sha256": null,
+          "required": true,
+          "availability": "planned"
+        }
+      ],
+      "policy_refs": [
+        {
+          "id": "synthetic-reevaluate_current_knowledge-new_policy_bundle",
+          "kind": "policy_bundle",
+          "revision": "v1",
+          "content_sha256": null,
+          "required": true,
+          "availability": "planned"
+        }
+      ],
+      "information_access": {
+        "design_mode": "offline",
+        "workload_visibility": "full_scenario",
+        "controller_profile": "realizable",
+        "state_access_policy": {
+          "kind": "realizable_past_only",
+          "version": 1
+        }
+      },
+      "authorization_epoch": 1,
+      "lineage": {
+        "primary_observation_id": "synthetic-observation-1",
+        "lineage_root_id": "synthetic-root-1",
+        "independence_class": "reinterpretation"
+      },
+      "availability": "not_captured",
+      "root_digest": null,
+      "semantic_validation_version": "snapshot-semantic-validation-v1",
+      "closure": {
+        "original_decision": "synthetic-reevaluate_current_knowledge-original_decision",
+        "original_design": "synthetic-reevaluate_current_knowledge-original_design",
+        "original_run": "synthetic-reevaluate_current_knowledge-original_run",
+        "current_knowledge": "synthetic-reevaluate_current_knowledge-current_knowledge",
+        "new_policy_bundle": "synthetic-reevaluate_current_knowledge-new_policy_bundle"
+      },
+      "temporal_access": {
+        "status": "planned",
+        "clock": "run_monotonic_us",
+        "encoding": "inline",
+        "decisions": []
+      },
+      "derived_from_snapshot": "synthetic-prior-snapshot-v1"
+    }
+  ],
+  "cases": [
+    {
+      "case_id": "SNAP-01",
+      "required_capability": "decision_audit",
+      "input": {
+        "purpose": "audit_decision",
+        "recorded_bundle": true,
+        "recorded_policy": true,
+        "recorded_native_results": true,
+        "current_access": "allow"
+      },
+      "expected_decision": "audit_available",
+      "allowed_unknown_reasons": [],
+      "expected_execution_permission": "not_applicable",
+      "runtime_status": "not_run",
+      "expected": {}
+    },
+    {
+      "case_id": "SNAP-02",
+      "required_capability": "original_input_replay",
+      "input": {
+        "purpose": "replay_original_inputs",
+        "required_artifacts": [
+          {
+            "id": "source-v1",
+            "availability": "deleted"
+          }
+        ],
+        "latest_replacement_available": true
+      },
+      "expected_decision": "replay_blocked",
+      "allowed_unknown_reasons": [
+        "required_artifact_unavailable"
+      ],
+      "expected_execution_permission": "not_applicable",
+      "runtime_status": "not_run",
+      "expected": {}
+    },
+    {
+      "case_id": "SNAP-03",
+      "required_capability": "current_knowledge_reevaluation",
+      "input": {
+        "purpose": "reevaluate_current_knowledge",
+        "parent_snapshot": "snapshot-old",
+        "old_policy": "v1",
+        "new_policy": "v2",
+        "overwrite_old_verdict": false
+      },
+      "expected_decision": "new_analysis_required",
+      "allowed_unknown_reasons": [],
+      "expected_execution_permission": "not_applicable",
+      "runtime_status": "not_run",
+      "expected": {
+        "old_verdict_unchanged": true,
+        "new_analysis_id_required": true
+      }
+    },
+    {
+      "case_id": "SNAP-04",
+      "required_capability": "information_access",
+      "input": {
+        "manifest": {
+          "schema_version": "1.0.0",
+          "snapshot_id": "synthetic-plan-snapshot-v1",
+          "manifest_state": "plan_template",
+          "purpose": "audit_decision",
+          "captured_at": null,
+          "dependency_refs": [
+            {
+              "id": "synthetic-source-v1",
+              "kind": "source_revision",
+              "revision": "v1",
+              "content_sha256": null,
+              "required": true,
+              "availability": "planned"
+            },
+            {
+              "id": "decision-record-v1",
+              "kind": "decision_record",
+              "revision": "v1",
+              "content_sha256": null,
+              "required": true,
+              "availability": "planned"
+            },
+            {
+              "id": "decision-input-v1",
+              "kind": "decision_input",
+              "revision": "v1",
+              "content_sha256": null,
+              "required": true,
+              "availability": "planned"
+            },
+            {
+              "id": "evidence-bundle-v1",
+              "kind": "evidence_bundle",
+              "revision": "v1",
+              "content_sha256": null,
+              "required": true,
+              "availability": "planned"
+            },
+            {
+              "id": "native-report-v1",
+              "kind": "native_report",
+              "revision": "v1",
+              "content_sha256": null,
+              "required": true,
+              "availability": "planned"
+            },
+            {
+              "id": "validation-report-v1",
+              "kind": "validation_report",
+              "revision": "v1",
+              "content_sha256": null,
+              "required": true,
+              "availability": "planned"
+            },
+            {
+              "id": "resource-state-v1",
+              "kind": "resource_observation",
+              "revision": "v1",
+              "content_sha256": null,
+              "required": true,
+              "availability": "planned"
+            }
+          ],
+          "policy_refs": [
+            {
+              "id": "validation-profile-v1",
+              "kind": "validation_profile",
+              "revision": "1",
+              "content_sha256": null,
+              "required": true,
+              "availability": "planned"
+            },
+            {
+              "id": "policy-bundle-v1",
+              "kind": "policy_bundle",
+              "revision": "v1",
+              "content_sha256": null,
+              "required": true,
+              "availability": "planned"
+            }
+          ],
+          "information_access": {
+            "design_mode": "online",
+            "workload_visibility": "full_scenario",
+            "controller_profile": "realizable",
+            "state_access_policy": {
+              "kind": "realizable_past_only",
+              "version": 1
+            }
+          },
+          "authorization_epoch": 1,
+          "lineage": {
+            "primary_observation_id": "synthetic-observation-1",
+            "lineage_root_id": "synthetic-root-1",
+            "independence_class": "original_measurement"
+          },
+          "availability": "not_captured",
+          "root_digest": null,
+          "semantic_validation_version": "snapshot-semantic-validation-v1",
+          "closure": {
+            "decision_record": "decision-record-v1",
+            "decision_input": "decision-input-v1",
+            "evidence_bundle": "evidence-bundle-v1",
+            "native_report": "native-report-v1",
+            "validation_report": "validation-report-v1",
+            "policy_bundle": "policy-bundle-v1"
+          },
+          "temporal_access": {
+            "status": "recorded",
+            "clock": "run_monotonic_us",
+            "encoding": "inline",
+            "decisions": [
+              {
+                "decision_id": "decision-1",
+                "decision_tick": "10",
+                "observations": [
+                  {
+                    "observation_id": "obs-1",
+                    "observed_at_tick": "9",
+                    "available_at_tick": "11",
+                    "source_ref": "resource-state-v1",
+                    "derived_from_observation_ids": []
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        "current_access": "allow"
+      },
+      "expected_decision": "information_access_violation",
+      "allowed_unknown_reasons": [],
+      "expected_execution_permission": "not_applicable",
+      "runtime_status": "not_run",
+      "expected": {}
+    },
+    {
+      "case_id": "SNAP-05",
+      "required_capability": "information_access",
+      "input": {
+        "manifest": {
+          "schema_version": "1.0.0",
+          "snapshot_id": "synthetic-plan-snapshot-v1",
+          "manifest_state": "plan_template",
+          "purpose": "audit_decision",
+          "captured_at": null,
+          "dependency_refs": [
+            {
+              "id": "synthetic-source-v1",
+              "kind": "source_revision",
+              "revision": "v1",
+              "content_sha256": null,
+              "required": true,
+              "availability": "planned"
+            },
+            {
+              "id": "decision-record-v1",
+              "kind": "decision_record",
+              "revision": "v1",
+              "content_sha256": null,
+              "required": true,
+              "availability": "planned"
+            },
+            {
+              "id": "decision-input-v1",
+              "kind": "decision_input",
+              "revision": "v1",
+              "content_sha256": null,
+              "required": true,
+              "availability": "planned"
+            },
+            {
+              "id": "evidence-bundle-v1",
+              "kind": "evidence_bundle",
+              "revision": "v1",
+              "content_sha256": null,
+              "required": true,
+              "availability": "planned"
+            },
+            {
+              "id": "native-report-v1",
+              "kind": "native_report",
+              "revision": "v1",
+              "content_sha256": null,
+              "required": true,
+              "availability": "planned"
+            },
+            {
+              "id": "validation-report-v1",
+              "kind": "validation_report",
+              "revision": "v1",
+              "content_sha256": null,
+              "required": true,
+              "availability": "planned"
+            },
+            {
+              "id": "resource-state-v1",
+              "kind": "resource_observation",
+              "revision": "v1",
+              "content_sha256": null,
+              "required": true,
+              "availability": "planned"
+            }
+          ],
+          "policy_refs": [
+            {
+              "id": "validation-profile-v1",
+              "kind": "validation_profile",
+              "revision": "1",
+              "content_sha256": null,
+              "required": true,
+              "availability": "planned"
+            },
+            {
+              "id": "policy-bundle-v1",
+              "kind": "policy_bundle",
+              "revision": "v1",
+              "content_sha256": null,
+              "required": true,
+              "availability": "planned"
+            }
+          ],
+          "information_access": {
+            "design_mode": "offline",
+            "workload_visibility": "full_scenario",
+            "controller_profile": "realizable",
+            "state_access_policy": {
+              "kind": "realizable_past_only",
+              "version": 1
+            }
+          },
+          "authorization_epoch": 1,
+          "lineage": {
+            "primary_observation_id": "synthetic-observation-1",
+            "lineage_root_id": "synthetic-root-1",
+            "independence_class": "original_measurement"
+          },
+          "availability": "not_captured",
+          "root_digest": null,
+          "semantic_validation_version": "snapshot-semantic-validation-v1",
+          "closure": {
+            "decision_record": "decision-record-v1",
+            "decision_input": "decision-input-v1",
+            "evidence_bundle": "evidence-bundle-v1",
+            "native_report": "native-report-v1",
+            "validation_report": "validation-report-v1",
+            "policy_bundle": "policy-bundle-v1"
+          },
+          "temporal_access": {
+            "status": "recorded",
+            "clock": "run_monotonic_us",
+            "encoding": "inline",
+            "decisions": [
+              {
+                "decision_id": "decision-1",
+                "decision_tick": "10",
+                "observations": [
+                  {
+                    "observation_id": "obs-1",
+                    "observed_at_tick": "9",
+                    "available_at_tick": "9",
+                    "source_ref": "resource-state-v1",
+                    "derived_from_observation_ids": []
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        "current_access": "allow"
+      },
+      "expected_decision": "allowed_with_declared_scope",
+      "allowed_unknown_reasons": [],
+      "expected_execution_permission": "not_applicable",
+      "runtime_status": "not_run",
+      "expected": {}
+    },
+    {
+      "case_id": "SNAP-06",
+      "required_capability": "profile_compatibility",
+      "input": {
+        "source_profile": "oracle",
+        "requested_profile": "realizable"
+      },
+      "expected_decision": "incompatible_profile",
+      "allowed_unknown_reasons": [],
+      "expected_execution_permission": "not_applicable",
+      "runtime_status": "not_run",
+      "expected": {}
+    },
+    {
+      "case_id": "SNAP-07",
+      "required_capability": "current_authorization",
+      "input": {
+        "historical_access": "allow",
+        "historical_epoch": 1,
+        "current_access": "deny",
+        "current_epoch": 2
+      },
+      "expected_decision": "access_denied",
+      "allowed_unknown_reasons": [],
+      "expected_execution_permission": "not_applicable",
+      "runtime_status": "not_run",
+      "expected": {}
+    },
+    {
+      "case_id": "SNAP-08",
+      "required_capability": "evidence_independence",
+      "input": {
+        "lineage_root_id": "root-1",
+        "new_event_id": "new-copy",
+        "existing_roots": [
+          "root-1"
+        ],
+        "independence_class": "reinterpretation"
+      },
+      "expected_decision": "same_independence_root",
+      "allowed_unknown_reasons": [],
+      "expected_execution_permission": "not_applicable",
+      "runtime_status": "not_run",
+      "expected": {
+        "independent_count_increment": 0
+      }
+    },
+    {
+      "case_id": "SNAP-09",
+      "required_capability": "snapshot_semantic_validation",
+      "input": {
+        "manifest": {
+          "schema_version": "1.0.0",
+          "snapshot_id": "synthetic-plan-snapshot-v1",
+          "manifest_state": "plan_template",
+          "purpose": "audit_decision",
+          "captured_at": null,
+          "dependency_refs": [
+            {
+              "id": "synthetic-source-v1",
+              "kind": "source_revision",
+              "revision": "v1",
+              "content_sha256": null,
+              "required": true,
+              "availability": "planned"
+            },
+            {
+              "id": "decision-record-v1",
+              "kind": "decision_record",
+              "revision": "v1",
+              "content_sha256": null,
+              "required": true,
+              "availability": "planned"
+            },
+            {
+              "id": "decision-input-v1",
+              "kind": "decision_input",
+              "revision": "v1",
+              "content_sha256": null,
+              "required": true,
+              "availability": "planned"
+            },
+            {
+              "id": "evidence-bundle-v1",
+              "kind": "evidence_bundle",
+              "revision": "v1",
+              "content_sha256": null,
+              "required": true,
+              "availability": "planned"
+            },
+            {
+              "id": "native-report-v1",
+              "kind": "native_report",
+              "revision": "v1",
+              "content_sha256": null,
+              "required": true,
+              "availability": "planned"
+            },
+            {
+              "id": "validation-report-v1",
+              "kind": "validation_report",
+              "revision": "v1",
+              "content_sha256": null,
+              "required": true,
+              "availability": "planned"
+            },
+            {
+              "id": "same-run",
+              "kind": "external_measurement_run",
+              "revision": "v1",
+              "content_sha256": null,
+              "required": true,
+              "availability": "planned"
+            },
+            {
+              "id": "capture-v1",
+              "kind": "device_capture",
+              "revision": "v1",
+              "content_sha256": null,
+              "required": true,
+              "availability": "planned"
+            },
+            {
+              "id": "assessment-v1",
+              "kind": "independence_assessment",
+              "revision": "v1",
+              "content_sha256": null,
+              "required": true,
+              "availability": "planned"
+            }
+          ],
+          "policy_refs": [
+            {
+              "id": "validation-profile-v1",
+              "kind": "validation_profile",
+              "revision": "1",
+              "content_sha256": null,
+              "required": true,
+              "availability": "planned"
+            },
+            {
+              "id": "policy-bundle-v1",
+              "kind": "policy_bundle",
+              "revision": "v1",
+              "content_sha256": null,
+              "required": true,
+              "availability": "planned"
+            }
+          ],
+          "information_access": {
+            "design_mode": "offline",
+            "workload_visibility": "full_scenario",
+            "controller_profile": "realizable",
+            "state_access_policy": {
+              "kind": "realizable_past_only",
+              "version": 1
+            }
+          },
+          "authorization_epoch": 1,
+          "lineage": {
+            "primary_observation_id": "same-observation",
+            "lineage_root_id": "same-root",
+            "replicates_lineage_root_id": "same-root",
+            "independence_class": "independent_replication",
+            "independence_evidence": {
+              "primary_measurement_run_ref": "same-run",
+              "replicates_run_ref": "same-run",
+              "new_capture_ref": "capture-v1",
+              "assessment_ref": "assessment-v1"
+            }
+          },
+          "availability": "not_captured",
+          "root_digest": null,
+          "semantic_validation_version": "snapshot-semantic-validation-v1",
+          "closure": {
+            "decision_record": "decision-record-v1",
+            "decision_input": "decision-input-v1",
+            "evidence_bundle": "evidence-bundle-v1",
+            "native_report": "native-report-v1",
+            "validation_report": "validation-report-v1",
+            "policy_bundle": "policy-bundle-v1"
+          },
+          "temporal_access": {
+            "status": "planned",
+            "clock": "run_monotonic_us",
+            "encoding": "inline",
+            "decisions": []
+          }
+        }
+      },
+      "expected_decision": "invalid_independence",
+      "allowed_unknown_reasons": [
+        "same_root_or_same_measurement_run"
+      ],
+      "expected_execution_permission": "not_applicable",
+      "runtime_status": "not_run",
+      "expected": {
+        "reason": "same_root_or_same_measurement_run"
+      }
+    },
+    {
+      "case_id": "SNAP-10",
+      "required_capability": "snapshot_semantic_validation",
+      "input": {
+        "manifest": {
+          "schema_version": "1.0.0",
+          "snapshot_id": "synthetic-plan-snapshot-v1",
+          "manifest_state": "plan_template",
+          "purpose": "audit_decision",
+          "captured_at": null,
+          "dependency_refs": [
+            {
+              "id": "synthetic-source-v1",
+              "kind": "source_revision",
+              "revision": "v1",
+              "content_sha256": null,
+              "required": true,
+              "availability": "planned"
+            },
+            {
+              "id": "decision-record-v1",
+              "kind": "decision_record",
+              "revision": "v1",
+              "content_sha256": null,
+              "required": true,
+              "availability": "planned"
+            },
+            {
+              "id": "decision-input-v1",
+              "kind": "decision_input",
+              "revision": "v1",
+              "content_sha256": null,
+              "required": true,
+              "availability": "planned"
+            },
+            {
+              "id": "evidence-bundle-v1",
+              "kind": "evidence_bundle",
+              "revision": "v1",
+              "content_sha256": null,
+              "required": true,
+              "availability": "planned"
+            },
+            {
+              "id": "native-report-v1",
+              "kind": "native_report",
+              "revision": "v1",
+              "content_sha256": null,
+              "required": true,
+              "availability": "planned"
+            },
+            {
+              "id": "validation-report-v1",
+              "kind": "validation_report",
+              "revision": "v1",
+              "content_sha256": null,
+              "required": true,
+              "availability": "planned"
+            }
+          ],
+          "policy_refs": [
+            {
+              "id": "validation-profile-v1",
+              "kind": "validation_profile",
+              "revision": "1",
+              "content_sha256": null,
+              "required": true,
+              "availability": "planned"
+            },
+            {
+              "id": "policy-bundle-v1",
+              "kind": "policy_bundle",
+              "revision": "v1",
+              "content_sha256": null,
+              "required": true,
+              "availability": "planned"
+            }
+          ],
+          "information_access": {
+            "design_mode": "offline",
+            "workload_visibility": "full_scenario",
+            "controller_profile": "realizable",
+            "state_access_policy": {
+              "kind": "realizable_past_only",
+              "version": 1
+            }
+          },
+          "authorization_epoch": 1,
+          "lineage": {
+            "primary_observation_id": "synthetic-observation-1",
+            "lineage_root_id": "synthetic-root-1",
+            "independence_class": "original_measurement"
+          },
+          "availability": "not_captured",
+          "root_digest": null,
+          "semantic_validation_version": "snapshot-semantic-validation-v1",
+          "closure": {
+            "decision_record": "decision-record-v1",
+            "decision_input": "decision-input-v1",
+            "evidence_bundle": "evidence-bundle-v1",
+            "validation_report": "validation-report-v1",
+            "policy_bundle": "policy-bundle-v1"
+          },
+          "temporal_access": {
+            "status": "planned",
+            "clock": "run_monotonic_us",
+            "encoding": "inline",
+            "decisions": []
+          }
+        }
+      },
+      "expected_decision": "invalid_snapshot_closure",
+      "allowed_unknown_reasons": [
+        "required_closure_ref_missing"
+      ],
+      "expected_execution_permission": "not_applicable",
+      "runtime_status": "not_run",
+      "expected": {
+        "reason": "required_closure_ref_missing"
+      }
+    },
+    {
+      "case_id": "SNAP-11",
+      "required_capability": "snapshot_semantic_validation",
+      "input": {
+        "manifest": {
+          "schema_version": "1.0.0",
+          "snapshot_id": "synthetic-plan-snapshot-v1",
+          "manifest_state": "plan_template",
+          "purpose": "audit_decision",
+          "captured_at": null,
+          "dependency_refs": [
+            {
+              "id": "synthetic-source-v1",
+              "kind": "source_revision",
+              "revision": "v1",
+              "content_sha256": null,
+              "required": true,
+              "availability": "planned"
+            },
+            {
+              "id": "decision-record-v1",
+              "kind": "decision_record",
+              "revision": "v1",
+              "content_sha256": null,
+              "required": true,
+              "availability": "planned"
+            },
+            {
+              "id": "decision-input-v1",
+              "kind": "decision_input",
+              "revision": "v1",
+              "content_sha256": null,
+              "required": true,
+              "availability": "planned"
+            },
+            {
+              "id": "evidence-bundle-v1",
+              "kind": "evidence_bundle",
+              "revision": "v1",
+              "content_sha256": null,
+              "required": true,
+              "availability": "planned"
+            },
+            {
+              "id": "native-report-v1",
+              "kind": "native_report",
+              "revision": "v1",
+              "content_sha256": null,
+              "required": true,
+              "availability": "planned"
+            },
+            {
+              "id": "validation-report-v1",
+              "kind": "validation_report",
+              "revision": "v1",
+              "content_sha256": null,
+              "required": true,
+              "availability": "planned"
+            }
+          ],
+          "policy_refs": [
+            {
+              "id": "validation-profile-v1",
+              "kind": "validation_profile",
+              "revision": "1",
+              "content_sha256": null,
+              "required": true,
+              "availability": "planned"
+            },
+            {
+              "id": "policy-bundle-v1",
+              "kind": "policy_bundle",
+              "revision": "v1",
+              "content_sha256": null,
+              "required": true,
+              "availability": "planned"
+            }
+          ],
+          "information_access": {
+            "design_mode": "offline",
+            "workload_visibility": "full_scenario",
+            "controller_profile": "realizable",
+            "state_access_policy": {
+              "kind": "realizable_past_only",
+              "version": 1
+            }
+          },
+          "authorization_epoch": 1,
+          "lineage": {
+            "primary_observation_id": "synthetic-observation-1",
+            "lineage_root_id": "synthetic-root-1",
+            "independence_class": "original_measurement"
+          },
+          "availability": "not_captured",
+          "root_digest": null,
+          "semantic_validation_version": "snapshot-semantic-validation-v1",
+          "closure": {
+            "decision_record": "decision-record-v1",
+            "decision_input": "decision-input-v1",
+            "evidence_bundle": "evidence-bundle-v1",
+            "native_report": "absent-native-report",
+            "validation_report": "validation-report-v1",
+            "policy_bundle": "policy-bundle-v1"
+          },
+          "temporal_access": {
+            "status": "planned",
+            "clock": "run_monotonic_us",
+            "encoding": "inline",
+            "decisions": []
+          }
+        }
+      },
+      "expected_decision": "invalid_snapshot_closure",
+      "allowed_unknown_reasons": [
+        "dangling_closure_ref"
+      ],
+      "expected_execution_permission": "not_applicable",
+      "runtime_status": "not_run",
+      "expected": {
+        "reason": "dangling_closure_ref"
+      }
+    },
+    {
+      "case_id": "SNAP-12",
+      "required_capability": "snapshot_semantic_validation",
+      "input": {
+        "manifest": {
+          "schema_version": "1.0.0",
+          "snapshot_id": "synthetic-plan-snapshot-v1",
+          "manifest_state": "plan_template",
+          "purpose": "audit_decision",
+          "captured_at": null,
+          "dependency_refs": [
+            {
+              "id": "synthetic-source-v1",
+              "kind": "source_revision",
+              "revision": "v1",
+              "content_sha256": null,
+              "required": true,
+              "availability": "planned"
+            },
+            {
+              "id": "decision-record-v1",
+              "kind": "decision_record",
+              "revision": "v1",
+              "content_sha256": null,
+              "required": true,
+              "availability": "planned"
+            },
+            {
+              "id": "decision-input-v1",
+              "kind": "decision_input",
+              "revision": "v1",
+              "content_sha256": null,
+              "required": true,
+              "availability": "planned"
+            },
+            {
+              "id": "evidence-bundle-v1",
+              "kind": "evidence_bundle",
+              "revision": "v1",
+              "content_sha256": null,
+              "required": true,
+              "availability": "planned"
+            },
+            {
+              "id": "native-report-v1",
+              "kind": "native_report",
+              "revision": "v1",
+              "content_sha256": null,
+              "required": true,
+              "availability": "planned"
+            },
+            {
+              "id": "validation-report-v1",
+              "kind": "validation_report",
+              "revision": "v1",
+              "content_sha256": null,
+              "required": true,
+              "availability": "planned"
+            },
+            {
+              "id": "same-run",
+              "kind": "external_measurement_run",
+              "revision": "v1",
+              "content_sha256": null,
+              "required": true,
+              "availability": "planned"
+            },
+            {
+              "id": "capture-v1",
+              "kind": "device_capture",
+              "revision": "v1",
+              "content_sha256": null,
+              "required": true,
+              "availability": "planned"
+            },
+            {
+              "id": "assessment-v1",
+              "kind": "independence_assessment",
+              "revision": "v1",
+              "content_sha256": null,
+              "required": true,
+              "availability": "planned"
+            }
+          ],
+          "policy_refs": [
+            {
+              "id": "validation-profile-v1",
+              "kind": "validation_profile",
+              "revision": "1",
+              "content_sha256": null,
+              "required": true,
+              "availability": "planned"
+            },
+            {
+              "id": "policy-bundle-v1",
+              "kind": "policy_bundle",
+              "revision": "v1",
+              "content_sha256": null,
+              "required": true,
+              "availability": "planned"
+            }
+          ],
+          "information_access": {
+            "design_mode": "offline",
+            "workload_visibility": "full_scenario",
+            "controller_profile": "realizable",
+            "state_access_policy": {
+              "kind": "realizable_past_only",
+              "version": 1
+            }
+          },
+          "authorization_epoch": 1,
+          "lineage": {
+            "primary_observation_id": "same-observation",
+            "lineage_root_id": "same-root",
+            "replicates_lineage_root_id": "same-root",
+            "independence_class": "independent_replication"
+          },
+          "availability": "not_captured",
+          "root_digest": null,
+          "semantic_validation_version": "snapshot-semantic-validation-v1",
+          "closure": {
+            "decision_record": "decision-record-v1",
+            "decision_input": "decision-input-v1",
+            "evidence_bundle": "evidence-bundle-v1",
+            "native_report": "native-report-v1",
+            "validation_report": "validation-report-v1",
+            "policy_bundle": "policy-bundle-v1"
+          },
+          "temporal_access": {
+            "status": "planned",
+            "clock": "run_monotonic_us",
+            "encoding": "inline",
+            "decisions": []
+          }
+        }
+      },
+      "expected_decision": "invalid_independence",
+      "allowed_unknown_reasons": [
+        "independence_provenance_missing"
+      ],
+      "expected_execution_permission": "not_applicable",
+      "runtime_status": "not_run",
+      "expected": {
+        "reason": "independence_provenance_missing"
+      }
+    },
+    {
+      "case_id": "SNAP-13",
+      "required_capability": "snapshot_semantic_validation",
+      "input": {
+        "manifest": {
+          "schema_version": "1.0.0",
+          "snapshot_id": "synthetic-plan-snapshot-v1",
+          "manifest_state": "plan_template",
+          "purpose": "audit_decision",
+          "captured_at": null,
+          "dependency_refs": [
+            {
+              "id": "synthetic-source-v1",
+              "kind": "source_revision",
+              "revision": "v1",
+              "content_sha256": null,
+              "required": true,
+              "availability": "planned"
+            },
+            {
+              "id": "decision-record-v1",
+              "kind": "decision_record",
+              "revision": "v1",
+              "content_sha256": null,
+              "required": true,
+              "availability": "planned"
+            },
+            {
+              "id": "decision-input-v1",
+              "kind": "decision_input",
+              "revision": "v1",
+              "content_sha256": null,
+              "required": true,
+              "availability": "planned"
+            },
+            {
+              "id": "evidence-bundle-v1",
+              "kind": "evidence_bundle",
+              "revision": "v1",
+              "content_sha256": null,
+              "required": true,
+              "availability": "planned"
+            },
+            {
+              "id": "native-report-v1",
+              "kind": "native_report",
+              "revision": "v1",
+              "content_sha256": null,
+              "required": true,
+              "availability": "planned"
+            },
+            {
+              "id": "validation-report-v1",
+              "kind": "validation_report",
+              "revision": "v1",
+              "content_sha256": null,
+              "required": true,
+              "availability": "planned"
+            },
+            {
+              "id": "resource-state-v1",
+              "kind": "resource_observation",
+              "revision": "v1",
+              "content_sha256": null,
+              "required": true,
+              "availability": "planned"
+            }
+          ],
+          "policy_refs": [
+            {
+              "id": "validation-profile-v1",
+              "kind": "validation_profile",
+              "revision": "1",
+              "content_sha256": null,
+              "required": true,
+              "availability": "planned"
+            },
+            {
+              "id": "policy-bundle-v1",
+              "kind": "policy_bundle",
+              "revision": "v1",
+              "content_sha256": null,
+              "required": true,
+              "availability": "planned"
+            }
+          ],
+          "information_access": {
+            "design_mode": "online",
+            "workload_visibility": "full_scenario",
+            "controller_profile": "realizable",
+            "state_access_policy": {
+              "kind": "realizable_past_only",
+              "version": 1
+            }
+          },
+          "authorization_epoch": 1,
+          "lineage": {
+            "primary_observation_id": "synthetic-observation-1",
+            "lineage_root_id": "synthetic-root-1",
+            "independence_class": "original_measurement"
+          },
+          "availability": "not_captured",
+          "root_digest": null,
+          "semantic_validation_version": "snapshot-semantic-validation-v1",
+          "closure": {
+            "decision_record": "decision-record-v1",
+            "decision_input": "decision-input-v1",
+            "evidence_bundle": "evidence-bundle-v1",
+            "native_report": "native-report-v1",
+            "validation_report": "validation-report-v1",
+            "policy_bundle": "policy-bundle-v1"
+          },
+          "temporal_access": {
+            "status": "recorded",
+            "clock": "run_monotonic_us",
+            "encoding": "inline",
+            "decisions": [
+              {
+                "decision_id": "decision-1",
+                "decision_tick": "10",
+                "observations": [
+                  {
+                    "observation_id": "obs-1",
+                    "observed_at_tick": "9",
+                    "available_at_tick": "9",
+                    "source_ref": "resource-state-v1",
+                    "derived_from_observation_ids": []
+                  },
+                  {
+                    "observation_id": "derived-1",
+                    "observed_at_tick": "8",
+                    "available_at_tick": "8",
+                    "source_ref": "resource-state-v1",
+                    "derived_from_observation_ids": [
+                      "obs-1"
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      },
+      "expected_decision": "information_access_violation",
+      "allowed_unknown_reasons": [
+        "derived_availability_precedes_input"
+      ],
+      "expected_execution_permission": "not_applicable",
+      "runtime_status": "not_run",
+      "expected": {
+        "reason": "derived_availability_precedes_input"
+      }
+    }
+  ]
+}

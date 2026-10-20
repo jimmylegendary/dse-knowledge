@@ -1,0 +1,101 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/jimmylegendary/dse-knowledge/blob/docs/p0-episode-contracts/schemas/claim-use-policy.schema.json",
+  "title": "DSE Claim Use Policy",
+  "description": "Typed, scope-aware gates for using claims in architecture decisions.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "policy_id", "policy_version", "decision_states", "uses", "gates", "examples"],
+  "properties": {
+    "schema_version": {"const": "1.0.0"},
+    "policy_id": {"type": "string", "minLength": 1},
+    "policy_version": {"type": "string", "minLength": 1},
+    "decision_states": {"const": ["allow", "deny", "abstain"]},
+    "uses": {"const": ["hard_constraint", "verified_parameter", "soft_prior", "candidate_generation", "exploratory_reference"]},
+    "gates": {
+      "type": "array", "minItems": 5, "maxItems": 5, "items": {"$ref": "#/$defs/gate"},
+      "allOf": [
+        {"contains": {"properties": {"use": {"const": "hard_constraint"}}, "required": ["use"]}, "minContains": 1, "maxContains": 1},
+        {"contains": {"properties": {"use": {"const": "verified_parameter"}}, "required": ["use"]}, "minContains": 1, "maxContains": 1},
+        {"contains": {"properties": {"use": {"const": "soft_prior"}}, "required": ["use"]}, "minContains": 1, "maxContains": 1},
+        {"contains": {"properties": {"use": {"const": "candidate_generation"}}, "required": ["use"]}, "minContains": 1, "maxContains": 1},
+        {"contains": {"properties": {"use": {"const": "exploratory_reference"}}, "required": ["use"]}, "minContains": 1, "maxContains": 1}
+      ]
+    },
+    "examples": {"type": "array", "minItems": 4, "items": {"$ref": "#/$defs/example"}}
+  },
+  "$defs": {
+    "gate": {
+      "type": "object", "additionalProperties": false,
+      "required": ["use", "required_claim_kinds", "required_epistemic_states", "authority_gate", "target_scope_gate", "unit_gate", "version_gate", "evidence_gate", "fallback"],
+      "properties": {
+        "use": {"enum": ["hard_constraint", "verified_parameter", "soft_prior", "candidate_generation", "exploratory_reference"]},
+        "required_claim_kinds": {"type": "array", "items": {"enum": ["normative_spec", "measured_observation", "analytical_prediction", "empirical_generalization", "hypothesis", "design_choice"]}},
+        "required_epistemic_states": {"type": "array", "items": {"enum": ["extracted_candidate", "source_verified", "validation_supported", "contested", "superseded", "retracted"]}},
+        "authority_gate": {"enum": ["applicable_normative_authority", "primary_or_reproducible_measurement", "record_source_and_uncertainty", "candidate_only", "record_provenance"]},
+        "target_scope_gate": {"enum": ["exact_normative_applicability", "same_measured_scope_and_conditions", "exact_or_partial_with_uncertainty", "scope_mismatch_forbidden", "must_preserve_original_scope"]},
+        "unit_gate": {"enum": ["exact_dimension_and_unit_or_explicit_conversion", "typed_value_required", "unit_optional_for_qualitative", "preserve_original_unit"]},
+        "version_gate": {"enum": ["exact_source_and_target_revision", "exact_measurement_revision", "record_source_version", "preserve_version_and_uncertainty"]},
+        "evidence_gate": {"enum": ["direct_clause_and_applicability_evidence", "reproducible_measurement_or_validation", "source_and_applicability_evidence", "hypothesis_provenance_only", "source_provenance_required"]},
+        "fallback": {"enum": ["deny", "abstain", "demote_to_soft_prior", "allow_only_candidate_generation", "allow_only_exploratory_reference"]}
+      },
+      "allOf": [
+        {"if": {"properties": {"use": {"const": "hard_constraint"}}, "required": ["use"]}, "then": {"properties": {"required_claim_kinds": {"const": ["normative_spec"]}, "required_epistemic_states": {"const": ["source_verified", "validation_supported"]}, "authority_gate": {"const": "applicable_normative_authority"}, "target_scope_gate": {"const": "exact_normative_applicability"}, "unit_gate": {"const": "exact_dimension_and_unit_or_explicit_conversion"}, "version_gate": {"const": "exact_source_and_target_revision"}, "evidence_gate": {"const": "direct_clause_and_applicability_evidence"}, "fallback": {"const": "deny"}}}},
+        {"if": {"properties": {"use": {"const": "verified_parameter"}}, "required": ["use"]}, "then": {"properties": {"required_claim_kinds": {"const": ["measured_observation", "analytical_prediction"]}, "required_epistemic_states": {"const": ["validation_supported"]}, "authority_gate": {"const": "primary_or_reproducible_measurement"}, "target_scope_gate": {"const": "same_measured_scope_and_conditions"}, "unit_gate": {"const": "exact_dimension_and_unit_or_explicit_conversion"}, "version_gate": {"const": "exact_measurement_revision"}, "evidence_gate": {"const": "reproducible_measurement_or_validation"}, "fallback": {"const": "abstain"}}}},
+        {"if": {"properties": {"use": {"const": "soft_prior"}}, "required": ["use"]}, "then": {"properties": {"required_claim_kinds": {"const": ["measured_observation", "analytical_prediction", "empirical_generalization", "hypothesis", "design_choice"]}, "required_epistemic_states": {"const": ["source_verified", "validation_supported", "contested"]}, "authority_gate": {"const": "record_source_and_uncertainty"}, "target_scope_gate": {"const": "exact_or_partial_with_uncertainty"}, "unit_gate": {"const": "typed_value_required"}, "version_gate": {"const": "record_source_version"}, "evidence_gate": {"const": "source_and_applicability_evidence"}, "fallback": {"const": "abstain"}}}},
+        {"if": {"properties": {"use": {"const": "candidate_generation"}}, "required": ["use"]}, "then": {"properties": {"required_claim_kinds": {"const": ["analytical_prediction", "empirical_generalization", "hypothesis", "design_choice"]}, "required_epistemic_states": {"const": ["extracted_candidate", "source_verified", "validation_supported", "contested"]}, "authority_gate": {"const": "candidate_only"}, "target_scope_gate": {"const": "scope_mismatch_forbidden"}, "unit_gate": {"const": "unit_optional_for_qualitative"}, "version_gate": {"const": "record_source_version"}, "evidence_gate": {"const": "hypothesis_provenance_only"}, "fallback": {"const": "allow_only_candidate_generation"}}}},
+        {"if": {"properties": {"use": {"const": "exploratory_reference"}}, "required": ["use"]}, "then": {"properties": {"required_claim_kinds": {"const": ["normative_spec", "measured_observation", "analytical_prediction", "empirical_generalization", "hypothesis", "design_choice"]}, "required_epistemic_states": {"const": ["extracted_candidate", "source_verified", "validation_supported", "contested"]}, "authority_gate": {"const": "record_provenance"}, "target_scope_gate": {"const": "must_preserve_original_scope"}, "unit_gate": {"const": "preserve_original_unit"}, "version_gate": {"const": "preserve_version_and_uncertainty"}, "evidence_gate": {"const": "source_provenance_required"}, "fallback": {"const": "allow_only_exploratory_reference"}}}}
+      ]
+    },
+    "scope": {
+      "type": "object", "additionalProperties": false,
+      "required": ["target_kind", "target_id", "target_revision", "conditions"],
+      "properties": {
+        "target_kind": {"type": "string", "minLength": 1},
+        "target_id": {"type": "string", "minLength": 1},
+        "target_revision": {"type": "string", "minLength": 1},
+        "conditions": {"type": "object", "minProperties": 1}
+      }
+    },
+    "evidence": {
+      "type": "object", "additionalProperties": false,
+      "required": ["evidence_id", "source_revision", "locator", "directness"],
+      "properties": {
+        "evidence_id": {"type": "string", "minLength": 1},
+        "source_revision": {"type": "string", "minLength": 1},
+        "locator": {"type": "string", "minLength": 1},
+        "directness": {"enum": ["direct", "derived", "secondary"]}
+      }
+    },
+    "claim": {
+      "type": "object", "additionalProperties": false,
+      "required": ["claim_id", "claim_kind", "epistemic_state", "authority", "applicability_scope", "unit", "source_version", "evidence", "value_type"],
+      "properties": {
+        "claim_id": {"type": "string", "minLength": 1},
+        "claim_kind": {"enum": ["normative_spec", "measured_observation", "analytical_prediction", "empirical_generalization", "hypothesis", "design_choice"]},
+        "epistemic_state": {"enum": ["extracted_candidate", "source_verified", "validation_supported", "contested", "superseded", "retracted"]},
+        "authority": {"enum": ["normative_authority", "primary_vendor", "measured_experiment", "peer_reviewed_analysis", "secondary_source", "unverified"]},
+        "applicability_scope": {"$ref": "#/$defs/scope"},
+        "unit": {"type": ["string", "null"]},
+        "source_version": {"type": "string", "minLength": 1},
+        "evidence": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/evidence"}},
+        "value_type": {"enum": ["quantitative", "qualitative"]}
+      }
+    },
+    "example": {
+      "type": "object", "additionalProperties": false,
+      "required": ["example_id", "claim", "requested_target", "scope_match", "requested_use", "expected_state", "expected_allowed_uses", "expected_denied_uses", "reason"],
+      "properties": {
+        "example_id": {"type": "string", "minLength": 1},
+        "claim": {"$ref": "#/$defs/claim"},
+        "requested_target": {"$ref": "#/$defs/scope"},
+        "scope_match": {"enum": ["exact", "contained", "partial", "mismatch", "unknown"]},
+        "requested_use": {"enum": ["hard_constraint", "verified_parameter", "soft_prior", "candidate_generation", "exploratory_reference"]},
+        "expected_state": {"enum": ["allow", "deny", "abstain"]},
+        "expected_allowed_uses": {"type": "array", "items": {"enum": ["hard_constraint", "verified_parameter", "soft_prior", "candidate_generation", "exploratory_reference"]}},
+        "expected_denied_uses": {"type": "array", "items": {"enum": ["hard_constraint", "verified_parameter", "soft_prior", "candidate_generation", "exploratory_reference"]}},
+        "reason": {"type": "string", "minLength": 1}
+      }
+    }
+  }
+}

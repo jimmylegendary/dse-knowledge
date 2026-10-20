@@ -1,5 +1,7 @@
 # 평가·추천 점수 운영·phase 승격·위험 관리
 
+P0 보완의 **수행·abstention·분모·budget·evidence lane** 기준은 [evaluation-oracles.md](https://github.com/jimmylegendary/dse-knowledge/blob/docs/p0-episode-contracts/docs/contracts/evaluation-oracles.md)다. Required positive는 모두 기대 상태에 도달해야 하며, held-out supported positives의 completion과 unnecessary abstention을 함께 평가한다. 표본이 없으면 not_evaluated이고 0/0은 100%가 아니다.
+
 상태: 검증 계획. 숫자는 최초 acceptance 목표 제안이며 측정된 성능이 아니다. source/model benchmark와 실제 DSE 판단 성능을 구분한다.
 
 ## 1. 두 종류의 점수
@@ -23,7 +25,7 @@
 
 역할이 다른 후보의 total을 비교하지 않는다. 예를 들어 AST parser는 native code의 구조 추출에 강하므로 높은 점수를 받을 수 있지만 논문의 암묵적 설계 지식을 자동으로 해석하는 LLM을 대체한다는 뜻은 아니다.
 
-미측정 TCO는 neutral 3을 기본으로 둔다. OSS의 라이선스 비용과 CPU/GPU·운영 인건비·idle·network 비용을 분리한다. 문서에 기재된 confidence 숫자는 작성자의 자기 평가이며 calibration된 확률이 아니다. 현재 공통 근거 수준은 `E1=공식 문서/카드 확인`, `E2=우리 fixture 검증`, `E3=우리 held-out 평가`, `E4=운영 관측`으로 표시한다. 이번 조사는 E1이다.
+미측정 TCO는 neutral 3을 기본으로 둔다. OSS의 라이선스 비용과 CPU/GPU·운영 인건비·idle·network 비용을 분리한다. 연구 JSON은 schema_version, evidence_stage, assessment_confidence(number 또는 null), 구조화 evidence 배열을 사용한다. assessment_confidence는 보정된 정답 확률이 아니다. 원문의 revision/section을 기록하지 않았던 prior는 그 한계를 명시하며 단순 URL 일치로 source authority가 검증됐다고 보지 않는다.
 
 ## 3. source rubric
 

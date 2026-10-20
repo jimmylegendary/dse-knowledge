@@ -1,4 +1,6 @@
 {
+  "schema_version": "1.0.0",
+  "catalog_kind": "technology",
   "candidates": [
     {
       "id": "aws-native",
@@ -14,10 +16,34 @@
         "https://docs.aws.amazon.com/opensearch-service/latest/developerguide/serverless-scale-to-zero.html"
       ],
       "evidence": [
-        "AWS recommends separate accounts for production and non-production workloads.",
-        "S3, Neptune, OpenSearch, and Batch have public service and pricing documentation.",
-        "S3 VPC gateway endpoints have no additional endpoint charge.",
-        "OpenSearch Serverless topology is mode-specific: the first Classic redundant collection in an account uses 2 OCU, Classic dev-test no-standby uses 1 OCU, and NextGen can configure minimum capacity 0."
+        {
+          "claim": "AWS recommends separate accounts for production and non-production workloads.",
+          "source_url": null,
+          "source_revision": null,
+          "locator": null,
+          "verification_status": "prior_review_unlocated"
+        },
+        {
+          "claim": "S3, Neptune, OpenSearch, and Batch have public service and pricing documentation.",
+          "source_url": null,
+          "source_revision": null,
+          "locator": null,
+          "verification_status": "prior_review_unlocated"
+        },
+        {
+          "claim": "S3 VPC gateway endpoints have no additional endpoint charge.",
+          "source_url": null,
+          "source_revision": null,
+          "locator": null,
+          "verification_status": "prior_review_unlocated"
+        },
+        {
+          "claim": "OpenSearch Serverless topology is mode-specific: the first Classic redundant collection in an account uses 2 OCU, Classic dev-test no-standby uses 1 OCU, and NextGen can configure minimum capacity 0.",
+          "source_url": null,
+          "source_revision": null,
+          "locator": null,
+          "verification_status": "prior_review_unlocated"
+        }
       ],
       "limitations": [
         "Graph and vector/search are separate services with independent data, backup, ACL, and indexing behavior.",
@@ -32,8 +58,9 @@
         "portability": 2,
         "economics": 3
       },
-      "confidence": 0.72,
-      "reason": "Broad native controls and operational cohesion fit the whole experiment flow; OpenSearch cost and cold-start tradeoffs depend on Classic redundant, dev-test no-standby, or NextGen scale-to-zero mode."
+      "reason": "Broad native controls and operational cohesion fit the whole experiment flow; OpenSearch cost and cold-start tradeoffs depend on Classic redundant, dev-test no-standby, or NextGen scale-to-zero mode.",
+      "evidence_stage": "prior_review_unlocated",
+      "assessment_confidence": 0.72
     },
     {
       "id": "gcp-native",
@@ -51,10 +78,34 @@
         "https://docs.cloud.google.com/spanner/docs/compute-capacity"
       ],
       "evidence": [
-        "Spanner Enterprise integrates relational, graph, full-text, and vector search features.",
-        "Spanner Graph and vector indexes require Enterprise or Enterprise Plus.",
-        "GCS Standard in Iowa is publicly listed at approximately USD 0.02 per GiB-month; Batch has no separate control-plane fee.",
-        "Base regional Spanner configurations have three read-write replicas; compute capacity is billed per replica, and granular 100 PU capacity is supported."
+        {
+          "claim": "Spanner Enterprise integrates relational, graph, full-text, and vector search features.",
+          "source_url": null,
+          "source_revision": null,
+          "locator": null,
+          "verification_status": "prior_review_unlocated"
+        },
+        {
+          "claim": "Spanner Graph and vector indexes require Enterprise or Enterprise Plus.",
+          "source_url": null,
+          "source_revision": null,
+          "locator": null,
+          "verification_status": "prior_review_unlocated"
+        },
+        {
+          "claim": "GCS Standard in Iowa is publicly listed at approximately USD 0.02 per GiB-month; Batch has no separate control-plane fee.",
+          "source_url": null,
+          "source_revision": null,
+          "locator": null,
+          "verification_status": "prior_review_unlocated"
+        },
+        {
+          "claim": "Base regional Spanner configurations have three read-write replicas; compute capacity is billed per replica, and granular 100 PU capacity is supported.",
+          "source_url": null,
+          "source_revision": null,
+          "locator": null,
+          "verification_status": "prior_review_unlocated"
+        }
       ],
       "limitations": [
         "Spanner Graph uses GoogleSQL and is not available through the PostgreSQL interface.",
@@ -70,8 +121,9 @@
         "portability": 2,
         "economics": 2
       },
-      "confidence": 0.74,
-      "reason": "The single Spanner Graph/Vector data plane aligns well with a source-linked KG, but Enterprise pricing and a non-PostgreSQL graph interface create cost and migration constraints."
+      "reason": "The single Spanner Graph/Vector data plane aligns well with a source-linked KG, but Enterprise pricing and a non-PostgreSQL graph interface create cost and migration constraints.",
+      "evidence_stage": "prior_review_unlocated",
+      "assessment_confidence": 0.74
     },
     {
       "id": "azure-native",
@@ -87,9 +139,27 @@
         "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/landing-zone/design-area/resource-org-management-groups"
       ],
       "evidence": [
-        "Cosmos DB Gremlin is a managed graph API billed through throughput/query units.",
-        "Azure AI Search dedicated tiers bill per Search Unit; Azure Database for PostgreSQL supports pgvector.",
-        "Azure Batch itself has no service fee, while compute, storage, networking, and logs are billed."
+        {
+          "claim": "Cosmos DB Gremlin is a managed graph API billed through throughput/query units.",
+          "source_url": null,
+          "source_revision": null,
+          "locator": null,
+          "verification_status": "prior_review_unlocated"
+        },
+        {
+          "claim": "Azure AI Search dedicated tiers bill per Search Unit; Azure Database for PostgreSQL supports pgvector.",
+          "source_url": null,
+          "source_revision": null,
+          "locator": null,
+          "verification_status": "prior_review_unlocated"
+        },
+        {
+          "claim": "Azure Batch itself has no service fee, while compute, storage, networking, and logs are billed.",
+          "source_url": null,
+          "source_revision": null,
+          "locator": null,
+          "verification_status": "prior_review_unlocated"
+        }
       ],
       "limitations": [
         "Graph, vector/RAG, and relational stores remain separate; cross-store authorization and consistency are application responsibilities.",
@@ -104,8 +174,9 @@
         "portability": 2,
         "economics": 3
       },
-      "confidence": 0.66,
-      "reason": "Strong identity/private-network tools and supported vector database options are offset by separate graph/search services, tier/region-dependent costs, and Gremlin compatibility work."
+      "reason": "Strong identity/private-network tools and supported vector database options are offset by separate graph/search services, tier/region-dependent costs, and Gremlin compatibility work.",
+      "evidence_stage": "prior_review_unlocated",
+      "assessment_confidence": 0.66
     },
     {
       "id": "supabase-aura",
@@ -119,9 +190,27 @@
         "https://neo4j.com/pricing/"
       ],
       "evidence": [
-        "Supabase supports pgvector and PostgreSQL Row Level Security.",
-        "Supabase Pro is listed at USD 25/month; Team starts at USD 599/month.",
-        "Aura Professional starts at USD 0.09 per GB-hour with a 1GB minimum; Business Critical/VDC tiers add enterprise controls."
+        {
+          "claim": "Supabase supports pgvector and PostgreSQL Row Level Security.",
+          "source_url": null,
+          "source_revision": null,
+          "locator": null,
+          "verification_status": "prior_review_unlocated"
+        },
+        {
+          "claim": "Supabase Pro is listed at USD 25/month; Team starts at USD 599/month.",
+          "source_url": null,
+          "source_revision": null,
+          "locator": null,
+          "verification_status": "prior_review_unlocated"
+        },
+        {
+          "claim": "Aura Professional starts at USD 0.09 per GB-hour with a 1GB minimum; Business Critical/VDC tiers add enterprise controls.",
+          "source_url": null,
+          "source_revision": null,
+          "locator": null,
+          "verification_status": "prior_review_unlocated"
+        }
       ],
       "limitations": [
         "No existing shared account, credential, corporate data, or project-specific access was granted.",
@@ -136,8 +225,9 @@
         "portability": 4,
         "economics": 3
       },
-      "confidence": 0.72,
-      "reason": "Managed PostgreSQL/RLS and graph capability fit a quick whole-flow slice, but cross-provider network and authorization boundaries undermine operational simplicity until private tiers are verified."
+      "reason": "Managed PostgreSQL/RLS and graph capability fit a quick whole-flow slice, but cross-provider network and authorization boundaries undermine operational simplicity until private tiers are verified.",
+      "evidence_stage": "prior_review_unlocated",
+      "assessment_confidence": 0.72
     },
     {
       "id": "portable-mix",
@@ -151,10 +241,34 @@
         "https://opentofu.org/"
       ],
       "evidence": [
-        "pgvector and Apache AGE are PostgreSQL extensions with public source and exportable SQL data models.",
-        "Temporal provides durable workflow primitives; Kubernetes schedules portable containers.",
-        "Apache AGE repository LICENSE is Apache-2.0; Temporal server repository LICENSE is MIT.",
-        "Provider-neutral object manifests, JSONL events, and pinned container images can reduce migration cost."
+        {
+          "claim": "pgvector and Apache AGE are PostgreSQL extensions with public source and exportable SQL data models.",
+          "source_url": null,
+          "source_revision": null,
+          "locator": null,
+          "verification_status": "prior_review_unlocated"
+        },
+        {
+          "claim": "Temporal provides durable workflow primitives; Kubernetes schedules portable containers.",
+          "source_url": null,
+          "source_revision": null,
+          "locator": null,
+          "verification_status": "prior_review_unlocated"
+        },
+        {
+          "claim": "Apache AGE repository LICENSE is Apache-2.0; Temporal server repository LICENSE is MIT.",
+          "source_url": null,
+          "source_revision": null,
+          "locator": null,
+          "verification_status": "prior_review_unlocated"
+        },
+        {
+          "claim": "Provider-neutral object manifests, JSONL events, and pinned container images can reduce migration cost.",
+          "source_url": null,
+          "source_revision": null,
+          "locator": null,
+          "verification_status": "prior_review_unlocated"
+        }
       ],
       "limitations": [
         "Self-hosted graph/query/runtime, database patching, upgrades, networking, backup, HA, IAM, and restore require an accountable operations team.",
@@ -169,8 +283,9 @@
         "portability": 5,
         "economics": 4
       },
-      "confidence": 0.61,
-      "reason": "Highest control over export and provenance but requires much more day-2 ownership; Jev advisory favored this direction with only 0.46 confidence, not as a vendor decision."
+      "reason": "Highest control over export and provenance but requires much more day-2 ownership; Jev advisory favored this direction with only 0.46 confidence, not as a vendor decision.",
+      "evidence_stage": "prior_review_unlocated",
+      "assessment_confidence": 0.61
     },
     {
       "id": "aws-neptune",
@@ -182,8 +297,20 @@
         "https://docs.aws.amazon.com/neptune/latest/userguide/what-is-neptune.html"
       ],
       "evidence": [
-        "AWS publishes separate instance, storage, I/O, backup, and transfer billing dimensions.",
-        "Current pricing page includes an us-east-1 I/O-Optimized db.r5.large example at USD 0.4698/hour plus storage."
+        {
+          "claim": "AWS publishes separate instance, storage, I/O, backup, and transfer billing dimensions.",
+          "source_url": null,
+          "source_revision": null,
+          "locator": null,
+          "verification_status": "prior_review_unlocated"
+        },
+        {
+          "claim": "Current pricing page includes an us-east-1 I/O-Optimized db.r5.large example at USD 0.4698/hour plus storage.",
+          "source_url": null,
+          "source_revision": null,
+          "locator": null,
+          "verification_status": "prior_review_unlocated"
+        }
       ],
       "limitations": [
         "Instance and storage can dominate a small graph; selected region and Standard vs I/O-Optimized change cost.",
@@ -198,8 +325,9 @@
         "portability": 2,
         "economics": 2
       },
-      "confidence": 0.71,
-      "reason": "Managed graph and auditable billing dimensions fit the evidence graph, while always-on instance and multi-store costs limit low-volume economics."
+      "reason": "Managed graph and auditable billing dimensions fit the evidence graph, while always-on instance and multi-store costs limit low-volume economics.",
+      "evidence_stage": "prior_review_unlocated",
+      "assessment_confidence": 0.71
     },
     {
       "id": "gcp-spanner-graph",
@@ -214,10 +342,34 @@
         "https://docs.cloud.google.com/spanner/docs/compute-capacity"
       ],
       "evidence": [
-        "Graph nodes/edges are mapped from tables and queried through GQL-compatible interface.",
-        "Spanner Enterprise includes graph, full-text, and vector search; published starting compute price is per 100 processing units/hour/replica.",
-        "A base regional configuration has three read-write replicas; granular compute can be configured at 100 PU and pricing is per replica.",
-        "For a base regional instance, Google documents three read-write replicas; granular capacity can be configured at 100 PU and compute is billed per replica."
+        {
+          "claim": "Graph nodes/edges are mapped from tables and queried through GQL-compatible interface.",
+          "source_url": null,
+          "source_revision": null,
+          "locator": null,
+          "verification_status": "prior_review_unlocated"
+        },
+        {
+          "claim": "Spanner Enterprise includes graph, full-text, and vector search; published starting compute price is per 100 processing units/hour/replica.",
+          "source_url": null,
+          "source_revision": null,
+          "locator": null,
+          "verification_status": "prior_review_unlocated"
+        },
+        {
+          "claim": "A base regional configuration has three read-write replicas; granular compute can be configured at 100 PU and pricing is per replica.",
+          "source_url": null,
+          "source_revision": null,
+          "locator": null,
+          "verification_status": "prior_review_unlocated"
+        },
+        {
+          "claim": "For a base regional instance, Google documents three read-write replicas; granular capacity can be configured at 100 PU and compute is billed per replica.",
+          "source_url": null,
+          "source_revision": null,
+          "locator": null,
+          "verification_status": "prior_review_unlocated"
+        }
       ],
       "limitations": [
         "Enterprise or Enterprise Plus required; Spanner Graph is unavailable through PostgreSQL dialect.",
@@ -232,8 +384,9 @@
         "portability": 2,
         "economics": 2
       },
-      "confidence": 0.77,
-      "reason": "Integrated graph/vector/relational semantics suit evidence lineage, but edition floor and dialect lock-in are material."
+      "reason": "Integrated graph/vector/relational semantics suit evidence lineage, but edition floor and dialect lock-in are material.",
+      "evidence_stage": "prior_review_unlocated",
+      "assessment_confidence": 0.77
     },
     {
       "id": "azure-cosmos-gremlin",
@@ -246,8 +399,20 @@
         "https://azure.microsoft.com/en-us/pricing/details/cosmos-db/standard-provisioned/"
       ],
       "evidence": [
-        "Fully managed Gremlin API; graph queries are billed based on RU/s consumed by objects and edges processed.",
-        "Supports horizontal partitioning and provisioned/autoscale/serverless billing models."
+        {
+          "claim": "Fully managed Gremlin API; graph queries are billed based on RU/s consumed by objects and edges processed.",
+          "source_url": null,
+          "source_revision": null,
+          "locator": null,
+          "verification_status": "prior_review_unlocated"
+        },
+        {
+          "claim": "Supports horizontal partitioning and provisioned/autoscale/serverless billing models.",
+          "source_url": null,
+          "source_revision": null,
+          "locator": null,
+          "verification_status": "prior_review_unlocated"
+        }
       ],
       "limitations": [
         "FAQ documents missing bytecode support and driver incompatibility for some newer Gremlin clients.",
@@ -262,8 +427,9 @@
         "portability": 3,
         "economics": 3
       },
-      "confidence": 0.77,
-      "reason": "Managed graph is viable if Gremlin compatibility matches the client, but RU behavior and protocol gaps need a representative test."
+      "reason": "Managed graph is viable if Gremlin compatibility matches the client, but RU behavior and protocol gaps need a representative test.",
+      "evidence_stage": "prior_review_unlocated",
+      "assessment_confidence": 0.77
     },
     {
       "id": "neo4j-aura",
@@ -275,9 +441,27 @@
         "https://neo4j.com/docs/aura/"
       ],
       "evidence": [
-        "Aura is available on AWS, Azure, and Google Cloud.",
-        "Professional starts at USD 0.09/GB-hour (minimum 1GB); Business Critical starts at USD 0.20/GB-hour (minimum 2GB).",
-        "Business Critical pricing page lists multi-zone SLA, RBAC/SSO, IP filtering, and daily backups."
+        {
+          "claim": "Aura is available on AWS, Azure, and Google Cloud.",
+          "source_url": null,
+          "source_revision": null,
+          "locator": null,
+          "verification_status": "prior_review_unlocated"
+        },
+        {
+          "claim": "Professional starts at USD 0.09/GB-hour (minimum 1GB); Business Critical starts at USD 0.20/GB-hour (minimum 2GB).",
+          "source_url": null,
+          "source_revision": null,
+          "locator": null,
+          "verification_status": "prior_review_unlocated"
+        },
+        {
+          "claim": "Business Critical pricing page lists multi-zone SLA, RBAC/SSO, IP filtering, and daily backups.",
+          "source_url": null,
+          "source_revision": null,
+          "locator": null,
+          "verification_status": "prior_review_unlocated"
+        }
       ],
       "limitations": [
         "Professional excludes private endpoints, fine-grained RBAC/SSO, and SLA; higher features cost more.",
@@ -292,8 +476,9 @@
         "portability": 3,
         "economics": 3
       },
-      "confidence": 0.79,
-      "reason": "Managed graph reduces operations and has useful enterprise tiers, but security/network requirements move the candidate above the published low-cost Professional tier."
+      "reason": "Managed graph reduces operations and has useful enterprise tiers, but security/network requirements move the candidate above the published low-cost Professional tier.",
+      "evidence_stage": "prior_review_unlocated",
+      "assessment_confidence": 0.79
     },
     {
       "id": "managed-pgvector",
@@ -307,9 +492,27 @@
         "https://learn.microsoft.com/en-us/azure/postgresql/extensions/how-to-use-pgvector"
       ],
       "evidence": [
-        "pgvector is supported by Supabase, AlloyDB, and Azure Database for PostgreSQL.",
-        "PostgreSQL RLS can enforce row-level access for vector retrieval.",
-        "Cloud SQL/PostgreSQL costs are largely compute, storage, backup, HA, and network dependent."
+        {
+          "claim": "pgvector is supported by Supabase, AlloyDB, and Azure Database for PostgreSQL.",
+          "source_url": null,
+          "source_revision": null,
+          "locator": null,
+          "verification_status": "prior_review_unlocated"
+        },
+        {
+          "claim": "PostgreSQL RLS can enforce row-level access for vector retrieval.",
+          "source_url": null,
+          "source_revision": null,
+          "locator": null,
+          "verification_status": "prior_review_unlocated"
+        },
+        {
+          "claim": "Cloud SQL/PostgreSQL costs are largely compute, storage, backup, HA, and network dependent.",
+          "source_url": null,
+          "source_revision": null,
+          "locator": null,
+          "verification_status": "prior_review_unlocated"
+        }
       ],
       "limitations": [
         "Vector index size, recall/latency, HNSW overhead, filtered-query behavior, and replica needs require measurements.",
@@ -324,8 +527,9 @@
         "portability": 5,
         "economics": 4
       },
-      "confidence": 0.72,
-      "reason": "Relational ACL plus vector data provides an exportable low-complexity baseline, with scale limits to be measured before larger corpus."
+      "reason": "Relational ACL plus vector data provides an exportable low-complexity baseline, with scale limits to be measured before larger corpus.",
+      "evidence_stage": "prior_review_unlocated",
+      "assessment_confidence": 0.72
     },
     {
       "id": "aws-opensearch-serverless",
@@ -338,9 +542,27 @@
         "https://docs.aws.amazon.com/opensearch-service/latest/developerguide/serverless-scale-to-zero.html"
       ],
       "evidence": [
-        "Current us-east-1 pricing page example lists USD 0.24/OCU-hour and USD 0.02/GB-month managed storage.",
-        "The first Classic redundant collection in an account has a 2 OCU minimum total (1 indexing including primary+standby, 1 search including replica).",
-        "Classic dev-test without redundant standby has a 1 OCU minimum; NextGen collection groups can set minimum indexing and search capacity to 0."
+        {
+          "claim": "Current us-east-1 pricing page example lists USD 0.24/OCU-hour and USD 0.02/GB-month managed storage.",
+          "source_url": null,
+          "source_revision": null,
+          "locator": null,
+          "verification_status": "prior_review_unlocated"
+        },
+        {
+          "claim": "The first Classic redundant collection in an account has a 2 OCU minimum total (1 indexing including primary+standby, 1 search including replica).",
+          "source_url": null,
+          "source_revision": null,
+          "locator": null,
+          "verification_status": "prior_review_unlocated"
+        },
+        {
+          "claim": "Classic dev-test without redundant standby has a 1 OCU minimum; NextGen collection groups can set minimum indexing and search capacity to 0.",
+          "source_url": null,
+          "source_revision": null,
+          "locator": null,
+          "verification_status": "prior_review_unlocated"
+        }
       ],
       "limitations": [
         "At the us-east-1 example rate and 730 hours, the first Classic redundant collection minimum is USD 350.40/month before storage; dev-test no-standby is USD 175.20/month.",
@@ -356,8 +578,9 @@
         "portability": 2,
         "economics": 3
       },
-      "confidence": 0.78,
-      "reason": "Managed hybrid retrieval remains useful; economics depend on selecting redundant Classic, dev-test no-standby, or NextGen scale-to-zero, each with a different availability and cold-start profile."
+      "reason": "Managed hybrid retrieval remains useful; economics depend on selecting redundant Classic, dev-test no-standby, or NextGen scale-to-zero, each with a different availability and cold-start profile.",
+      "evidence_stage": "prior_review_unlocated",
+      "assessment_confidence": 0.78
     },
     {
       "id": "gcp-spanner-vector",
@@ -372,8 +595,20 @@
         "https://docs.cloud.google.com/spanner/docs/compute-capacity"
       ],
       "evidence": [
-        "Supports ANN indexes and filters on stored/key columns.",
-        "Vector Search is part of Spanner Enterprise/Enterprise Plus capabilities."
+        {
+          "claim": "Supports ANN indexes and filters on stored/key columns.",
+          "source_url": null,
+          "source_revision": null,
+          "locator": null,
+          "verification_status": "prior_review_unlocated"
+        },
+        {
+          "claim": "Vector Search is part of Spanner Enterprise/Enterprise Plus capabilities.",
+          "source_url": null,
+          "source_revision": null,
+          "locator": null,
+          "verification_status": "prior_review_unlocated"
+        }
       ],
       "limitations": [
         "Edition and provisioned processing-unit/replica charges apply even before query volume is known.",
@@ -389,8 +624,9 @@
         "portability": 2,
         "economics": 2
       },
-      "confidence": 0.73,
-      "reason": "Graph and vector colocation can simplify evidence joins, but Enterprise pricing and Spanner schema bind the platform."
+      "reason": "Graph and vector colocation can simplify evidence joins, but Enterprise pricing and Spanner schema bind the platform.",
+      "evidence_stage": "prior_review_unlocated",
+      "assessment_confidence": 0.73
     },
     {
       "id": "azure-ai-search",
@@ -402,8 +638,20 @@
         "https://azure.microsoft.com/en-us/pricing/details/search/"
       ],
       "evidence": [
-        "Dedicated search bills by Search Units (replicas × partitions) and tier; serverless model is consumption based.",
-        "Current documentation identifies Serverless Developer as preview without SLA."
+        {
+          "claim": "Dedicated search bills by Search Units (replicas × partitions) and tier; serverless model is consumption based.",
+          "source_url": null,
+          "source_revision": null,
+          "locator": null,
+          "verification_status": "prior_review_unlocated"
+        },
+        {
+          "claim": "Current documentation identifies Serverless Developer as preview without SLA.",
+          "source_url": null,
+          "source_revision": null,
+          "locator": null,
+          "verification_status": "prior_review_unlocated"
+        }
       ],
       "limitations": [
         "Dedicated SU capacity is billed hourly and can cost more than token embedding at low query rates.",
@@ -418,8 +666,9 @@
         "portability": 2,
         "economics": 3
       },
-      "confidence": 0.71,
-      "reason": "Strong managed hybrid search and access-filter candidate; fixed tier floor or preview limitations need an explicit stage decision."
+      "reason": "Strong managed hybrid search and access-filter candidate; fixed tier floor or preview limitations need an explicit stage decision.",
+      "evidence_stage": "prior_review_unlocated",
+      "assessment_confidence": 0.71
     },
     {
       "id": "provider-batch",
@@ -433,8 +682,20 @@
         "https://learn.microsoft.com/en-us/azure/batch/plan-to-manage-costs"
       ],
       "evidence": [
-        "AWS, GCP, and Azure Batch pages state no separate Batch control-plane fee; underlying VM/GPU/storage/network resources are billed.",
-        "GCP Pub/Sub charges by bytes, with the first 10 GiB/month basic-throughput allowance and published per-TiB pricing thereafter."
+        {
+          "claim": "AWS, GCP, and Azure Batch pages state no separate Batch control-plane fee; underlying VM/GPU/storage/network resources are billed.",
+          "source_url": null,
+          "source_revision": null,
+          "locator": null,
+          "verification_status": "prior_review_unlocated"
+        },
+        {
+          "claim": "GCP Pub/Sub charges by bytes, with the first 10 GiB/month basic-throughput allowance and published per-TiB pricing thereafter.",
+          "source_url": null,
+          "source_revision": null,
+          "locator": null,
+          "verification_status": "prior_review_unlocated"
+        }
       ],
       "limitations": [
         "Queue, workflow, and job semantics differ by provider; portable event IDs/replay contract still required.",
@@ -449,8 +710,9 @@
         "portability": 2,
         "economics": 4
       },
-      "confidence": 0.74,
-      "reason": "Managed batch is the simplest execution boundary for reproducible job manifests, but job state and scheduler APIs are provider specific."
+      "reason": "Managed batch is the simplest execution boundary for reproducible job manifests, but job state and scheduler APIs are provider specific.",
+      "evidence_stage": "prior_review_unlocated",
+      "assessment_confidence": 0.74
     },
     {
       "id": "temporal-kubernetes",
@@ -463,8 +725,20 @@
         "https://github.com/temporalio/temporal/blob/main/LICENSE"
       ],
       "evidence": [
-        "Temporal provides durable workflow/event history; Kubernetes Jobs execute pinned containers.",
-        "Runtime and task containers can be redeployed on multiple cloud providers."
+        {
+          "claim": "Temporal provides durable workflow/event history; Kubernetes Jobs execute pinned containers.",
+          "source_url": null,
+          "source_revision": null,
+          "locator": null,
+          "verification_status": "prior_review_unlocated"
+        },
+        {
+          "claim": "Runtime and task containers can be redeployed on multiple cloud providers.",
+          "source_url": null,
+          "source_revision": null,
+          "locator": null,
+          "verification_status": "prior_review_unlocated"
+        }
       ],
       "limitations": [
         "Control plane, worker pools, database, upgrades, HA, network policies, and capacity are customer-operated unless a managed service is selected.",
@@ -479,8 +753,9 @@
         "portability": 5,
         "economics": 4
       },
-      "confidence": 0.64,
-      "reason": "Strong workflow portability and replay potential, but operational ownership is much higher than provider-managed Batch."
+      "reason": "Strong workflow portability and replay potential, but operational ownership is much higher than provider-managed Batch.",
+      "evidence_stage": "prior_review_unlocated",
+      "assessment_confidence": 0.64
     },
     {
       "id": "embedding-api",
@@ -494,9 +769,48 @@
         "https://docs.aws.amazon.com/bedrock/latest/userguide/model-card-amazon-titan-text-embeddings-v2.html"
       ],
       "evidence": [
-        "OpenAI publishes per-million-input-token prices and a 50% Batch API discount; Vertex publishes online/batch input prices.",
-        "Current Vertex pricing table shows Gemini Embedding at USD 0.00015 per 1,000 count online and USD 0.00012 per 1,000 count batch, Global region.",
-        "API unit costs can be estimated from actual token/character counts before building GPU infrastructure."
+        {
+          "claim": "OpenAI publishes per-million-input-token prices and a 50% Batch API discount; Vertex publishes online/batch input prices.",
+          "source_url": null,
+          "source_revision": null,
+          "locator": null,
+          "verification_status": "prior_review_unlocated"
+        },
+        {
+          "claim": "Current Vertex pricing table shows Gemini Embedding at USD 0.00015 per 1,000 count online and USD 0.00012 per 1,000 count batch, Global region.",
+          "source_url": null,
+          "source_revision": null,
+          "locator": null,
+          "verification_status": "prior_review_unlocated"
+        },
+        {
+          "claim": "API unit costs can be estimated from actual token/character counts before building GPU infrastructure.",
+          "source_url": null,
+          "source_revision": null,
+          "locator": null,
+          "verification_status": "prior_review_unlocated"
+        },
+        {
+          "claim": "OpenAI text-embedding-3-small and text-embedding-3-large are priced at USD 0.02 and USD 0.13 per million input tokens; the Batch API offers a published 50% discount with up-to-24-hour completion.",
+          "source_url": "https://developers.openai.com/api/docs/models/text-embedding-3-large",
+          "source_revision": null,
+          "locator": "Embedding model price table; Batch API discount and completion window",
+          "verification_status": "verified_primary"
+        },
+        {
+          "claim": "The visible Vertex Gemini Embedding Global price rows show online USD 0.00015 and batch USD 0.00012 per 1,000 count; the visible row does not define the count unit, so no token conversion is inferred.",
+          "source_url": "https://cloud.google.com/gemini-enterprise-agent-platform/generative-ai/pricing",
+          "source_revision": null,
+          "locator": "Gemini Embedding price rows, Global region",
+          "verification_status": "verified_primary"
+        },
+        {
+          "claim": "With 512-token chunks and 64-token overlap, actual document input including overlap is 45.12M/908.8M/13.664B tokens for the existing 40M/800M/12B source-token envelopes; changed-document batch, retry/re-embed batch, and realtime query input are separate billable components.",
+          "source_url": "https://github.com/jimmylegendary/dse-knowledge/blob/docs/p0-episode-contracts/research/03-cloud-operations.md",
+          "source_revision": null,
+          "locator": "Cost model: data/request assumptions; Embedding API vs batch GPU table",
+          "verification_status": "derived_deterministic"
+        }
       ],
       "limitations": [
         "Source content leaves the chosen cloud boundary; data residency, DPA, region, rate limits, and retention terms must be approved.",
@@ -512,8 +826,9 @@
         "portability": 3,
         "economics": 5
       },
-      "confidence": 0.82,
-      "reason": "Good first infrastructure baseline because cost is directly metered and avoids GPU operations, subject to source privacy and provider contract."
+      "reason": "Good first infrastructure baseline because cost is directly metered and avoids GPU operations, subject to source privacy and provider contract.",
+      "evidence_stage": "E1",
+      "assessment_confidence": 0.82
     },
     {
       "id": "embedding-gpu-batch",
@@ -527,8 +842,20 @@
         "https://azure.microsoft.com/en-us/pricing/details/virtual-machines/linux/"
       ],
       "evidence": [
-        "AWS/GCP/Azure expose region/SKU pricing calculators; GPU node hours, disks, data egress, quotas, and capacity determine job cost.",
-        "GPU availability differs by provider region/zone; batch compute can be destroyed after completion."
+        {
+          "claim": "AWS/GCP/Azure expose region/SKU pricing calculators; GPU node hours, disks, data egress, quotas, and capacity determine job cost.",
+          "source_url": null,
+          "source_revision": null,
+          "locator": null,
+          "verification_status": "prior_review_unlocated"
+        },
+        {
+          "claim": "GPU availability differs by provider region/zone; batch compute can be destroyed after completion.",
+          "source_url": null,
+          "source_revision": null,
+          "locator": null,
+          "verification_status": "prior_review_unlocated"
+        }
       ],
       "limitations": [
         "No token-to-GPU-hour rate can be inferred without a model, hardware, batch shape, utilization, and approved benchmark.",
@@ -543,8 +870,9 @@
         "portability": 5,
         "economics": 3
       },
-      "confidence": 0.56,
-      "reason": "Can keep source processing inside a private environment and control model/runtime versions, but economics and availability cannot be scored confidently yet."
+      "reason": "Can keep source processing inside a private environment and control model/runtime versions, but economics and availability cannot be scored confidently yet.",
+      "evidence_stage": "prior_review_unlocated",
+      "assessment_confidence": 0.56
     },
     {
       "id": "aws-s3",
@@ -557,8 +885,20 @@
         "https://docs.aws.amazon.com/vpc/latest/privatelink/vpc-endpoints-s3.html"
       ],
       "evidence": [
-        "S3 pricing separates storage, request/retrieval, transfer, replication, and management.",
-        "Object Lock supports WORM retention/legal hold; S3 gateway endpoints can privately reach S3 without extra endpoint charge."
+        {
+          "claim": "S3 pricing separates storage, request/retrieval, transfer, replication, and management.",
+          "source_url": null,
+          "source_revision": null,
+          "locator": null,
+          "verification_status": "prior_review_unlocated"
+        },
+        {
+          "claim": "Object Lock supports WORM retention/legal hold; S3 gateway endpoints can privately reach S3 without extra endpoint charge.",
+          "source_url": null,
+          "source_revision": null,
+          "locator": null,
+          "verification_status": "prior_review_unlocated"
+        }
       ],
       "limitations": [
         "Locked object versions cannot be deleted before retention; versioning/Object Lock must not conflict with legal deletion.",
@@ -573,8 +913,9 @@
         "portability": 3,
         "economics": 4
       },
-      "confidence": 0.78,
-      "reason": "Mature source/artifact storage with useful versioning and access controls; immutability and lifecycle charges need careful deletion policy."
+      "reason": "Mature source/artifact storage with useful versioning and access controls; immutability and lifecycle charges need careful deletion policy.",
+      "evidence_stage": "prior_review_unlocated",
+      "assessment_confidence": 0.78
     },
     {
       "id": "gcp-gcs",
@@ -587,8 +928,20 @@
         "https://docs.cloud.google.com/storage/docs/control-data-lifecycles"
       ],
       "evidence": [
-        "Current public standard rate in Iowa us-central1 is approximately USD 0.02/GiB-month with separate operations/egress.",
-        "Bucket Lock can permanently prevent reducing/removing a retention policy; Object Lifecycle Management supports tier and deletion policies."
+        {
+          "claim": "Current public standard rate in Iowa us-central1 is approximately USD 0.02/GiB-month with separate operations/egress.",
+          "source_url": null,
+          "source_revision": null,
+          "locator": null,
+          "verification_status": "prior_review_unlocated"
+        },
+        {
+          "claim": "Bucket Lock can permanently prevent reducing/removing a retention policy; Object Lifecycle Management supports tier and deletion policies.",
+          "source_url": null,
+          "source_revision": null,
+          "locator": null,
+          "verification_status": "prior_review_unlocated"
+        }
       ],
       "limitations": [
         "Locked bucket policy is irreversible and can prevent bucket/project deletion until all objects expire.",
@@ -603,8 +956,9 @@
         "portability": 3,
         "economics": 4
       },
-      "confidence": 0.8,
-      "reason": "Clear regional storage price and retention/lifecycle tools make cost and evidence policy legible, with irreversible lock behavior as a governance gate."
+      "reason": "Clear regional storage price and retention/lifecycle tools make cost and evidence policy legible, with irreversible lock behavior as a governance gate.",
+      "evidence_stage": "prior_review_unlocated",
+      "assessment_confidence": 0.8
     },
     {
       "id": "azure-blob",
@@ -617,8 +971,20 @@
         "https://learn.microsoft.com/en-us/azure/storage/blobs/lifecycle-management-overview"
       ],
       "evidence": [
-        "Storage tiers include hot/cool/cold/archive; charge depends on bytes, operations, redundancy, and transfer.",
-        "Immutable Blob supports time-based retention and legal holds; lifecycle rules can tier and expire eligible blobs."
+        {
+          "claim": "Storage tiers include hot/cool/cold/archive; charge depends on bytes, operations, redundancy, and transfer.",
+          "source_url": null,
+          "source_revision": null,
+          "locator": null,
+          "verification_status": "prior_review_unlocated"
+        },
+        {
+          "claim": "Immutable Blob supports time-based retention and legal holds; lifecycle rules can tier and expire eligible blobs.",
+          "source_url": null,
+          "source_revision": null,
+          "locator": null,
+          "verification_status": "prior_review_unlocated"
+        }
       ],
       "limitations": [
         "Public page calculator may display dynamic offer/region-dependent rates rather than a single unit price.",
@@ -633,8 +999,9 @@
         "portability": 3,
         "economics": 4
       },
-      "confidence": 0.76,
-      "reason": "Strong lifecycle and WORM features, but exact rates depend on account offer/region/redundancy and deletion restrictions."
+      "reason": "Strong lifecycle and WORM features, but exact rates depend on account offer/region/redundancy and deletion restrictions.",
+      "evidence_stage": "prior_review_unlocated",
+      "assessment_confidence": 0.76
     }
   ]
 }

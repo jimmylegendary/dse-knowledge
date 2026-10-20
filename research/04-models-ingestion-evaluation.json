@@ -1,352 +1,958 @@
 {
+  "schema_version": "1.0.0",
+  "catalog_kind": "technology",
   "candidates": [
     {
       "id": "docling",
       "category": "parsing",
       "name": "Docling + Docling Models",
       "role": "로컬 PDF/문서 layout, OCR, 읽기 순서, 표·블록 추출",
-      "source_urls": ["https://github.com/docling-project/docling", "https://huggingface.co/docling-project/docling-models"],
-      "evidence": "공개 toolkit/model repo. 표·OCR·layout pipeline, local run 가능; software와 model artifacts에 Apache/CDLA dual license 표시가 있어 각각 점검 대상.",
+      "source_urls": [
+        "https://github.com/docling-project/docling",
+        "https://huggingface.co/docling-project/docling-models"
+      ],
+      "evidence": [
+        {
+          "claim": "공개 toolkit/model repo. 표·OCR·layout pipeline, local run 가능; software와 model artifacts에 Apache/CDLA dual license 표시가 있어 각각 점검 대상.",
+          "source_url": null,
+          "source_revision": null,
+          "locator": null,
+          "verification_status": "prior_review_unlocated"
+        }
+      ],
       "limitations": "수식·복잡한 병합 셀·낮은 품질 스캔은 실패 가능. 정확도는 DSE 자체 표/식 골드셋으로 검증해야 함.",
-      "scores": {"quality": 4, "fit": 5, "provenance": 4, "operability": 4, "portability": 5, "economics": 3},
-      "confidence": 0.52,
-      "reason": "전 범용 파서의 유력한 로컬 기준선이며 citation-friendly 구조를 만들기 쉽다. 아티팩트 라이선스와 기술수식 정확도 확인 전 잠정이다."
+      "scores": {
+        "quality": 4,
+        "fit": 5,
+        "provenance": 4,
+        "operability": 4,
+        "portability": 5,
+        "economics": 3
+      },
+      "reason": "전 범용 파서의 유력한 로컬 기준선이며 citation-friendly 구조를 만들기 쉽다. 아티팩트 라이선스와 기술수식 정확도 확인 전 잠정이다.",
+      "evidence_stage": "prior_review_unlocated",
+      "assessment_confidence": 0.52
     },
     {
       "id": "marker",
       "category": "parsing",
       "name": "Marker / Surya",
       "role": "PDF layout·선택 OCR/VLM·표와 수식 추출",
-      "source_urls": ["https://github.com/datalab-to/marker", "https://github.com/datalab-to/marker/blob/master/MODEL_LICENSE"],
-      "evidence": "프로젝트는 born-digital text layer를 쓰고 불량/스캔 영역 및 수식·저신뢰 표에 OCR/VLM을 사용한다고 설명. 코드와 모델 가중치 라이선스가 다름.",
+      "source_urls": [
+        "https://github.com/datalab-to/marker",
+        "https://github.com/datalab-to/marker/blob/master/MODEL_LICENSE"
+      ],
+      "evidence": [
+        {
+          "claim": "프로젝트는 born-digital text layer를 쓰고 불량/스캔 영역 및 수식·저신뢰 표에 OCR/VLM을 사용한다고 설명. 코드와 모델 가중치 라이선스가 다름.",
+          "source_url": null,
+          "source_revision": null,
+          "locator": null,
+          "verification_status": "prior_review_unlocated"
+        }
+      ],
       "limitations": "가중치는 수정 OpenRAIL-M/상용 사용 조건을 확인해야 한다. mode에 따라 수식 정밀도가 크게 바뀌며 GPU/VLM 서비스 운영 부담이 있음.",
-      "scores": {"quality": 4, "fit": 4, "provenance": 2, "operability": 3, "portability": 3, "economics": 3},
-      "confidence": 0.45,
-      "reason": "수식-heavy 논문 비교 후보. 성능 잠재력과 별개로 법적 허용 범위 및 mode 선택이 의사결정의 큰 변수다."
+      "scores": {
+        "quality": 4,
+        "fit": 4,
+        "provenance": 2,
+        "operability": 3,
+        "portability": 3,
+        "economics": 3
+      },
+      "reason": "수식-heavy 논문 비교 후보. 성능 잠재력과 별개로 법적 허용 범위 및 mode 선택이 의사결정의 큰 변수다.",
+      "evidence_stage": "prior_review_unlocated",
+      "assessment_confidence": 0.45
     },
     {
       "id": "mineru",
       "category": "parsing",
       "name": "MinerU 4.0",
       "role": "PDF·오피스·스캔에서 구조화 Markdown/JSON/LaTeX 추출",
-      "source_urls": ["https://github.com/opendatalab/MinerU", "https://opendatalab.github.io/MinerU/"],
-      "evidence": "현재 저장소는 여러 parsing tier, 다국어 OCR, 표/수식/이미지, PDF와 Office formats 및 구조형 output을 제시.",
+      "source_urls": [
+        "https://github.com/opendatalab/MinerU",
+        "https://opendatalab.github.io/MinerU/"
+      ],
+      "evidence": [
+        {
+          "claim": "현재 저장소는 여러 parsing tier, 다국어 OCR, 표/수식/이미지, PDF와 Office formats 및 구조형 output을 제시.",
+          "source_url": null,
+          "source_revision": null,
+          "locator": null,
+          "verification_status": "prior_review_unlocated"
+        }
+      ],
       "limitations": "release별 license/모델/출력 계약과 GPU/CPU 성능이 바뀔 수 있다. version/tag별 운영·권리·정확도 고정이 필요.",
-      "scores": {"quality": 4, "fit": 4, "provenance": 3, "operability": 3, "portability": 4, "economics": 3},
-      "confidence": 0.43,
-      "reason": "다국어·표·수식·파일 포맷 coverage가 넓어 parsing bake-off에 포함할 가치가 높다. moving release의 재현성/권리가 미확정이다."
+      "scores": {
+        "quality": 4,
+        "fit": 4,
+        "provenance": 3,
+        "operability": 3,
+        "portability": 4,
+        "economics": 3
+      },
+      "reason": "다국어·표·수식·파일 포맷 coverage가 넓어 parsing bake-off에 포함할 가치가 높다. moving release의 재현성/권리가 미확정이다.",
+      "evidence_stage": "prior_review_unlocated",
+      "assessment_confidence": 0.43
     },
     {
       "id": "paddleocr_pp_structure_v3",
       "category": "parsing",
       "name": "PaddleOCR PP-StructureV3",
       "role": "로컬 OCR·layout·table·formula·chart 인식과 읽기 순서",
-      "source_urls": ["https://github.com/PaddlePaddle/PaddleOCR", "https://github.com/PaddlePaddle/PaddleOCR/blob/main/docs/version3.x/algorithm/PP-StructureV3/PP-StructureV3.en.md"],
-      "evidence": "공식 설명에 layout, table, formula, chart recognition 및 Markdown 변환과 다중 HW serving이 명시됨.",
+      "source_urls": [
+        "https://github.com/PaddlePaddle/PaddleOCR",
+        "https://github.com/PaddlePaddle/PaddleOCR/blob/main/docs/version3.x/algorithm/PP-StructureV3/PP-StructureV3.en.md"
+      ],
+      "evidence": [
+        {
+          "claim": "공식 설명에 layout, table, formula, chart recognition 및 Markdown 변환과 다중 HW serving이 명시됨.",
+          "source_url": null,
+          "source_revision": null,
+          "locator": null,
+          "verification_status": "prior_review_unlocated"
+        }
+      ],
       "limitations": "논문에 제시된 편집거리/속도 비교는 DSE의 실제 문서셋과 동일 조건이 아니다. 언어·model artifact·실제 운영률 검증 필요.",
-      "scores": {"quality": 4, "fit": 4, "provenance": 4, "operability": 3, "portability": 4, "economics": 3},
-      "confidence": 0.48,
-      "reason": "formula/table 능력이 공개된 현지 실행형 대안이며 법적/경제적 이점이 있을 수 있다. 배포 stack과 기술 영문·한글 성능은 별도 확인한다."
+      "scores": {
+        "quality": 4,
+        "fit": 4,
+        "provenance": 4,
+        "operability": 3,
+        "portability": 4,
+        "economics": 3
+      },
+      "reason": "formula/table 능력이 공개된 현지 실행형 대안이며 법적/경제적 이점이 있을 수 있다. 배포 stack과 기술 영문·한글 성능은 별도 확인한다.",
+      "evidence_stage": "prior_review_unlocated",
+      "assessment_confidence": 0.48
     },
     {
       "id": "grobid",
       "category": "parsing",
       "name": "GROBID",
       "role": "과학 논문 metadata·section·citation을 TEI/XML로 구조화",
-      "source_urls": ["https://github.com/grobidOrg/grobid", "https://grobid.readthedocs.io/"],
-      "evidence": "Apache-2.0 scholarly document parser이며 인용/서지 구조 추출에 특화.",
+      "source_urls": [
+        "https://github.com/grobidOrg/grobid",
+        "https://grobid.readthedocs.io/"
+      ],
+      "evidence": [
+        {
+          "claim": "Apache-2.0 scholarly document parser이며 인용/서지 구조 추출에 특화.",
+          "source_url": null,
+          "source_revision": null,
+          "locator": null,
+          "verification_status": "prior_review_unlocated"
+        }
+      ],
       "limitations": "범용 스캔/OCR, HATIR 코드, complex table, 실험 로그의 주 파서가 될 수 없음.",
-      "scores": {"quality": 2, "fit": 4, "provenance": 5, "operability": 4, "portability": 5, "economics": 3},
-      "confidence": 0.53,
-      "reason": "수집될 공개 기술 논문의 provenance·citation 보강에 적합하지만 corpus 일부 전용 보완재다."
+      "scores": {
+        "quality": 2,
+        "fit": 4,
+        "provenance": 5,
+        "operability": 4,
+        "portability": 5,
+        "economics": 3
+      },
+      "reason": "수집될 공개 기술 논문의 provenance·citation 보강에 적합하지만 corpus 일부 전용 보완재다.",
+      "evidence_stage": "prior_review_unlocated",
+      "assessment_confidence": 0.53
     },
     {
       "id": "mathpix_ocr_api",
       "category": "parsing",
       "name": "Mathpix OCR API",
       "role": "수식/LaTeX·표·기술 PDF의 고정밀 managed OCR 후보",
-      "source_urls": ["https://mathpix.com/pricing/api", "https://website.mathpix.com/docs/convert/billing"],
-      "evidence": "공식 문서가 이미지 OCR, math, tables, PDF/DOCX/PPTX 변환과 line geometry를 설명. 공개 가격은 image $0.002, PDF $0.005/page, batch tier가 있음.",
+      "source_urls": [
+        "https://mathpix.com/pricing/api",
+        "https://website.mathpix.com/docs/convert/billing"
+      ],
+      "evidence": [
+        {
+          "claim": "공식 문서가 이미지 OCR, math, tables, PDF/DOCX/PPTX 변환과 line geometry를 설명. 공개 가격은 image $0.002, PDF $0.005/page, batch tier가 있음.",
+          "source_url": null,
+          "source_revision": null,
+          "locator": null,
+          "verification_status": "prior_review_unlocated"
+        }
+      ],
       "limitations": "외부 처리와 30-day default image retention; opt-out은 24시간 삭제 안내. private cloud 비용/계약, 저품질 scan 정확도와 재현성을 검토.",
-      "scores": {"quality": 5, "fit": 4, "provenance": 4, "operability": 4, "portability": 2, "economics": 3},
-      "confidence": 0.47,
-      "reason": "수식 특화 비교 기준으로 유용하다. 보안 분류가 확인되지 않은 내부 문서에는 승인 전 외부 API를 사용할 수 없다."
+      "scores": {
+        "quality": 5,
+        "fit": 4,
+        "provenance": 4,
+        "operability": 4,
+        "portability": 2,
+        "economics": 3
+      },
+      "reason": "수식 특화 비교 기준으로 유용하다. 보안 분류가 확인되지 않은 내부 문서에는 승인 전 외부 API를 사용할 수 없다.",
+      "evidence_stage": "prior_review_unlocated",
+      "assessment_confidence": 0.47
     },
     {
       "id": "google_document_ai_layout",
       "category": "parsing",
       "name": "Google Document AI Layout Parser",
       "role": "managed OCR/layout 및 context-aware chunks",
-      "source_urls": ["https://docs.cloud.google.com/document-ai/docs/layout-parse-chunk", "https://cloud.google.com/products/document-ai/pricing"],
-      "evidence": "PDF/Office/web table·paragraph·heading·figure 등 인식; 공개 Layout Parser 가격 $10/1,000 pages.",
+      "source_urls": [
+        "https://docs.cloud.google.com/document-ai/docs/layout-parse-chunk",
+        "https://cloud.google.com/products/document-ai/pricing"
+      ],
+      "evidence": [
+        {
+          "claim": "PDF/Office/web table·paragraph·heading·figure 등 인식; 공개 Layout Parser 가격 $10/1,000 pages.",
+          "source_url": null,
+          "source_revision": null,
+          "locator": null,
+          "verification_status": "prior_review_unlocated"
+        }
+      ],
       "limitations": "PDF batch 제한 500 pages, across-page table split 가능. cloud/region/retention 권한이 미정이며 수식 전문성은 미검증.",
-      "scores": {"quality": 3, "fit": 4, "provenance": 4, "operability": 4, "portability": 3, "economics": 3},
-      "confidence": 0.43,
-      "reason": "빠른 managed parser 대안이다. DSE 표와 식의 correctness는 별도 benchmark가 없으므로 평균 OCR 품질만으로 채택할 수 없다."
+      "scores": {
+        "quality": 3,
+        "fit": 4,
+        "provenance": 4,
+        "operability": 4,
+        "portability": 3,
+        "economics": 3
+      },
+      "reason": "빠른 managed parser 대안이다. DSE 표와 식의 correctness는 별도 benchmark가 없으므로 평균 OCR 품질만으로 채택할 수 없다.",
+      "evidence_stage": "prior_review_unlocated",
+      "assessment_confidence": 0.43
     },
     {
       "id": "azure_document_intelligence_layout",
       "category": "parsing",
       "name": "Azure Document Intelligence prebuilt-layout",
       "role": "managed OCR·table·문서 구조 extraction",
-      "source_urls": ["https://learn.microsoft.com/en-us/azure/ai-services/document-intelligence/prebuilt/layout?view=doc-intel-4.0.0", "https://azure.microsoft.com/en-us/pricing/details/document-intelligence/"],
-      "evidence": "공식 model ID `prebuilt-layout`; OCR, tables, selection marks, document structure 제공.",
+      "source_urls": [
+        "https://learn.microsoft.com/en-us/azure/ai-services/document-intelligence/prebuilt/layout?view=doc-intel-4.0.0",
+        "https://azure.microsoft.com/en-us/pricing/details/document-intelligence/"
+      ],
+      "evidence": [
+        {
+          "claim": "공식 model ID `prebuilt-layout`; OCR, tables, selection marks, document structure 제공.",
+          "source_url": null,
+          "source_revision": null,
+          "locator": null,
+          "verification_status": "prior_review_unlocated"
+        }
+      ],
       "limitations": "region별 current page cost 및 residency/retention·account approval을 확인해야 함. formula/circuit diagram 인식은 별도 gold task 필요.",
-      "scores": {"quality": 3, "fit": 4, "provenance": 4, "operability": 4, "portability": 3, "economics": 3},
-      "confidence": 0.4,
-      "reason": "Azure 기반 cloud 후보. 선택 전 조직 cloud/provider 제약과 actual quote가 필요하다."
+      "scores": {
+        "quality": 3,
+        "fit": 4,
+        "provenance": 4,
+        "operability": 4,
+        "portability": 3,
+        "economics": 3
+      },
+      "reason": "Azure 기반 cloud 후보. 선택 전 조직 cloud/provider 제약과 actual quote가 필요하다.",
+      "evidence_stage": "prior_review_unlocated",
+      "assessment_confidence": 0.4
     },
     {
       "id": "aws_textract_analyze_document",
       "category": "parsing",
       "name": "Amazon Textract AnalyzeDocument",
       "role": "managed page OCR, tables/forms/layout relationships",
-      "source_urls": ["https://docs.aws.amazon.com/textract/latest/APIReference/API_AnalyzeDocument.html", "https://aws.amazon.com/textract/pricing/"],
-      "evidence": "공식 API가 TABLES, FORMS, QUERIES, SIGNATURES, LAYOUT feature types와 async document analysis를 제공.",
+      "source_urls": [
+        "https://docs.aws.amazon.com/textract/latest/APIReference/API_AnalyzeDocument.html",
+        "https://aws.amazon.com/textract/pricing/"
+      ],
+      "evidence": [
+        {
+          "claim": "공식 API가 TABLES, FORMS, QUERIES, SIGNATURES, LAYOUT feature types와 async document analysis를 제공.",
+          "source_url": null,
+          "source_revision": null,
+          "locator": null,
+          "verification_status": "prior_review_unlocated"
+        }
+      ],
       "limitations": "논문 수식의 semantic LaTeX extraction이 주 기능은 아님. per-page tier, region, async pipeline, IAM 설정 미정.",
-      "scores": {"quality": 3, "fit": 3, "provenance": 4, "operability": 4, "portability": 3, "economics": 3},
-      "confidence": 0.38,
-      "reason": "forms/logistics 스타일 문서의 비교점이 되나 이 프로젝트의 수식·kernel/실험 중심 corpus에 대한 적합도는 낮게 둔다."
+      "scores": {
+        "quality": 3,
+        "fit": 3,
+        "provenance": 4,
+        "operability": 4,
+        "portability": 3,
+        "economics": 3
+      },
+      "reason": "forms/logistics 스타일 문서의 비교점이 되나 이 프로젝트의 수식·kernel/실험 중심 corpus에 대한 적합도는 낮게 둔다.",
+      "evidence_stage": "prior_review_unlocated",
+      "assessment_confidence": 0.38
     },
     {
       "id": "bm25_exact",
       "category": "retrieval_baseline",
       "name": "BM25 + exact identifier/unit/field search",
       "role": "모델 없는 sparse 기준선 및 수치/버전 lookup",
-      "source_urls": ["https://www.elastic.co/docs/reference/elasticsearch/index-settings/similarity", "https://www.elastic.co/docs/solutions/search/ranking"],
-      "evidence": "텍스트 lexical matching은 모델 API나 embedding space 없이 재현 가능. exact identifier와 filter를 sparse score와 분리할 수 있음.",
+      "source_urls": [
+        "https://www.elastic.co/docs/reference/elasticsearch/index-settings/similarity",
+        "https://www.elastic.co/docs/solutions/search/ranking"
+      ],
+      "evidence": [
+        {
+          "claim": "텍스트 lexical matching은 모델 API나 embedding space 없이 재현 가능. exact identifier와 filter를 sparse score와 분리할 수 있음.",
+          "source_url": null,
+          "source_revision": null,
+          "locator": null,
+          "verification_status": "prior_review_unlocated"
+        }
+      ],
       "limitations": "동의어, 다국어 표현, 질문 문장 의미를 단독 처리하기 어렵다. 모델 없는 방법이므로 질의 분석/field 설계가 필요.",
-      "scores": {"quality": 4, "fit": 5, "provenance": 5, "operability": 5, "portability": 5, "economics": 3},
-      "confidence": 0.63,
-      "reason": "B300, firmware version, kernel symbol, units, serial-like IDs를 보존할 필수 비교 경로다. dense retrieval을 이 기준선 대비 실험한다."
+      "scores": {
+        "quality": 4,
+        "fit": 5,
+        "provenance": 5,
+        "operability": 5,
+        "portability": 5,
+        "economics": 3
+      },
+      "reason": "B300, firmware version, kernel symbol, units, serial-like IDs를 보존할 필수 비교 경로다. dense retrieval을 이 기준선 대비 실험한다.",
+      "evidence_stage": "prior_review_unlocated",
+      "assessment_confidence": 0.63
     },
     {
       "id": "bge_m3",
       "category": "embedding",
       "name": "BAAI/bge-m3",
       "role": "self-host multilingual dense+sparse+ColBERT embedding baseline",
-      "source_urls": ["https://huggingface.co/BAAI/bge-m3", "https://github.com/FlagOpen/FlagEmbedding"],
-      "evidence": "MIT; 1024 dims, 8192 tokens, 100+ languages. dense/sparse/multi-vector를 한 모델이 출력할 수 있음.",
+      "source_urls": [
+        "https://huggingface.co/BAAI/bge-m3",
+        "https://github.com/FlagOpen/FlagEmbedding"
+      ],
+      "evidence": [
+        {
+          "claim": "MIT; 1024 dims, 8192 tokens, 100+ languages. dense/sparse/multi-vector를 한 모델이 출력할 수 있음.",
+          "source_url": null,
+          "source_revision": null,
+          "locator": null,
+          "verification_status": "prior_review_unlocated"
+        }
+      ],
       "limitations": "하이브리드/ColBERT 저장소 및 검색 비용이 늘어난다. 한국어 기술약어, 수식, table row relevance 실측 없음.",
-      "scores": {"quality": 4, "fit": 5, "provenance": 5, "operability": 3, "portability": 5, "economics": 3},
-      "confidence": 0.55,
-      "reason": "로컬·다국어와 lexical/multivector 선택지가 있어 첫 bake-off로 균형이 좋다. Jev advisory choice도 BGE-M3를 골랐으나 이는 성능 실측을 대체하지 않는다."
+      "scores": {
+        "quality": 4,
+        "fit": 5,
+        "provenance": 5,
+        "operability": 3,
+        "portability": 5,
+        "economics": 3
+      },
+      "reason": "로컬·다국어와 lexical/multivector 선택지가 있어 첫 bake-off로 균형이 좋다. Jev advisory choice도 BGE-M3를 골랐으나 이는 성능 실측을 대체하지 않는다.",
+      "evidence_stage": "prior_review_unlocated",
+      "assessment_confidence": 0.55
     },
     {
       "id": "multilingual_e5_large_instruct",
       "category": "embedding",
       "name": "intfloat/multilingual-e5-large-instruct",
       "role": "local multilingual asymmetric retrieval baseline",
-      "source_urls": ["https://huggingface.co/intfloat/multilingual-e5-large-instruct"],
-      "evidence": "MIT; 1024 dims, 100 languages. query는 `Instruct: ...\nQuery: ...`, document에는 instruction 불필요; max length 512 tokens.",
+      "source_urls": [
+        "https://huggingface.co/intfloat/multilingual-e5-large-instruct"
+      ],
+      "evidence": [
+        {
+          "claim": "MIT; 1024 dims, 100 languages. query는 `Instruct: ...\nQuery: ...`, document에는 instruction 불필요; max length 512 tokens.",
+          "source_url": null,
+          "source_revision": null,
+          "locator": null,
+          "verification_status": "prior_review_unlocated"
+        }
+      ],
       "limitations": "짧은 chunk가 필요해 표/로그 context 손실 가능. query instruction을 빼면 모델 학습 형식과 어긋난다.",
-      "scores": {"quality": 3, "fit": 4, "provenance": 5, "operability": 4, "portability": 5, "economics": 3},
-      "confidence": 0.49,
-      "reason": "저비용 multilingual 대비점이며 explicit query instruction이 있다. DSE의 장문/코드/수식 검색 문제로 인해 순위를 낮게 잠정 배정했다."
+      "scores": {
+        "quality": 3,
+        "fit": 4,
+        "provenance": 5,
+        "operability": 4,
+        "portability": 5,
+        "economics": 3
+      },
+      "reason": "저비용 multilingual 대비점이며 explicit query instruction이 있다. DSE의 장문/코드/수식 검색 문제로 인해 순위를 낮게 잠정 배정했다.",
+      "evidence_stage": "prior_review_unlocated",
+      "assessment_confidence": 0.49
     },
     {
       "id": "qwen3_embedding_06b",
       "category": "embedding",
       "name": "Qwen/Qwen3-Embedding-0.6B",
       "role": "local multilingual/code dense retrieval, low-compute tier",
-      "source_urls": ["https://huggingface.co/Qwen/Qwen3-Embedding-0.6B", "https://huggingface.co/Qwen/Qwen3-Embedding-8B"],
-      "evidence": "Apache-2.0, 100+ languages/code retrieval, 32K, 1024 dims, MRL/instruction aware; query prompt 활용 가능.",
+      "source_urls": [
+        "https://huggingface.co/Qwen/Qwen3-Embedding-0.6B",
+        "https://huggingface.co/Qwen/Qwen3-Embedding-8B"
+      ],
+      "evidence": [
+        {
+          "claim": "Apache-2.0, 100+ languages/code retrieval, 32K, 1024 dims, MRL/instruction aware; query prompt 활용 가능.",
+          "source_url": null,
+          "source_revision": null,
+          "locator": null,
+          "verification_status": "prior_review_unlocated"
+        }
+      ],
       "limitations": "최대 입력을 그대로 쓰는 chunking이 적절하다는 뜻은 아니다. 실제 inference rate·VRAM·Korean technical recall은 미측정.",
-      "scores": {"quality": 4, "fit": 5, "provenance": 4, "operability": 3, "portability": 5, "economics": 3},
-      "confidence": 0.5,
-      "reason": "용량/실행 가능성이 높은 최신 local candidate이고 BGE-M3와 비교하기 좋다."
+      "scores": {
+        "quality": 4,
+        "fit": 5,
+        "provenance": 4,
+        "operability": 3,
+        "portability": 5,
+        "economics": 3
+      },
+      "reason": "용량/실행 가능성이 높은 최신 local candidate이고 BGE-M3와 비교하기 좋다.",
+      "evidence_stage": "prior_review_unlocated",
+      "assessment_confidence": 0.5
     },
     {
       "id": "qwen3_embedding_4b",
       "category": "embedding",
       "name": "Qwen/Qwen3-Embedding-4B",
       "role": "local high-quality multilingual/code retrieval tier",
-      "source_urls": ["https://huggingface.co/Qwen/Qwen3-Embedding-4B"],
-      "evidence": "Apache-2.0; 100+ languages/code, 32K, up to 2560 dims, MRL and instruction aware.",
+      "source_urls": [
+        "https://huggingface.co/Qwen/Qwen3-Embedding-4B"
+      ],
+      "evidence": [
+        {
+          "claim": "Apache-2.0; 100+ languages/code, 32K, up to 2560 dims, MRL and instruction aware.",
+          "source_url": null,
+          "source_revision": null,
+          "locator": null,
+          "verification_status": "prior_review_unlocated"
+        }
+      ],
       "limitations": "0.6B 대비 VRAM, batch throughput 및 re-embed compute 증가. gains per GB/second가 DSE gold set에서 확인되지 않음.",
-      "scores": {"quality": 5, "fit": 5, "provenance": 4, "operability": 2, "portability": 5, "economics": 3},
-      "confidence": 0.44,
-      "reason": "측정되는 품질 상승이 있으면 local 고품질 후보가 된다. 비용은 실제 hardware throughput 전까지 낮춰 평가한다."
+      "scores": {
+        "quality": 5,
+        "fit": 5,
+        "provenance": 4,
+        "operability": 2,
+        "portability": 5,
+        "economics": 3
+      },
+      "reason": "측정되는 품질 상승이 있으면 local 고품질 후보가 된다. 비용은 실제 hardware throughput 전까지 낮춰 평가한다.",
+      "evidence_stage": "prior_review_unlocated",
+      "assessment_confidence": 0.44
     },
     {
       "id": "qwen3_embedding_8b",
       "category": "embedding",
       "name": "Qwen/Qwen3-Embedding-8B",
       "role": "local maximum-quality embedding comparison point",
-      "source_urls": ["https://huggingface.co/Qwen/Qwen3-Embedding-8B"],
-      "evidence": "Apache-2.0; 100+ languages/code, 32K, 4096 dims, user-defined MRL dimensions and instruction-aware.",
-      "limitations": "큰 VRAM·throughput·re-embedding 비용. 공개 MTEB multilingual rank를 DSE 성능으로 해석하면 안 됨.",
-      "scores": {"quality": 5, "fit": 4, "provenance": 4, "operability": 1, "portability": 5, "economics": 3},
-      "confidence": 0.4,
-      "reason": "quality ceiling/ablation 용도로만 포함한다. 운영 상시 후보인지 결론은 evidence가 없다."
+      "source_urls": [
+        "https://huggingface.co/Qwen/Qwen3-Embedding-8B"
+      ],
+      "evidence": [
+        {
+          "claim": "Apache-2.0; 100+ languages/code, 32K, 4096 dims, user-defined MRL dimensions and instruction-aware.",
+          "source_url": null,
+          "source_revision": null,
+          "locator": null,
+          "verification_status": "prior_review_unlocated"
+        },
+        {
+          "claim": "Qwen3-Embedding-8B model card specifies 32K sequence length, default 4096 output dimensions, and support for user-defined MRL dimensions.",
+          "source_url": "https://huggingface.co/Qwen/Qwen3-Embedding-8B/tree/1d8ad4ca9b3dd8059ad90a75d4983776a23d44af",
+          "source_revision": "1d8ad4ca9b3dd8059ad90a75d4983776a23d44af",
+          "locator": "Model Overview; Qwen3 Embedding Series Model list",
+          "verification_status": "verified_primary"
+        },
+        {
+          "claim": "Official Qwen3-Embedding-8B card lists user-defined output dimensions 32–4096 and MRL support, so 1024 is a supported reduced-dimension candidate.",
+          "source_url": "https://huggingface.co/Qwen/Qwen3-Embedding-8B",
+          "source_revision": null,
+          "locator": "Features: Embedding Dimension; Qwen3 Embedding Series Model list and MRL Support",
+          "verification_status": "verified_primary"
+        },
+        {
+          "claim": "pgvector v0.8.7 upstream HNSW and IVFFlat indexes support vector up to 2000 dimensions and halfvec up to 4000; exact vector/halfvec storage supports up to 16000 dimensions.",
+          "source_url": "https://github.com/pgvector/pgvector/blob/f37c13f68b57d2c3472b2214fbcff699d6d34876/README.md",
+          "source_revision": "f37c13f68b57d2c3472b2214fbcff699d6d34876",
+          "locator": "HNSW and IVFFlat supported-type limits; Vector Type and Halfvec Type limits",
+          "verification_status": "verified_primary"
+        }
+      ],
+      "limitations": "큰 VRAM·throughput·re-embedding 비용. 공개 MTEB multilingual rank를 DSE 성능으로 해석하면 안 됨. Default 4096 dimensions exceed pgvector HNSW/IVFFlat limits for vector (2000) and halfvec (4000); exact storage/search is possible. Supported reduced MRL 1024 is dimension-compatible with both ANN type limits but remains a separate index requiring DSE retrieval-quality validation and deployed extversion verification.",
+      "scores": {
+        "quality": 5,
+        "fit": 4,
+        "provenance": 4,
+        "operability": 1,
+        "portability": 5,
+        "economics": 3
+      },
+      "reason": "quality ceiling/ablation 용도로만 포함한다. 운영 상시 후보인지 결론은 evidence가 없다.",
+      "evidence_stage": "E1",
+      "assessment_confidence": 0.4
     },
     {
       "id": "openai_text_embedding_3_small",
       "category": "embedding",
       "name": "OpenAI text-embedding-3-small",
       "role": "managed low-cost multilingual embedding comparison",
-      "source_urls": ["https://developers.openai.com/api/docs/models/text-embedding-3-small", "https://developers.openai.com/api/docs/guides/embeddings", "https://developers.openai.com/api/docs/guides/your-data"],
-      "evidence": "1536 default dims, max 8192 tokens, adjustable dimensions. Official model page lists $0.02 per 1M input tokens; no query/document prefix parameter.",
+      "source_urls": [
+        "https://developers.openai.com/api/docs/models/text-embedding-3-small",
+        "https://developers.openai.com/api/docs/guides/embeddings",
+        "https://developers.openai.com/api/docs/guides/your-data"
+      ],
+      "evidence": [
+        {
+          "claim": "1536 default dims, max 8192 tokens, adjustable dimensions. Official model page lists $0.02 per 1M input tokens; no query/document prefix parameter.",
+          "source_url": null,
+          "source_revision": null,
+          "locator": null,
+          "verification_status": "prior_review_unlocated"
+        }
+      ],
       "limitations": "remote data/API policy; default abuse logs up to 30 days. No domain-specific code/math/table quality claim verified.",
-      "scores": {"quality": 3, "fit": 4, "provenance": 3, "operability": 5, "portability": 3, "economics": 5},
-      "confidence": 0.47,
-      "reason": "가격과 API 편의의 낮은 비용 hosted point. 보안 승인과 local baseline 비교가 전제다."
+      "scores": {
+        "quality": 3,
+        "fit": 4,
+        "provenance": 3,
+        "operability": 5,
+        "portability": 3,
+        "economics": 5
+      },
+      "reason": "가격과 API 편의의 낮은 비용 hosted point. 보안 승인과 local baseline 비교가 전제다.",
+      "evidence_stage": "prior_review_unlocated",
+      "assessment_confidence": 0.47
     },
     {
       "id": "openai_text_embedding_3_large",
       "category": "embedding",
       "name": "OpenAI text-embedding-3-large",
       "role": "managed higher-quality multilingual embedding comparison",
-      "source_urls": ["https://developers.openai.com/api/docs/guides/embeddings", "https://developers.openai.com/api/reference/resources/embeddings/methods/create"],
-      "evidence": "3072 default dims, dimensions parameter로 줄일 수 있음, maximum input 8192, official guide에 $0.13 per 1M input tokens 안내.",
+      "source_urls": [
+        "https://developers.openai.com/api/docs/guides/embeddings",
+        "https://developers.openai.com/api/reference/resources/embeddings/methods/create"
+      ],
+      "evidence": [
+        {
+          "claim": "3072 default dims, dimensions parameter로 줄일 수 있음, maximum input 8192, official guide에 $0.13 per 1M input tokens 안내.",
+          "source_url": null,
+          "source_revision": null,
+          "locator": null,
+          "verification_status": "prior_review_unlocated"
+        }
+      ],
       "limitations": "small보다 6.5x input 가격 및 저장량; 호스팅/retention 조건과 DSE 기술질의 품질은 별도 검증 필요.",
-      "scores": {"quality": 4, "fit": 4, "provenance": 3, "operability": 5, "portability": 3, "economics": 3},
-      "confidence": 0.45,
-      "reason": "상용 API upper comparison point. 저차원 축소와 full dimension을 함께 재색인하지 않고 각각 다른 index로 평가한다."
+      "scores": {
+        "quality": 4,
+        "fit": 4,
+        "provenance": 3,
+        "operability": 5,
+        "portability": 3,
+        "economics": 3
+      },
+      "reason": "상용 API upper comparison point. 저차원 축소와 full dimension을 함께 재색인하지 않고 각각 다른 index로 평가한다.",
+      "evidence_stage": "prior_review_unlocated",
+      "assessment_confidence": 0.45
     },
     {
       "id": "gemini_embedding_2",
       "category": "embedding",
       "name": "Google Gemini Embedding 2",
       "role": "multimodal text/image/PDF embedding candidate",
-      "source_urls": ["https://ai.google.dev/gemini-api/docs/embeddings", "https://ai.google.dev/gemini-api/docs/pricing", "https://docs.cloud.google.com/vertex-ai/generative-ai/docs/vertex-ai-zero-data-retention"],
-      "evidence": "model ID `gemini-embedding-2`, 8192 token input, output dims 128–3072; text/image/video/audio/PDF. Standard text $0.20/M tokens, batch $0.10/M tokens.",
+      "source_urls": [
+        "https://ai.google.dev/gemini-api/docs/embeddings",
+        "https://ai.google.dev/gemini-api/docs/pricing",
+        "https://docs.cloud.google.com/vertex-ai/generative-ai/docs/vertex-ai-zero-data-retention"
+      ],
+      "evidence": [
+        {
+          "claim": "model ID `gemini-embedding-2`, 8192 token input, output dims 128–3072; text/image/video/audio/PDF. Standard text $0.20/M tokens, batch $0.10/M tokens.",
+          "source_url": null,
+          "source_revision": null,
+          "locator": null,
+          "verification_status": "prior_review_unlocated"
+        }
+      ],
       "limitations": "PDF 1개 최대 6 pages; paid/free tier data handling 다름(무료 tier improvement use 표시). New embedding space is incompatible with prior Gemini embedding models.",
-      "scores": {"quality": 4, "fit": 4, "provenance": 3, "operability": 4, "portability": 3, "economics": 4},
-      "confidence": 0.48,
-      "reason": "도표/페이지 이미지 retrieval 시험에 유용한 현행 multimodal 비교군. page image embedding이 표 OCR/숫자 정확성을 자동 보증하지 않는다."
+      "scores": {
+        "quality": 4,
+        "fit": 4,
+        "provenance": 3,
+        "operability": 4,
+        "portability": 3,
+        "economics": 4
+      },
+      "reason": "도표/페이지 이미지 retrieval 시험에 유용한 현행 multimodal 비교군. page image embedding이 표 OCR/숫자 정확성을 자동 보증하지 않는다.",
+      "evidence_stage": "prior_review_unlocated",
+      "assessment_confidence": 0.48
     },
     {
       "id": "voyage_4_large",
       "category": "embedding",
       "name": "voyage-4-large",
       "role": "managed high-quality multilingual retrieval embedding",
-      "source_urls": ["https://docs.voyageai.com/docs/embeddings", "https://docs.voyageai.com/docs/pricing"],
-      "evidence": "32K; default 1024 and 256/512/2048 dims; query/document input_type auto-prefix; listed $0.12/1M tokens. 4-series models share space per vendor docs.",
-      "limitations": "hosted API and vendor retention/region contract; data access not granted. Model family compatibility does not extend to other providers.",
-      "scores": {"quality": 5, "fit": 4, "provenance": 3, "operability": 5, "portability": 3, "economics": 3},
-      "confidence": 0.46,
-      "reason": "강한 hosted retrieval comparison point와 명시적 query/doc mode가 장점이나 economics/privacy는 계정 조건에 의존한다."
+      "source_urls": [
+        "https://docs.voyageai.com/docs/embeddings",
+        "https://docs.voyageai.com/docs/pricing",
+        "https://docs.voyageai.com/docs/flexible-dimensions-and-quantization"
+      ],
+      "evidence": [
+        {
+          "claim": "32K; default 1024 and 256/512/2048 dims; query/document input_type auto-prefix; listed $0.12/1M tokens. 4-series models share space per vendor docs.",
+          "source_url": null,
+          "source_revision": null,
+          "locator": null,
+          "verification_status": "prior_review_unlocated"
+        },
+        {
+          "claim": "Official Voyage docs identify voyage-4-large as 1024 dimensions by default and demonstrate output_dimension=2048.",
+          "source_url": "https://docs.voyageai.com/docs/flexible-dimensions-and-quantization",
+          "source_revision": null,
+          "locator": "Matryoshka Embeddings; 2048-dimensional output example",
+          "verification_status": "verified_primary"
+        },
+        {
+          "claim": "pgvector v0.8.7 HNSW and IVFFlat support vector up to 2000 dimensions and halfvec up to 4000; exact vector/halfvec storage supports up to 16000 dimensions.",
+          "source_url": "https://github.com/pgvector/pgvector/blob/f37c13f68b57d2c3472b2214fbcff699d6d34876/README.md",
+          "source_revision": "f37c13f68b57d2c3472b2214fbcff699d6d34876",
+          "locator": "HNSW and IVFFlat supported-type limits; Vector Type and Halfvec Type limits",
+          "verification_status": "verified_primary"
+        }
+      ],
+      "limitations": "hosted API and vendor retention/region contract; data access not granted. Default 1024 fits vector/halfvec ANN dimension ceilings; 2048 exceeds vector ANN's 2000 ceiling but fits halfvec's 4000 ceiling after a separately quality-gated precision conversion. Verify deployed extversion. Model family compatibility does not extend to other providers.",
+      "scores": {
+        "quality": 5,
+        "fit": 4,
+        "provenance": 3,
+        "operability": 5,
+        "portability": 3,
+        "economics": 3
+      },
+      "reason": "강한 hosted retrieval comparison point와 명시적 query/doc mode가 장점이나 economics/privacy는 계정 조건에 의존한다.",
+      "evidence_stage": "E1",
+      "assessment_confidence": 0.46
     },
     {
       "id": "cohere_embed_v5_pro",
       "category": "embedding",
       "name": "Cohere embed-v5.0-pro",
       "role": "managed multilingual/multimodal embedding candidate",
-      "source_urls": ["https://docs.cohere.com/docs/cohere-embed", "https://docs.cohere.com/v2/docs/embeddings", "https://cohere.com/pricing"],
-      "evidence": "128K, 100+ languages, text/image/mixed input, dimensions 256–2048, search_query/search_document input_type. Model Vault public instance rates available.",
-      "limitations": "이번 조사에서 Embed 5 API per-token rate 확인 불가. Model Vault Small $2,000/mo; remote terms, account, capacity and region unresolved.",
-      "scores": {"quality": 5, "fit": 5, "provenance": 3, "operability": 4, "portability": 3, "economics": 3},
-      "confidence": 0.43,
-      "reason": "parsed PDF·visual content·multilingual retrieval에 strong candidate지만 price and policy evidence가 완결되지 않았다."
+      "source_urls": [
+        "https://docs.cohere.com/docs/cohere-embed",
+        "https://docs.cohere.com/v2/docs/embeddings",
+        "https://cohere.com/pricing"
+      ],
+      "evidence": [
+        {
+          "claim": "128K, 100+ languages, text/image/mixed input, dimensions 256–2048, search_query/search_document input_type. Model Vault public instance rates available.",
+          "source_url": null,
+          "source_revision": null,
+          "locator": null,
+          "verification_status": "prior_review_unlocated"
+        },
+        {
+          "claim": "Cohere's current embed-v5.0-pro model table lists 2048 as the default dimension and 1024 as a supported alternative.",
+          "source_url": "https://docs.cohere.com/docs/cohere-embed",
+          "source_revision": null,
+          "locator": "Latest Model table, embed-v5.0-pro row",
+          "verification_status": "verified_primary"
+        },
+        {
+          "claim": "pgvector v0.8.7 HNSW and IVFFlat support vector up to 2000 dimensions and halfvec up to 4000; exact vector/halfvec storage supports up to 16000 dimensions.",
+          "source_url": "https://github.com/pgvector/pgvector/blob/f37c13f68b57d2c3472b2214fbcff699d6d34876/README.md",
+          "source_revision": "f37c13f68b57d2c3472b2214fbcff699d6d34876",
+          "locator": "HNSW and IVFFlat supported-type limits; Vector Type and Halfvec Type limits",
+          "verification_status": "verified_primary"
+        }
+      ],
+      "limitations": "Default 2048 exceeds vector ANN's 2000 ceiling but fits halfvec's 4000 ceiling after a separately quality-gated precision conversion; alternate 1024 fits both ANN dimension ceilings. Verify deployed extversion. 이번 조사에서 Embed 5 API per-token rate 확인 불가. Model Vault Small $2,000/mo; remote terms, account, capacity and region unresolved.",
+      "scores": {
+        "quality": 5,
+        "fit": 5,
+        "provenance": 3,
+        "operability": 4,
+        "portability": 3,
+        "economics": 3
+      },
+      "reason": "parsed PDF·visual content·multilingual retrieval에 strong candidate지만 price and policy evidence가 완결되지 않았다.",
+      "evidence_stage": "E1",
+      "assessment_confidence": 0.43
     },
     {
       "id": "jina_v5_small_retrieval",
       "category": "embedding",
       "name": "jina-embeddings-v5-text-small-retrieval",
       "role": "local compact long-context multilingual retrieval candidate",
-      "source_urls": ["https://huggingface.co/jinaai/jina-embeddings-v5-text-small-retrieval", "https://jina.ai/en-US/models/jina-embeddings-v5-text-small/"],
-      "evidence": "677M; 32K; default 1024 and MRL; retrieval-targeted Query/Document prefixes; CC BY-NC 4.0 model card.",
+      "source_urls": [
+        "https://huggingface.co/jinaai/jina-embeddings-v5-text-small-retrieval",
+        "https://jina.ai/en-US/models/jina-embeddings-v5-text-small/"
+      ],
+      "evidence": [
+        {
+          "claim": "677M; 32K; default 1024 and MRL; retrieval-targeted Query/Document prefixes; CC BY-NC 4.0 model card.",
+          "source_url": null,
+          "source_revision": null,
+          "locator": null,
+          "verification_status": "prior_review_unlocated"
+        }
+      ],
       "limitations": "NC license makes commercial self-host use unsuitable without different agreement. Inference-code/model revision and separate commercial API terms need legal review.",
-      "scores": {"quality": 4, "fit": 4, "provenance": 2, "operability": 3, "portability": 2, "economics": 3},
-      "confidence": 0.41,
-      "reason": "compact long context is attractive but license restrictions materially reduce deployment flexibility."
+      "scores": {
+        "quality": 4,
+        "fit": 4,
+        "provenance": 2,
+        "operability": 3,
+        "portability": 2,
+        "economics": 3
+      },
+      "reason": "compact long context is attractive but license restrictions materially reduce deployment flexibility.",
+      "evidence_stage": "prior_review_unlocated",
+      "assessment_confidence": 0.41
     },
     {
       "id": "bge_reranker_v2_m3",
       "category": "reranker",
       "name": "BAAI/bge-reranker-v2-m3",
       "role": "local multilingual cross-encoder reranker",
-      "source_urls": ["https://huggingface.co/BAAI/bge-reranker-v2-m3", "https://github.com/FlagOpen/FlagEmbedding"],
-      "evidence": "Apache-2.0; multilingual pairwise query/document scoring, 0.6B-class model; local deployment.",
+      "source_urls": [
+        "https://huggingface.co/BAAI/bge-reranker-v2-m3",
+        "https://github.com/FlagOpen/FlagEmbedding"
+      ],
+      "evidence": [
+        {
+          "claim": "Apache-2.0; multilingual pairwise query/document scoring, 0.6B-class model; local deployment.",
+          "source_url": null,
+          "source_revision": null,
+          "locator": null,
+          "verification_status": "prior_review_unlocated"
+        }
+      ],
       "limitations": "Candidate pool에만 작동; 1차 retrieval recall은 별도 측정. 긴 input truncation/throughput와 formula/code relevance는 실측 없음.",
-      "scores": {"quality": 4, "fit": 5, "provenance": 5, "operability": 4, "portability": 5, "economics": 3},
-      "confidence": 0.48,
-      "reason": "다국어·local·permissive license가 DSE 실험에 무난하며 hybrid retrieval 재정렬의 기준선이 된다."
+      "scores": {
+        "quality": 4,
+        "fit": 5,
+        "provenance": 5,
+        "operability": 4,
+        "portability": 5,
+        "economics": 3
+      },
+      "reason": "다국어·local·permissive license가 DSE 실험에 무난하며 hybrid retrieval 재정렬의 기준선이 된다.",
+      "evidence_stage": "prior_review_unlocated",
+      "assessment_confidence": 0.48
     },
     {
       "id": "qwen3_reranker_06b",
       "category": "reranker",
       "name": "Qwen/Qwen3-Reranker-0.6B",
       "role": "local 32K multilingual/instruction-aware reranker",
-      "source_urls": ["https://huggingface.co/Qwen/Qwen3-Reranker-0.6B"],
-      "evidence": "Apache-2.0, 100+ languages, 32K, instruction-aware pair scoring.",
+      "source_urls": [
+        "https://huggingface.co/Qwen/Qwen3-Reranker-0.6B"
+      ],
+      "evidence": [
+        {
+          "claim": "Apache-2.0, 100+ languages, 32K, instruction-aware pair scoring.",
+          "source_url": null,
+          "source_revision": null,
+          "locator": null,
+          "verification_status": "prior_review_unlocated"
+        }
+      ],
       "limitations": "Local model hosting requires compute/runtime. Output score calibration, true throughput, technical-code relevance are unverified.",
-      "scores": {"quality": 4, "fit": 4, "provenance": 5, "operability": 3, "portability": 5, "economics": 3},
-      "confidence": 0.44,
-      "reason": "Qwen embedding model family와 같은 multilingual retrieval comparison lane을 구성할 수 있다."
+      "scores": {
+        "quality": 4,
+        "fit": 4,
+        "provenance": 5,
+        "operability": 3,
+        "portability": 5,
+        "economics": 3
+      },
+      "reason": "Qwen embedding model family와 같은 multilingual retrieval comparison lane을 구성할 수 있다.",
+      "evidence_stage": "prior_review_unlocated",
+      "assessment_confidence": 0.44
     },
     {
       "id": "cohere_rerank_v4_pro",
       "category": "reranker",
       "name": "Cohere rerank-v4.0-pro",
       "role": "managed high-quality multilingual/JSON reranker",
-      "source_urls": ["https://docs.cohere.com/v2/docs/rerank", "https://docs.cohere.com/docs/model-vault/standard/pricing"],
-      "evidence": "Vendor docs list multilingual, semi-structured JSON and 32768 context. Public Model Vault Medium is $5/hour or $3,250/month.",
+      "source_urls": [
+        "https://docs.cohere.com/v2/docs/rerank",
+        "https://docs.cohere.com/docs/model-vault/standard/pricing"
+      ],
+      "evidence": [
+        {
+          "claim": "Vendor docs list multilingual, semi-structured JSON and 32768 context. Public Model Vault Medium is $5/hour or $3,250/month.",
+          "source_url": null,
+          "source_revision": null,
+          "locator": null,
+          "verification_status": "prior_review_unlocated"
+        }
+      ],
       "limitations": "Hosted input and model vault operations need security/account/region review. API search metering not confirmed in this research.",
-      "scores": {"quality": 5, "fit": 4, "provenance": 3, "operability": 4, "portability": 3, "economics": 3},
-      "confidence": 0.42,
-      "reason": "Quality-first managed comparison and JSON support are useful if cloud input approval is obtained."
+      "scores": {
+        "quality": 5,
+        "fit": 4,
+        "provenance": 3,
+        "operability": 4,
+        "portability": 3,
+        "economics": 3
+      },
+      "reason": "Quality-first managed comparison and JSON support are useful if cloud input approval is obtained.",
+      "evidence_stage": "prior_review_unlocated",
+      "assessment_confidence": 0.42
     },
     {
       "id": "cohere_rerank_v4_fast",
       "category": "reranker",
       "name": "Cohere rerank-v4.0-fast",
       "role": "managed low-latency/high-throughput multilingual reranker",
-      "source_urls": ["https://docs.cohere.com/v2/docs/rerank", "https://cohere.com/pricing"],
-      "evidence": "Current model ID in Cohere docs; vendor positions it as a lower latency/throughput-oriented multilingual v4 variant with 32K context.",
+      "source_urls": [
+        "https://docs.cohere.com/v2/docs/rerank",
+        "https://cohere.com/pricing"
+      ],
+      "evidence": [
+        {
+          "claim": "Current model ID in Cohere docs; vendor positions it as a lower latency/throughput-oriented multilingual v4 variant with 32K context.",
+          "source_url": null,
+          "source_revision": null,
+          "locator": null,
+          "verification_status": "prior_review_unlocated"
+        }
+      ],
       "limitations": "Pro와 accuracy parity는 미검증. Per-search API cost, region, retention, throttling을 계약/계정 기준으로 확인.",
-      "scores": {"quality": 4, "fit": 4, "provenance": 3, "operability": 5, "portability": 3, "economics": 3},
-      "confidence": 0.42,
-      "reason": "agent query traffic와 latency Pareto 분석용. Pro와 같은 query 후보로 paired test한다."
+      "scores": {
+        "quality": 4,
+        "fit": 4,
+        "provenance": 3,
+        "operability": 5,
+        "portability": 3,
+        "economics": 3
+      },
+      "reason": "agent query traffic와 latency Pareto 분석용. Pro와 같은 query 후보로 paired test한다.",
+      "evidence_stage": "prior_review_unlocated",
+      "assessment_confidence": 0.42
     },
     {
       "id": "tree_sitter_rules",
       "category": "deterministic_extraction",
       "name": "Native parsers + Tree-sitter/AST + unit/schema rules",
       "role": "code/config/experiment source에서 typed claim을 결정론적으로 추출",
-      "source_urls": ["https://tree-sitter.github.io/tree-sitter/using-parsers/", "https://json-schema.org/", "https://github.com/python/cpython/tree/main/Lib/ast.py"],
-      "evidence": "Tree-sitter produces concrete syntax trees for supported grammars; native JSON/YAML/CSV/code parsers preserve literal structure without semantic generation.",
+      "source_urls": [
+        "https://tree-sitter.github.io/tree-sitter/using-parsers/",
+        "https://json-schema.org/",
+        "https://github.com/python/cpython/tree/main/Lib/ast.py"
+      ],
+      "evidence": [
+        {
+          "claim": "Tree-sitter produces concrete syntax trees for supported grammars; native JSON/YAML/CSV/code parsers preserve literal structure without semantic generation.",
+          "source_url": null,
+          "source_revision": null,
+          "locator": null,
+          "verification_status": "prior_review_unlocated"
+        }
+      ],
       "limitations": "비정형 자연어는 해석하지 못하며 HATIR DSL은 grammar/semantic mapping을 별도 유지해야 함. 그래도 output claim의 units/version/legality는 validator로 검증.",
-      "scores": {"quality": 5, "fit": 5, "provenance": 5, "operability": 4, "portability": 5, "economics": 3},
-      "confidence": 0.65,
-      "reason": "typed code/config/log 사실 추출의 deterministic-category 후보이며 자유 서술에서 의미 주장을 추출하는 semantic LLM 후보를 대체하지 않는다."
+      "scores": {
+        "quality": 5,
+        "fit": 5,
+        "provenance": 5,
+        "operability": 4,
+        "portability": 5,
+        "economics": 3
+      },
+      "reason": "typed code/config/log 사실 추출의 deterministic-category 후보이며 자유 서술에서 의미 주장을 추출하는 semantic LLM 후보를 대체하지 않는다.",
+      "evidence_stage": "prior_review_unlocated",
+      "assessment_confidence": 0.65
     },
     {
       "id": "openai_gpt6_structured_outputs",
       "category": "semantic_extraction",
       "name": "OpenAI Structured Outputs + gpt-6-astra",
       "role": "비정형 문장/표 설명에서 JSON Schema Claim 후보 추출",
-      "source_urls": ["https://developers.openai.com/api/docs/guides/structured-outputs", "https://developers.openai.com/api/docs/models", "https://developers.openai.com/api/docs/guides/your-data"],
-      "evidence": "Official Structured Outputs supports JSON Schema/Pydantic and latest models including gpt-6-astra; model pricing listed $10 input/$50 output per million tokens.",
+      "source_urls": [
+        "https://developers.openai.com/api/docs/guides/structured-outputs",
+        "https://developers.openai.com/api/docs/models",
+        "https://developers.openai.com/api/docs/guides/your-data"
+      ],
+      "evidence": [
+        {
+          "claim": "Official Structured Outputs supports JSON Schema/Pydantic and latest models including gpt-6-astra; model pricing listed $10 input/$50 output per million tokens.",
+          "source_url": null,
+          "source_revision": null,
+          "locator": null,
+          "verification_status": "prior_review_unlocated"
+        }
+      ],
       "limitations": "Schema compliance는 factual correctness/grounding을 보장하지 않는다. 비정형 내부 자료 전송, 기본 30-day abuse logging, model cost는 approval/volume에 의존.",
-      "scores": {"quality": 4, "fit": 4, "provenance": 3, "operability": 4, "portability": 3, "economics": 1},
-      "confidence": 0.46,
-      "reason": "복잡하고 모호한 텍스트의 추출 upper point. 매 문서 배치가 아니라 규칙 파싱 실패 건에 한정해 비용과 error rate를 잰다."
+      "scores": {
+        "quality": 4,
+        "fit": 4,
+        "provenance": 3,
+        "operability": 4,
+        "portability": 3,
+        "economics": 1
+      },
+      "reason": "복잡하고 모호한 텍스트의 추출 upper point. 매 문서 배치가 아니라 규칙 파싱 실패 건에 한정해 비용과 error rate를 잰다.",
+      "evidence_stage": "prior_review_unlocated",
+      "assessment_confidence": 0.46
     },
     {
       "id": "gemini_structured_output",
       "category": "semantic_extraction",
       "name": "Gemini 3.1 Pro Structured Output",
       "role": "managed multimodal/schema-based claim extraction comparison",
-      "source_urls": ["https://ai.google.dev/gemini-api/docs/models/gemini-3.1-pro-preview", "https://ai.google.dev/gemini-api/docs/structured-output", "https://ai.google.dev/gemini-api/docs/pricing", "https://docs.cloud.google.com/vertex-ai/generative-ai/docs/vertex-ai-zero-data-retention"],
-      "evidence": "Official model ID `gemini-3.1-pro-preview` explicitly supports structured outputs; Gemini API supports a JSON Schema subset and Python Pydantic/JS Zod.",
+      "source_urls": [
+        "https://ai.google.dev/gemini-api/docs/models/gemini-3.1-pro-preview",
+        "https://ai.google.dev/gemini-api/docs/structured-output",
+        "https://ai.google.dev/gemini-api/docs/pricing",
+        "https://docs.cloud.google.com/vertex-ai/generative-ai/docs/vertex-ai-zero-data-retention"
+      ],
+      "evidence": [
+        {
+          "claim": "Official model ID `gemini-3.1-pro-preview` explicitly supports structured outputs; Gemini API supports a JSON Schema subset and Python Pydantic/JS Zod.",
+          "source_url": null,
+          "source_revision": null,
+          "locator": null,
+          "verification_status": "prior_review_unlocated"
+        }
+      ],
       "limitations": "Exact model/region endpoint support and schema subset need per-account confirmation. Free AI Studio data-use differs from paid API and Vertex contracts; JSON validity is not factual validation.",
-      "scores": {"quality": 4, "fit": 4, "provenance": 3, "operability": 4, "portability": 3, "economics": 3},
-      "confidence": 0.4,
-      "reason": "Multimodal/cloud alternative for visually complex source; API policy and extraction accuracy must be approved/measured."
+      "scores": {
+        "quality": 4,
+        "fit": 4,
+        "provenance": 3,
+        "operability": 4,
+        "portability": 3,
+        "economics": 3
+      },
+      "reason": "Multimodal/cloud alternative for visually complex source; API policy and extraction accuracy must be approved/measured.",
+      "evidence_stage": "prior_review_unlocated",
+      "assessment_confidence": 0.4
     },
     {
       "id": "vllm_local_json_schema",
       "category": "semantic_extraction",
       "name": "vLLM JSON Schema/XGrammar or Guidance + pinned local model",
       "role": "on-prem constrained generation for candidate Claim JSON",
-      "source_urls": ["https://docs.vllm.ai/en/latest/features/structured_outputs.html", "https://huggingface.co/Qwen/Qwen3-8B"],
-      "evidence": "vLLM documents JSON Schema/regex/grammar structured outputs; Qwen3-8B is a concrete multilingual open-weight model candidate for extracted OCR text.",
+      "source_urls": [
+        "https://docs.vllm.ai/en/latest/features/structured_outputs.html",
+        "https://huggingface.co/Qwen/Qwen3-8B"
+      ],
+      "evidence": [
+        {
+          "claim": "vLLM documents JSON Schema/regex/grammar structured outputs; Qwen3-8B is a concrete multilingual open-weight model candidate for extracted OCR text.",
+          "source_url": null,
+          "source_revision": null,
+          "locator": null,
+          "verification_status": "prior_review_unlocated"
+        }
+      ],
       "limitations": "grammar guarantees form, not factuality. Base model license/revision, hardware capacity, supported schema keywords and batch throughput must be verified.",
-      "scores": {"quality": 3, "fit": 4, "provenance": 4, "operability": 2, "portability": 5, "economics": 3},
-      "confidence": 0.37,
-      "reason": "민감자료 local path의 comparison point다. hallucinated value/refusal/evidence span accuracy를 별도 validator로 잰다."
+      "scores": {
+        "quality": 3,
+        "fit": 4,
+        "provenance": 4,
+        "operability": 2,
+        "portability": 5,
+        "economics": 3
+      },
+      "reason": "민감자료 local path의 comparison point다. hallucinated value/refusal/evidence span accuracy를 별도 validator로 잰다.",
+      "evidence_stage": "prior_review_unlocated",
+      "assessment_confidence": 0.37
     }
   ]
 }

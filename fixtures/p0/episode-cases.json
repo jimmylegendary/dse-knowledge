@@ -1,0 +1,272 @@
+{
+  "schema_version": "1.0.0",
+  "fixture_set_id": "episode-boundary-oracles-p0-v1",
+  "target_positive_requirement": {
+    "status": "blocked_unbound",
+    "count_as_evaluated_positive": false,
+    "required_before_success": [
+      "concrete_B300_asset",
+      "explicit_all_level_assembly",
+      "model_workload_recipe_inputs",
+      "bound_native_capture_HATIR_RP_path",
+      "authorized_Melete_query_binding",
+      "required_metric_artifacts",
+      "independent_case_gold_review",
+      "runtime_execution_authorization"
+    ],
+    "source_only_component_probe_is_sufficient": false
+  },
+  "cases": [
+    {
+      "case_id": "EP-01",
+      "required_capability": "b300_target_episode",
+      "input": {
+        "episode_manifest": "fixtures/p0/episode-manifest.json",
+        "section": "target_episode"
+      },
+      "expected_decision": "blocked_missing_b300_asset_and_integrated_chain",
+      "allowed_unknown_reasons": [
+        "b300_twin_missing",
+        "all_level_composition_unproven",
+        "integrated_capture_recipe_rp_chain_unproven"
+      ],
+      "expected_execution_permission": "denied",
+      "expected": {
+        "runtime_invoked": false,
+        "b300_success": false,
+        "review_completeness": "not_run"
+      },
+      "fixture_origin": "synthetic contract or pinned-source gap; not a captured run",
+      "runtime_status": "not_run"
+    },
+    {
+      "case_id": "EP-02",
+      "required_capability": "native_structural_probe",
+      "input": {
+        "episode_manifest": "fixtures/p0/episode-manifest.json",
+        "section": "diagnostic_probe",
+        "mode": "current_p0"
+      },
+      "expected_decision": "source_verified_runtime_not_run",
+      "allowed_unknown_reasons": [
+        "image_digest_unknown",
+        "numeric_reference_absent"
+      ],
+      "expected_execution_permission": "denied",
+      "expected": {
+        "runtime_invoked": false,
+        "numerical_correctness_verified": false,
+        "device_fidelity_verified": false,
+        "may_replace_b300": false
+      },
+      "fixture_origin": "synthetic contract or pinned-source gap; not a captured run",
+      "runtime_status": "not_run"
+    },
+    {
+      "case_id": "EP-03",
+      "required_capability": "validation",
+      "input": {
+        "oracle_ref": {
+          "file": "fixtures/p0/validation-cases.json",
+          "case_id": "required_r13_failure_hidden_from_top12_summary"
+        }
+      },
+      "expected_decision": "reject",
+      "allowed_unknown_reasons": [],
+      "expected_execution_permission": "denied",
+      "expected": {
+        "failed_required_rule": "DSE-R13",
+        "narrative_summary_count": 12,
+        "required_rule_count": 13
+      },
+      "fixture_origin": "synthetic contract or pinned-source gap; not a captured run",
+      "runtime_status": "not_run"
+    },
+    {
+      "case_id": "EP-04",
+      "required_capability": "semantic_support",
+      "input": {
+        "logical_operation": "synthetic_unregistered_semantics",
+        "semantic_registry_membership": false,
+        "lower_level_semantics_available": false
+      },
+      "expected_decision": "unsupported_semantics",
+      "allowed_unknown_reasons": [
+        "semantic_definition_unavailable"
+      ],
+      "expected_execution_permission": "denied",
+      "expected": {
+        "zero_cost_fill_allowed": false
+      },
+      "fixture_origin": "synthetic contract or pinned-source gap; not a captured run",
+      "runtime_status": "not_run"
+    },
+    {
+      "case_id": "EP-05",
+      "required_capability": "cost_accounting",
+      "input": {
+        "logical_unit": "u1",
+        "lower_unit_source_ref": "lower-u1",
+        "lower_cost_preserved": true,
+        "higher_complete_replacement_evidence": false,
+        "higher_coverage_claim": false
+      },
+      "expected_decision": "carry_forward_required_not_full_higher_coverage",
+      "allowed_unknown_reasons": [
+        "higher_replacement_uncovered"
+      ],
+      "expected_execution_permission": "not_applicable",
+      "expected": {
+        "effective_unit_sources": [
+          "lower-u1"
+        ],
+        "may_claim_fully_covered_l2": false
+      },
+      "fixture_origin": "synthetic contract or pinned-source gap; not a captured run",
+      "runtime_status": "not_run"
+    },
+    {
+      "case_id": "EP-06",
+      "required_capability": "cost_accounting",
+      "input": {
+        "required_logical_units": [
+          "u1",
+          "u2"
+        ],
+        "effective_unit_sources": {
+          "u1": [
+            "lower-u1",
+            "higher-u1"
+          ],
+          "u2": []
+        }
+      },
+      "expected_decision": "invalid_cost_ledger",
+      "allowed_unknown_reasons": [
+        "duplicate_effective_unit",
+        "missing_effective_unit"
+      ],
+      "expected_execution_permission": "denied",
+      "expected": {
+        "performance_claim_allowed": false
+      },
+      "fixture_origin": "synthetic contract or pinned-source gap; not a captured run",
+      "runtime_status": "not_run"
+    },
+    {
+      "case_id": "EP-07",
+      "required_capability": "run_lifecycle",
+      "input": {
+        "native_invocation_attempted": true,
+        "runner_result": "failure",
+        "metric_artifact": null
+      },
+      "expected_decision": "execution_failure_not_design_inferiority",
+      "allowed_unknown_reasons": [
+        "runner_failure"
+      ],
+      "expected_execution_permission": "denied",
+      "expected": {
+        "design_inferior_label_allowed": false,
+        "success_count_increment": 0
+      },
+      "fixture_origin": "synthetic contract or pinned-source gap; not a captured run",
+      "runtime_status": "not_run"
+    },
+    {
+      "case_id": "EP-08",
+      "required_capability": "evidence_completeness",
+      "input": {
+        "required_evidence_present": false,
+        "execution_semantics_check": "unknown"
+      },
+      "expected_decision": "incomplete_unknown",
+      "allowed_unknown_reasons": [
+        "required_execution_evidence_missing"
+      ],
+      "expected_execution_permission": "denied",
+      "expected": {
+        "validated_design": false
+      },
+      "fixture_origin": "synthetic contract or pinned-source gap; not a captured run",
+      "runtime_status": "not_run"
+    },
+    {
+      "case_id": "EP-09",
+      "required_capability": "experience_ingest",
+      "input": {
+        "oracle_ref": {
+          "file": "fixtures/p0/melete-cases.json",
+          "case_id": "duplicate_is_not_independent_evidence"
+        }
+      },
+      "expected_decision": "duplicate_same_lineage",
+      "allowed_unknown_reasons": [],
+      "expected_execution_permission": "not_applicable",
+      "expected": {
+        "independent_count_increment": 0
+      },
+      "fixture_origin": "synthetic contract or pinned-source gap; not a captured run",
+      "runtime_status": "not_run"
+    },
+    {
+      "case_id": "EP-10",
+      "required_capability": "experience_visibility",
+      "input": {
+        "receipt_status": "stored",
+        "embedding_pending": true,
+        "fresh_authorized_exact_query_hit": false
+      },
+      "expected_decision": "visibility_unconfirmed",
+      "allowed_unknown_reasons": [
+        "fresh_query_evidence_missing"
+      ],
+      "expected_execution_permission": "not_applicable",
+      "expected": {
+        "searchable_claim": false
+      },
+      "fixture_origin": "synthetic contract or pinned-source gap; not a captured run",
+      "runtime_status": "not_run"
+    },
+    {
+      "case_id": "EP-11",
+      "required_capability": "metric_comparison",
+      "input": {
+        "required_workload_metrics_present": false,
+        "synthetic_or_measured_b300_metric": null
+      },
+      "expected_decision": "comparison_incomplete",
+      "allowed_unknown_reasons": [
+        "required_metric_missing"
+      ],
+      "expected_execution_permission": "not_applicable",
+      "expected": {
+        "global_dominance_claim": false
+      },
+      "fixture_origin": "synthetic contract or pinned-source gap; not a captured run",
+      "runtime_status": "not_run"
+    },
+    {
+      "case_id": "EP-12",
+      "required_capability": "next_proposal",
+      "input": {
+        "observation_kind": "pinned_source_gap",
+        "runtime_observations": [],
+        "gap": "B300 twin and full capture-to-RP binding missing"
+      },
+      "expected_decision": "support_resolution_proposal_only",
+      "allowed_unknown_reasons": [
+        "target_input_binding_missing"
+      ],
+      "expected_execution_permission": "denied",
+      "expected": {
+        "proposal_kind": "request_missing_support_evidence",
+        "expected_performance_gain": null,
+        "automatic_experiment_launch": false,
+        "experiment_insight_claim": false
+      },
+      "fixture_origin": "synthetic contract or pinned-source gap; not a captured run",
+      "runtime_status": "not_run"
+    }
+  ]
+}

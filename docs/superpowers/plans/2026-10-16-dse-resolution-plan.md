@@ -1,14 +1,16 @@
 # DSE Knowledge System Implementation Plan
 
+2026-10-21 현재 작업은 [2026-10-21-knowledge-architecture-plan.md](https://github.com/jimmylegendary/dse-knowledge/blob/docs/p0-episode-contracts/docs/superpowers/plans/2026-10-21-knowledge-architecture-plan.md)를 따른다. 이 문서는 과거 구현 phase·통합 작업의 참고이며 현재 실행할 plan이 아니다. 지식 수요·source·DB/model 조합·schema·write/read workflow를 모든 설계 phase에서 구체화한 뒤 구현 계획을 재정리한다. Native integration preflight는 해당 구현 작업의 의존성이고 상위 architecture 설계의 선행 조건이 아니다.
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development to implement this plan task-by-task after the full design and plan have been reviewed. Steps use checkbox syntax. 현재는 계획 작성만 허용되며 아래 실행 항목은 모두 미실행이다.
 
 **Goal:** 모든 HW 계층·kernel·실험 환류를 포괄하는 DSE 지식 시스템을 전체 흐름의 해상도를 높이는 방식으로 구축한다.
 
 **Architecture:** versioned source/Claim/experiment ledger를 중심으로 object artifact, lexical/vector/graph projections, deterministic validation, HAT 및 Melete adapter를 연결한다. Human과 agent는 같은 evidence와 run 계약을 사용한다. 모든 phase는 전체 흐름을 통과한다.
 
-**Tech Stack:** 논리 구조는 확정 제안, 제품 조합은 [recommendation-and-selection.md](https://github.com/jimmylegendary/dse-knowledge/blob/main/docs/recommendation-and-selection.md)의 검토 순서와 gate에 따른다. 추천 조합을 실행 승인으로 간주하지 않는다.
+**Tech Stack:** 논리 구조는 확정 제안, 제품 조합은 [recommendation-and-selection.md](https://github.com/jimmylegendary/dse-knowledge/blob/docs/p0-episode-contracts/docs/recommendation-and-selection.md)의 검토 순서와 gate에 따른다. 추천 조합을 실행 승인으로 간주하지 않는다.
 
-**Spec:** [2026-10-16-dse-knowledge-system-design.md](https://github.com/jimmylegendary/dse-knowledge/blob/main/docs/superpowers/specs/2026-10-16-dse-knowledge-system-design.md)
+**Spec:** [2026-10-16-dse-knowledge-system-design.md](https://github.com/jimmylegendary/dse-knowledge/blob/docs/p0-episode-contracts/docs/superpowers/specs/2026-10-16-dse-knowledge-system-design.md)
 
 ## Global Constraints
 
@@ -95,7 +97,7 @@ P1에서 모든 성능 항목을 정확히 측정할 수 있다는 뜻은 아니
 | record_experience | `(DSEEvent, AuthorizedIntakeContext) -> ExperienceReceipt` |
 | propose_next | `(ExperimentContext, EvidenceBundle, SearchBudget) -> ExperimentProposalSet` |
 
-위 type의 field는 [data-contracts.md](https://github.com/jimmylegendary/dse-knowledge/blob/main/docs/data-contracts.md)에 정의한다. Receipt/Report/Handle은 request ID·schema version·status·result reference·error/unknown list를 공통 envelope로 갖는다. P1 Task 1이 실제 serialization 및 service transport를 확정한다.
+위 type의 field는 [data-contracts.md](https://github.com/jimmylegendary/dse-knowledge/blob/docs/p0-episode-contracts/docs/data-contracts.md)에 정의한다. Receipt/Report/Handle은 request ID·schema version·status·result reference·error/unknown list를 공통 envelope로 갖는다. P1 Task 1이 실제 serialization 및 service transport를 확정한다.
 
 ## 4. 모든 phase의 작업 방식
 
@@ -113,7 +115,24 @@ P1에서 모든 성능 항목을 정확히 측정할 수 있다는 뜻은 아니
 
 대상: 허용 source 약 50–200문서(계획용 크기), 모든 지식 영역에서 최소 2개 독립 source family, rack/tray/package/SoC/component를 모두 표현한 하나의 기준 설계와 계층별 작은 대안. workload는 전체 semantics를 보존한 작은 session trace. 지식 양만 줄이고 데이터 계약을 생략하지 않는다.
 
-### Task 1. 한 실험을 수용할 계약·infra·fixture
+### Task 0. Native episode support와 최소 adapter preflight
+
+**Files:** 미래 `adapters/hat/preflight.py`, `adapters/melete/preflight.py`, `contracts/native_state_bindings/`, `tests/contracts/test_native_state_bindings.py`, `tests/e2e/test_first_episode_preflight.py`. 현재 P0는 해당 구현 파일을 만들지 않는다.
+
+**Consumes:** [episode-manifest.json](https://github.com/jimmylegendary/dse-knowledge/blob/docs/p0-episode-contracts/fixtures/p0/episode-manifest.json), policy/snapshot contracts, source pins와 case gold. **Produces:** source support, adapter conformance, component probe, integrated episode의 passed/blocked/failed를 구분한 preflight report.
+
+- [ ] 실제 model/config/shape/workload/twin/recipe 입력과 missing dependency를 resolve한다. B300 twin·전체 hierarchy·capture→HATIR→RP 연결을 다른 fixture로 바꾸지 않는다.
+- [ ] Native type/function/entrypoint와 raw 상태를 보존하는 최소 adapter harness를 작성한다. all-abstain, backend=None, R13, Melete pending/duplicate 및 요청-응답 identity mismatch gold를 먼저 사용한다.
+- [ ] 별도 승인된 isolated execution site에서 지원 component probe만 실행한다. Dummy/meta는 shape/capture 검증이며 수치·장비 성능 증거가 아니다. Image/source/input pin이 없으면 해당 probe는 blocked다.
+- [ ] B300 target required asset·계층·연산·전체 chain을 확보한 경우에만 first-episode positive를 실행한다. 독립 component 성공을 integrated episode 성공으로 합성하지 않는다.
+- [ ] HAT cost-unit·정보 접근, Melete authenticated request/readout binding, metric/snapshot을 보존한다. 미지원 metric은 missing으로 두고 ComparisonPolicy의 incomplete를 반환한다.
+- [ ] Required positive/critical negative, 현재 실행 authority와 source/runtime evidence를 따로 검토한다. Target blocked이면 후속 설계·지원 작업을 고정하고 P1 완료를 선언하지 않는다.
+
+**Acceptance:** 문서/schema PASS, adapter conformance PASS, component probe PASS, integrated episode PASS를 별도 report로 남긴다. B300 target의 required positive가 실제로 통과해야 B300 acceptance가 열린다. 현재 P0는 source-only 계약을 확인했을 뿐이다.
+
+**Dependency:** Task 1의 본격 cloud data-plane 구축은 이 preflight의 지원·실패 조건을 입력으로 한다. B300 통합이 막혀도 source 권리 확인·schema/gold·문서 검토는 계속한다. 실행은 전체 설계·계획 검토 후의 승인 범위에서만 한다.
+
+### Task 1. Preflight 뒤의 계약·infra·fixture
 
 **Files:** 미래 `contracts/`, `infra/environments/dev/`, `tests/contracts/`, `evals/fixtures/minimal_episode/`.
 
@@ -121,7 +140,8 @@ P1에서 모든 성능 항목을 정확히 측정할 수 있다는 뜻은 아니
 
 - [ ] 실패 fixture를 정의한다: 잘못된 단위, 누락 provenance, 다른 ISA revision, 권한 없는 evidence, unsupported metric.
 - [ ] 계약 검증이 해당 fixture를 거부하는지 확인한다.
-- [ ] 승인된 dev cloud profile에 최소 object/ledger/graph/job/secrets/observability를 설정하는 IaC를 작성한다.
+- [ ] Task 0 support/preflight evidence와 [deployment-profiles.md](https://github.com/jimmylegendary/dse-knowledge/blob/docs/p0-episode-contracts/docs/deployment-profiles.md)의 명시 profile을 먼저 확인한다. Native 지원이 불명인 채 DB·수집기·UI를 대량 구축하지 않는다.
+- [ ] 승인된 dev profile에 object/PG ledger와 typed graph 조회/job/secrets/observability의 IaC를 작성한다. Neo4j는 [0001-graph-backend-selection.md](https://github.com/jimmylegendary/dse-knowledge/blob/docs/p0-episode-contracts/docs/adr/0001-graph-backend-selection.md)의 동일 질의 challenger이며 선배포 필수가 아니다.
 - [ ] future plan/apply 리뷰에서 비용 estimate, IAM, region/edition, backup·delete·rollback 항목을 확인한 후 배포한다.
 - [ ] dev backup 복원 및 secret/ACL deny smoke check를 수행한다.
 - [ ] 계약/schema/IaC reviewer와 master 확인 후 commit한다.
@@ -141,7 +161,7 @@ P1에서 모든 성능 항목을 정확히 측정할 수 있다는 뜻은 아니
 - [ ] held-out query에서 추천 후보와 baseline의 recall·오인용·비용을 비교한다.
 - [ ] 다른 worker 검토와 master command 확인 후 commit한다.
 
-**Acceptance:** 최소 각 영역 10개 query의 evidence가 원문으로 역추적된다. critical negative case 오허용은 0건이어야 한다. 점수 기준은 [validation-and-governance.md](https://github.com/jimmylegendary/dse-knowledge/blob/main/docs/validation-and-governance.md)를 따른다.
+**Acceptance:** 최소 각 영역 10개 query의 evidence가 원문으로 역추적된다. critical negative case 오허용은 0건이어야 한다. 점수 기준은 [validation-and-governance.md](https://github.com/jimmylegendary/dse-knowledge/blob/docs/p0-episode-contracts/docs/validation-and-governance.md)를 따른다.
 
 ### Task 3. HW·kernel·HAT·Melete 한 바퀴
 
@@ -159,7 +179,7 @@ P1에서 모든 성능 항목을 정확히 측정할 수 있다는 뜻은 아니
 - [ ] timeout·잘못된 recipe·중복 event·Melete 일시 장애를 주입해 재시도를 확인한다.
 - [ ] spec/code reviewer와 master가 원자료를 확인한 뒤 commit한다.
 
-**Acceptance:** 신규 ModelVersion onboarding부터 source와 next proposal까지 끊기지 않은 실제 episode 1개, 미지원 모델/연산 1개, 설계 reject 1개, 실행 실패 1개가 같은 계약으로 보존된다. 전체 단계가 stub이면 통과가 아니다. HAT 또는 Melete 실행 환경이 확보되지 않으면 이 task는 blocked이며 P1 완료로 표시하지 않는다.
+**Acceptance:** 신규 ModelVersion onboarding부터 source와 next proposal까지 실제 target episode 1개, 미지원 모델/연산 1개, 설계 reject 1개, 실행 실패 1개가 같은 계약으로 보존된다. Task 0 source-only/component probe로 대체하지 않는다. Stub이거나 B300 asset/전체 chain·HAT/Melete 환경이 없으면 target task는 blocked이며 P1 완료로 표시하지 않는다.
 
 ### Task 4. 인간과 agent가 보는 동일 결과
 
@@ -170,7 +190,7 @@ P1에서 모든 성능 항목을 정확히 측정할 수 있다는 뜻은 아니
 - [ ] 사람이 근거 원문·실패·다음 proposal까지 이동할 수 있는지 확인한다.
 - [ ] P1 matrix 전 행에 실제 evidence를 연결하고 남은 unsupported capability를 명시한다.
 
-후속 단계의 파일·입출력·acceptance·검증 command별 세부 패키지는 [phase-work-packages.md](https://github.com/jimmylegendary/dse-knowledge/blob/main/docs/phase-work-packages.md)에 정의한다. 새로운 설계 결정을 구현 중 임의로 추가하기 위한 문서가 아니라 이 계획의 일부다.
+후속 단계의 파일·입출력·acceptance·검증 command별 세부 패키지는 [phase-work-packages.md](https://github.com/jimmylegendary/dse-knowledge/blob/docs/p0-episode-contracts/docs/phase-work-packages.md)에 정의한다. 새로운 설계 결정을 구현 중 임의로 추가하기 위한 문서가 아니라 이 계획의 일부다.
 
 ## 6. P2 — 전체의 폭 확대
 

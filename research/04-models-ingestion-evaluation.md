@@ -1,6 +1,8 @@
 # 04. 모델·수집·평가 후보
 
-기준일: 2026-10-16. 이 문서는 모델·파서의 추천 우선순위를 위한 조사다. 아래 점수는 실측 성능이나 정답 확률이 아니라, 공개 문서에 근거한 잠정 전문가 사전값이다. 가중치는 품질 25%, 요구 적합도 20%, 근거 추적성 20%, 운영성 15%, 이식성 10%, 경제성 10%이며 JSON에 후보별 점수를 둔다. 범주가 다른 후보 간 숫자를 직접 비교하지 않고 같은 범주 안에서만 우선순위를 본다. 외부 MTEB/벤더 점수는 후보 제거에 참고할 수 있어도 DSE의 당첨 모델을 정하지 않는다.
+기준일: 2026-10-17. 이 문서는 모델·파서의 추천 우선순위를 위한 조사다. 아래 점수는 실측 성능이나 정답 확률이 아니라, 공개 문서에 근거한 잠정 전문가 사전값이다. 가중치는 품질 25%, 요구 적합도 20%, 근거 추적성 20%, 운영성 15%, 이식성 10%, 경제성 10%이며 JSON에 후보별 점수를 둔다. 범주가 다른 후보 간 숫자를 직접 비교하지 않고 같은 범주 안에서만 우선순위를 본다. 외부 MTEB/벤더 점수는 후보 제거에 참고할 수 있어도 DSE의 당첨 모델을 정하지 않는다.
+
+다섯 research JSON은 [research-catalog.schema.json](https://github.com/jimmylegendary/dse-knowledge/blob/docs/p0-episode-contracts/schemas/research-catalog.schema.json) 버전 1.0.0을 따른다. `assessment_confidence`는 이전 후보 검토자의 판단 확신도이며 사실의 확률이 아니다. `evidence_stage`는 `E1`, `proposal`, `prior_review_unlocated`를 구분하고, 각 evidence record의 `verification_status`가 해당 주장별 출처 위치 확인 여부를 기록한다. 기존 E1/proposal 라벨은 보존했고, 위치를 재확인하지 않은 prior는 추정 locator를 만들지 않았다.
 
 ## 판단 요약
 
@@ -50,15 +52,17 @@ Docling, MinerU, Marker, PaddleOCR를 같은 문서 하위집합으로 비교한
 | [intfloat/multilingual-e5-large-instruct](https://huggingface.co/intfloat/multilingual-e5-large-instruct) | MIT, 1024차원, 100개 언어 지원; query에 `Instruct: ...\nQuery: ...`, document에는 instruction 불필요 | 최대 512 tokens이므로 문서/표를 더 짧게 나누어야 한다. instruction 미적용 시 저하 가능. 긴 기술 문맥/코드 성능을 따로 측정한다. |
 | [Qwen3-Embedding-0.6B](https://huggingface.co/Qwen/Qwen3-Embedding-0.6B) | Apache-2.0, 100+ 언어 및 code retrieval, 32K, 1024차원, instruction-aware; 로컬 배치 적합 | 0.6B여도 GPU/CPU 처리량은 HW에 따라 달라진다. Query prompt와 dimension을 고정해 재현한다. |
 | [Qwen3-Embedding-4B](https://huggingface.co/Qwen/Qwen3-Embedding-4B) | Apache-2.0, 32K, 2560차원(32–2560 사용자 정의), multilingual/code, instructions | 품질 상승이 DSE Recall/nDCG에 반영되는지 확인. 메모리와 재색인 비용이 0.6B보다 커진다. |
-| [Qwen3-Embedding-8B](https://huggingface.co/Qwen/Qwen3-Embedding-8B) | Apache-2.0, 32K, 최대 4096차원, multilingual/code, MRL | 최고 용량의 비용/latency/VRAM 부담. 공개 MTEB 순위는 사전 screening 정보일 뿐 도메인 추천 증거가 아니다. |
+| [Qwen3-Embedding-8B](https://huggingface.co/Qwen/Qwen3-Embedding-8B) | Apache-2.0, 32K, 기본 4096차원, multilingual/code, MRL | 기본 4096차원은 pgvector `vector` ANN(2,000)과 `halfvec` ANN(4,000) 한계를 넘어 HNSW/IVFFlat 불가지만 exact storage/search는 가능하다. 지원되는 MRL 1024차원은 두 ANN 차원 한도에 들어가지만 별도 index와 DSE retrieval 품질 검증, 배포된 extension version 확인이 필요하다. 공개 MTEB 순위는 사전 screening 정보일 뿐이다. |
 | OpenAI [`text-embedding-3-small`](https://developers.openai.com/api/docs/models/text-embedding-3-small) | API, 1536차원, 8192 tokens, dimensions 조절; $0.02/1M input tokens, OpenAI API는 기본적으로 입력을 모델 학습에 쓰지 않음 | API 업로드/기본 abuse logs는 별도 보안 검토가 필요하다. query/document 특수 prefix 없음. |
 | OpenAI [`text-embedding-3-large`](https://developers.openai.com/api/docs/guides/embeddings) | API, 기본 3072차원(축소 가능), 8192 tokens, 현 안내 $0.13/1M input tokens | small보다 비용·저장량이 큼. 둘 다 수식·테이블은 먼저 구조를 보존하지 않으면 텍스트 표현 손실을 복구할 수 없다. |
 | Google [`gemini-embedding-2`](https://ai.google.dev/gemini-api/docs/embeddings) | 최신 multimodal embedding: text/image/video/audio/PDF, 8192 tokens, 128–3072 dims (768/1536/3072 권장); query/doc task type 대신 task prompt 사용 | PDF 1개 최대 6 pages. Standard text $0.20/1M tokens, Batch $0.10; 무료 tier 데이터는 product improvement 사용 조건이라 금지 자료 업로드 금지. Paid tier와 Vertex 약관도 조직 승인 후 사용한다. |
-| Voyage [`voyage-4-large`](https://docs.voyageai.com/docs/embeddings) | API, 32K, 1024 기본 및 256/512/2048, `input_type=query|document`가 각각 prompt 부착; $0.12/1M tokens, 최근 계열 batch/양자화 지원 | 호스팅 API, 지역/보존/계약 검토. 모델 계열 호환성은 Voyage 4 family 내에서만 적용되며 외부 모델 공간과 비교/혼합 불가. |
-| Cohere [`embed-v5.0-pro`](https://docs.cohere.com/docs/cohere-embed) | API/Model Vault, 128K, 256–2048 dims, multilingual 100+, mixed text/image/PDF; `search_query`·`search_document`; `fast` 모델과 공유 공간 주장 | 상용 API의 per-token 단가를 이번 조사에서 확인하지 못했다. Model Vault 공개 인스턴스는 Small $2,000/month, Medium $3,250/month. 128K 하나로 chunk 설계를 생략하지 말 것. |
+| Voyage [`voyage-4-large`](https://docs.voyageai.com/docs/embeddings) | API, 32K, 1024 기본 및 256/512/2048, `input_type=query|document`가 각각 prompt 부착; $0.12/1M tokens, 최근 계열 batch/양자화 지원 | 기본 1024는 `vector`/`halfvec` ANN 차원 한도에 맞는다. 대안 2048은 `vector` ANN 한도 초과, `halfvec` ANN 한도 이내이며 half precision 품질은 별도 검증한다. 호스팅 API, 지역/보존/계약 검토. Voyage 4 family 내 호환성을 외부 모델 공간에 확장하지 않는다. |
+| Cohere [`embed-v5.0-pro`](https://docs.cohere.com/docs/cohere-embed) | API/Model Vault, 128K, 256–2048 dims, multilingual 100+, mixed text/image/PDF; `search_query`·`search_document`; `fast` 모델과 공유 공간 주장 | 기본 2048은 `vector` ANN 한도 초과, `halfvec` ANN 한도 이내다. 대안 1024는 두 ANN 차원 한도에 맞으며, half precision 사용은 별도 품질 검증이 필요하다. 상용 API의 per-token 단가를 이번 조사에서 확인하지 못했다. Model Vault 공개 인스턴스는 Small $2,000/month, Medium $3,250/month. 128K 하나로 chunk 설계를 생략하지 말 것. |
 | Jina [`jina-embeddings-v5-text-small-retrieval`](https://huggingface.co/jinaai/jina-embeddings-v5-text-small-retrieval) | 677M, 32K, 1024차원/MRL, retrieval 전용, query/document prefix, local serving 가능 | 가중치 라이선스 CC BY-NC 4.0이므로 상업적 self-host 조건은 사용 금지에 가까운 중요 제한이다. 상용 API는 별도 서비스 약관을 확인. |
 
 Qwen, Cohere, Jina처럼 query와 document를 다르게 encoding하거나 instruction/task를 넣는 모델은 그 template/version을 index metadata와 함께 저장한다. Query-only text normalization, Unicode 기호·마이너스 부호·Greek letter·소수점·SI 접두사, 코드 토큰 분할은 A/B 변수로 고정한다. 모델별 vector space와 dimension, normalize, quantization은 분리된 인덱스로 취급한다.
+
+pgvector 형식·dimension·distance·HNSW/IVFFlat 적합성은 upstream index 한계와 실제 managed extension version을 반영한 [embedding-index-compatibility.md](https://github.com/jimmylegendary/dse-knowledge/blob/docs/p0-episode-contracts/docs/contracts/embedding-index-compatibility.md)을 따른다. 모델 output dimension이 extension ANN limit을 넘는 후보는 vector store를 바꾸거나 exact-only로 두거나 MRL/quantization 대안을 별도 품질 실험한다.
 
 ### Reranker 후보
 

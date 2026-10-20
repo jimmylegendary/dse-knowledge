@@ -1,0 +1,237 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/jimmylegendary/dse-knowledge/blob/docs/p0-episode-contracts/schemas/melete-bridge.schema.json",
+  "title": "DSE to Melete Bridge Contract",
+  "description": "Design-time contract for native Melete receipts and DSE-owned applicability revalidation; not an implemented endpoint. Case inputs and host identities are synthetic contract examples.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "melete_source_commit", "fixture_data_status", "runtime_execution_status", "cases"],
+  "properties": {
+    "schema_version": {"const": "p0-melete-bridge/v1"},
+    "melete_source_commit": {"const": "9a3564dd96de22d0311522417c2c36e6bf2a0a91"},
+    "fixture_data_status": {"const": "synthetic_contract_inputs"},
+    "runtime_execution_status": {"const": "not_run"},
+    "cases": {"type": "array", "minItems": 10, "items": {"$ref": "#/$defs/case"}}
+  },
+  "$defs": {
+    "scalar_condition": {
+      "type": "object",
+      "description": "Melete Condition: flat, strict scalar equality only; DSE remains authoritative for complex predicates.",
+      "additionalProperties": {"type": ["string", "boolean", "integer", "number"]}
+    },
+    "receipt": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["event_id", "status", "gate_label", "memory_revision", "journal_seq", "memory_ids", "extraction_incomplete", "embedding_pending"],
+      "properties": {
+        "event_id": {"type": "string", "minLength": 1},
+        "status": {"enum": ["stored", "trace_only", "duplicate"]},
+        "gate_label": {"enum": ["informative", "trace_only", "choice"]},
+        "memory_revision": {"type": "integer", "minimum": 0},
+        "journal_seq": {"type": "integer", "minimum": 0},
+        "learning_window_id": {"type": ["string", "null"]},
+        "memory_ids": {"type": "array", "items": {"type": "string", "minLength": 1}},
+        "extraction_incomplete": {"type": "boolean"},
+        "embedding_pending": {"type": "boolean"},
+        "embedding_failure_reason": {"enum": ["token_limit", "encoder_error"]}
+      }
+    },
+    "source_binding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["event_id", "root_event_id", "payload_sha256"],
+      "properties": {
+        "event_id": {"type": "string", "minLength": 1},
+        "root_event_id": {"type": "string", "minLength": 1},
+        "previous_event_id": {"type": ["string", "null"]},
+        "payload_sha256": {"type": "string", "pattern": "^[a-fA-F0-9]{64}$"},
+        "duplicate_of_event_id": {"type": "string", "minLength": 1}
+      }
+    },
+    "dse_predicate_binding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["predicate_ref", "predicate_version", "canonical_sha256", "expression_kind", "native_scalar_hints", "authority"],
+      "properties": {
+        "predicate_ref": {"type": "string", "minLength": 1},
+        "predicate_version": {"type": "string", "minLength": 1},
+        "canonical_sha256": {"type": "string", "pattern": "^[a-fA-F0-9]{64}$"},
+        "expression_kind": {"enum": ["scalar_conjunction", "range", "nested", "other"]},
+        "native_scalar_hints": {"$ref": "#/$defs/scalar_condition"},
+        "authority": {"const": "dse_registry"}
+      }
+    },
+    "readout_item": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["memory_id", "version", "applicability", "epistemic_state", "residency"],
+      "properties": {
+        "memory_id": {"type": "string", "minLength": 1},
+        "version": {"type": "integer", "minimum": 1},
+        "role": {"enum": ["episode", "pattern", "strategy"]},
+        "applicability": {"$ref": "#/$defs/scalar_condition"},
+        "epistemic_state": {"enum": ["observed", "candidate", "validated", "contested", "superseded"]},
+        "residency": {"enum": ["active", "archived"]}
+      }
+    },
+    "readout": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Normalized DSE visibility witness joined from the captured query request/host-auth record and native query result. It is not a complete native wire object and does not establish authorization by itself.",
+      "required": ["retrieval_id", "query_id", "scope", "snapshot_seq", "items"],
+      "properties": {
+        "retrieval_id": {"type": "string", "minLength": 1},
+        "query_id": {"type": "string", "minLength": 1},
+        "scope": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["user_id", "namespace"],
+          "properties": {"user_id": {"type": "string", "minLength": 1}, "namespace": {"type": "string", "minLength": 1}}
+        },
+        "snapshot_seq": {"type": "integer", "minimum": 0},
+        "items": {"type": "array", "items": {"$ref": "#/$defs/readout_item"}}
+      }
+    },
+    "query_binding": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "DSE-side witness for the exact request, host authorization, expected target item and snapshot. Record it outside provider/model output; cross-check query IDs, scopes, snapshot and target tuple against the result.",
+      "required": ["request", "authorization_witness", "expected_result", "expected_snapshot_seq"],
+      "properties": {
+        "request": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["query_id", "task_id", "goal", "scope", "context", "payload_kind", "payload_sha256", "request_sha256", "mode", "return_format", "time_mode"],
+          "properties": {
+            "query_id": {"type": "string", "minLength": 1},
+            "task_id": {"type": "string", "minLength": 1},
+            "goal": {"type": "string", "minLength": 1},
+            "scope": {"$ref": "#/$defs/melete_scope"},
+            "context": {"$ref": "#/$defs/scalar_condition"},
+            "payload_kind": {"const": "text"},
+            "payload_sha256": {"type": "string", "pattern": "^[a-fA-F0-9]{64}$", "description": "DSE-side payload digest; fixture value is synthetic, not a fetched query payload."},
+            "request_sha256": {"type": "string", "pattern": "^[a-fA-F0-9]{64}$", "description": "DSE-side canonical request digest; fixture value is synthetic, not a recorded Melete request."},
+            "mode": {"const": "index"},
+            "return_format": {"const": "text"},
+            "time_mode": {"const": "current"}
+          }
+        },
+        "authorization_witness": {
+          "type": "object",
+          "additionalProperties": false,
+          "description": "External host call evidence. Its query_id must match request.query_id; a Melete response cannot self-assert this authorization.",
+          "required": ["provider", "decision", "host_principal_ref", "auth_scope_ref", "resolved_melete_scope", "actor", "query_id", "evidence_ref"],
+          "properties": {
+            "provider": {"const": "host_auth_boundary"},
+            "decision": {"enum": ["allow", "deny", "unknown"]},
+            "host_principal_ref": {"type": "string", "minLength": 1, "description": "External host identity reference; fixture values are synthetic and are not credentials."},
+            "auth_scope_ref": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["owner_id", "namespace", "learner_id"],
+              "properties": {"owner_id": {"type": "string", "minLength": 1}, "namespace": {"type": "string", "minLength": 1}, "learner_id": {"type": "string", "minLength": 1}}
+            },
+            "resolved_melete_scope": {"$ref": "#/$defs/melete_scope"},
+            "actor": {"enum": ["user", "assistant", "tool", "system"]},
+            "query_id": {"type": "string", "minLength": 1},
+            "evidence_ref": {"type": "string", "minLength": 1}
+          }
+        },
+        "expected_result": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["memory_id", "version"],
+          "properties": {"memory_id": {"type": "string", "minLength": 1}, "version": {"type": "integer", "minimum": 1}}
+        },
+        "expected_snapshot_seq": {"type": "integer", "minimum": 0}
+      }
+    },
+    "melete_scope": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["user_id", "namespace"],
+      "properties": {"user_id": {"type": "string", "minLength": 1}, "namespace": {"type": "string", "minLength": 1}}
+    },
+    "revalidation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["predicate_ref_resolved", "version_current", "digest_current", "predicate_result", "source_acl", "source_status", "snapshot_state", "predecessor_state"],
+      "properties": {
+        "predicate_ref_resolved": {"type": "boolean"},
+        "version_current": {"type": "boolean"},
+        "digest_current": {"type": "boolean"},
+        "predicate_result": {"enum": ["match", "mismatch", "unknown"]},
+        "source_acl": {"enum": ["allowed", "denied", "unknown"]},
+        "source_status": {"enum": ["active", "retracted", "superseded", "unknown"]},
+        "snapshot_state": {"enum": ["current", "stale", "unknown"]},
+        "predecessor_state": {"enum": ["resolved", "missing", "out_of_order", "not_applicable"]}
+      }
+    },
+    "case": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["case_id", "expected_decision", "allowed_unknown_reasons", "required_capability", "expected_execution_permission", "request_kind", "expected_candidate_visibility", "inputs", "runtime_observation"],
+      "properties": {
+        "case_id": {"type": "string", "minLength": 1},
+        "expected_decision": {"type": "string", "minLength": 1},
+        "allowed_unknown_reasons": {"type": "array", "items": {"type": "string", "minLength": 1}},
+        "required_capability": {"type": "string", "minLength": 1},
+        "expected_execution_permission": {"enum": ["not_applicable", "denied", "exploratory_only", "validated_profile_only"]},
+        "request_kind": {"enum": ["receipt_review", "memory_apply", "episode_validation"]},
+        "expected_candidate_visibility": {"enum": ["not_applicable", "not_confirmed", "confirmed_visible", "candidate_preserved"]},
+        "inputs": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "simulation_requested": {"type": "boolean"},
+            "source_binding": {"$ref": "#/$defs/source_binding"},
+            "receipt": {"$ref": "#/$defs/receipt"},
+            "dse_predicate_binding": {"$ref": "#/$defs/dse_predicate_binding"},
+            "query_binding": {"$ref": "#/$defs/query_binding"},
+            "readout": {"$ref": "#/$defs/readout"},
+            "revalidation": {"$ref": "#/$defs/revalidation"},
+            "execution_validation": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["profile_id", "profile_version", "design_snapshot_sha256", "required_checks", "required_review", "physical_feasibility"],
+              "properties": {
+                "profile_id": {"type": "string", "minLength": 1},
+                "profile_version": {"type": "string", "minLength": 1},
+                "design_snapshot_sha256": {"type": "string", "pattern": "^[a-fA-F0-9]{64}$"},
+                "required_checks": {"enum": ["all_pass", "fail", "incomplete_or_unknown"]},
+                "required_review": {"enum": ["complete", "incomplete_or_abstain"]},
+                "physical_feasibility": {"enum": ["feasible_within_declared_scope", "infeasible", "unknown"]}
+              }
+            },
+            "embedding_recovery": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["owner", "outcome", "fresh_query_hit"],
+              "properties": {
+                "owner": {"enum": ["external_worker", "unsupported_native"]},
+                "outcome": {"enum": ["not_attempted", "recovered", "failed"]},
+                "fresh_query_hit": {"type": "boolean"}
+              }
+            }
+          }
+        },
+        "runtime_observation": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["state", "actual_receipt", "actual_readout"],
+          "properties": {
+            "state": {"const": "not_run"},
+            "actual_receipt": {"type": "null"},
+            "actual_readout": {"type": "null"}
+          }
+        }
+      },
+      "allOf": [
+        {
+          "if": {"properties": {"inputs": {"required": ["readout"]}}},
+          "then": {"properties": {"inputs": {"required": ["query_binding"]}}}
+        }
+      ]
+    }
+  }
+}

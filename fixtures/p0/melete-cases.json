@@ -1,0 +1,377 @@
+{
+  "schema_version": "p0-melete-bridge/v1",
+  "melete_source_commit": "9a3564dd96de22d0311522417c2c36e6bf2a0a91",
+  "fixture_data_status": "synthetic_contract_inputs",
+  "runtime_execution_status": "not_run",
+  "cases": [
+    {
+      "case_id": "stored_without_materialized_memory",
+      "expected_decision": "source_persisted_but_no_memory_id_no_search_claim",
+      "allowed_unknown_reasons": ["no_memory_id_in_receipt", "extraction_result_unreported"],
+      "required_capability": "melete_receipt_parser_and_dse_state_ledger",
+      "expected_execution_permission": "not_applicable",
+      "request_kind": "receipt_review",
+      "expected_candidate_visibility": "not_confirmed",
+      "inputs": {
+        "simulation_requested": false,
+        "source_binding": {"event_id": "evt-001", "root_event_id": "evt-001", "payload_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"},
+        "receipt": {"event_id": "evt-001", "status": "stored", "gate_label": "informative", "memory_revision": 4, "journal_seq": 31, "memory_ids": [], "extraction_incomplete": false, "embedding_pending": false}
+      },
+      "runtime_observation": {"state": "not_run", "actual_receipt": null, "actual_readout": null}
+    },
+    {
+      "case_id": "duplicate_is_not_independent_evidence",
+      "expected_decision": "duplicate_resolves_to_prior_event_and_adds_zero_evidence",
+      "allowed_unknown_reasons": [],
+      "required_capability": "idempotency_ledger_keyed_by_scope_event_id_and_digest",
+      "expected_execution_permission": "not_applicable",
+      "request_kind": "receipt_review",
+      "expected_candidate_visibility": "not_confirmed",
+      "inputs": {
+        "simulation_requested": false,
+        "source_binding": {"event_id": "evt-002", "root_event_id": "evt-002", "payload_sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb", "duplicate_of_event_id": "evt-002"},
+        "receipt": {"event_id": "evt-002", "status": "duplicate", "gate_label": "informative", "memory_revision": 5, "journal_seq": 32, "memory_ids": ["mem-22"], "extraction_incomplete": false, "embedding_pending": false}
+      },
+      "runtime_observation": {"state": "not_run", "actual_receipt": null, "actual_readout": null}
+    },
+    {
+      "case_id": "trace_only_event_is_not_a_memory_candidate",
+      "expected_decision": "trace_event_persisted_without_retrievable_memory_id",
+      "allowed_unknown_reasons": ["no_memory_id_in_receipt"],
+      "required_capability": "preserve_trace_event_separately_from_memory_claims",
+      "expected_execution_permission": "not_applicable",
+      "request_kind": "receipt_review",
+      "expected_candidate_visibility": "not_confirmed",
+      "inputs": {
+        "simulation_requested": false,
+        "source_binding": {"event_id": "evt-003", "root_event_id": "evt-003", "payload_sha256": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"},
+        "receipt": {"event_id": "evt-003", "status": "trace_only", "gate_label": "trace_only", "memory_revision": 5, "journal_seq": 33, "memory_ids": [], "extraction_incomplete": false, "embedding_pending": false}
+      },
+      "runtime_observation": {"state": "not_run", "actual_receipt": null, "actual_readout": null}
+    },
+    {
+      "case_id": "incomplete_extraction_blocks_episode_use",
+      "expected_decision": "candidate_memory_retained_but_incomplete_extraction_denies_execution",
+      "allowed_unknown_reasons": ["extraction_incomplete", "required_evidence_incomplete"],
+      "required_capability": "dse_evidence_completeness_gate_before_episode_validation",
+      "expected_execution_permission": "denied",
+      "request_kind": "episode_validation",
+      "expected_candidate_visibility": "not_confirmed",
+      "inputs": {
+        "simulation_requested": true,
+        "source_binding": {"event_id": "evt-004", "root_event_id": "evt-004", "payload_sha256": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"},
+        "receipt": {"event_id": "evt-004", "status": "stored", "gate_label": "informative", "memory_revision": 6, "journal_seq": 34, "memory_ids": ["mem-23"], "extraction_incomplete": true, "embedding_pending": false}
+      },
+      "runtime_observation": {"state": "not_run", "actual_receipt": null, "actual_readout": null}
+    },
+    {
+      "case_id": "pending_embedding_does_not_establish_or_preclude_visibility",
+      "expected_decision": "exact_fresh_query_hit_confirms_visibility_despite_pending_embedding_flag",
+      "allowed_unknown_reasons": ["embedding_state_is_not_retrieval_evidence"],
+      "required_capability": "authorized_fresh_text_query_and_exact_memory_version_match",
+      "expected_execution_permission": "not_applicable",
+      "request_kind": "receipt_review",
+      "expected_candidate_visibility": "confirmed_visible",
+      "inputs": {
+        "simulation_requested": false,
+        "source_binding": {"event_id": "evt-005", "root_event_id": "evt-005", "payload_sha256": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"},
+        "receipt": {"event_id": "evt-005", "status": "stored", "gate_label": "informative", "memory_revision": 7, "journal_seq": 35, "memory_ids": ["mem-24"], "extraction_incomplete": false, "embedding_pending": true, "embedding_failure_reason": "encoder_error"},
+        "query_binding": {"request": {"query_id": "qry-5", "task_id": "task-5", "goal": "retrieve DSE episode evidence", "scope": {"user_id": "dse-user", "namespace": "dse"}, "context": {"gpu_family": "B300"}, "payload_kind": "text", "payload_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "request_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "mode": "index", "return_format": "text", "time_mode": "current"}, "authorization_witness": {"provider": "host_auth_boundary", "decision": "allow", "host_principal_ref": "principal:dse-user", "auth_scope_ref": {"owner_id": "owner-dse", "namespace": "dse", "learner_id": "learner-dse"}, "resolved_melete_scope": {"user_id": "dse-user", "namespace": "dse"}, "actor": "user", "query_id": "qry-5", "evidence_ref": "authz-evidence:qry-5"}, "expected_result": {"memory_id": "mem-24", "version": 1}, "expected_snapshot_seq": 35},
+        "readout": {"retrieval_id": "ret-5", "query_id": "qry-5", "scope": {"user_id": "dse-user", "namespace": "dse"}, "snapshot_seq": 35, "items": [{"memory_id": "mem-24", "version": 1, "role": "episode", "applicability": {"gpu_family": "B300"}, "epistemic_state": "observed", "residency": "active"}]}
+      },
+      "runtime_observation": {"state": "not_run", "actual_receipt": null, "actual_readout": null}
+    },
+    {
+      "case_id": "external_embedding_recovery_requires_fresh_query",
+      "expected_decision": "external_recovery_is_counted_only_after_fresh_exact_query_hit",
+      "allowed_unknown_reasons": [],
+      "required_capability": "external_embedding_recovery_worker_plus_authorized_fresh_query",
+      "expected_execution_permission": "not_applicable",
+      "request_kind": "receipt_review",
+      "expected_candidate_visibility": "confirmed_visible",
+      "inputs": {
+        "simulation_requested": false,
+        "source_binding": {"event_id": "evt-006", "root_event_id": "evt-006", "payload_sha256": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"},
+        "receipt": {"event_id": "evt-006", "status": "stored", "gate_label": "informative", "memory_revision": 8, "journal_seq": 36, "memory_ids": ["mem-25"], "extraction_incomplete": false, "embedding_pending": true, "embedding_failure_reason": "encoder_error"},
+        "embedding_recovery": {"owner": "external_worker", "outcome": "recovered", "fresh_query_hit": true},
+        "query_binding": {"request": {"query_id": "qry-6", "task_id": "task-6", "goal": "verify recovered DSE memory visibility", "scope": {"user_id": "dse-user", "namespace": "dse"}, "context": {"gpu_family": "B300"}, "payload_kind": "text", "payload_sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb", "request_sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb", "mode": "index", "return_format": "text", "time_mode": "current"}, "authorization_witness": {"provider": "host_auth_boundary", "decision": "allow", "host_principal_ref": "principal:dse-user", "auth_scope_ref": {"owner_id": "owner-dse", "namespace": "dse", "learner_id": "learner-dse"}, "resolved_melete_scope": {"user_id": "dse-user", "namespace": "dse"}, "actor": "user", "query_id": "qry-6", "evidence_ref": "authz-evidence:qry-6"}, "expected_result": {"memory_id": "mem-25", "version": 1}, "expected_snapshot_seq": 38},
+        "readout": {"retrieval_id": "ret-6", "query_id": "qry-6", "scope": {"user_id": "dse-user", "namespace": "dse"}, "snapshot_seq": 38, "items": [{"memory_id": "mem-25", "version": 1, "role": "pattern", "applicability": {"gpu_family": "B300"}, "epistemic_state": "candidate", "residency": "active"}]}
+      },
+      "runtime_observation": {"state": "not_run", "actual_receipt": null, "actual_readout": null}
+    },
+    {
+      "case_id": "range_predicate_is_evaluated_by_dse_authority",
+      "expected_decision": "dse_range_predicate_matches_after_exact_scalar_hint_candidate_retrieval",
+      "allowed_unknown_reasons": [],
+      "required_capability": "versioned_dse_predicate_resolver_and_current_design_snapshot",
+      "expected_execution_permission": "not_applicable",
+      "request_kind": "memory_apply",
+      "expected_candidate_visibility": "confirmed_visible",
+      "inputs": {
+        "simulation_requested": false,
+        "source_binding": {"event_id": "evt-007", "root_event_id": "evt-007", "payload_sha256": "1111111111111111111111111111111111111111111111111111111111111111"},
+        "receipt": {"event_id": "evt-007", "status": "stored", "gate_label": "informative", "memory_revision": 9, "journal_seq": 39, "memory_ids": ["mem-26"], "extraction_incomplete": false, "embedding_pending": false},
+        "dse_predicate_binding": {"predicate_ref": "pred:clock-range", "predicate_version": "3", "canonical_sha256": "2222222222222222222222222222222222222222222222222222222222222222", "expression_kind": "range", "native_scalar_hints": {"gpu_family": "B300"}, "authority": "dse_registry"},
+        "query_binding": {"request": {"query_id": "qry-7", "task_id": "task-7", "goal": "retrieve clock range claim candidate", "scope": {"user_id": "dse-user", "namespace": "dse"}, "context": {"gpu_family": "B300"}, "payload_kind": "text", "payload_sha256": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc", "request_sha256": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc", "mode": "index", "return_format": "text", "time_mode": "current"}, "authorization_witness": {"provider": "host_auth_boundary", "decision": "allow", "host_principal_ref": "principal:dse-user", "auth_scope_ref": {"owner_id": "owner-dse", "namespace": "dse", "learner_id": "learner-dse"}, "resolved_melete_scope": {"user_id": "dse-user", "namespace": "dse"}, "actor": "user", "query_id": "qry-7", "evidence_ref": "authz-evidence:qry-7"}, "expected_result": {"memory_id": "mem-26", "version": 2}, "expected_snapshot_seq": 39},
+        "readout": {"retrieval_id": "ret-7", "query_id": "qry-7", "scope": {"user_id": "dse-user", "namespace": "dse"}, "snapshot_seq": 39, "items": [{"memory_id": "mem-26", "version": 2, "role": "strategy", "applicability": {"gpu_family": "B300"}, "epistemic_state": "candidate", "residency": "active"}]},
+        "revalidation": {"predicate_ref_resolved": true, "version_current": true, "digest_current": true, "predicate_result": "match", "source_acl": "allowed", "source_status": "active", "snapshot_state": "current", "predecessor_state": "not_applicable"}
+      },
+      "runtime_observation": {"state": "not_run", "actual_receipt": null, "actual_readout": null}
+    },
+    {
+      "case_id": "native_hint_match_cannot_override_range_mismatch",
+      "expected_decision": "full_dse_range_mismatch_denies_memory_application_despite_native_hint_match",
+      "allowed_unknown_reasons": [],
+      "required_capability": "evaluate_full_dse_predicate_after_melete_candidate_retrieval",
+      "expected_execution_permission": "denied",
+      "request_kind": "episode_validation",
+      "expected_candidate_visibility": "candidate_preserved",
+      "inputs": {
+        "simulation_requested": true,
+        "source_binding": {"event_id": "evt-008", "root_event_id": "evt-008", "payload_sha256": "3333333333333333333333333333333333333333333333333333333333333333"},
+        "receipt": {"event_id": "evt-008", "status": "stored", "gate_label": "informative", "memory_revision": 10, "journal_seq": 40, "memory_ids": ["mem-27"], "extraction_incomplete": false, "embedding_pending": false},
+        "dse_predicate_binding": {"predicate_ref": "pred:clock-range", "predicate_version": "3", "canonical_sha256": "2222222222222222222222222222222222222222222222222222222222222222", "expression_kind": "range", "native_scalar_hints": {"gpu_family": "B300"}, "authority": "dse_registry"},
+        "query_binding": {"request": {"query_id": "qry-8", "task_id": "task-8", "goal": "retrieve clock range claim candidate", "scope": {"user_id": "dse-user", "namespace": "dse"}, "context": {"gpu_family": "B300"}, "payload_kind": "text", "payload_sha256": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd", "request_sha256": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd", "mode": "index", "return_format": "text", "time_mode": "current"}, "authorization_witness": {"provider": "host_auth_boundary", "decision": "allow", "host_principal_ref": "principal:dse-user", "auth_scope_ref": {"owner_id": "owner-dse", "namespace": "dse", "learner_id": "learner-dse"}, "resolved_melete_scope": {"user_id": "dse-user", "namespace": "dse"}, "actor": "user", "query_id": "qry-8", "evidence_ref": "authz-evidence:qry-8"}, "expected_result": {"memory_id": "mem-27", "version": 1}, "expected_snapshot_seq": 40},
+        "readout": {"retrieval_id": "ret-8", "query_id": "qry-8", "scope": {"user_id": "dse-user", "namespace": "dse"}, "snapshot_seq": 40, "items": [{"memory_id": "mem-27", "version": 1, "role": "strategy", "applicability": {"gpu_family": "B300"}, "epistemic_state": "candidate", "residency": "active"}]},
+        "revalidation": {"predicate_ref_resolved": true, "version_current": true, "digest_current": true, "predicate_result": "mismatch", "source_acl": "allowed", "source_status": "active", "snapshot_state": "current", "predecessor_state": "not_applicable"}
+      },
+      "runtime_observation": {"state": "not_run", "actual_receipt": null, "actual_readout": null}
+    },
+    {
+      "case_id": "stale_predicate_hash_fails_closed",
+      "expected_decision": "retrieved_candidate_preserved_but_stale_predicate_hash_is_unknown_and_denied",
+      "allowed_unknown_reasons": ["predicate_hash_stale"],
+      "required_capability": "resolve_and_rehash_current_dse_predicate_before_application",
+      "expected_execution_permission": "denied",
+      "request_kind": "episode_validation",
+      "expected_candidate_visibility": "candidate_preserved",
+      "inputs": {
+        "simulation_requested": true,
+        "source_binding": {"event_id": "evt-009", "root_event_id": "evt-009", "payload_sha256": "4444444444444444444444444444444444444444444444444444444444444444"},
+        "receipt": {"event_id": "evt-009", "status": "stored", "gate_label": "informative", "memory_revision": 11, "journal_seq": 41, "memory_ids": ["mem-28"], "extraction_incomplete": false, "embedding_pending": false},
+        "dse_predicate_binding": {"predicate_ref": "pred:isa-legality", "predicate_version": "4", "canonical_sha256": "5555555555555555555555555555555555555555555555555555555555555555", "expression_kind": "nested", "native_scalar_hints": {"isa": "X"}, "authority": "dse_registry"},
+        "query_binding": {"request": {"query_id": "qry-9", "task_id": "task-9", "goal": "retrieve ISA legality candidate", "scope": {"user_id": "dse-user", "namespace": "dse"}, "context": {"isa": "X"}, "payload_kind": "text", "payload_sha256": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee", "request_sha256": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee", "mode": "index", "return_format": "text", "time_mode": "current"}, "authorization_witness": {"provider": "host_auth_boundary", "decision": "allow", "host_principal_ref": "principal:dse-user", "auth_scope_ref": {"owner_id": "owner-dse", "namespace": "dse", "learner_id": "learner-dse"}, "resolved_melete_scope": {"user_id": "dse-user", "namespace": "dse"}, "actor": "user", "query_id": "qry-9", "evidence_ref": "authz-evidence:qry-9"}, "expected_result": {"memory_id": "mem-28", "version": 1}, "expected_snapshot_seq": 41},
+        "readout": {"retrieval_id": "ret-9", "query_id": "qry-9", "scope": {"user_id": "dse-user", "namespace": "dse"}, "snapshot_seq": 41, "items": [{"memory_id": "mem-28", "version": 1, "role": "pattern", "applicability": {"isa": "X"}, "epistemic_state": "candidate", "residency": "active"}]},
+        "revalidation": {"predicate_ref_resolved": true, "version_current": true, "digest_current": false, "predicate_result": "unknown", "source_acl": "allowed", "source_status": "active", "snapshot_state": "current", "predecessor_state": "not_applicable"}
+      },
+      "runtime_observation": {"state": "not_run", "actual_receipt": null, "actual_readout": null}
+    },
+    {
+      "case_id": "source_retraction_after_retrieval",
+      "expected_decision": "fresh_source_retraction_blocks_use_while_candidate_remains_audit_visible",
+      "allowed_unknown_reasons": ["source_retracted_after_query"],
+      "required_capability": "source_retraction_registry_and_post_query_revalidation",
+      "expected_execution_permission": "denied",
+      "request_kind": "episode_validation",
+      "expected_candidate_visibility": "candidate_preserved",
+      "inputs": {
+        "simulation_requested": true,
+        "source_binding": {"event_id": "evt-010", "root_event_id": "evt-010", "payload_sha256": "6666666666666666666666666666666666666666666666666666666666666666"},
+        "receipt": {"event_id": "evt-010", "status": "stored", "gate_label": "informative", "memory_revision": 12, "journal_seq": 42, "memory_ids": ["mem-29"], "extraction_incomplete": false, "embedding_pending": false},
+        "dse_predicate_binding": {"predicate_ref": "pred:bandwidth", "predicate_version": "2", "canonical_sha256": "7777777777777777777777777777777777777777777777777777777777777777", "expression_kind": "scalar_conjunction", "native_scalar_hints": {"gpu_family": "B300"}, "authority": "dse_registry"},
+        "query_binding": {"request": {"query_id": "qry-10", "task_id": "task-10", "goal": "retrieve measured bandwidth evidence", "scope": {"user_id": "dse-user", "namespace": "dse"}, "context": {"gpu_family": "B300"}, "payload_kind": "text", "payload_sha256": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff", "request_sha256": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff", "mode": "index", "return_format": "text", "time_mode": "current"}, "authorization_witness": {"provider": "host_auth_boundary", "decision": "allow", "host_principal_ref": "principal:dse-user", "auth_scope_ref": {"owner_id": "owner-dse", "namespace": "dse", "learner_id": "learner-dse"}, "resolved_melete_scope": {"user_id": "dse-user", "namespace": "dse"}, "actor": "user", "query_id": "qry-10", "evidence_ref": "authz-evidence:qry-10"}, "expected_result": {"memory_id": "mem-29", "version": 1}, "expected_snapshot_seq": 42},
+        "readout": {"retrieval_id": "ret-10", "query_id": "qry-10", "scope": {"user_id": "dse-user", "namespace": "dse"}, "snapshot_seq": 42, "items": [{"memory_id": "mem-29", "version": 1, "role": "episode", "applicability": {"gpu_family": "B300"}, "epistemic_state": "observed", "residency": "active"}]},
+        "revalidation": {"predicate_ref_resolved": true, "version_current": true, "digest_current": true, "predicate_result": "match", "source_acl": "allowed", "source_status": "retracted", "snapshot_state": "stale", "predecessor_state": "not_applicable"}
+      },
+      "runtime_observation": {"state": "not_run", "actual_receipt": null, "actual_readout": null}
+    },
+    {
+      "case_id": "out_of_order_trajectory_event",
+      "expected_decision": "missing_or_out_of_order_predecessor_blocks_episode_application",
+      "allowed_unknown_reasons": ["trajectory_predecessor_unresolved"],
+      "required_capability": "event_order_reconciler_over_stable_event_and_predecessor_ids",
+      "expected_execution_permission": "denied",
+      "request_kind": "episode_validation",
+      "expected_candidate_visibility": "candidate_preserved",
+      "inputs": {
+        "simulation_requested": true,
+        "source_binding": {"event_id": "evt-012", "root_event_id": "evt-011", "previous_event_id": "evt-011", "payload_sha256": "8888888888888888888888888888888888888888888888888888888888888888"},
+        "receipt": {"event_id": "evt-012", "status": "stored", "gate_label": "informative", "memory_revision": 13, "journal_seq": 43, "memory_ids": ["mem-30"], "extraction_incomplete": false, "embedding_pending": false},
+        "dse_predicate_binding": {"predicate_ref": "pred:kernel-legality", "predicate_version": "1", "canonical_sha256": "9999999999999999999999999999999999999999999999999999999999999999", "expression_kind": "nested", "native_scalar_hints": {"isa": "Y"}, "authority": "dse_registry"},
+        "query_binding": {"request": {"query_id": "qry-12", "task_id": "task-12", "goal": "retrieve trajectory episode evidence", "scope": {"user_id": "dse-user", "namespace": "dse"}, "context": {"isa": "Y"}, "payload_kind": "text", "payload_sha256": "1111111111111111111111111111111111111111111111111111111111111111", "request_sha256": "1111111111111111111111111111111111111111111111111111111111111111", "mode": "index", "return_format": "text", "time_mode": "current"}, "authorization_witness": {"provider": "host_auth_boundary", "decision": "allow", "host_principal_ref": "principal:dse-user", "auth_scope_ref": {"owner_id": "owner-dse", "namespace": "dse", "learner_id": "learner-dse"}, "resolved_melete_scope": {"user_id": "dse-user", "namespace": "dse"}, "actor": "user", "query_id": "qry-12", "evidence_ref": "authz-evidence:qry-12"}, "expected_result": {"memory_id": "mem-30", "version": 1}, "expected_snapshot_seq": 43},
+        "readout": {"retrieval_id": "ret-12", "query_id": "qry-12", "scope": {"user_id": "dse-user", "namespace": "dse"}, "snapshot_seq": 43, "items": [{"memory_id": "mem-30", "version": 1, "role": "episode", "applicability": {"isa": "Y"}, "epistemic_state": "observed", "residency": "active"}]},
+        "revalidation": {"predicate_ref_resolved": true, "version_current": true, "digest_current": true, "predicate_result": "match", "source_acl": "allowed", "source_status": "active", "snapshot_state": "current", "predecessor_state": "out_of_order"}
+      },
+      "runtime_observation": {"state": "not_run", "actual_receipt": null, "actual_readout": null}
+    },
+    {
+      "case_id": "acl_revocation_after_retrieval",
+      "expected_decision": "current_source_acl_denial_overrides_prior_query_candidate",
+      "allowed_unknown_reasons": [],
+      "required_capability": "dse_source_acl_check_at_point_of_use",
+      "expected_execution_permission": "denied",
+      "request_kind": "episode_validation",
+      "expected_candidate_visibility": "candidate_preserved",
+      "inputs": {
+        "simulation_requested": true,
+        "source_binding": {"event_id": "evt-013", "root_event_id": "evt-013", "payload_sha256": "abababababababababababababababababababababababababababababababab"},
+        "receipt": {"event_id": "evt-013", "status": "stored", "gate_label": "informative", "memory_revision": 14, "journal_seq": 44, "memory_ids": ["mem-31"], "extraction_incomplete": false, "embedding_pending": false},
+        "dse_predicate_binding": {"predicate_ref": "pred:latency", "predicate_version": "1", "canonical_sha256": "cdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcd", "expression_kind": "range", "native_scalar_hints": {"gpu_family": "B300"}, "authority": "dse_registry"},
+        "query_binding": {"request": {"query_id": "qry-13", "task_id": "task-13", "goal": "retrieve latency claim candidate", "scope": {"user_id": "dse-user", "namespace": "dse"}, "context": {"gpu_family": "B300"}, "payload_kind": "text", "payload_sha256": "2222222222222222222222222222222222222222222222222222222222222222", "request_sha256": "2222222222222222222222222222222222222222222222222222222222222222", "mode": "index", "return_format": "text", "time_mode": "current"}, "authorization_witness": {"provider": "host_auth_boundary", "decision": "allow", "host_principal_ref": "principal:dse-user", "auth_scope_ref": {"owner_id": "owner-dse", "namespace": "dse", "learner_id": "learner-dse"}, "resolved_melete_scope": {"user_id": "dse-user", "namespace": "dse"}, "actor": "user", "query_id": "qry-13", "evidence_ref": "authz-evidence:qry-13"}, "expected_result": {"memory_id": "mem-31", "version": 1}, "expected_snapshot_seq": 44},
+        "readout": {"retrieval_id": "ret-13", "query_id": "qry-13", "scope": {"user_id": "dse-user", "namespace": "dse"}, "snapshot_seq": 44, "items": [{"memory_id": "mem-31", "version": 1, "role": "episode", "applicability": {"gpu_family": "B300"}, "epistemic_state": "observed", "residency": "active"}]},
+        "revalidation": {"predicate_ref_resolved": true, "version_current": true, "digest_current": true, "predicate_result": "match", "source_acl": "denied", "source_status": "active", "snapshot_state": "current", "predecessor_state": "not_applicable"}
+      },
+      "runtime_observation": {"state": "not_run", "actual_receipt": null, "actual_readout": null}
+    },
+    {
+      "case_id": "stale_melete_snapshot_after_hit",
+      "expected_decision": "query_candidate_preserved_but_stale_snapshot_requires_new_authorized_query",
+      "allowed_unknown_reasons": ["melete_snapshot_stale"],
+      "required_capability": "snapshot_revision_recheck_and_fresh_query",
+      "expected_execution_permission": "denied",
+      "request_kind": "episode_validation",
+      "expected_candidate_visibility": "candidate_preserved",
+      "inputs": {
+        "simulation_requested": true,
+        "source_binding": {"event_id": "evt-014", "root_event_id": "evt-014", "payload_sha256": "dededededededededededededededededededededededededededededededede"},
+        "receipt": {"event_id": "evt-014", "status": "stored", "gate_label": "informative", "memory_revision": 15, "journal_seq": 45, "memory_ids": ["mem-32"], "extraction_incomplete": false, "embedding_pending": false},
+        "dse_predicate_binding": {"predicate_ref": "pred:occupancy", "predicate_version": "5", "canonical_sha256": "efefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefef", "expression_kind": "scalar_conjunction", "native_scalar_hints": {"gpu_family": "B300"}, "authority": "dse_registry"},
+        "query_binding": {"request": {"query_id": "qry-14", "task_id": "task-14", "goal": "retrieve occupancy pattern candidate", "scope": {"user_id": "dse-user", "namespace": "dse"}, "context": {"gpu_family": "B300"}, "payload_kind": "text", "payload_sha256": "3333333333333333333333333333333333333333333333333333333333333333", "request_sha256": "3333333333333333333333333333333333333333333333333333333333333333", "mode": "index", "return_format": "text", "time_mode": "current"}, "authorization_witness": {"provider": "host_auth_boundary", "decision": "allow", "host_principal_ref": "principal:dse-user", "auth_scope_ref": {"owner_id": "owner-dse", "namespace": "dse", "learner_id": "learner-dse"}, "resolved_melete_scope": {"user_id": "dse-user", "namespace": "dse"}, "actor": "user", "query_id": "qry-14", "evidence_ref": "authz-evidence:qry-14"}, "expected_result": {"memory_id": "mem-32", "version": 1}, "expected_snapshot_seq": 45},
+        "readout": {"retrieval_id": "ret-14", "query_id": "qry-14", "scope": {"user_id": "dse-user", "namespace": "dse"}, "snapshot_seq": 45, "items": [{"memory_id": "mem-32", "version": 1, "role": "pattern", "applicability": {"gpu_family": "B300"}, "epistemic_state": "candidate", "residency": "active"}]},
+        "revalidation": {"predicate_ref_resolved": true, "version_current": true, "digest_current": true, "predicate_result": "match", "source_acl": "allowed", "source_status": "active", "snapshot_state": "stale", "predecessor_state": "not_applicable"}
+      },
+      "runtime_observation": {"state": "not_run", "actual_receipt": null, "actual_readout": null}
+    },
+    {
+      "case_id": "unsupported_nested_predicate_is_unknown",
+      "expected_decision": "native_scalar_hint_cannot_stand_in_for_nested_predicate_evaluation",
+      "allowed_unknown_reasons": ["predicate_capability_unsupported"],
+      "required_capability": "dse_predicate_resolver_for_nested_expression",
+      "expected_execution_permission": "denied",
+      "request_kind": "episode_validation",
+      "expected_candidate_visibility": "candidate_preserved",
+      "inputs": {
+        "simulation_requested": true,
+        "source_binding": {"event_id": "evt-015", "root_event_id": "evt-015", "payload_sha256": "abababababababababababababababababababababababababababababababaa"},
+        "receipt": {"event_id": "evt-015", "status": "stored", "gate_label": "informative", "memory_revision": 16, "journal_seq": 46, "memory_ids": ["mem-33"], "extraction_incomplete": false, "embedding_pending": false},
+        "dse_predicate_binding": {"predicate_ref": "pred:kernel-legality-nested", "predicate_version": "2", "canonical_sha256": "1212121212121212121212121212121212121212121212121212121212121212", "expression_kind": "nested", "native_scalar_hints": {"isa": "Z"}, "authority": "dse_registry"},
+        "query_binding": {"request": {"query_id": "qry-15", "task_id": "task-15", "goal": "retrieve nested kernel legality candidate", "scope": {"user_id": "dse-user", "namespace": "dse"}, "context": {"isa": "Z"}, "payload_kind": "text", "payload_sha256": "4444444444444444444444444444444444444444444444444444444444444444", "request_sha256": "4444444444444444444444444444444444444444444444444444444444444444", "mode": "index", "return_format": "text", "time_mode": "current"}, "authorization_witness": {"provider": "host_auth_boundary", "decision": "allow", "host_principal_ref": "principal:dse-user", "auth_scope_ref": {"owner_id": "owner-dse", "namespace": "dse", "learner_id": "learner-dse"}, "resolved_melete_scope": {"user_id": "dse-user", "namespace": "dse"}, "actor": "user", "query_id": "qry-15", "evidence_ref": "authz-evidence:qry-15"}, "expected_result": {"memory_id": "mem-33", "version": 1}, "expected_snapshot_seq": 46},
+        "readout": {"retrieval_id": "ret-15", "query_id": "qry-15", "scope": {"user_id": "dse-user", "namespace": "dse"}, "snapshot_seq": 46, "items": [{"memory_id": "mem-33", "version": 1, "role": "strategy", "applicability": {"isa": "Z"}, "epistemic_state": "candidate", "residency": "active"}]},
+        "revalidation": {"predicate_ref_resolved": true, "version_current": true, "digest_current": true, "predicate_result": "unknown", "source_acl": "allowed", "source_status": "active", "snapshot_state": "current", "predecessor_state": "not_applicable"}
+      },
+      "runtime_observation": {"state": "not_run", "actual_receipt": null, "actual_readout": null}
+    },
+    {
+      "case_id": "fresh_candidate_passes_dse_profile_within_scope",
+      "expected_decision": "fresh_melete_candidate_and_current_dse_evidence_pass_complete_profile",
+      "allowed_unknown_reasons": [],
+      "required_capability": "melete_query_plus_dse_predicate_acl_snapshot_and_complete_profile_validation",
+      "expected_execution_permission": "validated_profile_only",
+      "request_kind": "episode_validation",
+      "expected_candidate_visibility": "confirmed_visible",
+      "inputs": {
+        "simulation_requested": true,
+        "source_binding": {"event_id": "evt-016", "root_event_id": "evt-016", "payload_sha256": "3434343434343434343434343434343434343434343434343434343434343434"},
+        "receipt": {"event_id": "evt-016", "status": "stored", "gate_label": "informative", "memory_revision": 17, "journal_seq": 47, "memory_ids": ["mem-34"], "extraction_incomplete": false, "embedding_pending": false},
+        "dse_predicate_binding": {"predicate_ref": "pred:kernel-profile", "predicate_version": "7", "canonical_sha256": "4545454545454545454545454545454545454545454545454545454545454545", "expression_kind": "scalar_conjunction", "native_scalar_hints": {"gpu_family": "B300", "isa": "X"}, "authority": "dse_registry"},
+        "query_binding": {"request": {"query_id": "qry-16", "task_id": "task-16", "goal": "retrieve target episode evidence", "scope": {"user_id": "dse-user", "namespace": "dse"}, "context": {"gpu_family": "B300", "isa": "X"}, "payload_kind": "text", "payload_sha256": "5555555555555555555555555555555555555555555555555555555555555555", "request_sha256": "5555555555555555555555555555555555555555555555555555555555555555", "mode": "index", "return_format": "text", "time_mode": "current"}, "authorization_witness": {"provider": "host_auth_boundary", "decision": "allow", "host_principal_ref": "principal:dse-user", "auth_scope_ref": {"owner_id": "owner-dse", "namespace": "dse", "learner_id": "learner-dse"}, "resolved_melete_scope": {"user_id": "dse-user", "namespace": "dse"}, "actor": "user", "query_id": "qry-16", "evidence_ref": "authz-evidence:qry-16"}, "expected_result": {"memory_id": "mem-34", "version": 1}, "expected_snapshot_seq": 47},
+        "readout": {"retrieval_id": "ret-16", "query_id": "qry-16", "scope": {"user_id": "dse-user", "namespace": "dse"}, "snapshot_seq": 47, "items": [{"memory_id": "mem-34", "version": 1, "role": "episode", "applicability": {"gpu_family": "B300", "isa": "X"}, "epistemic_state": "candidate", "residency": "active"}]},
+        "revalidation": {"predicate_ref_resolved": true, "version_current": true, "digest_current": true, "predicate_result": "match", "source_acl": "allowed", "source_status": "active", "snapshot_state": "current", "predecessor_state": "resolved"},
+        "execution_validation": {"profile_id": "profile-synthetic-p0", "profile_version": "1", "design_snapshot_sha256": "5656565656565656565656565656565656565656565656565656565656565656", "required_checks": "all_pass", "required_review": "complete", "physical_feasibility": "feasible_within_declared_scope"}
+      },
+      "runtime_observation": {"state": "not_run", "actual_receipt": null, "actual_readout": null}
+    },
+    {
+      "case_id": "readout_query_id_mismatch_is_not_visible",
+      "expected_decision": "readout_query_id_must_equal_bound_query_request_id",
+      "allowed_unknown_reasons": ["readout_query_id_mismatch"],
+      "required_capability": "bind_native_result_identity_to_authorized_query_request",
+      "expected_execution_permission": "denied",
+      "request_kind": "episode_validation",
+      "expected_candidate_visibility": "not_confirmed",
+      "inputs": {
+        "simulation_requested": true,
+        "source_binding": {"event_id": "evt-020", "root_event_id": "evt-020", "payload_sha256": "6666666666666666666666666666666666666666666666666666666666666666"},
+        "receipt": {"event_id": "evt-020", "status": "stored", "gate_label": "informative", "memory_revision": 20, "journal_seq": 50, "memory_ids": ["mem-40"], "extraction_incomplete": false, "embedding_pending": false},
+        "query_binding": {"request": {"query_id": "qry-20", "task_id": "task-20", "goal": "retrieve target memory", "scope": {"user_id": "dse-user", "namespace": "dse"}, "context": {"gpu_family": "B300"}, "payload_kind": "text", "payload_sha256": "6666666666666666666666666666666666666666666666666666666666666666", "request_sha256": "6666666666666666666666666666666666666666666666666666666666666666", "mode": "index", "return_format": "text", "time_mode": "current"}, "authorization_witness": {"provider": "host_auth_boundary", "decision": "allow", "host_principal_ref": "principal:dse-user", "auth_scope_ref": {"owner_id": "owner-dse", "namespace": "dse", "learner_id": "learner-dse"}, "resolved_melete_scope": {"user_id": "dse-user", "namespace": "dse"}, "actor": "user", "query_id": "qry-20", "evidence_ref": "authz-evidence:qry-20"}, "expected_result": {"memory_id": "mem-40", "version": 1}, "expected_snapshot_seq": 50},
+        "readout": {"retrieval_id": "ret-20", "query_id": "qry-other", "scope": {"user_id": "dse-user", "namespace": "dse"}, "snapshot_seq": 50, "items": [{"memory_id": "mem-40", "version": 1, "role": "episode", "applicability": {"gpu_family": "B300"}, "epistemic_state": "observed", "residency": "active"}]}
+      },
+      "runtime_observation": {"state": "not_run", "actual_receipt": null, "actual_readout": null}
+    },
+    {
+      "case_id": "readout_scope_mismatch_is_not_visible",
+      "expected_decision": "readout_and_host_resolved_scope_must_match_request_scope",
+      "allowed_unknown_reasons": ["readout_scope_mismatch"],
+      "required_capability": "compare_request_readout_and_host_authorization_scopes",
+      "expected_execution_permission": "denied",
+      "request_kind": "episode_validation",
+      "expected_candidate_visibility": "not_confirmed",
+      "inputs": {
+        "simulation_requested": true,
+        "source_binding": {"event_id": "evt-021", "root_event_id": "evt-021", "payload_sha256": "7777777777777777777777777777777777777777777777777777777777777777"},
+        "receipt": {"event_id": "evt-021", "status": "stored", "gate_label": "informative", "memory_revision": 21, "journal_seq": 51, "memory_ids": ["mem-41"], "extraction_incomplete": false, "embedding_pending": false},
+        "query_binding": {"request": {"query_id": "qry-21", "task_id": "task-21", "goal": "retrieve target memory", "scope": {"user_id": "dse-user", "namespace": "dse"}, "context": {"gpu_family": "B300"}, "payload_kind": "text", "payload_sha256": "7777777777777777777777777777777777777777777777777777777777777777", "request_sha256": "7777777777777777777777777777777777777777777777777777777777777777", "mode": "index", "return_format": "text", "time_mode": "current"}, "authorization_witness": {"provider": "host_auth_boundary", "decision": "allow", "host_principal_ref": "principal:dse-user", "auth_scope_ref": {"owner_id": "owner-dse", "namespace": "dse", "learner_id": "learner-dse"}, "resolved_melete_scope": {"user_id": "dse-user", "namespace": "dse"}, "actor": "user", "query_id": "qry-21", "evidence_ref": "authz-evidence:qry-21"}, "expected_result": {"memory_id": "mem-41", "version": 1}, "expected_snapshot_seq": 51},
+        "readout": {"retrieval_id": "ret-21", "query_id": "qry-21", "scope": {"user_id": "other-user", "namespace": "other"}, "snapshot_seq": 51, "items": [{"memory_id": "mem-41", "version": 1, "role": "episode", "applicability": {"gpu_family": "B300"}, "epistemic_state": "observed", "residency": "active"}]}
+      },
+      "runtime_observation": {"state": "not_run", "actual_receipt": null, "actual_readout": null}
+    },
+    {
+      "case_id": "readout_version_mismatch_is_not_visible",
+      "expected_decision": "readout_version_must_equal_expected_target_tuple",
+      "allowed_unknown_reasons": ["readout_version_mismatch"],
+      "required_capability": "exact_memory_id_and_version_selection_check",
+      "expected_execution_permission": "denied",
+      "request_kind": "episode_validation",
+      "expected_candidate_visibility": "not_confirmed",
+      "inputs": {
+        "simulation_requested": true,
+        "source_binding": {"event_id": "evt-022", "root_event_id": "evt-022", "payload_sha256": "8888888888888888888888888888888888888888888888888888888888888888"},
+        "receipt": {"event_id": "evt-022", "status": "stored", "gate_label": "informative", "memory_revision": 22, "journal_seq": 52, "memory_ids": ["mem-42"], "extraction_incomplete": false, "embedding_pending": false},
+        "query_binding": {"request": {"query_id": "qry-22", "task_id": "task-22", "goal": "retrieve target memory", "scope": {"user_id": "dse-user", "namespace": "dse"}, "context": {"gpu_family": "B300"}, "payload_kind": "text", "payload_sha256": "8888888888888888888888888888888888888888888888888888888888888888", "request_sha256": "8888888888888888888888888888888888888888888888888888888888888888", "mode": "index", "return_format": "text", "time_mode": "current"}, "authorization_witness": {"provider": "host_auth_boundary", "decision": "allow", "host_principal_ref": "principal:dse-user", "auth_scope_ref": {"owner_id": "owner-dse", "namespace": "dse", "learner_id": "learner-dse"}, "resolved_melete_scope": {"user_id": "dse-user", "namespace": "dse"}, "actor": "user", "query_id": "qry-22", "evidence_ref": "authz-evidence:qry-22"}, "expected_result": {"memory_id": "mem-42", "version": 2}, "expected_snapshot_seq": 52},
+        "readout": {"retrieval_id": "ret-22", "query_id": "qry-22", "scope": {"user_id": "dse-user", "namespace": "dse"}, "snapshot_seq": 52, "items": [{"memory_id": "mem-42", "version": 1, "role": "episode", "applicability": {"gpu_family": "B300"}, "epistemic_state": "observed", "residency": "active"}]}
+      },
+      "runtime_observation": {"state": "not_run", "actual_receipt": null, "actual_readout": null}
+    },
+    {
+      "case_id": "readout_memory_id_mismatch_is_not_visible",
+      "expected_decision": "readout_must_contain_bound_expected_memory_id",
+      "allowed_unknown_reasons": ["readout_memory_id_mismatch"],
+      "required_capability": "exact_memory_id_and_version_selection_check",
+      "expected_execution_permission": "denied",
+      "request_kind": "episode_validation",
+      "expected_candidate_visibility": "not_confirmed",
+      "inputs": {
+        "simulation_requested": true,
+        "source_binding": {"event_id": "evt-023", "root_event_id": "evt-023", "payload_sha256": "9999999999999999999999999999999999999999999999999999999999999999"},
+        "receipt": {"event_id": "evt-023", "status": "stored", "gate_label": "informative", "memory_revision": 23, "journal_seq": 53, "memory_ids": ["mem-43"], "extraction_incomplete": false, "embedding_pending": false},
+        "query_binding": {"request": {"query_id": "qry-23", "task_id": "task-23", "goal": "retrieve target memory", "scope": {"user_id": "dse-user", "namespace": "dse"}, "context": {"gpu_family": "B300"}, "payload_kind": "text", "payload_sha256": "9999999999999999999999999999999999999999999999999999999999999999", "request_sha256": "9999999999999999999999999999999999999999999999999999999999999999", "mode": "index", "return_format": "text", "time_mode": "current"}, "authorization_witness": {"provider": "host_auth_boundary", "decision": "allow", "host_principal_ref": "principal:dse-user", "auth_scope_ref": {"owner_id": "owner-dse", "namespace": "dse", "learner_id": "learner-dse"}, "resolved_melete_scope": {"user_id": "dse-user", "namespace": "dse"}, "actor": "user", "query_id": "qry-23", "evidence_ref": "authz-evidence:qry-23"}, "expected_result": {"memory_id": "mem-43", "version": 1}, "expected_snapshot_seq": 53},
+        "readout": {"retrieval_id": "ret-23", "query_id": "qry-23", "scope": {"user_id": "dse-user", "namespace": "dse"}, "snapshot_seq": 53, "items": [{"memory_id": "mem-other", "version": 1, "role": "episode", "applicability": {"gpu_family": "B300"}, "epistemic_state": "observed", "residency": "active"}]}
+      },
+      "runtime_observation": {"state": "not_run", "actual_receipt": null, "actual_readout": null}
+    },
+    {
+      "case_id": "readout_snapshot_mismatch_is_not_visible",
+      "expected_decision": "readout_snapshot_must_equal_bound_query_snapshot",
+      "allowed_unknown_reasons": ["readout_snapshot_mismatch"],
+      "required_capability": "exact_query_snapshot_identity_check",
+      "expected_execution_permission": "denied",
+      "request_kind": "episode_validation",
+      "expected_candidate_visibility": "not_confirmed",
+      "inputs": {
+        "simulation_requested": true,
+        "source_binding": {"event_id": "evt-024", "root_event_id": "evt-024", "payload_sha256": "abababababababababababababababababababababababababababababababab"},
+        "receipt": {"event_id": "evt-024", "status": "stored", "gate_label": "informative", "memory_revision": 24, "journal_seq": 54, "memory_ids": ["mem-44"], "extraction_incomplete": false, "embedding_pending": false},
+        "query_binding": {"request": {"query_id": "qry-24", "task_id": "task-24", "goal": "retrieve target memory", "scope": {"user_id": "dse-user", "namespace": "dse"}, "context": {"gpu_family": "B300"}, "payload_kind": "text", "payload_sha256": "abababababababababababababababababababababababababababababababab", "request_sha256": "abababababababababababababababababababababababababababababababab", "mode": "index", "return_format": "text", "time_mode": "current"}, "authorization_witness": {"provider": "host_auth_boundary", "decision": "allow", "host_principal_ref": "principal:dse-user", "auth_scope_ref": {"owner_id": "owner-dse", "namespace": "dse", "learner_id": "learner-dse"}, "resolved_melete_scope": {"user_id": "dse-user", "namespace": "dse"}, "actor": "user", "query_id": "qry-24", "evidence_ref": "authz-evidence:qry-24"}, "expected_result": {"memory_id": "mem-44", "version": 1}, "expected_snapshot_seq": 54},
+        "readout": {"retrieval_id": "ret-24", "query_id": "qry-24", "scope": {"user_id": "dse-user", "namespace": "dse"}, "snapshot_seq": 53, "items": [{"memory_id": "mem-44", "version": 1, "role": "episode", "applicability": {"gpu_family": "B300"}, "epistemic_state": "observed", "residency": "active"}]}
+      },
+      "runtime_observation": {"state": "not_run", "actual_receipt": null, "actual_readout": null}
+    },
+    {
+      "case_id": "unauthorized_readout_is_not_visibility_evidence",
+      "expected_decision": "host_denied_authentication_cannot_be_overridden_by_readout_payload",
+      "allowed_unknown_reasons": ["query_authorization_denied"],
+      "required_capability": "trusted_host_auth_witness_bound_to_exact_query_id_and_scope",
+      "expected_execution_permission": "denied",
+      "request_kind": "episode_validation",
+      "expected_candidate_visibility": "not_confirmed",
+      "inputs": {
+        "simulation_requested": true,
+        "source_binding": {"event_id": "evt-025", "root_event_id": "evt-025", "payload_sha256": "cdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcd"},
+        "receipt": {"event_id": "evt-025", "status": "stored", "gate_label": "informative", "memory_revision": 25, "journal_seq": 55, "memory_ids": ["mem-45"], "extraction_incomplete": false, "embedding_pending": false},
+        "query_binding": {"request": {"query_id": "qry-25", "task_id": "task-25", "goal": "retrieve target memory", "scope": {"user_id": "dse-user", "namespace": "dse"}, "context": {"gpu_family": "B300"}, "payload_kind": "text", "payload_sha256": "cdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcd", "request_sha256": "cdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcd", "mode": "index", "return_format": "text", "time_mode": "current"}, "authorization_witness": {"provider": "host_auth_boundary", "decision": "deny", "host_principal_ref": "principal:unauthorized", "auth_scope_ref": {"owner_id": "owner-other", "namespace": "dse", "learner_id": "learner-other"}, "resolved_melete_scope": {"user_id": "dse-user", "namespace": "dse"}, "actor": "user", "query_id": "qry-25", "evidence_ref": "authz-evidence:qry-25-denied"}, "expected_result": {"memory_id": "mem-45", "version": 1}, "expected_snapshot_seq": 55},
+        "readout": {"retrieval_id": "ret-25", "query_id": "qry-25", "scope": {"user_id": "dse-user", "namespace": "dse"}, "snapshot_seq": 55, "items": [{"memory_id": "mem-45", "version": 1, "role": "episode", "applicability": {"gpu_family": "B300"}, "epistemic_state": "observed", "residency": "active"}]}
+      },
+      "runtime_observation": {"state": "not_run", "actual_receipt": null, "actual_readout": null}
+    }
+  ]
+}

@@ -1,5 +1,22 @@
 # 데이터 계약·metadata·지식 schema
 
+2026-10-17 P0 보완의 판정 기준은 [integration-state-map.md](https://github.com/jimmylegendary/dse-knowledge/blob/docs/p0-episode-contracts/docs/contracts/integration-state-map.md)다. 아래 entity 개요만 보고 native 상태·permission·coverage·memory readiness를 추론하지 않는다.
+
+## P0에서 고정한 필수 확장
+
+| 계약 | 필수 binding과 의미 | 단일 기준 |
+|---|---|---|
+| ValidationProfile | complete required rule/input/applicability registry, scope/out-of-scope, review blocking, version+digest | [validation-and-claim-use.md](https://github.com/jimmylegendary/dse-knowledge/blob/docs/p0-episode-contracts/docs/contracts/validation-and-claim-use.md) |
+| ClaimUsePolicy | Claim 종류·상태·권위·적용 조건별 다섯 사용 목적. source_verified 자체는 hard-constraint 승격 아님 | [claim-use-policy.schema.json](https://github.com/jimmylegendary/dse-knowledge/blob/docs/p0-episode-contracts/schemas/claim-use-policy.schema.json) |
+| ComparisonPolicy | required metrics/objectives/constraints, target bounds, fixed absolute improvement thresholds, compatible evidence profiles, exclusion reasons | [comparison-policy.md](https://github.com/jimmylegendary/dse-knowledge/blob/docs/p0-episode-contracts/docs/contracts/comparison-policy.md) |
+| SnapshotManifest | 당시 판단 감사·당시 입력 재생·현재 지식 재검토를 분리하고 현재 권한을 재확인 | [snapshot-contract.md](https://github.com/jimmylegendary/dse-knowledge/blob/docs/p0-episode-contracts/docs/contracts/snapshot-contract.md) |
+| HAT cost provenance | unit별 producer/coverage/replacement/carry-forward source, effective cost, Realizable/Oracle, state access, External Golden Control | [hat-fidelity.md](https://github.com/jimmylegendary/dse-knowledge/blob/docs/p0-episode-contracts/docs/contracts/hat-fidelity.md) |
+| Melete bridge | native status와 두 pending/incomplete flag, query visibility evidence, DSE predicate ID/version/hash binding과 post-retrieval 검사 | [melete-state-and-applicability.md](https://github.com/jimmylegendary/dse-knowledge/blob/docs/p0-episode-contracts/docs/contracts/melete-state-and-applicability.md) |
+
+RunManifest는 위 policy/snapshot/cost-provenance references와 content identity를 필수로 보존한다. MetricValue도 생성한 run·cost-unit·coverage/profile·허용 주장 범위를 따라갈 수 있어야 한다. `fidelity_level=L3`만으로 전체 coverage나 realizability를 표현하지 않는다. 원본 native report와 DSE projection은 별도다.
+
+아래 `ValidationResult.status`는 **개별 rule 결과**다. 전체 verdict는 reject/incomplete_unknown/validated_within_declared_scope/not_evaluated로 집계하며 simulation_permission·review_completeness·physical_feasibility와 별도 필드다. 모든 required rule은 evidence top-k/요약과 독립적으로 평가한다.
+
 상태: 구현 전 계약 초안. 아래 이름은 제안하는 domain record이며 기존 HAT/Melete에 이미 존재하는 API라는 뜻이 아니다.
 
 ## 1. 공통 envelope
@@ -90,7 +107,7 @@ idempotency_key는 동일한 source revision 또는 동일 run event 재전송�
 
 ## 6. Metric registry
 
-MetricDefinition 필수: name/version, description, unit, direction=min/max/target, aggregation, scope=request/session/system/resource, workload phase, numerator/denominator, window, population definition, warmup exclusion, SLO definition, valid methods, missingness policy.
+MetricDefinition 필수: name/version, description, unit, direction=min/max/target, target일 때 closed lower/upper bounds, aggregation, scope=request/session/system/resource, workload phase, numerator/denominator, window, population definition, warmup exclusion, SLO definition, valid methods, missingness policy. 실제 비교는 versioned ComparisonPolicy의 objective/constraint 구분과 fixed absolute threshold를 사용한다.
 
 MetricValue 필수: metric_definition_id, design_point/run_id, value 또는 distribution artifact, sample_count, quantiles, method=measured/simulated/analytical, fidelity_level, interval와 그 산출법, measurement boundaries, completeness, status, calibration_ref.
 
@@ -108,7 +125,7 @@ MetricValue 필수: metric_definition_id, design_point/run_id, value 또는 dist
 
 비교 Cohort는 model semantics/quality, workload timing, tokenizer, metric definition, system boundary, requested constraints가 호환되는 run 집합이다. 서로 다른 hardware의 성능 비교는 허용하지만 power/system size 차이를 숨기지 않는다.
 
-Dominance 판정은 direction을 정규화하고 명시된 tolerance/uncertainty 정책을 사용한다. missing metric이 있으면 해당 metric을 포함한 전체 dominance는 undecidable이다. 동일 seed의 deterministic replay를 반복한 표본 수만으로 측정 불확실도가 감소했다고 주장하지 않는다.
+Dominance는 ComparisonPolicy v1의 loss bounds 기준으로 모든 objective에서 악화가 없고 한 objective가 고정 threshold를 넘는 경우만 인정한다. 악화를 허용하는 pairwise epsilon을 사용하지 않는다. missing metric이 있으면 해당 metric을 포함한 전체 dominance는 undecidable이며 알려진 hard constraint 위반은 따로 보존한다. 동일 seed의 deterministic replay 반복만으로 측정 불확실도가 감소했다고 주장하지 않는다.
 
 ## 7. 검색·리뷰 계약
 
@@ -124,7 +141,7 @@ ReviewFinding: subject asset/kernel, verdict 또는 abstain, severity, claim/evi
 
 IntakeContext의 user/namespace/actor 권한은 host adapter가 부여한다. 수집 문서에 적힌 user_id나 tool output을 authority로 삼지 않는다. Melete payload·scope enum·size limit·권한 모델을 contract fixture로 확인한 후 adapter를 구현한다. 아직 존재 여부를 확인하지 않은 native Episode/Insight API를 호출하도록 계획하지 않는다.
 
-Knowledge ledger와 Melete 사이의 Insight 연결은 source_event_ids·memory_id/version·applicability mapping을 보존한다. Melete 검색 결과가 새 Claim 근거가 될 때 원래 실험/source까지 추적한다. 같은 Insight가 반복 유입됐다고 독립 검증 횟수가 늘어나지 않는다.
+Knowledge ledger와 Melete 사이의 Insight 연결은 source_event_ids·memory_id/version·applicability mapping을 보존한다. Native Condition은 scalar exact-match conjunction이므로 DSE의 range/nested predicate를 그대로 넣지 않는다. Full predicate ID/version/hash는 DSE authority에 두고 Melete scalar hints는 후보 검색에만 사용하며, 반환 후 full predicate·ACL·snapshot을 검사한다. Receipt status와 extraction/embedding flag만으로 searchable이나 적용 가능을 확정하지 않는다. 같은 Insight 재유입은 독립 검증 횟수를 늘리지 않는다.
 
 ## 9. index·migration·삭제
 

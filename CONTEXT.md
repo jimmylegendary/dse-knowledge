@@ -2,7 +2,17 @@
 
 지식과 실험 근거를 이용해 workload에 맞는 hardware와 kernel의 설계 공간을 탐색하는 맥락이다. 개념 정의는 설계 초안이며 사용자 검토에 따라 변경할 수 있다.
 
+2026-10-21 상위 설계는 [2026-10-21-dse-knowledge-architecture.md](https://github.com/jimmylegendary/dse-knowledge/blob/docs/p0-episode-contracts/docs/superpowers/specs/2026-10-21-dse-knowledge-architecture.md)다. 결정에 필요한 지식의 정의·수집·저장·검색·활용을 먼저 연결한다.
+
 ## Language
+
+**Decision Task**: DSE 단계에서 내려야 할 선택과 그 대상·목표·제약을 명시한 작업이다. 시스템 구축을 위한 기술 선정 작업과 운영 중 DSE 작업은 task kind로 구분한다.
+
+**Knowledge Requirement**: 특정 결정에 필요한 사실·규칙·설계 패턴·실험 경험과 적용 범위, 요구 정확도·신선도, 충족 조건을 정의한다. 관련 문서가 발견되었다는 사실만으로 충족되지 않는다.
+
+**Collection Plan**: 미충족 지식을 어느 source에서 어떤 방법·우선순위·갱신 조건으로 확보할지 정의한 계획이다. 실제 취득 시도와 결과는 별도 이력이다.
+
+**Query Plan**: Knowledge Requirement별로 exact/SQL·lexical·dense·typed graph·수치 분석을 조합하는 읽기 계획이다. 근거 coverage와 남은 gap을 함께 반환한다.
 
 **Workload Scenario**: session, turn, 요청 의존관계, 입력·출력 길이 및 시간 의미를 정의한 재현 가능한 작업 부하이다.
 

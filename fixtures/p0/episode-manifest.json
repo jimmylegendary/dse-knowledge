@@ -1,0 +1,291 @@
+{
+  "schema_version": "dse-p0-episode-manifest/v1",
+  "design_repo_base_sha": "2a460a0a57d13db6753481a26074e3fb3b4f2aa9",
+  "source_audit": {
+    "state": "bounded_pinned_source_inspection_performed",
+    "native_dse_run_review_invoked": false,
+    "review_artifact": null
+  },
+  "decision": "B300 target episode is blocked; B200 SmolLM2 W1 is a separate source-verified, runtime-ungranted diagnostic proposal only",
+  "status": {
+    "source_status": "source_missing",
+    "runtime_status": "blocked",
+    "validation_verdict": "incomplete_unknown",
+    "review_completeness": "not_run",
+    "physical_feasibility": "not_assessed",
+    "simulation_permission": "denied"
+  },
+  "target_episode": {
+    "id": "p1-b300-agent-serving",
+    "acceptance_hardware": "NVIDIA B300",
+    "workload_envelope": {
+      "sessions": 1000,
+      "turns_per_session": {
+        "min": 10,
+        "max": 100
+      },
+      "input_length_per_turn": {
+        "min": 10,
+        "max": 512,
+        "unit": "unknown"
+      },
+      "output_length_per_turn": {
+        "min": 100,
+        "max": 1000,
+        "unit": "unknown"
+      },
+      "timing_semantics": "unknown",
+      "arrival_or_think_time": "unknown",
+      "context_policy_full_or_incremental": "unknown",
+      "prefix_identity_and_reuse": "unknown",
+      "kv_lifetime_and_initial_state": "unknown",
+      "tool_wait_boundary": "unknown",
+      "quality_and_slo_targets": "unknown"
+    },
+    "blockers": [
+      "No pinned B300 or GB300 hardware twin with full hierarchy and validated capability/legality evidence was found in the pinned HAT source set.",
+      "No B300 calibration domain or same-scenario External Golden Control measurement is bound to the target episode.",
+      "The workload ranges do not pin units, actual turn trace, arrivals, context semantics, prefix/KV policy, or tool wait.",
+      "No integrated adapter binds vLLM capture through HATTorch, HATIR candidate generation/fold-unfold/fusion, RP replay, MetricVector, Melete, and next proposal.",
+      "No P1-specific RP snapshot/keyframe/WAL and state vector is bound to a target twin or kernel recipe; snapshot sufficiency is unknown.",
+      "Pinned HAT-System source records no integrated DSE B300 phase run or verdict; this is not evidence of current runtime readiness."
+    ],
+    "prohibited_substitution": "B200/GB300 source or diagnostic values cannot be relabeled, scaled, or used as B300 acceptance metrics."
+  },
+  "diagnostic_probe": {
+    "id": "hattorch-w1-smollm2-meta-forward-b200-twin",
+    "purpose": "Isolated source-defined vLLM/HATTorch model meta-forward and operator-census contract; not a DSE episode or physical HAT performance run.",
+    "status": {
+      "source_status": "source_verified",
+      "runtime_status": "not_run",
+      "validation_verdict": "incomplete_unknown",
+      "review_completeness": "not_run",
+      "physical_feasibility": "not_assessed",
+      "simulation_permission": "denied"
+    },
+    "declared_future_profile": {
+      "id": "b200-source-contract-diagnostic",
+      "expected_simulation_permission_if_separately_granted": "exploratory_only",
+      "current_runtime_or_simulation_grant": false
+    },
+    "hardware_input": {
+      "name": "DGX B200 x8",
+      "fixture_path": "tests/vllm26/fixtures/twins/dgx-b200-x8.hw",
+      "sha256": "77957c1e212e86050322a88a3faa0fd76359402cdacb8fac011e9ebea5654b5f",
+      "declared_resource_tree": "IB rack-scope switch -> NVLink tray-scope fabric -> 8 HBM/SRAM/compute resource branches",
+      "metadata_declared_gpus_per_node": 8,
+      "metadata_declared_dies_per_gpu": 2,
+      "explicit_package_soc_or_die_assembly_rows": false,
+      "all_level_hardware_hierarchy_covered": false,
+      "compute_capability_or_isa_legality_bound_by_fixture": false,
+      "separate_b200_profile_composed_and_validated": false,
+      "binding": "Fixture copied/mounted as the test twin path; no DSE target-twin adapter is claimed.",
+      "scope_limit": "Fixture fields are not physical feasibility, validated B200 support, all-level legality, or measured performance validation. A software compute-capability default is not hardware evidence."
+    },
+    "model_input": {
+      "repo_id": "HuggingFaceTB/SmolLM2-135M-Instruct",
+      "revision": "12fd25f77366fa6b3b4b768ec3050bf629380bac",
+      "source_lock_path": "hattorch/vllm26/contracts/qwen36-model-sources.lock.json",
+      "source_lock_scope": "multi-model source catalog; the qwen36 filename does not mean its model array contains only Qwen entries",
+      "source_record_json_pointer": "/models/0",
+      "source_record_line": 3,
+      "required_files": [
+        "config.json",
+        "generation_config.json",
+        "tokenizer.json",
+        "tokenizer_config.json"
+      ],
+      "per_file_checksums": "not provided by this lock; unbound",
+      "weights_sha256": "not provided; dummy/meta only",
+      "weights": "dummy/meta only; actual weight identity and quality are not covered",
+      "dse_model_version_registered": false
+    },
+    "runtime_input": {
+      "vllm_source_lock_path": "tests/vllm26/fixtures/runtime_image/vllm-source.lock.json",
+      "vllm_tag": "v0.26.0",
+      "vllm_commit": "568afb3a13806beb53bb2e6bd518269357b237c0",
+      "container_image_tag": "hattorch-vllm26-runtime-test:568afb3",
+      "container_image_digest": "unknown",
+      "load_format": "dummy",
+      "enforce_eager": true,
+      "max_model_len": 512,
+      "max_num_seqs": 1,
+      "tensor_parallel_size": 1,
+      "enable_prefix_caching": false,
+      "attention_backend": "FLASH_ATTN",
+      "custom_ops": ["none"],
+      "probe_steps": [
+        {"phase": "prefill", "num_tokens": 9},
+        {"phase": "decode", "num_tokens": 1}
+      ]
+    },
+    "expected_source_assertions": {
+      "layers": 30,
+      "hidden_size": 576,
+      "vocab_size": 49152,
+      "hidden_shape_per_step": ["num_tokens", 576],
+      "logits_shape_per_step": ["num_tokens", 49152],
+      "tensor_device": "meta",
+      "operator_symbols": "exactly the declared MEASURED_SYMBOLS set in test_w1_forward.py",
+      "operator_calls_per_step": 1716,
+      "actual_model_weights_loaded": false,
+      "reference_logits_or_numerical_tolerance_compared": false,
+      "task_quality_verified": false,
+      "full_HatModelRunner_ledger_HATIR_HATOS_assembly": false
+    },
+    "expected_artifacts": {
+      "durable_run_manifest": false,
+      "kernel_schedule_or_candidate_set": false,
+      "hatir_event_dag": false,
+      "hatrp_replay_or_final_state": false,
+      "metric_vector": false,
+      "case_artifact_path": "not defined by this isolated test source"
+    },
+    "source_refs": [
+      "https://github.com/jimmylegendary/hattorch/blob/05a4b1889d1f68cade396b40340111ccd8bdd826/tests/vllm26/runtime/test_w1_forward.py",
+      "https://github.com/jimmylegendary/hattorch/blob/05a4b1889d1f68cade396b40340111ccd8bdd826/tests/vllm26/fixtures/runtime_image/vllm-source.lock.json",
+      "https://github.com/jimmylegendary/hattorch/blob/05a4b1889d1f68cade396b40340111ccd8bdd826/hattorch/vllm26/contracts/qwen36-model-sources.lock.json#L3",
+      "https://github.com/jimmylegendary/hattorch/blob/05a4b1889d1f68cade396b40340111ccd8bdd826/tests/vllm26/fixtures/twins/dgx-b200-x8.hw",
+      "https://github.com/jimmylegendary/hat-schema/blob/a874d0c2e277e8838ecd95ba16679b774646408e/examples/dgx-b200-x8.hw",
+      "https://github.com/jimmylegendary/hat-schema/blob/a874d0c2e277e8838ecd95ba16679b774646408e/examples/b200.hw"
+    ]
+  },
+  "separate_nonselected_component_probe": {
+    "id": "hattorch-qwen36-mtp-exact-runtime",
+    "reason_not_merged": "It is a separate opt-in, one-request, three-token dummy-weight runtime smoke with zero physical payload; it does not supply the B200 twin or the multi-session episode.",
+    "status": "source_verified_runtime_not_run",
+    "model_source_lock_record": {
+      "path": "hattorch/vllm26/contracts/qwen36-model-sources.lock.json",
+      "json_pointer": "/models/2",
+      "line": 5,
+      "record_kind": "Qwen3.6-35B-A3B multi-model source entry"
+    },
+    "model_revision": "995ad96eacd98c81ed38be0c5b274b04031597b0",
+    "config_sha256": "93a4693fa9d8392fbfccd4b3c9873f4bfdcb14fdede978b123d07d19675efe99",
+    "prompt": "State the first prime number.",
+    "max_tokens": 3,
+    "artifacts_if_run": [
+      "resolved-config.json",
+      "call-ledger.jsonl",
+      "guard-report.json"
+    ],
+    "source_refs": [
+      "https://github.com/jimmylegendary/hattorch/blob/05a4b1889d1f68cade396b40340111ccd8bdd826/tests/vllm26/runtime/test_qwen36_mtp_engine_serverless.py",
+      "https://github.com/jimmylegendary/hattorch/blob/05a4b1889d1f68cade396b40340111ccd8bdd826/hattorch/vllm26/contracts/qwen36-model-sources.lock.json#L5",
+      "https://github.com/jimmylegendary/hattorch/blob/05a4b1889d1f68cade396b40340111ccd8bdd826/hattorch/vllm26/contracts/qwen36-model-semantics.lock.json"
+    ]
+  },
+  "required_adapters_before_full_episode": [
+    {
+      "id": "workload-to-vllm-capture",
+      "inputs": ["versioned ModelVersion and tokenizer/config/template hashes", "turn/session trace", "length unit", "arrival/think time", "predecessor and context policy", "prefix/KV identity and state", "tool wait", "scheduler and seed"],
+      "outputs": ["immutable WorkloadScenario/Session/Turn records", "resolved vLLM config", "replayable run-scoped inputs"]
+    },
+    {
+      "id": "vllm-to-hattorch-capture",
+      "inputs": ["pinned vLLM build and plugin", "sequence slot/positions", "input and KV shapes", "logical op IDs", "dtype/layout/stride/shape/dependencies"],
+      "outputs": ["run-scoped logical-op/call/access ledger", "capture artifact and provenance"]
+    },
+    {
+      "id": "hattorch-to-hatir-search-and-lowering",
+      "inputs": ["logical graph and tensor semantics", "full target hierarchy", "ProgrammingModel and ISA legality", "candidate generator version", "source-bearing recipes/templates", "correctness references and tolerances"],
+      "outputs": ["KernelPattern", "FoldedMappingPlan with per-tier tiles/folds/remainders", "explicit FusionPlan", "ArchitectureRecipe", "candidate legality and correctness results"]
+    },
+    {
+      "id": "hatir-to-hatrp-replay",
+      "inputs": ["validated mapping/recipe", "target twin hash", "resolved kernel instances/event DAG", "queue/dependencies/duration unit and provenance", "snapshot/keyframe/WAL ID/hash and initial state"],
+      "outputs": ["L2 cost and coverage", "RP event ledger", "deterministic replay timeline and final-state diff"]
+    },
+    {
+      "id": "replay-to-metrics-and-melete",
+      "inputs": ["event time/duration", "request/session boundaries", "arrivals", "token counts", "tool wait boundaries", "ACL epoch and evidence refs"],
+      "outputs": ["scope-correct MetricVector with missingness/uncertainty", "Melete Observation and IngestReceipt mapping", "version-bound retrieval/review record", "next ExperimentProposal"]
+    }
+  ],
+  "melete_boundary": {
+    "pin": "9a3564dd96de22d0311522417c2c36e6bf2a0a91",
+    "native_ingest": "Engine.ingest(observation, context); pinned CLI exposes JSONL ingest, not an HTTP/MCP endpoint",
+    "receipt_status_values": ["stored", "trace_only", "duplicate"],
+    "orthogonal_flags": ["extraction_incomplete", "embedding_pending"],
+    "query_binding_contract": {
+      "owner": "DSE host-side envelope binding; these wrapper fields are not asserted to be native Melete QueryRequest fields",
+      "request_required_fields": ["query_id", "task_id", "goal", "scope.user_id", "scope.namespace", "context", "payload_kind", "payload_sha256", "request_sha256", "mode", "return_format", "time_mode"],
+      "request_fixed_values": {"payload_kind": "text", "mode": "index", "return_format": "text", "time_mode": "current"},
+      "authorization_witness_required_fields": ["provider=host_auth_boundary", "decision", "host_principal_ref", "auth_scope_ref.owner_id", "auth_scope_ref.namespace", "auth_scope_ref.learner_id", "resolved_melete_scope.user_id", "resolved_melete_scope.namespace", "actor", "query_id", "evidence_ref"],
+      "expected_result": {"memory_id": "required exact target", "version": "required exact target version"},
+      "expected_snapshot_seq": "required exact target snapshot sequence",
+      "readout_required_fields": ["retrieval_id", "query_id", "scope.user_id", "scope.namespace", "snapshot_seq", "items[].memory_id", "items[].version"],
+      "confirmed_visible_rule": "Only allow when request/auth/readout query IDs and scopes agree, auth decision is allow, exact expected memory_id/version is returned, and readout snapshot_seq equals expected_snapshot_seq.",
+      "negative_mismatch_cases": ["wrong query_id", "principal or authorization denied/unknown", "wrong scope", "wrong context binding", "wrong memory_id", "wrong version", "wrong snapshot_seq"],
+      "mismatch_result": "candidate_only; deny applying to a DSE decision",
+      "synthetic_fixture_binding_not_run": {
+        "case_id": "pending_embedding_does_not_establish_or_preclude_visibility",
+        "request": {
+          "query_id": "qry-5",
+          "task_id": "task-5",
+          "goal": "retrieve DSE episode evidence",
+          "scope": {"user_id": "dse-user", "namespace": "dse"},
+          "context": {"gpu_family": "B300"},
+          "payload_kind": "text",
+          "payload_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "request_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "mode": "index",
+          "return_format": "text",
+          "time_mode": "current"
+        },
+        "authorization_witness": {
+          "provider": "host_auth_boundary",
+          "decision": "allow",
+          "host_principal_ref": "principal:dse-user",
+          "auth_scope_ref": {"owner_id": "owner-dse", "namespace": "dse", "learner_id": "learner-dse"},
+          "resolved_melete_scope": {"user_id": "dse-user", "namespace": "dse"},
+          "actor": "user",
+          "query_id": "qry-5",
+          "evidence_ref": "authz-evidence:qry-5"
+        },
+        "expected_result": {"memory_id": "mem-24", "version": 1},
+        "expected_snapshot_seq": 35,
+        "expected_readout": {
+          "retrieval_id": "ret-5",
+          "query_id": "qry-5",
+          "scope": {"user_id": "dse-user", "namespace": "dse"},
+          "snapshot_seq": 35,
+          "items": [{"memory_id": "mem-24", "version": 1}]
+        },
+        "runtime_observation": "not_run"
+      }
+    },
+    "query_contract": "Native Condition is flat typed scalar exact equality and cannot encode DSE range/nested predicates; validate those in DSE and bind exact memory ID/version and snapshot.",
+    "authorization": "DSE must recheck authoritative source ACL/revocation, predicate version/hash, freshness and predecessor/order before applying retrieved memory; retrieval alone remains a candidate.",
+    "source_refs": [
+      "https://github.com/jimmylegendary/melete/blob/9a3564dd96de22d0311522417c2c36e6bf2a0a91/packages/melete-core/src/melete/contracts/observation.py",
+      "https://github.com/jimmylegendary/melete/blob/9a3564dd96de22d0311522417c2c36e6bf2a0a91/packages/melete-core/src/melete/engine.py",
+      "https://github.com/jimmylegendary/melete/blob/9a3564dd96de22d0311522417c2c36e6bf2a0a91/packages/melete-core/src/melete/contracts/query.py",
+      "https://github.com/jimmylegendary/melete/blob/9a3564dd96de22d0311522417c2c36e6bf2a0a91/packages/melete-core/src/melete/cognition/kernel.py",
+      "https://github.com/jimmylegendary/melete/blob/9a3564dd96de22d0311522417c2c36e6bf2a0a91/packages/melete-core/src/melete/patterns/conditions.py"
+    ]
+  },
+  "pinned_hardware_and_runtime_source": {
+    "hat_system": "e3048fac5704118b47fd7e2eb21ed36d477742a0",
+    "hatir": "1ff4485f2a777d4a54a68e9406a834fc3bddc630",
+    "hat_rp": "2be990e5d7d05f1dcb450c41a0c0d54262ee7a26",
+    "hattorch": "05a4b1889d1f68cade396b40340111ccd8bdd826",
+    "hat_schema": "a874d0c2e277e8838ecd95ba16679b774646408e",
+    "melete": "9a3564dd96de22d0311522417c2c36e6bf2a0a91"
+  },
+  "rp_state_policy": {
+    "frozen_view_api_source_verified": true,
+    "p1_snapshot_keyframe_wal_available": "unknown",
+    "state_vector_sufficient_for_target_recipe": "unknown",
+    "historical_timeline_use": "diagnostic evidence only",
+    "changed_kernel_recipe_or_hardware": "recompute kernelization/event DAG/cost and RP replay under new pins; preserve old run as comparison evidence, not as new input state"
+  },
+  "execution_record": {
+    "runtime_invoked": false,
+    "tests_invoked": false,
+    "simulation_invoked": false,
+    "cloud_build_or_provisioning": false,
+    "runs": [],
+    "note": "Source inspection only. No component runtime result or integrated episode verification is claimed."
+  }
+}

@@ -1,5 +1,9 @@
 # DSE 판단 지식·실험 경험 시스템 설계
 
+2026-10-21 문서 우선순위: 사용자 방향 정정을 반영한 [2026-10-21-dse-knowledge-architecture.md](https://github.com/jimmylegendary/dse-knowledge/blob/docs/p0-episode-contracts/docs/superpowers/specs/2026-10-21-dse-knowledge-architecture.md)를 상위 architecture 기준으로 읽는다. 이 문서의 Metric Vector·provenance·계층별 자산·실험 환류 원칙은 상세 참고로 유지한다. 아래 native episode의 미지원 상태는 해당 실행만 제한하며 지식 수요·수집·DB/model·schema/workflow 설계를 막지 않는다.
+
+2026-10-17 P0 보완의 규범적 판정은 [integration-state-map.md](https://github.com/jimmylegendary/dse-knowledge/blob/docs/p0-episode-contracts/docs/contracts/integration-state-map.md)를 따른다. 기존 원칙은 유지하며 permission·validation·review·feasibility를 분리한다. 지정 source에 없는 B300 target/통합 chain은 [p1-first-episode.md](https://github.com/jimmylegendary/dse-knowledge/blob/docs/p0-episode-contracts/docs/episodes/p1-first-episode.md)의 blocker로 보존한다.
+
 상태: 설계 초안. 사용자 요구에 따라 구현·배포 승인과 분리한다. 모든 수치 목표·기술 추천은 이 문서에서 명시적으로 확정한 사용자 요구 외에는 제안이다.
 
 ## 1. 목적과 사용자 요구
@@ -72,7 +76,7 @@ RDF/SPARQL·property graph는 대안으로 평가한다. 관계의 출처·시�
 
 Hardware Asset의 hierarchy containment와 통신 topology는 다른 관계다. Rack에 Tray가 있다는 사실만으로 전력·냉각·link·프로토콜·물리 배치가 호환된다고 보지 않는다. 각 asset은 version, parameter domain, ports, units, constraints, supported programming capability, evidence를 갖는다.
 
-Committee는 역할별 관련 subgraph와 원문을 검색할 수 있다. 검색 query와 사용한 evidence ID를 Review Finding에 남긴다. 첫 retrieval의 제한된 context가 부족하면 정해진 예산 안에서 추가 검색한다. 증거 부족 시 abstain 또는 추가 검증 요청을 반환한다.
+Committee는 역할별 subgraph와 원문을 검색하고 query/evidence ID를 남긴다. Native simulation_ready=true는 permission hint이며 buildability·review 완결성·전체 validation 성공이 아니다. 필수 validation은 complete versioned ValidationProfile에서 수행하고 top-k는 설명 evidence에만 적용한다. Profile이 review gap을 비차단으로 정해도 execution/semantic rule 실패를 assumption으로 우회하지 않는다.
 
 정형 validation은 schema, 산술·차원, 연결·수량, 용량, 지원 ISA, 알려진 물리 한계를 검사한다. 수식 검증을 거쳤더라도 thermal closure, signal integrity, manufacturing feasibility 등 모델 밖의 항목은 unknown일 수 있다. Buildability 판정은 검증 coverage와 미확인 항목을 함께 반환한다.
 
@@ -106,7 +110,7 @@ Pareto 비교는 지표 방향과 허용 오차를 명시한다. 측정 누락·
 
 현재는 P0 설계 단계다. P0 내부에서는 전체의 개념 지도, 근거와 후보, 계약, 실행 계획을 차례로 정교화한다. 이후 P1–P5도 동일한 end-to-end 흐름을 유지한다.
 
-P1은 지식 시스템에 신규 모델을 등록하고 config/tokenizer/workload 의미와 HAT 지원 여부를 확인하는 onboarding부터 시작한다. 모든 HW 계층이 표현된 작은 asset 집합, 작은 corpus, 제한된 kernel 후보, 실제 HAT adapter와 Melete 최소 연결로 한 바퀴를 검증한다. P2에서 model family·corpus·asset·workload breadth를 넓히고, P3에서 정확도와 검색·kernel 탐색을 깊게 하며, P4에서 예산이 제한된 자율 실험을, P5에서 운영 규모와 지속 갱신을 높인다.
+P1은 cloud 구축 전에 pinned model/config/workload/native support와 adapter conformance를 확인한다. 이후 신규 모델 onboarding과 모든 HW 계층·kernel·HAT·Melete·다음 제안을 잇는 실제 target episode를 검증한다. 현재 B200 meta probe는 B300 지원이나 전체 episode를 대체하지 않는다. P2에서 breadth, P3에서 fidelity, P4에서 제한된 자율성, P5에서 운영 규모를 높이되 전체 흐름을 매번 유지한다.
 
 작은 범위는 허용하지만 누락된 기능을 placeholder 성공으로 처리하지 않는다. 외부 서비스나 fidelity가 막히면 해당 capability의 unsupported 상태와 해소 조건을 남기고 phase acceptance를 낮추지 않는다.
 
