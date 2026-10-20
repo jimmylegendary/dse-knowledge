@@ -784,7 +784,7 @@
     "access": "HTTP 200",
     "entrypoint_http_status": 200,
     "access_scope": "license_gated_metadata_only",
-    "registered": 129959,
+    "registered": 126842,
     "enumeration_route": {
       "mechanism": "arXiv API (export.arxiv.org/api/query, OAI-PMH) + bulk metadata (Kaggle snapshot) + S3 requester-pays full text",
       "target": "export.arxiv.org/api/query ; info.arxiv.org/help/bulk_data ; OAI-PMH endpoint",
@@ -806,7 +806,7 @@
     "access": "HTTP 200",
     "entrypoint_http_status": 200,
     "access_scope": "license_gated_metadata_only",
-    "registered": 3300,
+    "registered": 3299,
     "enumeration_route": {
       "mechanism": "OpenAlex REST API + S3 snapshot (bulk)",
       "target": "api.openalex.org/works (filter/search) ; OpenAlex snapshot on S3",
@@ -826,7 +826,7 @@
     "access": "HTTP 429",
     "entrypoint_http_status": 429,
     "access_scope": "license_gated_metadata_only",
-    "registered": 13164,
+    "registered": 13136,
     "enumeration_route": {
       "mechanism": "Semantic Scholar Graph API + datasets (bulk) endpoint",
       "target": "api.semanticscholar.org/graph/v1 ; api.semanticscholar.org/datasets/v1",

@@ -1,23 +1,23 @@
 {
-  "generated_at": "2026-10-20T19:24:30.114505+00:00",
+  "generated_at": "2026-10-20T19:34:40.228447+00:00",
   "source_families": 77,
   "target_unique_eligible": 100000,
   "target_met": true,
   "counts": {
-    "eligible": 148894,
+    "eligible": 145748,
     "pending": 41440,
-    "rejected": 28266
+    "rejected": 31412
   },
   "eligible_by_category": {
-    "compiler_kernel": 4852,
-    "dse_optimization": 21388,
-    "hardware_architecture": 13604,
-    "llm_model_workload": 92674,
-    "memory_interconnect": 3818,
-    "power_thermal_packaging": 3185,
-    "provenance_experiment": 597,
-    "serving_scheduling": 3005,
-    "simulation_measurement": 5771
+    "compiler_kernel": 4830,
+    "dse_optimization": 21034,
+    "hardware_architecture": 13590,
+    "llm_model_workload": 89979,
+    "memory_interconnect": 3817,
+    "power_thermal_packaging": 3179,
+    "provenance_experiment": 584,
+    "serving_scheduling": 2995,
+    "simulation_measurement": 5740
   },
   "eligible_primary_source_counts": {
     "s01": 1,
@@ -47,9 +47,9 @@
     "s31": 84,
     "s32": 30,
     "s33": 2,
-    "s35": 129959,
-    "s36": 3300,
-    "s37": 13164,
+    "s35": 126842,
+    "s36": 3299,
+    "s37": 13136,
     "s41": 135,
     "s42": 139,
     "s43": 351,
@@ -161,13 +161,13 @@
       "link",
       "material_type"
     ],
-    "sha256": "cd24bb92832d450d6cb95d1509dfea878d38495778b95b262e4bf727af2aed9b",
-    "bytes": 14203095
+    "sha256": "c92b848e282f35f3343de9ccee383f1a3ff16271dc8379071d7aad0a3e5059d2",
+    "bytes": 13906037
   },
   "screening": "contextual rules over title and observed head, with independent sample audit; not individually LLM reviewed",
   "access": "actual public abstract/document head observed; destination PDFs not individually tested unless explicitly recorded",
   "scope": "collection target list only; no full-paper analysis, embeddings or KG registration",
-  "policy_id": "dse-title-head-context-v3.1",
+  "policy_id": "dse-title-head-context-v3.2",
   "metadata_records_scanned": 3215335,
   "computing_candidates": 1146381,
   "computing_candidate_count_scope": "source observations before cross-source deduplication; arxiv computing-domain records plus scholarly-index records",
@@ -218,8 +218,14 @@
     "output": "selected-records.jsonl.gz",
     "completed_at": "2026-10-20T19:15:24.144605+00:00"
   },
-  "screen_implementation_sha256": "842355e3306efdf6f9c73312ec83e4656194a08edd2c4e3124fd06f77461f419",
-  "policy_sha256": "ddd35f6c8ecfbfe311a77660bc0e6deb9c20ecff77d0eced846785251f87cc19",
+  "screen_implementation_sha256": "f31528896cd6810a5b3ce173ae3834e320e24dc334fe1b928c78d871087dab54",
+  "policy_sha256": "ee2e406800b4b1d209e98b94c7032116f2dab50e90c969b8dff51fcdf7bfe3f3",
+  "scope_refinement": {
+    "removed": 3146,
+    "reason": "nontechnical_human_attitude_study without direct technical DSE evidence",
+    "previous_export_sha256": "cd24bb92832d450d6cb95d1509dfea878d38495778b95b262e4bf727af2aed9b"
+  },
+  "scope_refinement_implementation_sha256": "b51b77a8495aba24af4291e0865dbf7b6efd70a33ee7a6c9a5bd06de88e4a409",
   "verification": {
     "checks_passed": 15,
     "checks_failed": 0

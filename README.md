@@ -6,13 +6,13 @@
 
 ## 실제 자료 목록 수집 결과 — 2026-10-21
 
-**중복 제거 후 148,894건 등록**, 100,000건 목표 달성. Source 검토 범위는 초기 40개에서 **77개 family**로 확장했다.
+**중복 제거 후 145,748건 등록**, 100,000건 목표 달성. Source 검토 범위는 초기 40개에서 **77개 family**로 확장했다.
 
 | 단계 | 실제 결과 |
 |---|---|
 | STEP 1 | CPU/ISA/RTL, GPU simulation, compiler/kernel, power/thermal, serving/trace, 측정·최적화 source 누락을 보완해 77개 family의 entrypoint·발견 경로를 확인 |
 | STEP 2 | arXiv 공식 metadata snapshot 3,215,335개 record를 확인하고, 분야 선별·scholarly index를 합쳐 1,146,381개 후보 관측을 처리. Source 간 중복 포함 |
-| STEP 3 | 제목과 공개 초록/문서 앞부분 약 10줄을 자동 규칙으로 선별하고 DOI·arXiv ID·원문 링크·동일 긴 제목으로 중복 정리. 최종 148,894건 |
+| STEP 3 | 제목과 공개 초록/문서 앞부분 약 10줄을 자동 규칙으로 선별하고 DOI·arXiv ID·원문 링크·동일 긴 제목으로 중복 정리. 최종 145,748건 |
 | STEP 4 | source·제목·category·1줄 요약·link·자료 type의 6열 CSV와 집계·source 접근 상태를 제공 |
 
 - [자료 목록 webapp](https://dse-knowledge-atlas.nocode-jimmy.chatgpt.site/materials.html) — 본인 ChatGPT 로그인, 전체 목록 검색·필터·page 탐색
@@ -24,15 +24,15 @@
 
 | Category | 등록 자료 |
 |---|---:|
-| Compiler / kernel | 4,852 |
-| DSE / optimization | 21,388 |
-| HW architecture / ISA | 13,604 |
-| LLM / model / workload | 92,674 |
-| Memory / interconnect | 3,818 |
-| Power / thermal / packaging | 3,185 |
-| Provenance / experiment | 597 |
-| Serving / scheduling | 3,005 |
-| Simulation / measurement | 5,771 |
+| Compiler / kernel | 4,830 |
+| DSE / optimization | 21,034 |
+| HW architecture / ISA | 13,590 |
+| LLM / model / workload | 89,979 |
+| Memory / interconnect | 3,817 |
+| Power / thermal / packaging | 3,179 |
+| Provenance / experiment | 584 |
+| Serving / scheduling | 2,995 |
+| Simulation / measurement | 5,740 |
 
 등록 예시 — 공개 HEAD에서 뽑은 한 줄 요약이며 전체 본문 분석이 아니다.
 
@@ -41,7 +41,7 @@
 | Semantic Scholar | "A New Old Approach to Teaching Microprocessors: Update and Lessons Learned" | hardware_architecture | The construction of the microprocessor system was accompanied by lectures in a variety of topics including computer organization, instruction set architectures, the Intel family… | [원문](https://www.semanticscholar.org/paper/147b8a0719e818581be20eeee0730c6a058b405a) | scholarly_work |
 | arXiv | $MC^2RAM$: Markov Chain Monte Carlo Sampling in SRAM for Fast Bayesian Inference | memory_interconnect | We show a novel architecture of SRAM by embedding it with random number generators (RNGs), digital-to-analog converters (DACs), and analog-to-digital converters (ADCs) so that… | [원문](https://arxiv.org/abs/2003.02629v1) | research_paper |
 | arXiv | "Is Low Power Enough?" Rethinking Energy Efficiency in High-Fidelity Sensing | power_thermal_packaging | Scientists now want higher fidelity data from the field, such as images and audio, and these observations break that rule: a low-power microcontroller stays… | [원문](https://arxiv.org/abs/2610.14714v1) | research_paper |
-| arXiv | "It would work for me too": How Online Communities Shape Software Developers' Trust in AI-Powered Code Generation Tools | compiler_kernel | Through interviewing 17 developers, we find that developers collectively make sense of AI tools using the experiences shared by community members and leverage community… | [원문](https://arxiv.org/abs/2212.03491v2) | research_paper |
+| arXiv | $P_1$--nonconforming polyhedral finite elements in high dimensions | compiler_kernel | The $P_1$--nonconforming polyhedral finite element is introduced for any high dimension. | [원문](https://arxiv.org/abs/1910.04585v2) | research_paper |
 | arXiv | !MSA at BAREC Shared Task 2025: Ensembling Arabic Transformers for Readability Assessment | llm_model_workload | We present MSAs winning system for the BAREC 2025 Shared Task on fine-grained Arabic readability assessment, achieving first place in six of six tracks. | [원문](https://arxiv.org/abs/2509.10040v1) | research_paper |
 | arXiv | (Almost) Perfect Discrete Iterative Load Balancing | serving_scheduling | We present results for a general class of simple local balancing schemes where the tokens are balanced via matchings. | [원문](https://arxiv.org/abs/2510.15473v1) | research_paper |
 | arXiv | "I Strongly Suspect This Website Is a Scam": Benchmarking PII Leakage and Detection without Defense in Autonomous Web Agents | simulation_measurement | In this paper, we show that social-engineering attacks are highly effective at extracting critical-tier PII from frontier web agents, posing a severe risk to… | [원문](https://arxiv.org/abs/2606.00497v1) | research_paper |

@@ -1,5 +1,12 @@
 import re
 
+HUMAN_ATTITUDE = re.compile(r'\b(perceptions?|attitudes?|ethnograph\w*|questionnaires?|interviews?)\b|\buser stud(?:y|ies)\b|\b(?:users?|developers?|students?|humans?|public|consumers?).{0,55}\b(?:trust|acceptance|adoption)\b|\btrust.{0,18}(?:ai|llm|large language|code)\b|\b(?:social|societal).{0,20}(?:impact|implication)\b',re.I)
+DIRECT_TECHNICAL = re.compile(r'\b(cpu|gpu|fpga|asic|hbm|dram|sram|bandwidth|cache|compiler|kernel|microarchitecture|benchmark|flops|throughput|latency|quantiz\w*|prun\w*|vlsi|rtl)\b|\b(?:unit tests?|test cases?|code correctness|execution time|memory bandwidth|model architecture|neural architecture|attention mechanism|learning algorithm|model size|model parameter|token count|token budget|inference cost|inference latency|batch size)\b|pass@\d',re.I)
+
+def social_reference_without_dse_evidence(title, head):
+    text=(title or '')+' . '+(head or '')
+    return bool(HUMAN_ATTITUDE.search(text) and not DIRECT_TECHNICAL.search(text))
+
 class Screen:
     """Deterministic contextual keyword screen over title + observed abstract."""
 
@@ -102,6 +109,8 @@ class Screen:
         if len(t) < self.min_title:
             return {"decision": "pending", "category": None, "reason": "title_too_short",
                     "access_status": "metadata_only_no_head", "matched_terms": [], "score": 0.0}
+        if social_reference_without_dse_evidence(t,a):
+            return {"decision":"rejected","category":None,"reason":"nontechnical_human_attitude_study","access_status":"public_head_observed","matched_terms":[],"score":0.0}
         best = self.score(t, a)
         if best is None:
             return {"decision": "rejected", "category": None, "reason": "no_topic_terms",

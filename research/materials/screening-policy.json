@@ -1,5 +1,5 @@
 {
-  "policy_id": "dse-title-head-context-v3.1",
+  "policy_id": "dse-title-head-context-v3.2",
   "screening_model": {
     "method": "rule_based_contextual_keyword_screen",
     "honesty": "Contextual title/head rules, domain sense gates and independent sample audit; not individual LLM/human review.",
@@ -19,7 +19,8 @@
       "reject generic attention in control theory as an LLM signal and parallel radio relays as compute serving",
       "do not reject hardware just because it is applied to a medical workload",
       "final registrar rejects source directories/search-query URLs, repairs generic titles from observed document paths, and merges stable material identifiers",
-      "supporting optimization and model-method literature is a collection target, not an accepted physical constraint"
+      "supporting optimization and model-method literature is a collection target, not an accepted physical constraint",
+      "Reject human attitudes/perceptions/adoption studies unless the observed title/head contains direct technical DSE evidence; technical benchmarks and hardware studies remain eligible."
     ],
     "computing_context_required": true,
     "computing_context_terms": [
@@ -1564,6 +1565,6 @@
     "cohort"
   ],
   "scope": "Effective final eligibility parameters; transport/query settings are excluded",
-  "configuration_source_sha256": "ddd35f6c8ecfbfe311a77660bc0e6deb9c20ecff77d0eced846785251f87cc19",
-  "implementation_sha256": "842355e3306efdf6f9c73312ec83e4656194a08edd2c4e3124fd06f77461f419"
+  "configuration_source_sha256": "ee2e406800b4b1d209e98b94c7032116f2dab50e90c969b8dff51fcdf7bfe3f3",
+  "implementation_sha256": "f31528896cd6810a5b3ce173ae3834e320e24dc334fe1b928c78d871087dab54"
 }

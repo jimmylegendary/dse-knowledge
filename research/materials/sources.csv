@@ -33,9 +33,9 @@ s31,Ax/BoTorch,https://ax.dev/docs/recipes/multi-objective-optimization/,200,rep
 s32,OpenTelemetry GenAI,https://opentelemetry.io/docs/specs/semconv/gen-ai/,200,public_read,30
 s33,MLflow,https://www.mlflow.org/docs/latest/tracking/,200,repo_license_per_repo,2
 s34,W3C PROV-O,https://www.w3.org/TR/prov-o/,403,public_read,0
-s35,arXiv,https://info.arxiv.org/help/bulk_data.html,200,license_gated_metadata_only,129959
-s36,OpenAlex,https://help.openalex.org/api/,200,license_gated_metadata_only,3300
-s37,Semantic Scholar,https://api.semanticscholar.org/api-docs/,429,license_gated_metadata_only,13164
+s35,arXiv,https://info.arxiv.org/help/bulk_data.html,200,license_gated_metadata_only,126842
+s36,OpenAlex,https://help.openalex.org/api/,200,license_gated_metadata_only,3299
+s37,Semantic Scholar,https://api.semanticscholar.org/api-docs/,429,license_gated_metadata_only,13136
 s38,Crossref,https://www.crossref.org/documentation/retrieve-metadata/rest-api/,200,metadata_public_fulltext_licensed,0
 s39,ACM + IEEE publishers,https://libraries.acm.org/digital-library/platform-and-features,403,license_gated_metadata_only,0
 s40,USENIX,https://www.usenix.org/conference/osdi24/technical-sessions,200,public_read,0
