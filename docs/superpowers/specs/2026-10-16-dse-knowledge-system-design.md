@@ -1,5 +1,7 @@
 # DSE 판단 지식·실험 경험 시스템 설계
 
+2026-10-21 문서 우선순위: 사용자 방향 정정을 반영한 [2026-10-21-dse-knowledge-architecture.md](https://github.com/jimmylegendary/dse-knowledge/blob/docs/p0-episode-contracts/docs/superpowers/specs/2026-10-21-dse-knowledge-architecture.md)를 상위 architecture 기준으로 읽는다. 이 문서의 Metric Vector·provenance·계층별 자산·실험 환류 원칙은 상세 참고로 유지한다. 아래 native episode의 미지원 상태는 해당 실행만 제한하며 지식 수요·수집·DB/model·schema/workflow 설계를 막지 않는다.
+
 2026-10-17 P0 보완의 규범적 판정은 [integration-state-map.md](https://github.com/jimmylegendary/dse-knowledge/blob/docs/p0-episode-contracts/docs/contracts/integration-state-map.md)를 따른다. 기존 원칙은 유지하며 permission·validation·review·feasibility를 분리한다. 지정 source에 없는 B300 target/통합 chain은 [p1-first-episode.md](https://github.com/jimmylegendary/dse-knowledge/blob/docs/p0-episode-contracts/docs/episodes/p1-first-episode.md)의 blocker로 보존한다.
 
 상태: 설계 초안. 사용자 요구에 따라 구현·배포 승인과 분리한다. 모든 수치 목표·기술 추천은 이 문서에서 명시적으로 확정한 사용자 요구 외에는 제안이다.

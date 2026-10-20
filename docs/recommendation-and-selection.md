@@ -1,5 +1,7 @@
 # 추천 조합·검토 순서·선정 계약
 
+2026-10-21 현재 dev 제약은 **기존 Supabase 계정 + Linux host/local artifact**, 모델은 **OpenRouter 또는 Codex의 interface·env 선택**이다. AWS를 사용하지 않고 GPU·Neo4j·remote object storage를 초기 필수 자원으로 요구하지 않는다. 아래 제품·cloud 조합 점수는 과거 연구 prior로 보존하며 현재 배치 선택을 덮어쓰지 않는다. 최신 범위는 [2026-10-21-dse-knowledge-architecture.md](https://github.com/jimmylegendary/dse-knowledge/blob/docs/p0-episode-contracts/docs/superpowers/specs/2026-10-21-dse-knowledge-architecture.md), 준비 조건은 [infra-and-credential-requirements.md](https://github.com/jimmylegendary/dse-knowledge/blob/docs/p0-episode-contracts/docs/infra-and-credential-requirements.md)를 따른다.
+
 2026-10-17 보완: **P1의 physical graph backend는 PostgreSQL 관계·recursive 조회를 baseline으로, Neo4j를 동일 질의의 challenger로 평가한다.** Typed graph 의미·provenance는 P1부터 필수다. 아래 조합 점수는 기술 조사 prior이며 Neo4j를 즉시 배포하라는 결정이 아니다. 단일 기준은 [0001-graph-backend-selection.md](https://github.com/jimmylegendary/dse-knowledge/blob/docs/p0-episode-contracts/docs/adr/0001-graph-backend-selection.md)와 [deployment-profiles.md](https://github.com/jimmylegendary/dse-knowledge/blob/docs/p0-episode-contracts/docs/deployment-profiles.md)다.
 
 상태: P0 설계 추천. 후보의 실제 DSE 성능과 총비용은 아직 측정하지 않았다. 현재 선택은 **무엇을 먼저 검증할지**이며 cloud 설정이나 production 채택 승인과 다르다.
@@ -38,7 +40,7 @@ DuckDB는 분석 실행 방식의 제안이다. 상시 서비스가 필요한 �
 | 3 | C: PG ledger + RDF semantic projection | 4/4/5/3/3/3 | 77 | 규격·ontology·shape 요구가 강할 때 유리. RDF mapping과 운영 역량이 필요 |
 | 4 | D: portable self-host 중심 | 4/4/4/2/5/3 | 74 | export/control 강점. 현재 운영 인력이 미정이라 day-2 부담이 큼 |
 
-모든 조합의 economics=3은 실제 TCO를 모르기 때문이다. A가 가장 싸다고 결론 내리지 않는다. B의 세부 cloud는 AWS/GCP/Azure 후보 점수와 region/서비스 availability를 다시 비교한다. 이 표는 component 문서의 범주별 점수나 cloud 단독 점수와 서로 다른 평가 단위를 가진다.
+모든 조합의 economics=3은 실제 TCO를 모르기 때문이다. A가 가장 싸다고 결론 내리지 않는다. B는 2026-10-16 당시 cloud 후보 비교의 조사 기록이다. **현재는 AWS가 선택 불가이고 기존 Supabase + Linux host가 dev 기준**이므로 이 표의 AWS 관련 점수·가격을 현재 선택 순위로 사용하지 않는다. 이 표는 component 문서의 범주별 점수나 cloud 단독 점수와 서로 다른 평가 단위를 가진다.
 
 Jev `typesafe/jev-1.13-20260917`도 A를 첫 pilot 검토 대상으로 제안했다. 반환값은 [decision-advice.json](https://github.com/jimmylegendary/dse-knowledge/blob/docs/p0-episode-contracts/docs/decision-advice.json)에 요청·후보·응답과 함께 보존했다. 응답 확률은 실제 최적일 확률이 아니며, 배포 준비도와 성능 검증을 대체하지 않는다.
 
@@ -51,15 +53,15 @@ Jev `typesafe/jev-1.13-20260917`도 A를 첫 pilot 검토 대상으로 제안했
 5. score 상위가 실제 domain quality에서 열세면 측정 evidence를 추가해 순위를 바꾼다.
 6. 모델·service edition·가격·source가 바뀔 때 같은 방식으로 재평가한다.
 
-## 4. 첫 infra profile 제안
+## 4. 현재 host-dev infra profile
 
-제품 결정과 cloud account 선택을 분리한다. AWS/GCP/Azure 중 object store·job runner와 선택 managed DB/graph를 같은 region 또는 낮은 egress 경로에 놓을 수 있는 조합을 먼저 확인한다. 현재 계정·region은 생성하지 않았다.
+기존 Supabase 계정과 현재 Linux host를 사용한다. CPU worker, local raw/artifact/model cache, 작업 이력과 로그, 별도 backup 위치를 host 환경에 맞춰 설계한다. Supabase의 실제 project·namespace·DB 연결은 아직 미정이며 설정은 [infra-and-credential-requirements.md](https://github.com/jimmylegendary/dse-knowledge/blob/docs/p0-episode-contracts/docs/infra-and-credential-requirements.md)의 interface·env로 후속 연결한다. AWS 계정·object store·job runner를 초기 준비물로 요구하지 않는다.
 
 초기 public-source pilot은 인증·TLS·권한 필터·backup을 기본으로 설계한다. private connectivity가 반드시 필요한 사내 자료 profile은 별도로 계획하며, private endpoint/RBAC/SSO 지원 tier와 source ACL 연동을 검증하기 전에는 사내 자료를 넣지 않는다. Supabase/Aura의 저가 tier가 enterprise 기능을 제공한다고 가정하지 않는다.
 
-Embedding은 작은 표본에서 API 대조군과 batch local model을 비교한다. 로컬 open-weight model을 추천했다는 이유로 상시 GPU를 provision하지 않는다. CPU/GPU 시간·batch throughput·실패 retry를 측정해 API 또는 ephemeral worker의 실제 TCO를 비교한다.
+생성 모델은 OpenRouter 또는 Codex interface로 선택한다. Embedding/reranking은 별도 capability와 CPU 대안을 두고 작은 표본에서 품질·CPU 시간·메모리·batch throughput·API 비용을 비교하도록 계획한다. 초기 GPU·새 API key 발급은 요구하지 않으며 실제 호출·모델 다운로드는 아직 수행하지 않는다.
 
-초기에는 canonical ledger와 typed graph 조회를 PG에 두고 object store·job/runtime을 연결한다. 별도 graph service, vector DB, lexical engine, analytics service는 명시된 비교 gate가 충족될 때 추가한다. 이 선택은 KG 의미나 전체 flow를 생략하지 않는다. Embedding model의 출력 차원·dtype·ANN method·distance·managed extension version은 [embedding-index-compatibility.md](https://github.com/jimmylegendary/dse-knowledge/blob/docs/p0-episode-contracts/docs/contracts/embedding-index-compatibility.md)로 확인한다.
+초기에는 canonical ledger와 typed graph 조회를 PG에 두고 local artifact storage·host worker를 연결하도록 설계한다. 별도 graph service, vector DB, lexical engine, analytics service는 명시된 비교 gate가 충족될 때 추가한다. 이 선택은 KG 의미나 전체 flow를 생략하지 않는다. Embedding model의 출력 차원·dtype·ANN method·distance·managed extension version은 [embedding-index-compatibility.md](https://github.com/jimmylegendary/dse-knowledge/blob/docs/p0-episode-contracts/docs/contracts/embedding-index-compatibility.md)로 확인한다.
 
 ## 5. 가격·용량 산정에 사용할 입력
 

@@ -1,6 +1,6 @@
 # DSE Knowledge System Implementation Plan
 
-2026-10-17 P0 보완: native 상태와 첫 episode의 기준은 [integration-state-map.md](https://github.com/jimmylegendary/dse-knowledge/blob/docs/p0-episode-contracts/docs/contracts/integration-state-map.md), [p1-first-episode.md](https://github.com/jimmylegendary/dse-knowledge/blob/docs/p0-episode-contracts/docs/episodes/p1-first-episode.md), [evaluation-oracles.md](https://github.com/jimmylegendary/dse-knowledge/blob/docs/p0-episode-contracts/docs/contracts/evaluation-oracles.md)를 따른다. B300 target native asset/전체 chain은 현재 blocked이며 cloud 구축보다 native integration preflight를 앞세운다.
+2026-10-21 현재 작업은 [2026-10-21-knowledge-architecture-plan.md](https://github.com/jimmylegendary/dse-knowledge/blob/docs/p0-episode-contracts/docs/superpowers/plans/2026-10-21-knowledge-architecture-plan.md)를 따른다. 이 문서는 과거 구현 phase·통합 작업의 참고이며 현재 실행할 plan이 아니다. 지식 수요·source·DB/model 조합·schema·write/read workflow를 모든 설계 phase에서 구체화한 뒤 구현 계획을 재정리한다. Native integration preflight는 해당 구현 작업의 의존성이고 상위 architecture 설계의 선행 조건이 아니다.
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development to implement this plan task-by-task after the full design and plan have been reviewed. Steps use checkbox syntax. 현재는 계획 작성만 허용되며 아래 실행 항목은 모두 미실행이다.
 

@@ -1,5 +1,7 @@
 # DSE 지식·실험 플랫폼: cloud 운영 후보와 구축 순서
 
+2026-10-21 우선순위 변경: 이 문서는 **과거 cloud 후보·비용 산식의 조사 기록**이다. 사용자는 기존 Supabase 계정과 현재 Linux host를 사용하고 AWS를 사용하지 않도록 정했다. 모델은 OpenRouter 또는 Codex의 interface·env로 설정하며 GPU는 초기 필수가 아니다. 현재 배치·준비 요구는 [deployment-profiles.md](https://github.com/jimmylegendary/dse-knowledge/blob/docs/p0-episode-contracts/docs/deployment-profiles.md)와 [infra-and-credential-requirements.md](https://github.com/jimmylegendary/dse-knowledge/blob/docs/p0-episode-contracts/docs/infra-and-credential-requirements.md)를 따른다. 아래 공급자 비교·설정 작업을 현재 실행 지시로 읽지 않는다.
+
 기준일: **2026-10-16 KST** · 상태: **설계 조사 전용**. cloud 설정·계정 조회·설치·provisioning은 실행하지 않았다.
 
 ## 목적과 결정 경계

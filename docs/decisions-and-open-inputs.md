@@ -1,5 +1,9 @@
 # 요구·설계 결정·운영 입력 기록
 
+2026-10-21 현재 기준: 사용자는 2026-10-18에 작업의 중심을 **DSE 단계별 결정에 필요한 지식 → 수집 내용·source → DB·model 조합 → schema·전체 write/read algorithm·workflow의 architecture와 planning**으로 정정했다. 이 기준은 [2026-10-21-dse-knowledge-architecture.md](https://github.com/jimmylegendary/dse-knowledge/blob/docs/p0-episode-contracts/docs/superpowers/specs/2026-10-21-dse-knowledge-architecture.md)에 반영한다. 2026-10-21에는 이 내용을 GitHub에 게시하고 구현 준비 infra·credential 요구를 정리하도록 요청했다. 실제 서비스 생성·제품 구현은 아직 시작하지 않는다. 아래 U01–U12는 유지하며, 과거 episode 중심 작업 순서는 현재 architecture 설계를 대체하지 않는다.
+
+2026-10-21 추가 답변: **Supabase는 기존 계정을 사용하고, AWS를 사용하지 않으며 현재 Linux host를 사용한다. 모델은 OpenRouter 또는 Codex를 활용하고 interface·env로 설정 가능하게 설계한다.** GPU는 초기 필수 자원이 아니다. 월 예산은 미정이고 이번에는 API key 발급·제출을 요구하지 않는다. Supabase의 실제 project·DB namespace·접속은 아직 확인하지 않았다. 기존 사내 RAG가 Supabase·Neo4j를 사용한다는 사실은 별도이며 사내 자료·Neo4j 재사용 권한을 가정하지 않는다. 비밀 아닌 입력과 조건부 credential은 [infra-and-credential-requirements.md](https://github.com/jimmylegendary/dse-knowledge/blob/docs/p0-episode-contracts/docs/infra-and-credential-requirements.md)에 모은다.
+
 2026-10-17 추가 결정: P0 계약·actual source support 상태는 [p0-remediation-report.md](https://github.com/jimmylegendary/dse-knowledge/blob/docs/p0-episode-contracts/docs/p0-remediation-report.md)가 기준이다. 아래 과거 기술 추천은 조사 prior로 보존하며, P1 graph baseline은 [0001-graph-backend-selection.md](https://github.com/jimmylegendary/dse-knowledge/blob/docs/p0-episode-contracts/docs/adr/0001-graph-backend-selection.md)로 갱신한다.
 
 기준일: 2026-10-16. 사용자 확정 사항, root의 제안, 앞으로 실행할 때 필요한 입력을 분리한다. 이 기록은 구현 승인서가 아니다.

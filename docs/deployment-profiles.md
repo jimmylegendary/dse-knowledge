@@ -1,4 +1,20 @@
-# DeploymentProfile v1: public pilot과 internal의 단일 기준
+# DeploymentProfile: host-dev와 자료별 접근 기준
+
+2026-10-21 사용자 선택: **기존 Supabase + 현재 Linux host**를 dev 환경으로 사용한다. AWS를 사용하지 않는다. 모델은 OpenRouter 또는 Codex를 interface·env로 선택하며 초기 GPU·API key 발급은 요구하지 않는다. 아래 `host-dev-v1`이 현재 배치 기준이고, 과거 public-pilot/internal 표는 자료 유형에 따른 접근 조건의 참고다. 실제 project 연결·서비스 설정·runtime은 아직 수행하지 않았다.
+
+| host-dev-v1 항목 | 현재 설계 기준 | 미확정·조건부 |
+|---|---|---|
+| 지식 정본·index | 기존 계정의 Supabase PostgreSQL, pgvector/FTS·PG typed graph 후보 | 실제 project·DB namespace·연결 방식·extension 확인은 나중에 수행 |
+| 실행·artifact | 현재 Linux host의 CPU worker와 local artifact directory | 작업 동시성·RAM/disk 한도·별도 backup 위치를 상세 설계 |
+| 모델 | OpenRouter HTTP 또는 Codex CLI provider interface·env | model ID·실행 사용자별 인증·실제 연결은 미확인 |
+| Embedding/reranker | provider capability를 별도 정의하고 CPU 경로 포함 | chat 모델을 embedding API로 취급하지 않음. GPU는 초기 필수 아님 |
+| 노출 범위 | 개발 서비스는 loopback 접근을 출발 제안으로 둠. Supabase 연결은 인증된 TLS 경로 | 외부 API/UI 공개가 필요해지면 별도 인증·접근 경계 설계 |
+| Secret | 실제 값은 env/로컬 인증 interface에서 후속 연결. 문서·public GitHub에는 변수명·참조만 | root credential·새 PAT·AWS credential을 준비물로 요구하지 않음 |
+| 조건부 서비스 | Neo4j·별도 vector DB·GPU·remote artifact store는 초기 의존성이 아님 | 지식·질의·자원 평가에서 필요성이 확인될 때 검토 |
+
+서비스별 준비 항목·env 이름은 [infra-and-credential-requirements.md](https://github.com/jimmylegendary/dse-knowledge/blob/docs/p0-episode-contracts/docs/infra-and-credential-requirements.md), 상위 설계는 [2026-10-21-dse-knowledge-architecture.md](https://github.com/jimmylegendary/dse-knowledge/blob/docs/p0-episode-contracts/docs/superpowers/specs/2026-10-21-dse-knowledge-architecture.md)를 따른다.
+
+## 자료별 접근 조건 참고
 
 상태: 설계·설정 계획. 실제 cloud 설정은 수행하지 않는다. 이 문서가 추천서와 cloud 조사 문서에 흩어진 network/edition 규칙보다 우선한다. Source 권리·artifact ACL과 network 노출은 서로 다른 조건이다.
 

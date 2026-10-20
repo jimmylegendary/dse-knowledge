@@ -5,9 +5,22 @@
 문서 내부 링크는 GitHub 공개본을 가리킨다. HAT·Melete 통합 근거의 일부는 별도 접근 권한이 필요한 저장소를 참조하며, 해당 저장소의 코드를 이 저장소에 복사하지 않았다.
 
 
-상태: **v0.2 P0 판정 계약 보완안 / 제품 구현·runtime·infrastructure 변경 미실행**. 기준일: 2026-10-17 KST. 검토 baseline은 `2a460a0`이다. 지정 source에 B300 target twin과 전체 native chain이 없어 **B300 episode binding과 실행 acceptance는 blocked**다.
+상태: **v0.3 DSE 의사결정용 지식 시스템 architecture·planning / 구현 준비 입력 수집**. 기준일: 2026-10-21 KST. 현재 설계의 중심은 **DSE 단계별 결정 → 필요한 지식 → 수집 내용·source → DB·model 조합 → schema → write/read algorithm·workflow → 지식 부족의 환류**다. 제품 구현·runtime·cloud provisioning은 미실행이다.
 
-## P0 보완부터 읽기
+현재 dev 환경은 **기존 Supabase 계정 + 현재 Linux host + local artifact storage**로 설계한다. 모델은 **OpenRouter 또는 Codex**를 provider interface와 환경변수로 선택하게 계획한다. AWS는 사용하지 않으며, GPU는 초기 필수 자원이 아니다. 계정·API key를 지금 발급하거나 제출하도록 요구하지 않는다.
+
+## 현재 설계부터 읽기
+
+2026-10-18 사용자 방향 정정과 2026-10-21 게시 요청을 반영했다. 아래 architecture와 설계 계획이 상위 기준이며, 이전 native 판정 계약·episode 문서는 통합 상세 참고다. B300 native 준비 상태는 지식 수요·source·DB·model·schema 설계의 선행 조건이 아니다.
+
+| 문서 | 내용 |
+|---|---|
+| [2026-10-21-dse-knowledge-architecture.md](https://github.com/jimmylegendary/dse-knowledge/blob/docs/p0-episode-contracts/docs/superpowers/specs/2026-10-21-dse-knowledge-architecture.md) | DSE 결정별 지식·source, 시스템 조합, 논리 schema, 전체 write/read와 환류 |
+| [2026-10-21-knowledge-architecture-plan.md](https://github.com/jimmylegendary/dse-knowledge/blob/docs/p0-episode-contracts/docs/superpowers/plans/2026-10-21-knowledge-architecture-plan.md) | 모든 설계 phase에서 전체 흐름의 상세도를 높이는 작업 계획 |
+| [infra-and-credential-requirements.md](https://github.com/jimmylegendary/dse-knowledge/blob/docs/p0-episode-contracts/docs/infra-and-credential-requirements.md) | 구현 전 infra·계정·권한·credential 준비, 지금 필요한 입력과 조건부 항목 |
+| [handoff.md](https://github.com/jimmylegendary/dse-knowledge/blob/docs/p0-episode-contracts/docs/handoff.md) | 현재 범위·우선순위·다음 작업과 의존성 |
+
+## 기존 통합 계약·검증 참고
 
 | 문서 | 내용 |
 |---|---|
@@ -33,7 +46,7 @@ P1의 실제 작업 순서는 native integration preflight → 그 결과에 따
 
 ## 현재 작업 범위
 
-이 디렉터리의 설계 문서·조사표·계획만 작성한다. 기존 HAT·Melete 저장소는 읽기 전용이다. 공개 공식 문서 조회는 설계를 위한 조사이며 corpus 구축을 시작한 것이 아니다.
+이 디렉터리의 설계 문서·조사표·계획과 비밀 값 없는 설정 계약 예제만 작성한다. 기존 HAT·Melete 저장소는 읽기 전용이다. 공개 공식 문서 조회는 설계를 위한 조사이며 corpus 구축을 시작한 것이 아니다.
 
 ## 문서 책임
 
@@ -47,7 +60,7 @@ Root: 전체 설계, 데이터 계약·검색 설계, 점수 통합, phase 계�
 
 조사 범위는 **source family 40개와 기술·구성·알고리즘 후보 평가 73개**다. 같은 제품을 다른 역할에서 평가한 항목이 있으므로 73개를 모두 설치하거나 독립 제품 73개라는 뜻은 아니다. 추천 점수는 역할별 검토 우선순위이며 실제 DSE 성능 점수가 아니다.
 
-## 읽기 순서
+## 주제별 상세 참고
 
 | 순서 | 문서 | 볼 내용 |
 |---:|---|---|
@@ -66,7 +79,9 @@ Root: 전체 설계, 데이터 계약·검색 설계, 점수 통합, phase 계�
 
 상세 대안: [02-storage-retrieval.md](https://github.com/jimmylegendary/dse-knowledge/blob/docs/p0-episode-contracts/research/02-storage-retrieval.md), [04-models-ingestion-evaluation.md](https://github.com/jimmylegendary/dse-knowledge/blob/docs/p0-episode-contracts/research/04-models-ingestion-evaluation.md). 용어는 [CONTEXT.md](https://github.com/jimmylegendary/dse-knowledge/blob/docs/p0-episode-contracts/CONTEXT.md)에 있다.
 
-## 전체가 선명해지는 phase
+## 설계 이후 구현을 위한 기존 phase 참고
+
+현재 수행할 설계 phase는 [2026-10-21-knowledge-architecture-plan.md](https://github.com/jimmylegendary/dse-knowledge/blob/docs/p0-episode-contracts/docs/superpowers/plans/2026-10-21-knowledge-architecture-plan.md)를 따른다. 아래 P1–P5는 설계·계획이 완료된 뒤의 구현 범위를 설명하는 기존 참고다.
 
 | Phase | 높아지는 해상도 | 모든 phase에서 유지할 것 |
 |---|---|---|
@@ -77,10 +92,10 @@ Root: 전체 설계, 데이터 계약·검색 설계, 점수 통합, phase 계�
 | P4 | 제한된 예산 안의 자율성 | 동일 전체 흐름 + agent 제어·취소·실패·반례 처리 |
 | P5 | 운영 규모와 지속 갱신 | 동일 전체 흐름 + SLO·복구·삭제·migration·비용 |
 
-P1 이후 작업은 모두 미실행이다. 실제 corpus, cloud 자원, 제품 코드, IaC apply, HAT/Melete runtime은 만들거나 실행하지 않았다. P0에서는 pinned source 확인, 판정표·JSON Schema·합성 oracle 작성, 산식·schema·provenance·링크의 정적 검증과 독립 review를 수행한다. B300 target positive가 아직 bound/실행되지 않았으므로 전체 P0 target binding 또는 P1 완료를 주장하지 않는다.
+P1 이후 작업은 모두 미실행이다. 실제 corpus, cloud 자원, 제품 코드, IaC apply, HAT/Melete runtime은 만들거나 실행하지 않았다. 이전 P0 판정표·JSON Schema·합성 oracle는 상세 근거로 보존한다. 당시 B300 episode binding이 미완료라는 사실은 유지하며, 이를 현재 지식 시스템 architecture 설계의 완료 조건으로 사용하지 않는다.
 
 ## 바로 결정하지 않은 항목
 
-Cloud account/region·spending cap·HAT/Melete test execution site·private source 접근·retention 최종 기준은 실제 설정 전에 필요하다. 선호가 미정이라는 답을 반영해 지금은 대안과 선택 절차를 제공한다. Embedding/검색 모델의 최종 선택은 계획에 정의된 동일 DSE gold 비교로 확정하며, 추천 점수를 실측처럼 취급하지 않는다.
+기존 Supabase의 실제 project·DB namespace, host의 data/backup 경로와 자원 한도, model ID·인증 연결, private source 범위와 retention은 후속 연결 시 구체화한다. 설정 항목은 [.env.example](https://github.com/jimmylegendary/dse-knowledge/blob/docs/p0-episode-contracts/.env.example)에 제시하며 loader·adapter는 미구현이다. AWS 계정·GPU·API key를 지금 준비하도록 요구하지 않는다. Embedding/검색 모델의 최종 선택은 동일 DSE 질문으로 평가하며 추천 점수를 실측처럼 취급하지 않는다.
 
 전체 설계·계획에 대한 사용자 검토 전에는 구현 단계로 전환하지 않는다. 실행 방식은 지정된 Superpowers + master/worker workflow를 유지한다.
