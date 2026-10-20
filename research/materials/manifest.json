@@ -9,7 +9,7 @@
     "rejected": 31412
   },
   "eligible_by_category": {
-    "compiler_kernel": 4830,
+    "compiler_kernel": 4809,
     "dse_optimization": 21034,
     "hardware_architecture": 13590,
     "llm_model_workload": 89979,
@@ -17,7 +17,7 @@
     "power_thermal_packaging": 3179,
     "provenance_experiment": 584,
     "serving_scheduling": 2995,
-    "simulation_measurement": 5740
+    "simulation_measurement": 5761
   },
   "eligible_primary_source_counts": {
     "s01": 1,
@@ -161,13 +161,13 @@
       "link",
       "material_type"
     ],
-    "sha256": "c92b848e282f35f3343de9ccee383f1a3ff16271dc8379071d7aad0a3e5059d2",
-    "bytes": 13906037
+    "sha256": "d439fd8d6485ded914a5f56415ff0477ca563996ffa8a89a469974b1bf2c52d7",
+    "bytes": 13906210
   },
   "screening": "contextual rules over title and observed head, with independent sample audit; not individually LLM reviewed",
   "access": "actual public abstract/document head observed; destination PDFs not individually tested unless explicitly recorded",
   "scope": "collection target list only; no full-paper analysis, embeddings or KG registration",
-  "policy_id": "dse-title-head-context-v3.2",
+  "policy_id": "dse-title-head-context-v3.3",
   "metadata_records_scanned": 3215335,
   "computing_candidates": 1146381,
   "computing_candidate_count_scope": "source observations before cross-source deduplication; arxiv computing-domain records plus scholarly-index records",
@@ -218,14 +218,18 @@
     "output": "selected-records.jsonl.gz",
     "completed_at": "2026-10-20T19:15:24.144605+00:00"
   },
-  "screen_implementation_sha256": "f31528896cd6810a5b3ce173ae3834e320e24dc334fe1b928c78d871087dab54",
-  "policy_sha256": "ee2e406800b4b1d209e98b94c7032116f2dab50e90c969b8dff51fcdf7bfe3f3",
+  "screen_implementation_sha256": "ba8bc2f5b1ce3eec3cfbc4107fb9299794a34bab1fd88449fa62ba370ed41d86",
+  "policy_sha256": "e45f9e1b458652cdd65203624fe8f0e9be2977c31690506dcc17e8e09ae0c751",
   "scope_refinement": {
     "removed": 3146,
     "reason": "nontechnical_human_attitude_study without direct technical DSE evidence",
     "previous_export_sha256": "cd24bb92832d450d6cb95d1509dfea878d38495778b95b262e4bf727af2aed9b"
   },
   "scope_refinement_implementation_sha256": "b51b77a8495aba24af4291e0865dbf7b6efd70a33ee7a6c9a5bd06de88e4a409",
+  "category_refinement": {
+    "changed": 21,
+    "reason": "numerical geometry vs compiler polyhedral transforms"
+  },
   "verification": {
     "checks_passed": 15,
     "checks_failed": 0

@@ -7,6 +7,13 @@ def social_reference_without_dse_evidence(title, head):
     text=(title or '')+' . '+(head or '')
     return bool(HUMAN_ATTITUDE.search(text) and not DIRECT_TECHNICAL.search(text))
 
+def disambiguate_category(category,title):
+    # Numerical geometry is supporting simulation mathematics, not the
+    # polyhedral loop-transform compiler domain sharing the same word.
+    if category=='compiler_kernel' and re.search(r'finite.element|finite.volume|nonconforming|discretiz|discretis|\bPDE\b',title,re.I) and not re.search(r'compiler|cuda|gpu|llvm|mlir|kernel|code.generation|loop.til',title,re.I):
+        return 'simulation_measurement'
+    return category
+
 class Screen:
     """Deterministic contextual keyword screen over title + observed abstract."""
 
@@ -138,7 +145,7 @@ class Screen:
                     "reason": "off_field(fields=%s,score=%.1f)" % ("|".join(fos[:4]), dscore),
                     "access_status": "public_head_observed",
                     "matched_terms": [h[0] for h in hits][:12], "score": dscore}
-        return {"decision": "eligible", "category": dname,
+        return {"decision": "eligible", "category": disambiguate_category(dname,t),
                 "reason": "technical_context_v2(core=%d,score=%.1f)" % (len(core), dscore),
                 "access_status": "public_head_observed",
                 "matched_terms": [h[0] for h in sorted(hits, key=lambda x: -x[2])][:12],

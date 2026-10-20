@@ -24,7 +24,7 @@
 
 | Category | 등록 자료 |
 |---|---:|
-| Compiler / kernel | 4,830 |
+| Compiler / kernel | 4,809 |
 | DSE / optimization | 21,034 |
 | HW architecture / ISA | 13,590 |
 | LLM / model / workload | 89,979 |
@@ -32,7 +32,7 @@
 | Power / thermal / packaging | 3,179 |
 | Provenance / experiment | 584 |
 | Serving / scheduling | 2,995 |
-| Simulation / measurement | 5,740 |
+| Simulation / measurement | 5,761 |
 
 등록 예시 — 공개 HEAD에서 뽑은 한 줄 요약이며 전체 본문 분석이 아니다.
 
@@ -41,7 +41,7 @@
 | Semantic Scholar | "A New Old Approach to Teaching Microprocessors: Update and Lessons Learned" | hardware_architecture | The construction of the microprocessor system was accompanied by lectures in a variety of topics including computer organization, instruction set architectures, the Intel family… | [원문](https://www.semanticscholar.org/paper/147b8a0719e818581be20eeee0730c6a058b405a) | scholarly_work |
 | arXiv | $MC^2RAM$: Markov Chain Monte Carlo Sampling in SRAM for Fast Bayesian Inference | memory_interconnect | We show a novel architecture of SRAM by embedding it with random number generators (RNGs), digital-to-analog converters (DACs), and analog-to-digital converters (ADCs) so that… | [원문](https://arxiv.org/abs/2003.02629v1) | research_paper |
 | arXiv | "Is Low Power Enough?" Rethinking Energy Efficiency in High-Fidelity Sensing | power_thermal_packaging | Scientists now want higher fidelity data from the field, such as images and audio, and these observations break that rule: a low-power microcontroller stays… | [원문](https://arxiv.org/abs/2610.14714v1) | research_paper |
-| arXiv | $P_1$--nonconforming polyhedral finite elements in high dimensions | compiler_kernel | The $P_1$--nonconforming polyhedral finite element is introduced for any high dimension. | [원문](https://arxiv.org/abs/1910.04585v2) | research_paper |
+| arXiv | $\epsilon$-Approximate Coded Matrix Multiplication is Nearly Twice as Efficient as Exact Multiplication | compiler_kernel | As an additional contribution, we develop an optimization framework based on alternating minimization that enables the discovery of new codes for approximate matrix multiplication. | [원문](https://arxiv.org/abs/2105.01973v1) | research_paper |
 | arXiv | !MSA at BAREC Shared Task 2025: Ensembling Arabic Transformers for Readability Assessment | llm_model_workload | We present MSAs winning system for the BAREC 2025 Shared Task on fine-grained Arabic readability assessment, achieving first place in six of six tracks. | [원문](https://arxiv.org/abs/2509.10040v1) | research_paper |
 | arXiv | (Almost) Perfect Discrete Iterative Load Balancing | serving_scheduling | We present results for a general class of simple local balancing schemes where the tokens are balanced via matchings. | [원문](https://arxiv.org/abs/2510.15473v1) | research_paper |
 | arXiv | "I Strongly Suspect This Website Is a Scam": Benchmarking PII Leakage and Detection without Defense in Autonomous Web Agents | simulation_measurement | In this paper, we show that social-engineering attacks are highly effective at extracting critical-tier PII from frontier web agents, posing a severe risk to… | [원문](https://arxiv.org/abs/2606.00497v1) | research_paper |

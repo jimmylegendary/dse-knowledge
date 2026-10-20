@@ -1,5 +1,5 @@
 {
-  "policy_id": "dse-title-head-context-v3.2",
+  "policy_id": "dse-title-head-context-v3.3",
   "screening_model": {
     "method": "rule_based_contextual_keyword_screen",
     "honesty": "Contextual title/head rules, domain sense gates and independent sample audit; not individual LLM/human review.",
@@ -20,7 +20,8 @@
       "do not reject hardware just because it is applied to a medical workload",
       "final registrar rejects source directories/search-query URLs, repairs generic titles from observed document paths, and merges stable material identifiers",
       "supporting optimization and model-method literature is a collection target, not an accepted physical constraint",
-      "Reject human attitudes/perceptions/adoption studies unless the observed title/head contains direct technical DSE evidence; technical benchmarks and hardware studies remain eligible."
+      "Reject human attitudes/perceptions/adoption studies unless the observed title/head contains direct technical DSE evidence; technical benchmarks and hardware studies remain eligible.",
+      "Disambiguate finite-element/finite-volume numerical geometry into supporting simulation methods rather than the compiler polyhedral domain."
     ],
     "computing_context_required": true,
     "computing_context_terms": [
@@ -1565,6 +1566,6 @@
     "cohort"
   ],
   "scope": "Effective final eligibility parameters; transport/query settings are excluded",
-  "configuration_source_sha256": "ee2e406800b4b1d209e98b94c7032116f2dab50e90c969b8dff51fcdf7bfe3f3",
-  "implementation_sha256": "f31528896cd6810a5b3ce173ae3834e320e24dc334fe1b928c78d871087dab54"
+  "configuration_source_sha256": "e45f9e1b458652cdd65203624fe8f0e9be2977c31690506dcc17e8e09ae0c751",
+  "implementation_sha256": "ba8bc2f5b1ce3eec3cfbc4107fb9299794a34bab1fd88449fa62ba370ed41d86"
 }
