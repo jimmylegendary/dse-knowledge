@@ -1,0 +1,78 @@
+﻿source_id,name,url,entrypoint_http_status,access_scope,registered_materials
+s01,NVIDIA system docs,https://www.nvidia.com/en-us/data-center/gb300-nvl72/,200,public_read,1
+s02,CUDA/PTX,https://docs.nvidia.com/cuda/cuda-programming-guide/,200,public_read,472
+s03,Nsight Compute,https://docs.nvidia.com/nsight-compute/ProfilingGuide/index.html,200,repo_license_per_repo,1
+s04,DCGM,https://docs.nvidia.com/datacenter/dcgm/latest/reference/dcgm-exporter-metrics.html,200,public_read,5
+s05,AMD MI350/ROCm,https://rocm.docs.amd.com/en/develop/reference/gpu-arch/mi350.html,200,public_read,64
+s06,OCP,https://www.opencompute.org/projects/cooling-environments/,200,license_gated_metadata_only,2
+s07,UCIe,https://www.uciexpress.org/specifications,200,license_gated_metadata_only,1
+s08,CXL,https://computeexpresslink.org/cxl-specification/,200,license_gated_metadata_only,1
+s09,JEDEC,https://www.jedec.org/,200,license_gated_metadata_only,0
+s10,PCI-SIG,https://pcisig.com/specifications,200,license_gated_metadata_only,2
+s11,IEEE 802.3,https://www.ieee802.org/3/,200,license_gated_metadata_only,0
+s12,ASHRAE,https://www.ashrae.org/technical-resources/topics-and-initiatives/ai-data-center/site-planning,200,license_gated_metadata_only,0
+s13,OpenROAD/SKY130,https://openroad-flow-scripts.readthedocs.io/en/latest/,200,repo_license_per_repo,2
+s14,CACTI,https://github.com/HewlettPackard/cacti,200,license_gated_metadata_only,1
+s15,gem5,https://www.gem5.org/documentation/,200,repo_license_per_repo,2
+s16,Ramulator 2,https://github.com/CMU-SAFARI/ramulator2,200,license_gated_metadata_only,2
+s17,BookSim,https://github.com/booksim/booksim2,200,repo_license_per_repo,2
+s18,SST,https://sst-simulator.org/sst-docs/docs/guides/start,200,repo_license_per_repo,404
+s19,MLIR,https://mlir.llvm.org/docs/,200,repo_license_per_repo,2
+s20,Triton,https://triton-lang.org/main/getting-started/tutorials/,200,repo_license_per_repo,34
+s21,CUTLASS/CuTe,https://github.com/NVIDIA/cutlass,200,repo_license_per_repo,157
+s22,HAT internal,https://github.com/jimmylegendary/hat-system,404,internal_blocked,0
+s23,Melete internal,https://github.com/jimmylegendary/melete,404,internal_blocked,0
+s24,MLPerf,https://docs.mlcommons.org/inference/submission/,200,public_read,0
+s25,vLLM,https://docs.vllm.ai/en/stable/benchmarking/cli/,429,repo_license_per_repo,231
+s26,TensorRT-LLM,https://nvidia.github.io/TensorRT-LLM/,200,public_read,2
+s27,Hugging Face cards,https://huggingface.co/docs/hub/model-cards,200,per_item_license,2
+s28,AgentBench,https://github.com/THUDM/AgentBench,200,license_gated_metadata_only,5
+s29,τ-bench family,https://github.com/sierra-research/tau2-bench,200,repo_license_per_repo,2
+s30,BFCL,https://github.com/ShishirPatil/gorilla/tree/f7cf7359b7ac615a0b294831c5ba2bc95ee4a000/berkeley-function-call-leaderboard,200,repo_license_per_repo,6
+s31,Ax/BoTorch,https://ax.dev/docs/recipes/multi-objective-optimization/,200,repo_license_per_repo,84
+s32,OpenTelemetry GenAI,https://opentelemetry.io/docs/specs/semconv/gen-ai/,200,public_read,30
+s33,MLflow,https://www.mlflow.org/docs/latest/tracking/,200,repo_license_per_repo,2
+s34,W3C PROV-O,https://www.w3.org/TR/prov-o/,403,public_read,0
+s35,arXiv,https://info.arxiv.org/help/bulk_data.html,200,license_gated_metadata_only,129959
+s36,OpenAlex,https://help.openalex.org/api/,200,license_gated_metadata_only,3300
+s37,Semantic Scholar,https://api.semanticscholar.org/api-docs/,429,license_gated_metadata_only,13164
+s38,Crossref,https://www.crossref.org/documentation/retrieve-metadata/rest-api/,200,metadata_public_fulltext_licensed,0
+s39,ACM + IEEE publishers,https://libraries.acm.org/digital-library/platform-and-features,403,license_gated_metadata_only,0
+s40,USENIX,https://www.usenix.org/conference/osdi24/technical-sessions,200,public_read,0
+s41,RISC-V ISA specs + ratified extensions + profiles,https://riscv.org/technical/specifications/,200,public_read,135
+s42,Apache TVM / Relax / TensorIR,https://api.github.com/repos/apache/tvm,200,repo_license_per_repo,139
+s43,"SGLang (RadixAttention, HiCache) docs + repo",https://api.github.com/repos/sgl-project/sglang,200,repo_license_per_repo,351
+s44,Accelergy (energy/area model generator),https://api.github.com/repos/Accelergy-Project/accelergy,200,repo_license_per_repo,2
+s45,Timeloop (dataflow mapping explorer),https://api.github.com/repos/NVLabs/timeloop,200,repo_license_per_repo,4
+s46,ARM Architecture Reference Manual (A-profile) + ARM system IP docs,https://developer.arm.com/documentation/ddi0487/latest/,200,license_gated_metadata_only,0
+s47,Intel SDM (x86-64 ISA + platform),https://www.intel.com/content/www/us/en/developer/articles/technical/intel-sdm.html,200,license_gated_metadata_only,0
+s48,PTX ISA (NVIDIA Parallel Thread Execution),https://docs.nvidia.com/cuda/parallel-thread-execution/,200,public_read,1
+s49,"Khronos registry (SPIR-V, OpenCL, SYCL, Vulkan)",https://registry.khronos.org/spir/,200,license_gated_metadata_only,2
+s50,Accel-Sim / GPGPU-Sim,https://api.github.com/repos/accel-sim/accel-sim-framework,200,license_gated_metadata_only,3
+s51,Vidur (LLM serving simulator),https://api.github.com/repos/microsoft/vidur,200,repo_license_per_repo,4
+s52,"Power/thermal models (HotSpot, 3D-ICE, McPAT, Accelergy)",https://api.github.com/repos/HewlettPackard/mcpat,200,license_gated_metadata_only,1
+s53,"Predictive PDKs (ASAP7, FreePDK45) + open RTL flow",https://api.github.com/repos/The-OpenROAD-Project/asap7,200,license_gated_metadata_only,1
+s54,"KV-cache reuse & PD-disaggregation (LMCache, Mooncake, NIXL)",https://api.github.com/repos/kvcache-ai/Mooncake,200,repo_license_per_repo,1
+s55,Azure LLM inference trace + BurstGPT (session traces),https://api.github.com/repos/microsoft/AzurePublicDataset,200,public_read,1
+s56,"Long-context & agentic evaluation suites (RULER, LongBench, SWE-bench)",https://api.github.com/repos/NVIDIA/RULER,200,license_gated_metadata_only,1
+s57,OpenXLA / XLA HLO operation semantics,https://openxla.org/xla/operation_semantics,200,repo_license_per_repo,1
+s58,"Kernel benchmark suites (KernelBench, TritonBench, AITer)",https://api.github.com/repos/ScalingIntelligence/KernelBench,200,repo_license_per_repo,1
+s59,NCCL + collective communication docs,https://docs.nvidia.com/deeplearning/nccl/user-guide/docs/,200,repo_license_per_repo,126
+s60,Nsight Systems + CUPTI (timeline + counter APIs),https://docs.nvidia.com/nsight-systems/,200,public_read,1
+s61,UALink Consortium specification,https://ualinkconsortium.org/,200,license_gated_metadata_only,2
+s62,Ultra Ethernet Consortium specification,https://ultraethernet.org/,200,license_gated_metadata_only,0
+s63,IBTA InfiniBand architecture specification,https://www.infinibandta.org/specs/,200,license_gated_metadata_only,0
+s64,OCP Open Rack V3 / power delivery + contribution repository,https://www.opencompute.org/projects/open-rack-v3,200,license_gated_metadata_only,1
+s65,"HBM/DRAM vendor datasheets (SK hynix, Micron, Samsung)",https://www.skhynix.com/,200,public_read,2
+s66,"Cloud instance & price catalogs (AWS EC2 price list, GCP, Azure)",https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonEC2/current/region_index.json,200,public_read,0
+s67,MLPerf results repositories (measured submissions),https://api.github.com/repos/mlcommons/inference_results_v5.0,200,public_read,0
+s68,"OpenReview API (submissions, reviews, decisions)",https://api2.openreview.net/notes?limit=1,403,public_read,0
+s69,"DBLP (venue/author bibliography, bulk XML)",https://dblp.org/search/publ/api?q=llm%20serving&format=json&h=1,202,metadata_public_fulltext_licensed,0
+s70,IETF Datatracker (RFC + drafts),https://datatracker.ietf.org/api/v1/doc/document?limit=1,200,public_read,0
+s71,"Metric/provenance metadata specs (OpenMetrics, Croissant, DCAT)",https://prometheus.io/docs/instrumenting/exposition_formats/,200,license_gated_metadata_only,2
+s72,"Industry engineering blogs with measured numbers (NVIDIA technical blog, Meta/Google infra blogs)",https://developer.nvidia.com/blog/,200,public_read,2
+s73,PyTorch Inductor (torch.compile fusion/lowering),https://api.github.com/repos/pytorch/pytorch,200,repo_license_per_repo,1
+s74,IREE (MLIR-based compiler/runtime for accelerators),https://api.github.com/repos/iree-org/iree,200,repo_license_per_repo,90
+s75,"Constrained DSE/HPO tooling (Optuna, Ray Tune)",https://docs.ray.io/en/latest/tune/index.html,200,repo_license_per_repo,0
+s76,SPEC benchmark results and power/energy methodology,https://www.spec.org/power_ssj2008/results/,200,license_gated_metadata_only,3
+s77,"CUDA math libraries + attention kernels (cuBLAS, cuDNN, CCCL/CUB, FlashAttention, FlashInfer)",https://docs.nvidia.com/cuda/cublas/index.html,200,license_gated_metadata_only,74

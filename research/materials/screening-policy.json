@@ -1,0 +1,1569 @@
+{
+  "policy_id": "dse-title-head-context-v3.1",
+  "screening_model": {
+    "method": "rule_based_contextual_keyword_screen",
+    "honesty": "Contextual title/head rules, domain sense gates and independent sample audit; not individual LLM/human review.",
+    "title_weight": 2,
+    "abstract_weight": 1,
+    "min_abstract_chars": 180,
+    "min_title_chars": 12,
+    "eligible_min_domain_score": 5,
+    "core_term_required": true,
+    "core_weight": 3,
+    "off_field_max_score_without_cs": 7,
+    "decision_rule": [
+      "pending unless an actually observed head has at least180characters and an identifying title",
+      "match terms case-insensitively in title and approximately ten wrapped lines of observed head",
+      "require domain score >=5 and at least one weight3 core term; title weight2, head weight1",
+      "enforce domain-specific computing sense: CPU/GPU/circuit context for hardware; neural/language-model context for model methods; software/server/compute context for serving",
+      "reject generic attention in control theory as an LLM signal and parallel radio relays as compute serving",
+      "do not reject hardware just because it is applied to a medical workload",
+      "final registrar rejects source directories/search-query URLs, repairs generic titles from observed document paths, and merges stable material identifiers",
+      "supporting optimization and model-method literature is a collection target, not an accepted physical constraint"
+    ],
+    "computing_context_required": true,
+    "computing_context_terms": [
+      "accelerator",
+      "architecture",
+      "asic",
+      "bandwidth",
+      "benchmark",
+      "cache",
+      "chip",
+      "circuit",
+      "cluster",
+      "code generation",
+      "compiler",
+      "core",
+      "cpu",
+      "data center",
+      "datacenter",
+      "deep learning",
+      "die",
+      "dram",
+      "energy",
+      "fpga",
+      "gpu",
+      "hardware",
+      "hbm",
+      "inference",
+      "instruction",
+      "interconnect",
+      "kernel",
+      "latency",
+      "machine learning",
+      "memory",
+      "model serving",
+      "neural network",
+      "node",
+      "npu",
+      "occupancy",
+      "package",
+      "parallel",
+      "pipeline",
+      "power",
+      "processor",
+      "profiling",
+      "quantization",
+      "register",
+      "runtime",
+      "scheduling",
+      "server",
+      "simulation",
+      "simulator",
+      "soc",
+      "sram",
+      "thermal",
+      "thread",
+      "throughput",
+      "tiling",
+      "tpu",
+      "trace",
+      "training",
+      "transformer",
+      "vectorization",
+      "warp",
+      "workload"
+    ],
+    "technical_context_gates": "Implemented in arxiv/screen.py; its SHA256 is recorded with this policy. Regression fixtures include bone microarchitecture, medical RISC-V hardware, generic control quantization and wireless relay allocation."
+  },
+  "domains": {
+    "hardware_architecture": {
+      "priority": 1,
+      "terms": [
+        {
+          "t": "microarchitecture",
+          "w": 3,
+          "rx": "micro-?architect\\w*"
+        },
+        {
+          "t": "micro-architecture",
+          "w": 3,
+          "rx": "micro-?architect\\w*"
+        },
+        {
+          "t": "out-of-order",
+          "w": 3,
+          "rx": "(?<![a-z0-9])out\\-of\\-order(?:s|es|ed|ing)?(?![a-z0-9])"
+        },
+        {
+          "t": "branch predictor",
+          "w": 3,
+          "rx": "(?<![a-z0-9])branch\\ predictor(?:s|es|ed|ing)?(?![a-z0-9])"
+        },
+        {
+          "t": "branch prediction",
+          "w": 3,
+          "rx": "(?<![a-z0-9])branch\\ prediction(?:s|es|ed|ing)?(?![a-z0-9])"
+        },
+        {
+          "t": "reorder buffer",
+          "w": 3,
+          "rx": "(?<![a-z0-9])reorder\\ buffer(?:s|es|ed|ing)?(?![a-z0-9])"
+        },
+        {
+          "t": "register file",
+          "w": 3,
+          "rx": "(?<![a-z0-9])register\\ file(?:s|es|ed|ing)?(?![a-z0-9])"
+        },
+        {
+          "t": "instruction set architecture",
+          "w": 3,
+          "rx": "(?<![a-z0-9])instruction\\ set\\ architecture(?:s|es|ed|ing)?(?![a-z0-9])"
+        },
+        {
+          "t": "superscalar",
+          "w": 3,
+          "rx": "(?<![a-z0-9])superscalar(?:s|es|ed|ing)?(?![a-z0-9])"
+        },
+        {
+          "t": "systolic array",
+          "w": 3,
+          "rx": "(?<![a-z0-9])systolic\\ array(?:s|es|ed|ing)?(?![a-z0-9])"
+        },
+        {
+          "t": "tensor core",
+          "w": 3,
+          "rx": "(?<![a-z0-9])tensor\\ core(?:s|es|ed|ing)?(?![a-z0-9])"
+        },
+        {
+          "t": "SIMT",
+          "w": 3,
+          "rx": "(?<![a-z0-9])SIMT(?![a-z0-9])"
+        },
+        {
+          "t": "warp scheduler",
+          "w": 3,
+          "rx": "(?<![a-z0-9])warp\\ scheduler(?:s|es|ed|ing)?(?![a-z0-9])"
+        },
+        {
+          "t": "chiplet",
+          "w": 3,
+          "rx": "(?<![a-z0-9])chiplet(?:s|es|ed|ing)?(?![a-z0-9])"
+        },
+        {
+          "t": "speculative execution",
+          "w": 3,
+          "rx": "(?<![a-z0-9])speculative\\ execution(?:s|es|ed|ing)?(?![a-z0-9])"
+        },
+        {
+          "t": "memory consistency",
+          "w": 3,
+          "rx": "(?<![a-z0-9])memory\\ consistency(?:s|es|ed|ing)?(?![a-z0-9])"
+        },
+        {
+          "t": "processing-in-memory",
+          "w": 3,
+          "rx": "processing[- ]in[- ]memory"
+        },
+        {
+          "t": "processing in memory",
+          "w": 3,
+          "rx": "(?<![a-z0-9])processing\\ in\\ memory(?:s|es|ed|ing)?(?![a-z0-9])"
+        },
+        {
+          "t": "GPU architecture",
+          "w": 3,
+          "rx": "(?<![a-z0-9])GPU\\ architecture(?:s|es|ed|ing)?(?![a-z0-9])"
+        },
+        {
+          "t": "accelerator",
+          "w": 2,
+          "rx": "(?<![a-z0-9])accelerator(?:s|es|ed|ing)?(?![a-z0-9])"
+        },
+        {
+          "t": "FPGA",
+          "w": 3,
+          "rx": "(?<![a-z0-9])FPGA(?![a-z0-9])"
+        },
+        {
+          "t": "ASIC",
+          "w": 3,
+          "rx": "(?<![a-z0-9])ASIC(?![a-z0-9])"
+        },
+        {
+          "t": "RISC-V",
+          "w": 3,
+          "rx": "(?<![a-z0-9])RISC-?V(?![a-z0-9])"
+        },
+        {
+          "t": "GPU",
+          "w": 3,
+          "rx": "(?<![a-z0-9])GPU(?:s|es|ed|ing)?(?![a-z0-9])"
+        },
+        {
+          "t": "co-processor",
+          "w": 2,
+          "rx": "(?<![a-z0-9])co\\-processor(?:s|es|ed|ing)?(?![a-z0-9])"
+        },
+        {
+          "t": "coprecessor",
+          "w": 2,
+          "rx": "(?<![a-z0-9])coprecessor(?:s|es|ed|ing)?(?![a-z0-9])"
+        },
+        {
+          "t": "heterogeneous computing",
+          "w": 2,
+          "rx": "(?<![a-z0-9])heterogeneous\\ computing(?:s|es|ed|ing)?(?![a-z0-9])"
+        },
+        {
+          "t": "dataflow architecture",
+          "w": 2,
+          "rx": "(?<![a-z0-9])dataflow\\ architecture(?:s|es|ed|ing)?(?![a-z0-9])"
+        },
+        {
+          "t": "neuromorphic",
+          "w": 2,
+          "rx": "(?<![a-z0-9])neuromorphic(?:s|es|ed|ing)?(?![a-z0-9])"
+        },
+        {
+          "t": "instruction-level parallelism",
+          "w": 2,
+          "rx": "(?<![a-z0-9])instruction\\-level\\ parallelism(?:s|es|ed|ing)?(?![a-z0-9])"
+        },
+        {
+          "t": "deep learning accelerator",
+          "w": 3,
+          "rx": "(?<![a-z0-9])deep\\ learning\\ accelerator(?:s|es|ed|ing)?(?![a-z0-9])"
+        },
+        {
+          "t": "processor architecture",
+          "w": 3,
+          "rx": "(?<![a-z0-9])processor architecture[a-z]*(?![a-z0-9])"
+        },
+        {
+          "t": "computer architecture",
+          "w": 3,
+          "rx": "(?<![a-z0-9])computer architecture[a-z]*(?![a-z0-9])"
+        },
+        {
+          "t": "hardware accelerator",
+          "w": 3,
+          "rx": "(?<![a-z0-9])hardware accelerator[a-z]*(?![a-z0-9])"
+        },
+        {
+          "t": "neural accelerator",
+          "w": 3,
+          "rx": "(?<![a-z0-9])neural accelerator[a-z]*(?![a-z0-9])"
+        },
+        {
+          "t": "neural processing unit",
+          "w": 3,
+          "rx": "(?<![a-z0-9])neural processing unit[a-z]*(?![a-z0-9])"
+        },
+        {
+          "t": "CPU architecture",
+          "w": 3,
+          "rx": "(?<![a-z0-9])CPU architecture[a-z]*(?![a-z0-9])"
+        },
+        {
+          "t": "SIMD",
+          "w": 3,
+          "rx": "(?<![a-z0-9])SIMD[a-z]*(?![a-z0-9])"
+        },
+        {
+          "t": "tensor processing",
+          "w": 3,
+          "rx": "(?<![a-z0-9])tensor processing[a-z]*(?![a-z0-9])"
+        },
+        {
+          "t": "neural architecture search",
+          "w": 3,
+          "rx": "(?<![a-z0-9])neural architecture search[a-z]*(?![a-z0-9])"
+        }
+      ]
+    },
+    "memory_interconnect": {
+      "priority": 2,
+      "terms": [
+        {
+          "t": "cache coherence",
+          "w": 3,
+          "rx": "(?<![a-z0-9])cache\\ coherence(?:s|es|ed|ing)?(?![a-z0-9])"
+        },
+        {
+          "t": "coherence protocol",
+          "w": 3,
+          "rx": "(?<![a-z0-9])coherence\\ protocol(?:s|es|ed|ing)?(?![a-z0-9])"
+        },
+        {
+          "t": "last-level cache",
+          "w": 3,
+          "rx": "(?<![a-z0-9])last\\-level\\ cache(?:s|es|ed|ing)?(?![a-z0-9])"
+        },
+        {
+          "t": "cache replacement",
+          "w": 3,
+          "rx": "(?<![a-z0-9])cache\\ replacement(?:s|es|ed|ing)?(?![a-z0-9])"
+        },
+        {
+          "t": "network-on-chip",
+          "w": 3,
+          "rx": "network[- ]on[- ]chip"
+        },
+        {
+          "t": "memory controller",
+          "w": 3,
+          "rx": "(?<![a-z0-9])memory\\ controller(?:s|es|ed|ing)?(?![a-z0-9])"
+        },
+        {
+          "t": "prefetcher",
+          "w": 3,
+          "rx": "(?<![a-z0-9])prefetcher(?:s|es|ed|ing)?(?![a-z0-9])"
+        },
+        {
+          "t": "scratchpad memory",
+          "w": 3,
+          "rx": "(?<![a-z0-9])scratchpad\\ memory(?:s|es|ed|ing)?(?![a-z0-9])"
+        },
+        {
+          "t": "NUMA",
+          "w": 3,
+          "rx": "(?<![a-z0-9])NUMA(?![a-z0-9])"
+        },
+        {
+          "t": "CXL",
+          "w": 3,
+          "rx": "(?<![a-z0-9])CXL(?![a-z0-9])"
+        },
+        {
+          "t": "HBM",
+          "w": 3,
+          "rx": "(?<![a-z0-9])HBM\\d?(?![a-z0-9])"
+        },
+        {
+          "t": "DRAM",
+          "w": 3,
+          "rx": "(?<![a-z0-9])DRAM(?![a-z0-9])"
+        },
+        {
+          "t": "cache hierarchy",
+          "w": 3,
+          "rx": "(?<![a-z0-9])cache\\ hierarchy(?:s|es|ed|ing)?(?![a-z0-9])"
+        },
+        {
+          "t": "memory hierarchy",
+          "w": 3,
+          "rx": "(?<![a-z0-9])memory\\ hierarchy(?:s|es|ed|ing)?(?![a-z0-9])"
+        },
+        {
+          "t": "memory bandwidth",
+          "w": 3,
+          "rx": "(?<![a-z0-9])memory\\ bandwidth(?:s|es|ed|ing)?(?![a-z0-9])"
+        },
+        {
+          "t": "memory latency",
+          "w": 2,
+          "rx": "(?<![a-z0-9])memory\\ latency(?:s|es|ed|ing)?(?![a-z0-9])"
+        },
+        {
+          "t": "interconnect",
+          "w": 2,
+          "rx": "(?<![a-z0-9])interconnect(?:s|es|ed|ing)?(?![a-z0-9])"
+        },
+        {
+          "t": "NVLink",
+          "w": 3,
+          "rx": "(?<![a-z0-9])NVLink(?:s|es|ed|ing)?(?![a-z0-9])"
+        },
+        {
+          "t": "PCIe",
+          "w": 2,
+          "rx": "(?<![a-z0-9])PCIe(?![a-z0-9])"
+        },
+        {
+          "t": "off-chip memory",
+          "w": 2,
+          "rx": "(?<![a-z0-9])off\\-chip\\ memory(?:s|es|ed|ing)?(?![a-z0-9])"
+        },
+        {
+          "t": "cache line",
+          "w": 2,
+          "rx": "(?<![a-z0-9])cache\\ line(?:s|es|ed|ing)?(?![a-z0-9])"
+        },
+        {
+          "t": "memory access pattern",
+          "w": 2,
+          "rx": "(?<![a-z0-9])memory\\ access\\ pattern(?:s|es|ed|ing)?(?![a-z0-9])"
+        },
+        {
+          "t": "DDR",
+          "w": 2,
+          "rx": "(?<![a-z0-9])DDR\\d?(?![a-z0-9])"
+        },
+        {
+          "t": "SRAM",
+          "w": 3,
+          "rx": "(?<![a-z0-9])SRAM[a-z]*(?![a-z0-9])"
+        },
+        {
+          "t": "memory management",
+          "w": 3,
+          "rx": "(?<![a-z0-9])memory management[a-z]*(?![a-z0-9])"
+        },
+        {
+          "t": "on-chip network",
+          "w": 3,
+          "rx": "(?<![a-z0-9])on-chip network[a-z]*(?![a-z0-9])"
+        },
+        {
+          "t": "interconnection network",
+          "w": 3,
+          "rx": "(?<![a-z0-9])interconnection network[a-z]*(?![a-z0-9])"
+        },
+        {
+          "t": "collective communication",
+          "w": 3,
+          "rx": "(?<![a-z0-9])collective communication[a-z]*(?![a-z0-9])"
+        },
+        {
+          "t": "RDMA",
+          "w": 3,
+          "rx": "(?<![a-z0-9])RDMA[a-z]*(?![a-z0-9])"
+        },
+        {
+          "t": "all-reduce",
+          "w": 3,
+          "rx": "(?<![a-z0-9])all-reduce[a-z]*(?![a-z0-9])"
+        }
+      ]
+    },
+    "power_thermal_packaging": {
+      "priority": 3,
+      "terms": [
+        {
+          "t": "DVFS",
+          "w": 3,
+          "rx": "(?<![a-z0-9])DVFS(?![a-z0-9])"
+        },
+        {
+          "t": "dynamic voltage",
+          "w": 3,
+          "rx": "(?<![a-z0-9])dynamic\\ voltage(?:s|es|ed|ing)?(?![a-z0-9])"
+        },
+        {
+          "t": "power gating",
+          "w": 3,
+          "rx": "(?<![a-z0-9])power\\ gating(?:s|es|ed|ing)?(?![a-z0-9])"
+        },
+        {
+          "t": "clock gating",
+          "w": 3,
+          "rx": "(?<![a-z0-9])clock\\ gating(?:s|es|ed|ing)?(?![a-z0-9])"
+        },
+        {
+          "t": "thermal throttling",
+          "w": 3,
+          "rx": "(?<![a-z0-9])thermal\\ throttling(?:s|es|ed|ing)?(?![a-z0-9])"
+        },
+        {
+          "t": "power capping",
+          "w": 3,
+          "rx": "(?<![a-z0-9])power\\ capping(?:s|es|ed|ing)?(?![a-z0-9])"
+        },
+        {
+          "t": "thermal-aware",
+          "w": 3,
+          "rx": "(?<![a-z0-9])thermal\\-aware(?:s|es|ed|ing)?(?![a-z0-9])"
+        },
+        {
+          "t": "thermal aware",
+          "w": 3,
+          "rx": "(?<![a-z0-9])thermal\\ aware(?:s|es|ed|ing)?(?![a-z0-9])"
+        },
+        {
+          "t": "electromigration",
+          "w": 3,
+          "rx": "(?<![a-z0-9])electromigration(?:s|es|ed|ing)?(?![a-z0-9])"
+        },
+        {
+          "t": "NBTI",
+          "w": 3,
+          "rx": "(?<![a-z0-9])NBTI(?![a-z0-9])"
+        },
+        {
+          "t": "chip package",
+          "w": 3,
+          "rx": "(?<![a-z0-9])chip\\ package(?:s|es|ed|ing)?(?![a-z0-9])"
+        },
+        {
+          "t": "liquid cooling",
+          "w": 3,
+          "rx": "(?<![a-z0-9])liquid\\ cooling(?:s|es|ed|ing)?(?![a-z0-9])"
+        },
+        {
+          "t": "thermal model",
+          "w": 2,
+          "rx": "(?<![a-z0-9])thermal\\ model(?:s|es|ed|ing)?(?![a-z0-9])"
+        },
+        {
+          "t": "temperature",
+          "w": 2,
+          "rx": "(?<![a-z0-9])temperature(?:s|es|ed|ing)?(?![a-z0-9])"
+        },
+        {
+          "t": "power consumption",
+          "w": 3,
+          "rx": "(?<![a-z0-9])power\\ consumption(?:s|es|ed|ing)?(?![a-z0-9])"
+        },
+        {
+          "t": "energy efficiency",
+          "w": 3,
+          "rx": "(?<![a-z0-9])energy\\ efficiency(?:s|es|ed|ing)?(?![a-z0-9])"
+        },
+        {
+          "t": "power efficiency",
+          "w": 3,
+          "rx": "(?<![a-z0-9])power\\ efficiency(?:s|es|ed|ing)?(?![a-z0-9])"
+        },
+        {
+          "t": "heat dissipation",
+          "w": 2,
+          "rx": "(?<![a-z0-9])heat\\ dissipation(?:s|es|ed|ing)?(?![a-z0-9])"
+        },
+        {
+          "t": "thermal management",
+          "w": 3,
+          "rx": "(?<![a-z0-9])thermal\\ management(?:s|es|ed|ing)?(?![a-z0-9])"
+        },
+        {
+          "t": "cooling",
+          "w": 1,
+          "rx": "(?<![a-z0-9])cooling(?:s|es|ed|ing)?(?![a-z0-9])"
+        },
+        {
+          "t": "reliability",
+          "w": 2,
+          "rx": "(?<![a-z0-9])reliability(?:s|es|ed|ing)?(?![a-z0-9])"
+        },
+        {
+          "t": "aging",
+          "w": 1,
+          "rx": "(?<![a-z0-9])aging(?:s|es|ed|ing)?(?![a-z0-9])"
+        },
+        {
+          "t": "package",
+          "w": 1,
+          "rx": "(?<![a-z0-9])package(?:s|es|ed|ing)?(?![a-z0-9])"
+        },
+        {
+          "t": "thermal modeling",
+          "w": 3,
+          "rx": "(?<![a-z0-9])thermal modeling[a-z]*(?![a-z0-9])"
+        },
+        {
+          "t": "thermal modelling",
+          "w": 3,
+          "rx": "(?<![a-z0-9])thermal modelling[a-z]*(?![a-z0-9])"
+        },
+        {
+          "t": "thermal design",
+          "w": 3,
+          "rx": "(?<![a-z0-9])thermal design[a-z]*(?![a-z0-9])"
+        },
+        {
+          "t": "3D integration",
+          "w": 3,
+          "rx": "(?<![a-z0-9])3D integration[a-z]*(?![a-z0-9])"
+        },
+        {
+          "t": "3D IC",
+          "w": 3,
+          "rx": "(?<![a-z0-9])3D IC[a-z]*(?![a-z0-9])"
+        },
+        {
+          "t": "VLSI",
+          "w": 3,
+          "rx": "(?<![a-z0-9])VLSI[a-z]*(?![a-z0-9])"
+        },
+        {
+          "t": "floorplanning",
+          "w": 3,
+          "rx": "(?<![a-z0-9])floorplanning[a-z]*(?![a-z0-9])"
+        },
+        {
+          "t": "physical design",
+          "w": 3,
+          "rx": "(?<![a-z0-9])physical design[a-z]*(?![a-z0-9])"
+        },
+        {
+          "t": "logic synthesis",
+          "w": 3,
+          "rx": "(?<![a-z0-9])logic synthesis[a-z]*(?![a-z0-9])"
+        },
+        {
+          "t": "static timing",
+          "w": 3,
+          "rx": "(?<![a-z0-9])static timing[a-z]*(?![a-z0-9])"
+        },
+        {
+          "t": "CMOS",
+          "w": 3,
+          "rx": "(?<![a-z0-9])CMOS[a-z]*(?![a-z0-9])"
+        },
+        {
+          "t": "reliability modeling",
+          "w": 3,
+          "rx": "(?<![a-z0-9])reliability modeling[a-z]*(?![a-z0-9])"
+        }
+      ]
+    },
+    "compiler_kernel": {
+      "priority": 4,
+      "terms": [
+        {
+          "t": "polyhedral",
+          "w": 3,
+          "rx": "(?<![a-z0-9])polyhedral(?:s|es|ed|ing)?(?![a-z0-9])"
+        },
+        {
+          "t": "loop nest",
+          "w": 3,
+          "rx": "(?<![a-z0-9])loop\\ nest(?:s|es|ed|ing)?(?![a-z0-9])"
+        },
+        {
+          "t": "kernel fusion",
+          "w": 3,
+          "rx": "(?<![a-z0-9])kernel\\ fusion(?:s|es|ed|ing)?(?![a-z0-9])"
+        },
+        {
+          "t": "operator fusion",
+          "w": 3,
+          "rx": "(?<![a-z0-9])operator\\ fusion(?:s|es|ed|ing)?(?![a-z0-9])"
+        },
+        {
+          "t": "MLIR",
+          "w": 3,
+          "rx": "(?<![a-z0-9])MLIR(?:s|es|ed|ing)?(?![a-z0-9])"
+        },
+        {
+          "t": "LLVM IR",
+          "w": 3,
+          "rx": "(?<![a-z0-9])LLVM\\ IR(?:s|es|ed|ing)?(?![a-z0-9])"
+        },
+        {
+          "t": "register allocation",
+          "w": 3,
+          "rx": "(?<![a-z0-9])register\\ allocation(?:s|es|ed|ing)?(?![a-z0-9])"
+        },
+        {
+          "t": "code generation",
+          "w": 3,
+          "rx": "(?<![a-z0-9])code\\ generation(?:s|es|ed|ing)?(?![a-z0-9])"
+        },
+        {
+          "t": "software pipelining",
+          "w": 3,
+          "rx": "(?<![a-z0-9])software\\ pipelining(?:s|es|ed|ing)?(?![a-z0-9])"
+        },
+        {
+          "t": "auto-tuning",
+          "w": 3,
+          "rx": "(?<![a-z0-9])auto\\-tuning(?:s|es|ed|ing)?(?![a-z0-9])"
+        },
+        {
+          "t": "autotuning",
+          "w": 3,
+          "rx": "(?<![a-z0-9])autotuning(?:s|es|ed|ing)?(?![a-z0-9])"
+        },
+        {
+          "t": "warp specialization",
+          "w": 3,
+          "rx": "(?<![a-z0-9])warp\\ specialization(?:s|es|ed|ing)?(?![a-z0-9])"
+        },
+        {
+          "t": "tiling",
+          "w": 2,
+          "rx": "(?<![a-z0-9])tiling(?:s|es|ed|ing)?(?![a-z0-9])"
+        },
+        {
+          "t": "tile size",
+          "w": 2,
+          "rx": "(?<![a-z0-9])tile\\ size(?:s|es|ed|ing)?(?![a-z0-9])"
+        },
+        {
+          "t": "compiler",
+          "w": 2,
+          "rx": "(?<![a-z0-9])compiler(?:s|es|ed|ing)?(?![a-z0-9])"
+        },
+        {
+          "t": "vectorization",
+          "w": 3,
+          "rx": "(?<![a-z0-9])vectorization(?:s|es|ed|ing)?(?![a-z0-9])"
+        },
+        {
+          "t": "SIMD",
+          "w": 2,
+          "rx": "(?<![a-z0-9])SIMD(?![a-z0-9])"
+        },
+        {
+          "t": "CUDA",
+          "w": 3,
+          "rx": "(?<![a-z0-9])CUDA(?:s|es|ed|ing)?(?![a-z0-9])"
+        },
+        {
+          "t": "GPU kernel",
+          "w": 3,
+          "rx": "(?<![a-z0-9])GPU\\ kernel(?:s|es|ed|ing)?(?![a-z0-9])"
+        },
+        {
+          "t": "parallel loop",
+          "w": 2,
+          "rx": "(?<![a-z0-9])parallel\\ loop(?:s|es|ed|ing)?(?![a-z0-9])"
+        },
+        {
+          "t": "intermediate representation",
+          "w": 2,
+          "rx": "(?<![a-z0-9])intermediate\\ representation(?:s|es|ed|ing)?(?![a-z0-9])"
+        },
+        {
+          "t": "static analysis",
+          "w": 1,
+          "rx": "(?<![a-z0-9])static\\ analysis(?:s|es|ed|ing)?(?![a-z0-9])"
+        },
+        {
+          "t": "runtime system",
+          "w": 2,
+          "rx": "(?<![a-z0-9])runtime\\ system(?:s|es|ed|ing)?(?![a-z0-9])"
+        },
+        {
+          "t": "thread block",
+          "w": 2,
+          "rx": "(?<![a-z0-9])thread\\ block(?:s|es|ed|ing)?(?![a-z0-9])"
+        },
+        {
+          "t": "shared memory",
+          "w": 1,
+          "rx": "(?<![a-z0-9])shared\\ memory(?:s|es|ed|ing)?(?![a-z0-9])"
+        },
+        {
+          "t": "compiler optimization",
+          "w": 3,
+          "rx": "(?<![a-z0-9])compiler optimization[a-z]*(?![a-z0-9])"
+        },
+        {
+          "t": "compiler optimisation",
+          "w": 3,
+          "rx": "(?<![a-z0-9])compiler optimisation[a-z]*(?![a-z0-9])"
+        },
+        {
+          "t": "loop optimization",
+          "w": 3,
+          "rx": "(?<![a-z0-9])loop optimization[a-z]*(?![a-z0-9])"
+        },
+        {
+          "t": "loop optimisation",
+          "w": 3,
+          "rx": "(?<![a-z0-9])loop optimisation[a-z]*(?![a-z0-9])"
+        },
+        {
+          "t": "matrix multiplication",
+          "w": 3,
+          "rx": "(?<![a-z0-9])matrix multiplication[a-z]*(?![a-z0-9])"
+        },
+        {
+          "t": "GEMM",
+          "w": 3,
+          "rx": "(?<![a-z0-9])GEMM[a-z]*(?![a-z0-9])"
+        },
+        {
+          "t": "tensor computation",
+          "w": 3,
+          "rx": "(?<![a-z0-9])tensor computation[a-z]*(?![a-z0-9])"
+        },
+        {
+          "t": "tensor compiler",
+          "w": 3,
+          "rx": "(?<![a-z0-9])tensor compiler[a-z]*(?![a-z0-9])"
+        },
+        {
+          "t": "loop tiling",
+          "w": 3,
+          "rx": "(?<![a-z0-9])loop tiling[a-z]*(?![a-z0-9])"
+        },
+        {
+          "t": "vectorisation",
+          "w": 3,
+          "rx": "(?<![a-z0-9])vectorisation[a-z]*(?![a-z0-9])"
+        },
+        {
+          "t": "OpenCL",
+          "w": 3,
+          "rx": "(?<![a-z0-9])OpenCL[a-z]*(?![a-z0-9])"
+        },
+        {
+          "t": "Triton",
+          "w": 3,
+          "rx": "(?<![a-z0-9])Triton[a-z]*(?![a-z0-9])"
+        },
+        {
+          "t": "parallel algorithm",
+          "w": 3,
+          "rx": "(?<![a-z0-9])parallel algorithm[a-z]*(?![a-z0-9])"
+        }
+      ]
+    },
+    "llm_model_workload": {
+      "priority": 5,
+      "terms": [
+        {
+          "t": "KV cache",
+          "w": 3,
+          "rx": "(?<![a-z0-9])KV\\ cache(?:s|es|ed|ing)?(?![a-z0-9])"
+        },
+        {
+          "t": "key-value cache",
+          "w": 3,
+          "rx": "(?<![a-z0-9])key\\-value\\ cache(?:s|es|ed|ing)?(?![a-z0-9])"
+        },
+        {
+          "t": "speculative decoding",
+          "w": 3,
+          "rx": "(?<![a-z0-9])speculative\\ decoding(?:s|es|ed|ing)?(?![a-z0-9])"
+        },
+        {
+          "t": "mixture of experts",
+          "w": 3,
+          "rx": "(?<![a-z0-9])mixture\\ of\\ experts(?:s|es|ed|ing)?(?![a-z0-9])"
+        },
+        {
+          "t": "large language model",
+          "w": 3,
+          "rx": "(?<![a-z0-9])large\\ language\\ model(?:s|es|ed|ing)?(?![a-z0-9])"
+        },
+        {
+          "t": "LLM",
+          "w": 2,
+          "rx": "(?<![A-Za-z0-9])LLMs?(?![A-Za-z0-9])"
+        },
+        {
+          "t": "transformer",
+          "w": 3,
+          "rx": "(?<![a-z0-9])transformer(?:s|es|ed|ing)?(?![a-z0-9])"
+        },
+        {
+          "t": "attention",
+          "w": 1,
+          "rx": "(?<![a-z0-9])attention(?:s|es|ed|ing)?(?![a-z0-9])"
+        },
+        {
+          "t": "prefill",
+          "w": 2,
+          "rx": "(?<![a-z0-9])prefill(?:s|es|ed|ing)?(?![a-z0-9])"
+        },
+        {
+          "t": "decoding phase",
+          "w": 2,
+          "rx": "(?<![a-z0-9])decoding\\ phase(?:s|es|ed|ing)?(?![a-z0-9])"
+        },
+        {
+          "t": "kv-cache",
+          "w": 3,
+          "rx": "(?<![a-z0-9])kv\\-cache(?:s|es|ed|ing)?(?![a-z0-9])"
+        },
+        {
+          "t": "context length",
+          "w": 2,
+          "rx": "(?<![a-z0-9])context\\ length(?:s|es|ed|ing)?(?![a-z0-9])"
+        },
+        {
+          "t": "quantization",
+          "w": 3,
+          "rx": "(?<![a-z0-9])quantization(?:s|es|ed|ing)?(?![a-z0-9])"
+        },
+        {
+          "t": "sparse attention",
+          "w": 3,
+          "rx": "(?<![a-z0-9])sparse\\ attention(?:s|es|ed|ing)?(?![a-z0-9])"
+        },
+        {
+          "t": "token generation",
+          "w": 2,
+          "rx": "(?<![a-z0-9])token\\ generation(?:s|es|ed|ing)?(?![a-z0-9])"
+        },
+        {
+          "t": "foundation model",
+          "w": 2,
+          "rx": "(?<![a-z0-9])foundation\\ model(?:s|es|ed|ing)?(?![a-z0-9])"
+        },
+        {
+          "t": "inference",
+          "w": 2,
+          "rx": "(?<![a-z0-9])inference(?:s|es|ed|ing)?(?![a-z0-9])"
+        },
+        {
+          "t": "generative model",
+          "w": 1,
+          "rx": "(?<![a-z0-9])generative\\ model(?:s|es|ed|ing)?(?![a-z0-9])"
+        },
+        {
+          "t": "model size",
+          "w": 1,
+          "rx": "(?<![a-z0-9])model\\ size(?:s|es|ed|ing)?(?![a-z0-9])"
+        },
+        {
+          "t": "LLM inference",
+          "w": 3,
+          "rx": "(?<![a-z0-9])LLM inference[a-z]*(?![a-z0-9])"
+        },
+        {
+          "t": "language model inference",
+          "w": 3,
+          "rx": "(?<![a-z0-9])language model inference[a-z]*(?![a-z0-9])"
+        },
+        {
+          "t": "model compression",
+          "w": 3,
+          "rx": "(?<![a-z0-9])model compression[a-z]*(?![a-z0-9])"
+        },
+        {
+          "t": "neural network quantization",
+          "w": 3,
+          "rx": "(?<![a-z0-9])neural network quantization[a-z]*(?![a-z0-9])"
+        },
+        {
+          "t": "low-bit quantization",
+          "w": 3,
+          "rx": "(?<![a-z0-9])low-bit quantization[a-z]*(?![a-z0-9])"
+        },
+        {
+          "t": "efficient transformer",
+          "w": 3,
+          "rx": "(?<![a-z0-9])efficient transformer[a-z]*(?![a-z0-9])"
+        },
+        {
+          "t": "long context",
+          "w": 3,
+          "rx": "(?<![a-z0-9])long context[a-z]*(?![a-z0-9])"
+        },
+        {
+          "t": "long-context",
+          "w": 3,
+          "rx": "(?<![a-z0-9])long-context[a-z]*(?![a-z0-9])"
+        },
+        {
+          "t": "agent benchmark",
+          "w": 3,
+          "rx": "(?<![a-z0-9])agent benchmark[a-z]*(?![a-z0-9])"
+        },
+        {
+          "t": "LLM benchmark",
+          "w": 3,
+          "rx": "(?<![a-z0-9])LLM benchmark[a-z]*(?![a-z0-9])"
+        },
+        {
+          "t": "tool calling",
+          "w": 3,
+          "rx": "(?<![a-z0-9])tool calling[a-z]*(?![a-z0-9])"
+        },
+        {
+          "t": "function calling",
+          "w": 3,
+          "rx": "(?<![a-z0-9])function calling[a-z]*(?![a-z0-9])"
+        },
+        {
+          "t": "model architecture",
+          "w": 3,
+          "rx": "(?<![a-z0-9])model architecture[a-z]*(?![a-z0-9])"
+        },
+        {
+          "t": "language model",
+          "w": 3,
+          "rx": "(?<![a-z0-9])language model[a-z]*(?![a-z0-9])"
+        },
+        {
+          "t": "self-attention",
+          "w": 3,
+          "rx": "(?<![a-z0-9])self-attention[a-z]*(?![a-z0-9])"
+        },
+        {
+          "t": "state space model",
+          "w": 3,
+          "rx": "(?<![a-z0-9])state space model[a-z]*(?![a-z0-9])"
+        },
+        {
+          "t": "Mamba",
+          "w": 3,
+          "rx": "(?<![a-z0-9])Mamba[a-z]*(?![a-z0-9])"
+        },
+        {
+          "t": "neural architecture",
+          "w": 3,
+          "rx": "(?<![a-z0-9])neural architecture[a-z]*(?![a-z0-9])"
+        },
+        {
+          "t": "quantisation",
+          "w": 3,
+          "rx": "(?<![a-z0-9])quantisation[a-z]*(?![a-z0-9])"
+        },
+        {
+          "t": "model pruning",
+          "w": 3,
+          "rx": "(?<![a-z0-9])model pruning[a-z]*(?![a-z0-9])"
+        },
+        {
+          "t": "low-rank",
+          "w": 3,
+          "rx": "(?<![a-z0-9])low-rank[a-z]*(?![a-z0-9])"
+        },
+        {
+          "t": "sparsity",
+          "w": 3,
+          "rx": "(?<![a-z0-9])sparsity[a-z]*(?![a-z0-9])"
+        },
+        {
+          "t": "distillation",
+          "w": 3,
+          "rx": "(?<![a-z0-9])distillation[a-z]*(?![a-z0-9])"
+        }
+      ]
+    },
+    "serving_scheduling": {
+      "priority": 6,
+      "terms": [
+        {
+          "t": "inference serving",
+          "w": 3,
+          "rx": "(?<![a-z0-9])inference\\ serving(?:s|es|ed|ing)?(?![a-z0-9])"
+        },
+        {
+          "t": "model serving",
+          "w": 3,
+          "rx": "(?<![a-z0-9])model\\ serving(?:s|es|ed|ing)?(?![a-z0-9])"
+        },
+        {
+          "t": "serving system",
+          "w": 3,
+          "rx": "(?<![a-z0-9])serving\\ system(?:s|es|ed|ing)?(?![a-z0-9])"
+        },
+        {
+          "t": "request scheduling",
+          "w": 3,
+          "rx": "(?<![a-z0-9])request\\ scheduling(?:s|es|ed|ing)?(?![a-z0-9])"
+        },
+        {
+          "t": "cluster scheduling",
+          "w": 3,
+          "rx": "(?<![a-z0-9])cluster\\ scheduling(?:s|es|ed|ing)?(?![a-z0-9])"
+        },
+        {
+          "t": "batch scheduling",
+          "w": 3,
+          "rx": "(?<![a-z0-9])batch\\ scheduling(?:s|es|ed|ing)?(?![a-z0-9])"
+        },
+        {
+          "t": "SLO",
+          "w": 3,
+          "rx": "(?<![a-z0-9])SLOs?(?![a-z0-9])"
+        },
+        {
+          "t": "service level objective",
+          "w": 3,
+          "rx": "(?<![a-z0-9])service\\ level\\ objective(?:s|es|ed|ing)?(?![a-z0-9])"
+        },
+        {
+          "t": "multi-tenant",
+          "w": 3,
+          "rx": "multi-?tenan\\w*"
+        },
+        {
+          "t": "cold start",
+          "w": 2,
+          "rx": "(?<![a-z0-9])cold\\ start(?:s|es|ed|ing)?(?![a-z0-9])"
+        },
+        {
+          "t": "scheduler",
+          "w": 2,
+          "rx": "(?<![a-z0-9])scheduler(?:s|es|ed|ing)?(?![a-z0-9])"
+        },
+        {
+          "t": "scheduling",
+          "w": 2,
+          "rx": "(?<![a-z0-9])scheduling(?:s|es|ed|ing)?(?![a-z0-9])"
+        },
+        {
+          "t": "batching",
+          "w": 2,
+          "rx": "(?<![a-z0-9])batching(?:s|es|ed|ing)?(?![a-z0-9])"
+        },
+        {
+          "t": "throughput",
+          "w": 1,
+          "rx": "(?<![a-z0-9])throughput(?:s|es|ed|ing)?(?![a-z0-9])"
+        },
+        {
+          "t": "tail latency",
+          "w": 2,
+          "rx": "(?<![a-z0-9])tail\\ latency(?:s|es|ed|ing)?(?![a-z0-9])"
+        },
+        {
+          "t": "workload",
+          "w": 1,
+          "rx": "(?<![a-z0-9])workload(?:s|es|ed|ing)?(?![a-z0-9])"
+        },
+        {
+          "t": "placement",
+          "w": 1,
+          "rx": "(?<![a-z0-9])placement(?:s|es|ed|ing)?(?![a-z0-9])"
+        },
+        {
+          "t": "admission control",
+          "w": 2,
+          "rx": "(?<![a-z0-9])admission\\ control(?:s|es|ed|ing)?(?![a-z0-9])"
+        },
+        {
+          "t": "autoscaling",
+          "w": 2,
+          "rx": "(?<![a-z0-9])autoscaling(?:s|es|ed|ing)?(?![a-z0-9])"
+        },
+        {
+          "t": "LLM serving",
+          "w": 3,
+          "rx": "(?<![a-z0-9])LLM serving[a-z]*(?![a-z0-9])"
+        },
+        {
+          "t": "distributed inference",
+          "w": 3,
+          "rx": "(?<![a-z0-9])distributed inference[a-z]*(?![a-z0-9])"
+        },
+        {
+          "t": "distributed training",
+          "w": 3,
+          "rx": "(?<![a-z0-9])distributed training[a-z]*(?![a-z0-9])"
+        },
+        {
+          "t": "parallel inference",
+          "w": 3,
+          "rx": "(?<![a-z0-9])parallel inference[a-z]*(?![a-z0-9])"
+        },
+        {
+          "t": "task scheduling",
+          "w": 3,
+          "rx": "(?<![a-z0-9])task scheduling[a-z]*(?![a-z0-9])"
+        },
+        {
+          "t": "resource allocation",
+          "w": 3,
+          "rx": "(?<![a-z0-9])resource allocation[a-z]*(?![a-z0-9])"
+        },
+        {
+          "t": "load balancing",
+          "w": 3,
+          "rx": "(?<![a-z0-9])load balancing[a-z]*(?![a-z0-9])"
+        },
+        {
+          "t": "GPU scheduling",
+          "w": 3,
+          "rx": "(?<![a-z0-9])GPU scheduling[a-z]*(?![a-z0-9])"
+        },
+        {
+          "t": "inference latency",
+          "w": 3,
+          "rx": "(?<![a-z0-9])inference latency[a-z]*(?![a-z0-9])"
+        },
+        {
+          "t": "continuous batching",
+          "w": 3,
+          "rx": "(?<![a-z0-9])continuous batching[a-z]*(?![a-z0-9])"
+        },
+        {
+          "t": "prefill",
+          "w": 3,
+          "rx": "(?<![a-z0-9])prefill[a-z]*(?![a-z0-9])"
+        },
+        {
+          "t": "disaggregated inference",
+          "w": 3,
+          "rx": "(?<![a-z0-9])disaggregated inference[a-z]*(?![a-z0-9])"
+        }
+      ]
+    },
+    "simulation_measurement": {
+      "priority": 7,
+      "terms": [
+        {
+          "t": "gem5",
+          "w": 3,
+          "rx": "(?<![a-z0-9])gem5(?:s|es|ed|ing)?(?![a-z0-9])"
+        },
+        {
+          "t": "cycle-accurate",
+          "w": 3,
+          "rx": "(?<![a-z0-9])cycle\\-accurate(?:s|es|ed|ing)?(?![a-z0-9])"
+        },
+        {
+          "t": "cycle accurate",
+          "w": 3,
+          "rx": "(?<![a-z0-9])cycle\\ accurate(?:s|es|ed|ing)?(?![a-z0-9])"
+        },
+        {
+          "t": "trace-driven",
+          "w": 3,
+          "rx": "trace[- ]driven"
+        },
+        {
+          "t": "roofline",
+          "w": 3,
+          "rx": "(?<![a-z0-9])roofline(?:s|es|ed|ing)?(?![a-z0-9])"
+        },
+        {
+          "t": "performance model",
+          "w": 3,
+          "rx": "(?<![a-z0-9])performance\\ model(?:s|es|ed|ing)?(?![a-z0-9])"
+        },
+        {
+          "t": "analytical model",
+          "w": 2,
+          "rx": "(?<![a-z0-9])analytical\\ model(?:s|es|ed|ing)?(?![a-z0-9])"
+        },
+        {
+          "t": "hardware performance counter",
+          "w": 3,
+          "rx": "(?<![a-z0-9])hardware\\ performance\\ counter(?:s|es|ed|ing)?(?![a-z0-9])"
+        },
+        {
+          "t": "performance counter",
+          "w": 2,
+          "rx": "(?<![a-z0-9])performance\\ counter(?:s|es|ed|ing)?(?![a-z0-9])"
+        },
+        {
+          "t": "simulator",
+          "w": 2,
+          "rx": "(?<![a-z0-9])simulator(?:s|es|ed|ing)?(?![a-z0-9])"
+        },
+        {
+          "t": "simulation",
+          "w": 1,
+          "rx": "(?<![a-z0-9])simulation(?:s|es|ed|ing)?(?![a-z0-9])"
+        },
+        {
+          "t": "benchmark suite",
+          "w": 2,
+          "rx": "(?<![a-z0-9])benchmark\\ suite(?:s|es|ed|ing)?(?![a-z0-9])"
+        },
+        {
+          "t": "profiling",
+          "w": 3,
+          "rx": "(?<![a-z0-9])profiling(?:s|es|ed|ing)?(?![a-z0-9])"
+        },
+        {
+          "t": "instrumentation",
+          "w": 1,
+          "rx": "(?<![a-z0-9])instrumentation(?:s|es|ed|ing)?(?![a-z0-9])"
+        },
+        {
+          "t": "measurement methodology",
+          "w": 3,
+          "rx": "(?<![a-z0-9])measurement\\ methodology(?:s|es|ed|ing)?(?![a-z0-9])"
+        },
+        {
+          "t": "system-level simulation",
+          "w": 3,
+          "rx": "(?<![a-z0-9])system\\-level\\ simulation(?:s|es|ed|ing)?(?![a-z0-9])"
+        },
+        {
+          "t": "emulation",
+          "w": 2,
+          "rx": "(?<![a-z0-9])emulation(?:s|es|ed|ing)?(?![a-z0-9])"
+        },
+        {
+          "t": "calibration",
+          "w": 1,
+          "rx": "(?<![a-z0-9])calibration(?:s|es|ed|ing)?(?![a-z0-9])"
+        },
+        {
+          "t": "performance analysis",
+          "w": 3,
+          "rx": "(?<![a-z0-9])performance analysis[a-z]*(?![a-z0-9])"
+        },
+        {
+          "t": "performance prediction",
+          "w": 3,
+          "rx": "(?<![a-z0-9])performance prediction[a-z]*(?![a-z0-9])"
+        },
+        {
+          "t": "performance evaluation",
+          "w": 3,
+          "rx": "(?<![a-z0-9])performance evaluation[a-z]*(?![a-z0-9])"
+        },
+        {
+          "t": "performance modeling",
+          "w": 3,
+          "rx": "(?<![a-z0-9])performance modeling[a-z]*(?![a-z0-9])"
+        },
+        {
+          "t": "performance modelling",
+          "w": 3,
+          "rx": "(?<![a-z0-9])performance modelling[a-z]*(?![a-z0-9])"
+        },
+        {
+          "t": "GPU simulation",
+          "w": 3,
+          "rx": "(?<![a-z0-9])GPU simulation[a-z]*(?![a-z0-9])"
+        },
+        {
+          "t": "hardware simulation",
+          "w": 3,
+          "rx": "(?<![a-z0-9])hardware simulation[a-z]*(?![a-z0-9])"
+        },
+        {
+          "t": "benchmarking",
+          "w": 3,
+          "rx": "(?<![a-z0-9])benchmarking[a-z]*(?![a-z0-9])"
+        },
+        {
+          "t": "trace replay",
+          "w": 3,
+          "rx": "(?<![a-z0-9])trace replay[a-z]*(?![a-z0-9])"
+        }
+      ]
+    },
+    "dse_optimization": {
+      "priority": 8,
+      "terms": [
+        {
+          "t": "design space exploration",
+          "w": 3,
+          "rx": "(?<![a-z0-9])design\\ space\\ exploration(?:s|es|ed|ing)?(?![a-z0-9])"
+        },
+        {
+          "t": "Pareto",
+          "w": 3,
+          "rx": "(?<![a-z0-9])Pareto(?![a-z0-9])"
+        },
+        {
+          "t": "multi-objective",
+          "w": 3,
+          "rx": "multi-?objective"
+        },
+        {
+          "t": "Bayesian optimization",
+          "w": 3,
+          "rx": "(?<![a-z0-9])Bayesian\\ optimization(?:s|es|ed|ing)?(?![a-z0-9])"
+        },
+        {
+          "t": "co-design",
+          "w": 3,
+          "rx": "(?:co-?design)"
+        },
+        {
+          "t": "task graph",
+          "w": 3,
+          "rx": "(?<![a-z0-9])task\\ graph(?:s|es|ed|ing)?(?![a-z0-9])"
+        },
+        {
+          "t": "search space",
+          "w": 2,
+          "rx": "(?<![a-z0-9])search\\ space(?:s|es|ed|ing)?(?![a-z0-9])"
+        },
+        {
+          "t": "design space",
+          "w": 2,
+          "rx": "(?<![a-z0-9])design\\ space(?:s|es|ed|ing)?(?![a-z0-9])"
+        },
+        {
+          "t": "optimization framework",
+          "w": 2,
+          "rx": "(?<![a-z0-9])optimization\\ framework(?:s|es|ed|ing)?(?![a-z0-9])"
+        },
+        {
+          "t": "heuristic",
+          "w": 1,
+          "rx": "(?<![a-z0-9])heuristic(?:s|es|ed|ing)?(?![a-z0-9])"
+        },
+        {
+          "t": "tuning",
+          "w": 1,
+          "rx": "(?<![a-z0-9])tuning(?:s|es|ed|ing)?(?![a-z0-9])"
+        },
+        {
+          "t": "constraint programming",
+          "w": 2,
+          "rx": "(?<![a-z0-9])constraint\\ programming(?:s|es|ed|ing)?(?![a-z0-9])"
+        },
+        {
+          "t": "reinforcement learning",
+          "w": 3,
+          "rx": "(?<![a-z0-9])reinforcement\\ learning(?:s|es|ed|ing)?(?![a-z0-9])"
+        },
+        {
+          "t": "exploration",
+          "w": 1,
+          "rx": "(?<![a-z0-9])exploration(?:s|es|ed|ing)?(?![a-z0-9])"
+        },
+        {
+          "t": "configuration",
+          "w": 1,
+          "rx": "(?<![a-z0-9])configuration(?:s|es|ed|ing)?(?![a-z0-9])"
+        },
+        {
+          "t": "hardware design space",
+          "w": 3,
+          "rx": "(?<![a-z0-9])hardware design space[a-z]*(?![a-z0-9])"
+        },
+        {
+          "t": "architecture search",
+          "w": 3,
+          "rx": "(?<![a-z0-9])architecture search[a-z]*(?![a-z0-9])"
+        },
+        {
+          "t": "constrained optimization",
+          "w": 3,
+          "rx": "(?<![a-z0-9])constrained optimization[a-z]*(?![a-z0-9])"
+        },
+        {
+          "t": "multiobjective optimization",
+          "w": 3,
+          "rx": "(?<![a-z0-9])multiobjective optimization[a-z]*(?![a-z0-9])"
+        },
+        {
+          "t": "multiobjective optimisation",
+          "w": 3,
+          "rx": "(?<![a-z0-9])multiobjective optimisation[a-z]*(?![a-z0-9])"
+        },
+        {
+          "t": "experimental design",
+          "w": 3,
+          "rx": "(?<![a-z0-9])experimental design[a-z]*(?![a-z0-9])"
+        },
+        {
+          "t": "surrogate model",
+          "w": 3,
+          "rx": "(?<![a-z0-9])surrogate model[a-z]*(?![a-z0-9])"
+        },
+        {
+          "t": "active learning",
+          "w": 3,
+          "rx": "(?<![a-z0-9])active learning[a-z]*(?![a-z0-9])"
+        }
+      ]
+    },
+    "provenance_experiment": {
+      "priority": 9,
+      "terms": [
+        {
+          "t": "artifact evaluation",
+          "w": 3,
+          "rx": "(?<![a-z0-9])artifact\\ evaluation(?:s|es|ed|ing)?(?![a-z0-9])"
+        },
+        {
+          "t": "reproducibility",
+          "w": 3,
+          "rx": "(?<![a-z0-9])reproducibility(?:s|es|ed|ing)?(?![a-z0-9])"
+        },
+        {
+          "t": "replicability",
+          "w": 2,
+          "rx": "(?<![a-z0-9])replicability(?:s|es|ed|ing)?(?![a-z0-9])"
+        },
+        {
+          "t": "experimental methodology",
+          "w": 3,
+          "rx": "(?<![a-z0-9])experimental\\ methodology(?:s|es|ed|ing)?(?![a-z0-9])"
+        },
+        {
+          "t": "benchmarking methodology",
+          "w": 3,
+          "rx": "(?<![a-z0-9])benchmarking\\ methodology(?:s|es|ed|ing)?(?![a-z0-9])"
+        },
+        {
+          "t": "research infrastructure",
+          "w": 2,
+          "rx": "(?<![a-z0-9])research\\ infrastructure(?:s|es|ed|ing)?(?![a-z0-9])"
+        },
+        {
+          "t": "provenance",
+          "w": 2,
+          "rx": "(?<![a-z0-9])provenance(?:s|es|ed|ing)?(?![a-z0-9])"
+        },
+        {
+          "t": "measurement study",
+          "w": 2,
+          "rx": "(?<![a-z0-9])measurement\\ study(?:s|es|ed|ing)?(?![a-z0-9])"
+        },
+        {
+          "t": "experiment tracking",
+          "w": 3,
+          "rx": "(?<![a-z0-9])experiment tracking[a-z]*(?![a-z0-9])"
+        },
+        {
+          "t": "reproducible experiments",
+          "w": 3,
+          "rx": "(?<![a-z0-9])reproducible experiments[a-z]*(?![a-z0-9])"
+        },
+        {
+          "t": "data provenance",
+          "w": 3,
+          "rx": "(?<![a-z0-9])data provenance[a-z]*(?![a-z0-9])"
+        },
+        {
+          "t": "workflow provenance",
+          "w": 3,
+          "rx": "(?<![a-z0-9])workflow provenance[a-z]*(?![a-z0-9])"
+        },
+        {
+          "t": "distributed tracing",
+          "w": 3,
+          "rx": "(?<![a-z0-9])distributed tracing[a-z]*(?![a-z0-9])"
+        }
+      ]
+    }
+  },
+  "bio_markers": [
+    "protein",
+    "patient",
+    "clinical",
+    "cancer",
+    "tumor",
+    "tumour",
+    "gene expression",
+    "genomic",
+    "genome",
+    "biomarker",
+    "diagnosis",
+    "diagnostic",
+    "molecul",
+    "enzym",
+    "bacteri",
+    "virus",
+    "viral",
+    "tissue",
+    "medical",
+    "hospital",
+    "drug",
+    "pharmac",
+    "immun",
+    "antibod",
+    "histolog",
+    "surgery",
+    "eeg",
+    "fmri",
+    "in vitro",
+    "in vivo",
+    "specimen",
+    "cohort"
+  ],
+  "scope": "Effective final eligibility parameters; transport/query settings are excluded",
+  "configuration_source_sha256": "ddd35f6c8ecfbfe311a77660bc0e6deb9c20ecff77d0eced846785251f87cc19",
+  "implementation_sha256": "842355e3306efdf6f9c73312ec83e4656194a08edd2c4e3124fd06f77461f419"
+}

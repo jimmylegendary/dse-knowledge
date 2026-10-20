@@ -1,8 +1,94 @@
 # DSE 지식·실험 시스템: 아키텍처와 구현 준비
 
-상태: **architecture·planning 문서** · 기준일: 2026-10-21 KST · 제품 구현·배포·수집 및 모델 연동 pipeline 실행 미실행
+상태: **architecture·planning + 실제 수집 대상 목록** · 기준일: 2026-10-21 KST · 보고용 webapp·metadata 목록 제공. RAG runtime·embedding·KG 등록 pipeline은 미실행.
 
 이 README는 DSE 결정별 지식 요구를 만들고, 허가된 source에서 evidence를 취득·구조화하며, hardware/kernel/experiment 결정에 쓰고 부족한 지식을 다시 수집하는 전체 구조를 설명한다. 2026-10-18 사용자 정정에 맞춘 상위 기준은 [2026-10-21-dse-knowledge-architecture.md](https://github.com/jimmylegendary/dse-knowledge/blob/docs/p0-episode-contracts/docs/superpowers/specs/2026-10-21-dse-knowledge-architecture.md)와 [2026-10-21-knowledge-architecture-plan.md](https://github.com/jimmylegendary/dse-knowledge/blob/docs/p0-episode-contracts/docs/superpowers/plans/2026-10-21-knowledge-architecture-plan.md)다. 이전 HAT native episode/adapter 계약은 세부 참고이며 이 architecture의 중심 gate가 아니다.
+
+## 실제 자료 목록 수집 결과 — 2026-10-21
+
+**중복 제거 후 148,894건 등록**, 100,000건 목표 달성. Source 검토 범위는 초기 40개에서 **77개 family**로 확장했다.
+
+| 단계 | 실제 결과 |
+|---|---|
+| STEP 1 | CPU/ISA/RTL, GPU simulation, compiler/kernel, power/thermal, serving/trace, 측정·최적화 source 누락을 보완해 77개 family의 entrypoint·발견 경로를 확인 |
+| STEP 2 | arXiv 공식 metadata snapshot 3,215,335개 record를 확인하고, 분야 선별·scholarly index를 합쳐 1,146,381개 후보 관측을 처리. Source 간 중복 포함 |
+| STEP 3 | 제목과 공개 초록/문서 앞부분 약 10줄을 자동 규칙으로 선별하고 DOI·arXiv ID·원문 링크·동일 긴 제목으로 중복 정리. 최종 148,894건 |
+| STEP 4 | source·제목·category·1줄 요약·link·자료 type의 6열 CSV와 집계·source 접근 상태를 제공 |
+
+- [자료 목록 webapp](https://dse-knowledge-atlas.nocode-jimmy.chatgpt.site/materials.html) — 본인 ChatGPT 로그인, 전체 목록 검색·필터·page 탐색
+- [materials.csv.gz](https://github.com/jimmylegendary/dse-knowledge/raw/refs/heads/main/research/materials/materials.csv.gz) — 등록 자료 전체
+- [manifest.json](https://github.com/jimmylegendary/dse-knowledge/blob/main/research/materials/manifest.json) — 실제 건수·policy/code hash·snapshot version
+- [sources.csv](https://github.com/jimmylegendary/dse-knowledge/blob/main/research/materials/sources.csv) — 77개 source의 개별 접근 상태와 등록 수
+
+**판정의 범위:** 제목과 실제 관측한 공개 초록 또는 문서 앞부분을 기준으로 한 자동 선별이다. 자료별 본문 전체를 LLM이 읽어 검증한 결과가 아니다. 논문 PDF의 개별 열람·재배포 권한, 과학적 품질·주장 수용, embedding 및 KG 등록은 하지 않았다. 제약·private source는 비인증 entrypoint 응답과 실제 미확인 상태를 유지하며, 77개 source의 모든 자료를 완전 크롤링했다는 뜻은 아니다. 최적화·모델 방법론의 배경 자료도 모든 DSE 단계의 판단을 돕는 수집 대상으로 포함한다.
+
+| Category | 등록 자료 |
+|---|---:|
+| Compiler / kernel | 4,852 |
+| DSE / optimization | 21,388 |
+| HW architecture / ISA | 13,604 |
+| LLM / model / workload | 92,674 |
+| Memory / interconnect | 3,818 |
+| Power / thermal / packaging | 3,185 |
+| Provenance / experiment | 597 |
+| Serving / scheduling | 3,005 |
+| Simulation / measurement | 5,771 |
+
+등록 예시 — 공개 HEAD에서 뽑은 한 줄 요약이며 전체 본문 분석이 아니다.
+
+| Source | 제목 | Category | 1줄 요약 | Link | 자료 type |
+|---|---|---|---|---|---|
+| Semantic Scholar | "A New Old Approach to Teaching Microprocessors: Update and Lessons Learned" | hardware_architecture | The construction of the microprocessor system was accompanied by lectures in a variety of topics including computer organization, instruction set architectures, the Intel family… | [원문](https://www.semanticscholar.org/paper/147b8a0719e818581be20eeee0730c6a058b405a) | scholarly_work |
+| arXiv | $MC^2RAM$: Markov Chain Monte Carlo Sampling in SRAM for Fast Bayesian Inference | memory_interconnect | We show a novel architecture of SRAM by embedding it with random number generators (RNGs), digital-to-analog converters (DACs), and analog-to-digital converters (ADCs) so that… | [원문](https://arxiv.org/abs/2003.02629v1) | research_paper |
+| arXiv | "Is Low Power Enough?" Rethinking Energy Efficiency in High-Fidelity Sensing | power_thermal_packaging | Scientists now want higher fidelity data from the field, such as images and audio, and these observations break that rule: a low-power microcontroller stays… | [원문](https://arxiv.org/abs/2610.14714v1) | research_paper |
+| arXiv | "It would work for me too": How Online Communities Shape Software Developers' Trust in AI-Powered Code Generation Tools | compiler_kernel | Through interviewing 17 developers, we find that developers collectively make sense of AI tools using the experiences shared by community members and leverage community… | [원문](https://arxiv.org/abs/2212.03491v2) | research_paper |
+| arXiv | !MSA at BAREC Shared Task 2025: Ensembling Arabic Transformers for Readability Assessment | llm_model_workload | We present MSAs winning system for the BAREC 2025 Shared Task on fine-grained Arabic readability assessment, achieving first place in six of six tracks. | [원문](https://arxiv.org/abs/2509.10040v1) | research_paper |
+| arXiv | (Almost) Perfect Discrete Iterative Load Balancing | serving_scheduling | We present results for a general class of simple local balancing schemes where the tokens are balanced via matchings. | [원문](https://arxiv.org/abs/2510.15473v1) | research_paper |
+| arXiv | "I Strongly Suspect This Website Is a Scam": Benchmarking PII Leakage and Detection without Defense in Autonomous Web Agents | simulation_measurement | In this paper, we show that social-engineering attacks are highly effective at extracting critical-tier PII from frontier web agents, posing a severe risk to… | [원문](https://arxiv.org/abs/2606.00497v1) | research_paper |
+| arXiv | "Efficient Complexity": a Constrained Optimization Approach to the Evolution of Natural Intelligence | dse_optimization | A novel approach in the description of the information processes of natural learning is proposed in the framework of constrained optimization, where the objective… | [원문](https://arxiv.org/abs/2410.13881v2) | research_paper |
+| Semantic Scholar | "Get in Researchers; We're Measuring Reproducibility": A Reproducibility Study of Machine Learning Papers in Tier 1 Security Conferences | provenance_experiment | While the Security community has recently increased its attention on reproducibility, an independent and comprehensive measurement of the current state of reproducibility has not… | [원문](https://www.semanticscholar.org/paper/d0ee37d9e5ae942fce2c48db468738e014cb6a3c) | scholarly_work |
+
+추가 source 37개(초기 40개는 아래 설계 catalog에 유지). HTTP 상태는 entrypoint의 이번 관측이며 모든 하위 자료의 열람을 뜻하지 않는다.
+
+| ID | 추가 source | Entry point | 등록 자료 |
+|---|---|---|---:|
+| s41 | [RISC-V ISA specs + ratified extensions + profiles](https://riscv.org/technical/specifications/) | HTTP 200 | 135 |
+| s42 | [Apache TVM / Relax / TensorIR](https://api.github.com/repos/apache/tvm) | HTTP 200 | 139 |
+| s43 | [SGLang (RadixAttention, HiCache) docs + repo](https://api.github.com/repos/sgl-project/sglang) | HTTP 200 | 351 |
+| s44 | [Accelergy (energy/area model generator)](https://api.github.com/repos/Accelergy-Project/accelergy) | HTTP 200 | 2 |
+| s45 | [Timeloop (dataflow mapping explorer)](https://api.github.com/repos/NVLabs/timeloop) | HTTP 200 | 4 |
+| s46 | [ARM Architecture Reference Manual (A-profile) + ARM system IP docs](https://developer.arm.com/documentation/ddi0487/latest/) | HTTP 200 | 0 |
+| s47 | [Intel SDM (x86-64 ISA + platform)](https://www.intel.com/content/www/us/en/developer/articles/technical/intel-sdm.html) | HTTP 200 | 0 |
+| s48 | [PTX ISA (NVIDIA Parallel Thread Execution)](https://docs.nvidia.com/cuda/parallel-thread-execution/) | HTTP 200 | 1 |
+| s49 | [Khronos registry (SPIR-V, OpenCL, SYCL, Vulkan)](https://registry.khronos.org/spir/) | HTTP 200 | 2 |
+| s50 | [Accel-Sim / GPGPU-Sim](https://api.github.com/repos/accel-sim/accel-sim-framework) | HTTP 200 | 3 |
+| s51 | [Vidur (LLM serving simulator)](https://api.github.com/repos/microsoft/vidur) | HTTP 200 | 4 |
+| s52 | [Power/thermal models (HotSpot, 3D-ICE, McPAT, Accelergy)](https://api.github.com/repos/HewlettPackard/mcpat) | HTTP 200 | 1 |
+| s53 | [Predictive PDKs (ASAP7, FreePDK45) + open RTL flow](https://api.github.com/repos/The-OpenROAD-Project/asap7) | HTTP 200 | 1 |
+| s54 | [KV-cache reuse & PD-disaggregation (LMCache, Mooncake, NIXL)](https://api.github.com/repos/kvcache-ai/Mooncake) | HTTP 200 | 1 |
+| s55 | [Azure LLM inference trace + BurstGPT (session traces)](https://api.github.com/repos/microsoft/AzurePublicDataset) | HTTP 200 | 1 |
+| s56 | [Long-context & agentic evaluation suites (RULER, LongBench, SWE-bench)](https://api.github.com/repos/NVIDIA/RULER) | HTTP 200 | 1 |
+| s57 | [OpenXLA / XLA HLO operation semantics](https://openxla.org/xla/operation_semantics) | HTTP 200 | 1 |
+| s58 | [Kernel benchmark suites (KernelBench, TritonBench, AITer)](https://api.github.com/repos/ScalingIntelligence/KernelBench) | HTTP 200 | 1 |
+| s59 | [NCCL + collective communication docs](https://docs.nvidia.com/deeplearning/nccl/user-guide/docs/) | HTTP 200 | 126 |
+| s60 | [Nsight Systems + CUPTI (timeline + counter APIs)](https://docs.nvidia.com/nsight-systems/) | HTTP 200 | 1 |
+| s61 | [UALink Consortium specification](https://ualinkconsortium.org/) | HTTP 200 | 2 |
+| s62 | [Ultra Ethernet Consortium specification](https://ultraethernet.org/) | HTTP 200 | 0 |
+| s63 | [IBTA InfiniBand architecture specification](https://www.infinibandta.org/specs/) | HTTP 200 | 0 |
+| s64 | [OCP Open Rack V3 / power delivery + contribution repository](https://www.opencompute.org/projects/open-rack-v3) | HTTP 200 | 1 |
+| s65 | [HBM/DRAM vendor datasheets (SK hynix, Micron, Samsung)](https://www.skhynix.com/) | HTTP 200 | 2 |
+| s66 | [Cloud instance & price catalogs (AWS EC2 price list, GCP, Azure)](https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonEC2/current/region_index.json) | HTTP 200 | 0 |
+| s67 | [MLPerf results repositories (measured submissions)](https://api.github.com/repos/mlcommons/inference_results_v5.0) | HTTP 200 | 0 |
+| s68 | [OpenReview API (submissions, reviews, decisions)](https://api2.openreview.net/notes?limit=1) | HTTP 403 | 0 |
+| s69 | [DBLP (venue/author bibliography, bulk XML)](https://dblp.org/search/publ/api?q=llm%20serving&format=json&h=1) | HTTP 202 | 0 |
+| s70 | [IETF Datatracker (RFC + drafts)](https://datatracker.ietf.org/api/v1/doc/document?limit=1) | HTTP 200 | 0 |
+| s71 | [Metric/provenance metadata specs (OpenMetrics, Croissant, DCAT)](https://prometheus.io/docs/instrumenting/exposition_formats/) | HTTP 200 | 2 |
+| s72 | [Industry engineering blogs with measured numbers (NVIDIA technical blog, Meta/Google infra blogs)](https://developer.nvidia.com/blog/) | HTTP 200 | 2 |
+| s73 | [PyTorch Inductor (torch.compile fusion/lowering)](https://api.github.com/repos/pytorch/pytorch) | HTTP 200 | 1 |
+| s74 | [IREE (MLIR-based compiler/runtime for accelerators)](https://api.github.com/repos/iree-org/iree) | HTTP 200 | 90 |
+| s75 | [Constrained DSE/HPO tooling (Optuna, Ray Tune)](https://docs.ray.io/en/latest/tune/index.html) | HTTP 200 | 0 |
+| s76 | [SPEC benchmark results and power/energy methodology](https://www.spec.org/power_ssj2008/results/) | HTTP 200 | 3 |
+| s77 | [CUDA math libraries + attention kernels (cuBLAS, cuDNN, CCCL/CUB, FlashAttention, FlashInfer)](https://docs.nvidia.com/cuda/cublas/index.html) | HTTP 200 | 74 |
 
 ## 한눈에 보기
 

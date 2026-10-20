@@ -1,0 +1,1395 @@
+[
+  {
+    "id": "s01",
+    "name": "NVIDIA system docs",
+    "url": "https://www.nvidia.com/en-us/data-center/gb300-nvl72/",
+    "access": "HTTP 200",
+    "entrypoint_http_status": 200,
+    "access_scope": "public_read",
+    "registered": 1,
+    "enumeration_route": {
+      "mechanism": "vendor product pages → PDF \"architecture/whitepaper\" downloads; docs.<vendor> HTML tree",
+      "target": "nvidia.com data-center product pages + developer.nvidia.com \"technical blog\" + GB300/NVL72 datasheet PDFs",
+      "pagination": "none (curated index); product-page nav + PDF links; no bulk API",
+      "robots": {
+        "status": 200,
+        "sitemaps": [
+          "https://www.nvidia.com/sitemap_index.xml"
+        ],
+        "disallow_sample": [
+          "/content/g/*\r",
+          "/content/gated-pdfs/*\r",
+          "/content/*/gated-resources/*\r",
+          "/content/*/gated-pdfs/*\r"
+        ]
+      }
+    },
+    "source_status_scope": "entrypoint response only; individual material access is tracked separately"
+  },
+  {
+    "id": "s02",
+    "name": "CUDA/PTX",
+    "url": "https://docs.nvidia.com/cuda/cuda-programming-guide/",
+    "access": "HTTP 200",
+    "entrypoint_http_status": 200,
+    "access_scope": "public_read",
+    "registered": 472,
+    "enumeration_route": {
+      "mechanism": "docs.nvidia.com CUDA doc site (Doxygen/Sphinx) + PTX ISA doc + CUDA samples repo tree",
+      "target": "docs.nvidia.com/cuda/* (guide, best-practices, PTX ISA, libs) ; github.com/NVIDIA/cuda-samples tree",
+      "pagination": "docs sitemap or nav index; GitHub git-trees API recursive",
+      "robots": {
+        "status": 200,
+        "sitemaps": [
+          "https://docs.nvidia.com/bsp-sitemap.xml",
+          "https://docs.nvidia.com/cumulus-networking-ethernet-software-sitemap.xml",
+          "https://docs.nvidia.com/bsp_sitemap_index.xml",
+          "https://docs.nvidia.com/s3-sitemap-index.xml",
+          "https://docs.nvidia.com/fern-sitemap-index.xml"
+        ],
+        "disallow_sample": [
+          "/*?ncid*",
+          "/*&ncid*",
+          "/*?nvid*",
+          "/*&nvid*"
+        ]
+      }
+    },
+    "source_status_scope": "entrypoint response only; individual material access is tracked separately"
+  },
+  {
+    "id": "s03",
+    "name": "Nsight Compute",
+    "url": "https://docs.nvidia.com/nsight-compute/ProfilingGuide/index.html",
+    "access": "HTTP 200",
+    "entrypoint_http_status": 200,
+    "access_scope": "repo_license_per_repo",
+    "registered": 1,
+    "enumeration_route": {
+      "mechanism": "docs.nvidia.com/nsight-compute doc site; metric reference tables",
+      "target": "ProfilingGuide + \"Metrics\" glossary + per-arch counter tables",
+      "pagination": "single guide, HTML sections (anchors)",
+      "robots": {
+        "status": 200,
+        "sitemaps": [
+          "https://docs.nvidia.com/bsp-sitemap.xml",
+          "https://docs.nvidia.com/cumulus-networking-ethernet-software-sitemap.xml",
+          "https://docs.nvidia.com/bsp_sitemap_index.xml",
+          "https://docs.nvidia.com/s3-sitemap-index.xml",
+          "https://docs.nvidia.com/fern-sitemap-index.xml"
+        ],
+        "disallow_sample": [
+          "/*?ncid*",
+          "/*&ncid*",
+          "/*?nvid*",
+          "/*&nvid*"
+        ]
+      }
+    },
+    "source_status_scope": "entrypoint response only; individual material access is tracked separately"
+  },
+  {
+    "id": "s04",
+    "name": "DCGM",
+    "url": "https://docs.nvidia.com/datacenter/dcgm/latest/reference/dcgm-exporter-metrics.html",
+    "access": "HTTP 200",
+    "entrypoint_http_status": 200,
+    "access_scope": "public_read",
+    "registered": 5,
+    "enumeration_route": {
+      "mechanism": "docs.nvidia.com DCGM docs; dcgm-exporter metrics list; GitHub repo (NVIDIA/DCGM)",
+      "target": "docs.nvidia.com/datacenter/dcgm/latest/* ; github.com/NVIDIA/DCGM tree",
+      "pagination": "docs nav + GitHub tree API",
+      "robots": {
+        "status": 200,
+        "sitemaps": [
+          "https://docs.nvidia.com/bsp-sitemap.xml",
+          "https://docs.nvidia.com/cumulus-networking-ethernet-software-sitemap.xml",
+          "https://docs.nvidia.com/bsp_sitemap_index.xml",
+          "https://docs.nvidia.com/s3-sitemap-index.xml",
+          "https://docs.nvidia.com/fern-sitemap-index.xml"
+        ],
+        "disallow_sample": [
+          "/*?ncid*",
+          "/*&ncid*",
+          "/*?nvid*",
+          "/*&nvid*"
+        ]
+      }
+    },
+    "source_status_scope": "entrypoint response only; individual material access is tracked separately"
+  },
+  {
+    "id": "s05",
+    "name": "AMD MI350/ROCm",
+    "url": "https://rocm.docs.amd.com/en/develop/reference/gpu-arch/mi350.html",
+    "access": "HTTP 200",
+    "entrypoint_http_status": 200,
+    "access_scope": "public_read",
+    "registered": 64,
+    "enumeration_route": {
+      "mechanism": "rocm.docs.amd.com (Sphinx, has sitemap) + AMD CDNA ISA ref + MI350 spec pages",
+      "target": "rocm.docs.amd.com/en/latest/* ; amd.com \"AMD Instinct MI350\" pages",
+      "pagination": "Sphinx sitemap.xml / objects.inv; versioned docs",
+      "robots": {
+        "status": 200,
+        "sitemaps": [
+          "https://rocm.docs.amd.com/sitemap.xml"
+        ],
+        "disallow_sample": [
+          "/en/docs-5.0.0/ # Hidden version",
+          "/en/docs-5.0.1/ # Hidden version",
+          "/en/docs-5.0.2/ # Hidden version",
+          "/en/docs-5.1.0/ # Hidden version"
+        ]
+      }
+    },
+    "source_status_scope": "entrypoint response only; individual material access is tracked separately"
+  },
+  {
+    "id": "s06",
+    "name": "OCP",
+    "url": "https://www.opencompute.org/projects/cooling-environments/",
+    "access": "HTTP 200",
+    "entrypoint_http_status": 200,
+    "access_scope": "license_gated_metadata_only",
+    "registered": 2,
+    "enumeration_route": {
+      "mechanism": "opencompute.org project pages + OCP contribution database + github.com/opencompute repos",
+      "target": "OCP \"Cooling Environments\", \"Open Rack V3\", OAM/UBB, DC-MHS project pages; getrepo PDFs",
+      "pagination": "project index; contribution DB needs account for some artifacts",
+      "robots": {
+        "status": 200,
+        "sitemaps": [
+          "https://www.opencompute.org/sitemap_index.xml"
+        ],
+        "disallow_sample": [
+          "Sitemap: https://www.opencompute.org/sitemap_index.xml"
+        ]
+      }
+    },
+    "source_status_scope": "entrypoint response only; individual material access is tracked separately"
+  },
+  {
+    "id": "s07",
+    "name": "UCIe",
+    "url": "https://www.uciexpress.org/specifications",
+    "access": "HTTP 200",
+    "entrypoint_http_status": 200,
+    "access_scope": "license_gated_metadata_only",
+    "registered": 1,
+    "enumeration_route": {
+      "mechanism": "UCIe consortium spec download page (form-gated?) + press releases",
+      "target": "uciexpress.org/specifications → spec PDF behind click-through",
+      "pagination": "none",
+      "robots": {
+        "status": 200,
+        "sitemaps": [
+          "https://www.uciexpress.org/sitemap.xml"
+        ],
+        "disallow_sample": [
+          "*?lightbox=",
+          "/_partials*",
+          "/pro-gallery-webapp/v1/galleries/*",
+          "/"
+        ]
+      }
+    },
+    "source_status_scope": "entrypoint response only; individual material access is tracked separately"
+  },
+  {
+    "id": "s08",
+    "name": "CXL",
+    "url": "https://computeexpresslink.org/cxl-specification/",
+    "access": "HTTP 200",
+    "entrypoint_http_status": 200,
+    "access_scope": "license_gated_metadata_only",
+    "registered": 1,
+    "enumeration_route": {
+      "mechanism": "computeexpresslink.org spec page + ECN/errata list + CXL consortium member docs",
+      "target": "cxl-specification page → PDF per revision; ECN list",
+      "pagination": "none",
+      "robots": {
+        "status": 200,
+        "sitemaps": [
+          "https://computeexpresslink.org/sitemap.xml",
+          "https://computeexpresslink.org/sitemap.rss"
+        ],
+        "disallow_sample": [
+          "/wp-admin/\r"
+        ]
+      }
+    },
+    "source_status_scope": "entrypoint response only; individual material access is tracked separately"
+  },
+  {
+    "id": "s09",
+    "name": "JEDEC",
+    "url": "https://www.jedec.org/",
+    "access": "HTTP 200",
+    "entrypoint_http_status": 200,
+    "access_scope": "license_gated_metadata_only",
+    "registered": 0,
+    "enumeration_route": {
+      "mechanism": "jedec.org standards search + document detail pages (metadata public, PDF paywalled)",
+      "target": "jedec.org/main/standards-search → JESD*/JEP* document records",
+      "pagination": "search with paging params",
+      "robots": {
+        "status": 200,
+        "sitemaps": null,
+        "disallow_sample": [
+          "/includes/",
+          "/misc/",
+          "/modules/",
+          "/profiles/"
+        ]
+      }
+    },
+    "source_status_scope": "entrypoint response only; individual material access is tracked separately"
+  },
+  {
+    "id": "s10",
+    "name": "PCI-SIG",
+    "url": "https://pcisig.com/specifications",
+    "access": "HTTP 200",
+    "entrypoint_http_status": 200,
+    "access_scope": "license_gated_metadata_only",
+    "registered": 2,
+    "enumeration_route": {
+      "mechanism": "pcisig.com specifications page (public revision/status list); member-only specs",
+      "target": "pcisig.com/specifications → PCIe base spec pages, ECN list, integrators list",
+      "pagination": "none",
+      "robots": {
+        "status": 200,
+        "sitemaps": null,
+        "disallow_sample": [
+          "/core/",
+          "/profiles/",
+          "/README.md",
+          "/composer/Metapackage/README.txt"
+        ]
+      }
+    },
+    "source_status_scope": "entrypoint response only; individual material access is tracked separately"
+  },
+  {
+    "id": "s11",
+    "name": "IEEE 802.3",
+    "url": "https://www.ieee802.org/3/",
+    "access": "HTTP 200",
+    "entrypoint_http_status": 200,
+    "access_scope": "license_gated_metadata_only",
+    "registered": 0,
+    "enumeration_route": {
+      "mechanism": "ieee802.org/3/ public pages (amendment status, PAR, presentations); IEEE Xplore for published text",
+      "target": "ieee802.org/3/ index + per-task-force pages; get*.pdf presentations",
+      "pagination": "task-force index",
+      "robots": {
+        "status": 404,
+        "sitemaps": null,
+        "disallow_sample": []
+      }
+    },
+    "source_status_scope": "entrypoint response only; individual material access is tracked separately"
+  },
+  {
+    "id": "s12",
+    "name": "ASHRAE",
+    "url": "https://www.ashrae.org/technical-resources/topics-and-initiatives/ai-data-center/site-planning",
+    "access": "HTTP 200",
+    "entrypoint_http_status": 200,
+    "access_scope": "license_gated_metadata_only",
+    "registered": 0,
+    "enumeration_route": {
+      "mechanism": "ashrae.org technical resources + ASHRAE handbook/standard pages (Datacom series)",
+      "target": "ashrae.org .../ai-data-center/site-planning + datacom book series pages",
+      "pagination": "none",
+      "robots": {
+        "status": 200,
+        "sitemaps": [
+          "https://www.ashrae.org/sitemap.xml"
+        ],
+        "disallow_sample": [
+          "/admin/",
+          "/commonlogin/",
+          "/marketieradmin/",
+          "/commerceadmin/"
+        ]
+      }
+    },
+    "source_status_scope": "entrypoint response only; individual material access is tracked separately"
+  },
+  {
+    "id": "s13",
+    "name": "OpenROAD/SKY130",
+    "url": "https://openroad-flow-scripts.readthedocs.io/en/latest/",
+    "access": "HTTP 200",
+    "entrypoint_http_status": 200,
+    "access_scope": "repo_license_per_repo",
+    "registered": 2,
+    "enumeration_route": {
+      "mechanism": "readthedocs (Sphinx) + github.com/The-OpenROAD-Project/OpenROAD-flow-scripts + PDK repos (sky130, gf180)",
+      "target": "openroad-flow-scripts.readthedocs.io ; GitHub trees for flow scripts & PDKs",
+      "pagination": "Sphinx sitemap; GitHub tree API",
+      "robots": {
+        "status": 200,
+        "sitemaps": [
+          "https://openroad-flow-scripts.readthedocs.io/sitemap.xml"
+        ],
+        "disallow_sample": [
+          "# Allow everything"
+        ]
+      }
+    },
+    "source_status_scope": "entrypoint response only; individual material access is tracked separately"
+  },
+  {
+    "id": "s14",
+    "name": "CACTI",
+    "url": "https://github.com/HewlettPackard/cacti",
+    "access": "HTTP 200",
+    "entrypoint_http_status": 200,
+    "access_scope": "license_gated_metadata_only",
+    "registered": 1,
+    "enumeration_route": {
+      "mechanism": "GitHub repo tree + CACTI model docs/papers",
+      "target": "github.com/HewlettPackard/cacti (source, example configs)",
+      "pagination": "GitHub git-trees API recursive",
+      "robots": {
+        "status": 404,
+        "sitemaps": null,
+        "disallow_sample": []
+      }
+    },
+    "source_status_scope": "entrypoint response only; individual material access is tracked separately"
+  },
+  {
+    "id": "s15",
+    "name": "gem5",
+    "url": "https://www.gem5.org/documentation/",
+    "access": "HTTP 200",
+    "entrypoint_http_status": 200,
+    "access_scope": "repo_license_per_repo",
+    "registered": 2,
+    "enumeration_route": {
+      "mechanism": "gem5.org doc site + github.com/gem5/gem5 tree + gem5 \"resources\" (configs, stdlib)",
+      "target": "gem5.org/documentation ; GitHub tree; gem5 JIRA/wiki",
+      "pagination": "Sphinx sitemap; GitHub tree API",
+      "robots": {
+        "status": 404,
+        "sitemaps": null,
+        "disallow_sample": []
+      }
+    },
+    "source_status_scope": "entrypoint response only; individual material access is tracked separately"
+  },
+  {
+    "id": "s16",
+    "name": "Ramulator 2",
+    "url": "https://github.com/CMU-SAFARI/ramulator2",
+    "access": "HTTP 200",
+    "entrypoint_http_status": 200,
+    "access_scope": "license_gated_metadata_only",
+    "registered": 2,
+    "enumeration_route": {
+      "mechanism": "GitHub tree (CMU-SAFARI/ramulator2) + config YAML + README",
+      "target": "github.com/CMU-SAFARI/ramulator2",
+      "pagination": "GitHub tree API",
+      "robots": {
+        "status": 404,
+        "sitemaps": null,
+        "disallow_sample": []
+      }
+    },
+    "source_status_scope": "entrypoint response only; individual material access is tracked separately"
+  },
+  {
+    "id": "s17",
+    "name": "BookSim",
+    "url": "https://github.com/booksim/booksim2",
+    "access": "HTTP 200",
+    "entrypoint_http_status": 200,
+    "access_scope": "repo_license_per_repo",
+    "registered": 2,
+    "enumeration_route": {
+      "mechanism": "GitHub tree (booksim/booksim2)",
+      "target": "github.com/booksim/booksim2",
+      "pagination": "GitHub tree API",
+      "robots": {
+        "status": 404,
+        "sitemaps": null,
+        "disallow_sample": []
+      }
+    },
+    "source_status_scope": "entrypoint response only; individual material access is tracked separately"
+  },
+  {
+    "id": "s18",
+    "name": "SST",
+    "url": "https://sst-simulator.org/sst-docs/docs/guides/start",
+    "access": "HTTP 200",
+    "entrypoint_http_status": 200,
+    "access_scope": "repo_license_per_repo",
+    "registered": 404,
+    "enumeration_route": {
+      "mechanism": "sst-simulator.org docs + github.com/sstsimulator/sst-* component repos",
+      "target": "sst-docs; GitHub org tree (sst-elements, sst-core, sst-macro)",
+      "pagination": "docs sitemap; GitHub org repo list + tree API",
+      "robots": {
+        "status": 200,
+        "sitemaps": [
+          "http://sst-simulator.org/sitemap.xml"
+        ],
+        "disallow_sample": []
+      }
+    },
+    "source_status_scope": "entrypoint response only; individual material access is tracked separately"
+  },
+  {
+    "id": "s19",
+    "name": "MLIR",
+    "url": "https://mlir.llvm.org/docs/",
+    "access": "HTTP 200",
+    "entrypoint_http_status": 200,
+    "access_scope": "repo_license_per_repo",
+    "registered": 2,
+    "enumeration_route": {
+      "mechanism": "mlir.llvm.org docs (Sphinx) + llvm-project GitHub tree (mlir/) + MLIR op defs (.td)",
+      "target": "mlir.llvm.org/docs ; github.com/llvm/llvm-project/tree/main/mlir",
+      "pagination": "Sphinx sitemap/toctree; GitHub tree API",
+      "robots": {
+        "status": 404,
+        "sitemaps": null,
+        "disallow_sample": []
+      }
+    },
+    "source_status_scope": "entrypoint response only; individual material access is tracked separately"
+  },
+  {
+    "id": "s20",
+    "name": "Triton",
+    "url": "https://triton-lang.org/main/getting-started/tutorials/",
+    "access": "HTTP 200",
+    "entrypoint_http_status": 200,
+    "access_scope": "repo_license_per_repo",
+    "registered": 34,
+    "enumeration_route": {
+      "mechanism": "triton-lang.org docs + github.com/triton-lang/triton (python/triton/language, tutorials)",
+      "target": "triton-lang.org/main ; GitHub tree",
+      "pagination": "Sphinx sitemap; GitHub tree API",
+      "robots": {
+        "status": 404,
+        "sitemaps": null,
+        "disallow_sample": []
+      }
+    },
+    "source_status_scope": "entrypoint response only; individual material access is tracked separately"
+  },
+  {
+    "id": "s21",
+    "name": "CUTLASS/CuTe",
+    "url": "https://github.com/NVIDIA/cutlass",
+    "access": "HTTP 200",
+    "entrypoint_http_status": 200,
+    "access_scope": "repo_license_per_repo",
+    "registered": 157,
+    "enumeration_route": {
+      "mechanism": "GitHub tree (NVIDIA/cutlass) + docs/ + examples/ + media/docs PDFs",
+      "target": "github.com/NVIDIA/cutlass ; NVIDIA/cutlass docs site",
+      "pagination": "GitHub tree API (recursive)",
+      "robots": {
+        "status": 404,
+        "sitemaps": null,
+        "disallow_sample": []
+      }
+    },
+    "source_status_scope": "entrypoint response only; individual material access is tracked separately"
+  },
+  {
+    "id": "s22",
+    "name": "HAT internal",
+    "url": "https://github.com/jimmylegendary/hat-system",
+    "access": "HTTP 404",
+    "entrypoint_http_status": 404,
+    "access_scope": "internal_blocked",
+    "registered": 0,
+    "enumeration_route": {
+      "mechanism": "internal repo tree (may be private) + allowlisted schema export",
+      "target": "github.com/jimmylegendary/hat-system",
+      "pagination": "GitHub tree API (requires access rights)",
+      "robots": {
+        "status": 404,
+        "sitemaps": null,
+        "disallow_sample": []
+      }
+    },
+    "source_status_scope": "entrypoint response only; individual material access is tracked separately"
+  },
+  {
+    "id": "s23",
+    "name": "Melete internal",
+    "url": "https://github.com/jimmylegendary/melete",
+    "access": "HTTP 404",
+    "entrypoint_http_status": 404,
+    "access_scope": "internal_blocked",
+    "registered": 0,
+    "enumeration_route": {
+      "mechanism": "internal repo tree + allowlisted Experience/Claim/Evidence export",
+      "target": "github.com/jimmylegendary/melete",
+      "pagination": "GitHub tree API (requires rights)",
+      "robots": {
+        "status": 404,
+        "sitemaps": null,
+        "disallow_sample": []
+      }
+    },
+    "source_status_scope": "entrypoint response only; individual material access is tracked separately"
+  },
+  {
+    "id": "s24",
+    "name": "MLPerf",
+    "url": "https://docs.mlcommons.org/inference/submission/",
+    "access": "HTTP 200",
+    "entrypoint_http_status": 200,
+    "access_scope": "public_read",
+    "registered": 0,
+    "enumeration_route": {
+      "mechanism": "docs.mlcommons.org (Sphinx) + github.com/mlcommons/inference (rules, loadgen) + *inference_results_* repos (measured results)",
+      "target": "docs.mlcommons.org/inference ; GitHub trees for inference & inference_results_v5.x",
+      "pagination": "Sphinx sitemap; GitHub tree API; results repos are versioned per round",
+      "robots": {
+        "status": 404,
+        "sitemaps": null,
+        "disallow_sample": []
+      }
+    },
+    "source_status_scope": "entrypoint response only; individual material access is tracked separately"
+  },
+  {
+    "id": "s25",
+    "name": "vLLM",
+    "url": "https://docs.vllm.ai/en/stable/benchmarking/cli/",
+    "access": "HTTP 429",
+    "entrypoint_http_status": 429,
+    "access_scope": "repo_license_per_repo",
+    "registered": 231,
+    "enumeration_route": {
+      "mechanism": "docs.vllm.ai (Sphinx/MkDocs) + github.com/vllm-project/vllm tree",
+      "target": "docs.vllm.ai/en/stable ; GitHub tree",
+      "pagination": "docs sitemap; GitHub tree API",
+      "robots": {
+        "status": 429,
+        "sitemaps": null,
+        "disallow_sample": []
+      }
+    },
+    "source_status_scope": "entrypoint response only; individual material access is tracked separately"
+  },
+  {
+    "id": "s26",
+    "name": "TensorRT-LLM",
+    "url": "https://nvidia.github.io/TensorRT-LLM/",
+    "access": "HTTP 200",
+    "entrypoint_http_status": 200,
+    "access_scope": "public_read",
+    "registered": 2,
+    "enumeration_route": {
+      "mechanism": "nvidia.github.io/TensorRT-LLM (Sphinx) + github.com/NVIDIA/TensorRT-LLM tree + perf-overview docs",
+      "target": "nvidia.github.io/TensorRT-LLM ; GitHub tree",
+      "pagination": "docs sitemap; GitHub tree API",
+      "robots": {
+        "status": 200,
+        "sitemaps": [
+          "https://nvidia.github.io/sitemap.xml"
+        ],
+        "disallow_sample": []
+      }
+    },
+    "source_status_scope": "entrypoint response only; individual material access is tracked separately"
+  },
+  {
+    "id": "s27",
+    "name": "Hugging Face cards",
+    "url": "https://huggingface.co/docs/hub/model-cards",
+    "access": "HTTP 200",
+    "entrypoint_http_status": 200,
+    "access_scope": "per_item_license",
+    "registered": 2,
+    "enumeration_route": {
+      "mechanism": "huggingface.co Hub API (/api/models, /api/datasets) + model card markdown in repos",
+      "target": "huggingface.co/api/models?limit=..&full=true ; card files README.md in each repo",
+      "pagination": "API cursor (Link header) — e.g. 1000/page",
+      "robots": {
+        "status": 200,
+        "sitemaps": [
+          "https://huggingface.co/sitemap.xml"
+        ],
+        "disallow_sample": []
+      }
+    },
+    "source_status_scope": "entrypoint response only; individual material access is tracked separately"
+  },
+  {
+    "id": "s28",
+    "name": "AgentBench",
+    "url": "https://github.com/THUDM/AgentBench",
+    "access": "HTTP 200",
+    "entrypoint_http_status": 200,
+    "access_scope": "license_gated_metadata_only",
+    "registered": 5,
+    "enumeration_route": {
+      "mechanism": "GitHub tree (THUDM/AgentBench) + task data dirs + docs",
+      "target": "github.com/THUDM/AgentBench",
+      "pagination": "GitHub tree API",
+      "robots": {
+        "status": 404,
+        "sitemaps": null,
+        "disallow_sample": []
+      }
+    },
+    "source_status_scope": "entrypoint response only; individual material access is tracked separately"
+  },
+  {
+    "id": "s29",
+    "name": "τ-bench family",
+    "url": "https://github.com/sierra-research/tau2-bench",
+    "access": "HTTP 200",
+    "entrypoint_http_status": 200,
+    "access_scope": "repo_license_per_repo",
+    "registered": 2,
+    "enumeration_route": {
+      "mechanism": "GitHub tree (sierra-research/tau2-bench) + data/ json",
+      "target": "github.com/sierra-research/tau2-bench",
+      "pagination": "GitHub tree API",
+      "robots": {
+        "status": 404,
+        "sitemaps": null,
+        "disallow_sample": []
+      }
+    },
+    "source_status_scope": "entrypoint response only; individual material access is tracked separately"
+  },
+  {
+    "id": "s30",
+    "name": "BFCL",
+    "url": "https://github.com/ShishirPatil/gorilla/tree/f7cf7359b7ac615a0b294831c5ba2bc95ee4a000/berkeley-function-call-leaderboard",
+    "access": "HTTP 200",
+    "entrypoint_http_status": 200,
+    "access_scope": "repo_license_per_repo",
+    "registered": 6,
+    "enumeration_route": {
+      "mechanism": "GitHub tree (ShishirPatil/gorilla) subdir berkeley-function-call-leaderboard + results",
+      "target": "gorilla/berkeley-function-call-leaderboard (pinned commit)",
+      "pagination": "GitHub tree API at pinned SHA",
+      "robots": {
+        "status": 404,
+        "sitemaps": null,
+        "disallow_sample": []
+      }
+    },
+    "source_status_scope": "entrypoint response only; individual material access is tracked separately"
+  },
+  {
+    "id": "s31",
+    "name": "Ax/BoTorch",
+    "url": "https://ax.dev/docs/recipes/multi-objective-optimization/",
+    "access": "HTTP 200",
+    "entrypoint_http_status": 200,
+    "access_scope": "repo_license_per_repo",
+    "registered": 84,
+    "enumeration_route": {
+      "mechanism": "ax.dev docs (Sphinx) + github.com/facebook/Ax + BoTorch docs",
+      "target": "ax.dev/docs ; GitHub trees",
+      "pagination": "docs sitemap; GitHub tree API",
+      "robots": {
+        "status": 404,
+        "sitemaps": null,
+        "disallow_sample": []
+      }
+    },
+    "source_status_scope": "entrypoint response only; individual material access is tracked separately"
+  },
+  {
+    "id": "s32",
+    "name": "OpenTelemetry GenAI",
+    "url": "https://opentelemetry.io/docs/specs/semconv/gen-ai/",
+    "access": "HTTP 200",
+    "entrypoint_http_status": 200,
+    "access_scope": "public_read",
+    "registered": 30,
+    "enumeration_route": {
+      "mechanism": "opentelemetry.io docs + semconv YAML in github.com/open-telemetry/semantic-conventions",
+      "target": "opentelemetry.io/docs/specs/semconv/gen-ai ; GitHub tree (model/gen-ai)",
+      "pagination": "docs nav; GitHub tree API",
+      "robots": {
+        "status": 200,
+        "sitemaps": null,
+        "disallow_sample": []
+      }
+    },
+    "source_status_scope": "entrypoint response only; individual material access is tracked separately"
+  },
+  {
+    "id": "s33",
+    "name": "MLflow",
+    "url": "https://www.mlflow.org/docs/latest/tracking/",
+    "access": "HTTP 200",
+    "entrypoint_http_status": 200,
+    "access_scope": "repo_license_per_repo",
+    "registered": 2,
+    "enumeration_route": {
+      "mechanism": "mlflow.org docs (Sphinx) + github.com/mlflow/mlflow tree",
+      "target": "mlflow.org/docs/latest ; GitHub tree",
+      "pagination": "docs sitemap; GitHub tree API",
+      "robots": {
+        "status": 200,
+        "sitemaps": [
+          "https://mlflow.org/sitemap.xml",
+          "https://mlflow.org/docs/latest/sitemap.xml"
+        ],
+        "disallow_sample": [
+          "/docs/1.*/",
+          "/docs/2.*/",
+          "/docs/3.*/",
+          "/docs/0.*/"
+        ]
+      }
+    },
+    "source_status_scope": "entrypoint response only; individual material access is tracked separately"
+  },
+  {
+    "id": "s34",
+    "name": "W3C PROV-O",
+    "url": "https://www.w3.org/TR/prov-o/",
+    "access": "HTTP 403",
+    "entrypoint_http_status": 403,
+    "access_scope": "public_read",
+    "registered": 0,
+    "enumeration_route": {
+      "mechanism": "W3C TR page + PROV-* companion recs; no bulk",
+      "target": "w3.org/TR/prov-o/ (+ prov-constraints, prov-dm, prov-aq)",
+      "pagination": "none (few docs)",
+      "robots": {
+        "status": 403,
+        "sitemaps": null,
+        "disallow_sample": []
+      }
+    },
+    "source_status_scope": "entrypoint response only; individual material access is tracked separately"
+  },
+  {
+    "id": "s35",
+    "name": "arXiv",
+    "url": "https://info.arxiv.org/help/bulk_data.html",
+    "access": "HTTP 200",
+    "entrypoint_http_status": 200,
+    "access_scope": "license_gated_metadata_only",
+    "registered": 129959,
+    "enumeration_route": {
+      "mechanism": "arXiv API (export.arxiv.org/api/query, OAI-PMH) + bulk metadata (Kaggle snapshot) + S3 requester-pays full text",
+      "target": "export.arxiv.org/api/query ; info.arxiv.org/help/bulk_data ; OAI-PMH endpoint",
+      "pagination": "start/max_results (API caps 2k/call, 30k window); OAI-PMH resumptionToken",
+      "robots": {
+        "status": 200,
+        "sitemaps": null,
+        "disallow_sample": [
+          "/"
+        ]
+      }
+    },
+    "source_status_scope": "entrypoint response only; individual material access is tracked separately"
+  },
+  {
+    "id": "s36",
+    "name": "OpenAlex",
+    "url": "https://help.openalex.org/api/",
+    "access": "HTTP 200",
+    "entrypoint_http_status": 200,
+    "access_scope": "license_gated_metadata_only",
+    "registered": 3300,
+    "enumeration_route": {
+      "mechanism": "OpenAlex REST API + S3 snapshot (bulk)",
+      "target": "api.openalex.org/works (filter/search) ; OpenAlex snapshot on S3",
+      "pagination": "cursor paging (per-page 200, cursor=*)",
+      "robots": {
+        "status": 200,
+        "sitemaps": null,
+        "disallow_sample": []
+      }
+    },
+    "source_status_scope": "entrypoint response only; individual material access is tracked separately"
+  },
+  {
+    "id": "s37",
+    "name": "Semantic Scholar",
+    "url": "https://api.semanticscholar.org/api-docs/",
+    "access": "HTTP 429",
+    "entrypoint_http_status": 429,
+    "access_scope": "license_gated_metadata_only",
+    "registered": 13164,
+    "enumeration_route": {
+      "mechanism": "Semantic Scholar Graph API + datasets (bulk) endpoint",
+      "target": "api.semanticscholar.org/graph/v1 ; api.semanticscholar.org/datasets/v1",
+      "pagination": "offset/limit (search), token paging (bulk)",
+      "robots": {
+        "status": 429,
+        "sitemaps": null,
+        "disallow_sample": []
+      }
+    },
+    "source_status_scope": "entrypoint response only; individual material access is tracked separately"
+  },
+  {
+    "id": "s38",
+    "name": "Crossref",
+    "url": "https://www.crossref.org/documentation/retrieve-metadata/rest-api/",
+    "access": "HTTP 200",
+    "entrypoint_http_status": 200,
+    "access_scope": "metadata_public_fulltext_licensed",
+    "registered": 0,
+    "enumeration_route": {
+      "mechanism": "Crossref REST API (works, members, journals)",
+      "target": "api.crossref.org/works (+ filter by ISSN/type)",
+      "pagination": "cursor=* deep paging, rows<=1000",
+      "robots": {
+        "status": 404,
+        "sitemaps": null,
+        "disallow_sample": []
+      }
+    },
+    "source_status_scope": "entrypoint response only; individual material access is tracked separately"
+  },
+  {
+    "id": "s39",
+    "name": "ACM + IEEE publishers",
+    "url": "https://libraries.acm.org/digital-library/platform-and-features",
+    "access": "HTTP 403",
+    "entrypoint_http_status": 403,
+    "access_scope": "license_gated_metadata_only",
+    "registered": 0,
+    "enumeration_route": {
+      "mechanism": "ACM DL / IEEE Xplore item pages & conference proceedings TOC; ACM \"OpenTOC\" free proceedings",
+      "target": "dl.acm.org/conference/<conf>?tocHeading ; ieeexplore.ieee.org/xpl/conhome (metadata)",
+      "pagination": "TOC paging; ACM OpenTOC per-conference free links",
+      "robots": {
+        "status": 200,
+        "sitemaps": [
+          "https://libraries.acm.org/sitemap.xml"
+        ],
+        "disallow_sample": [
+          "/live-search\r",
+          "/404\r",
+          "/landing-page-documents/\r",
+          "/referenced-ctalist/\r"
+        ]
+      }
+    },
+    "source_status_scope": "entrypoint response only; individual material access is tracked separately"
+  },
+  {
+    "id": "s40",
+    "name": "USENIX",
+    "url": "https://www.usenix.org/conference/osdi24/technical-sessions",
+    "access": "HTTP 200",
+    "entrypoint_http_status": 200,
+    "access_scope": "public_read",
+    "registered": 0,
+    "enumeration_route": {
+      "mechanism": "usenix.org conference technical-sessions pages (per year/conf) + open PDFs",
+      "target": "usenix.org/conference/<conf><yy>/technical-sessions",
+      "pagination": "per-conference page; ~50-200 papers each",
+      "robots": {
+        "status": 200,
+        "sitemaps": null,
+        "disallow_sample": [
+          "/core/",
+          "/profiles/",
+          "/README.md",
+          "/web.config"
+        ]
+      }
+    },
+    "source_status_scope": "entrypoint response only; individual material access is tracked separately"
+  },
+  {
+    "id": "s41",
+    "name": "RISC-V ISA specs + ratified extensions + profiles",
+    "url": "https://riscv.org/technical/specifications/",
+    "access": "HTTP 200",
+    "entrypoint_http_status": 200,
+    "access_scope": "public_read",
+    "registered": 135,
+    "enumeration_route": {
+      "mechanism": "riscv.org technical/specifications index → per-spec PDFs; github.com/riscv/riscv-isa-manual (AsciiDoc sources, tagged releases); extension index"
+    },
+    "source_status_scope": "entrypoint response only; individual material access is tracked separately"
+  },
+  {
+    "id": "s42",
+    "name": "Apache TVM / Relax / TensorIR",
+    "url": "https://api.github.com/repos/apache/tvm",
+    "access": "HTTP 200",
+    "entrypoint_http_status": 200,
+    "access_scope": "repo_license_per_repo",
+    "registered": 139,
+    "enumeration_route": {
+      "mechanism": "tvm.apache.org/docs (Sphinx) + github.com/apache/tvm tree (python/tvm/tir, relax) + RFCs on discuss"
+    },
+    "source_status_scope": "entrypoint response only; individual material access is tracked separately"
+  },
+  {
+    "id": "s43",
+    "name": "SGLang (RadixAttention, HiCache) docs + repo",
+    "url": "https://api.github.com/repos/sgl-project/sglang",
+    "access": "HTTP 200",
+    "entrypoint_http_status": 200,
+    "access_scope": "repo_license_per_repo",
+    "registered": 351,
+    "enumeration_route": {
+      "mechanism": "docs.sglang.ai (Sphinx/MkDocs) + github.com/sgl-project/sglang tree; benchmark scripts"
+    },
+    "source_status_scope": "entrypoint response only; individual material access is tracked separately"
+  },
+  {
+    "id": "s44",
+    "name": "Accelergy (energy/area model generator)",
+    "url": "https://api.github.com/repos/Accelergy-Project/accelergy",
+    "access": "HTTP 200",
+    "entrypoint_http_status": 200,
+    "access_scope": "repo_license_per_repo",
+    "registered": 2,
+    "enumeration_route": {
+      "mechanism": "github.com/NVLabs/timeloop, /NVLabs/timeloop-accelergy-exercises, /Accelergy-Project/accelergy (git trees; YAML components and constraints)"
+    },
+    "source_status_scope": "entrypoint response only; individual material access is tracked separately"
+  },
+  {
+    "id": "s45",
+    "name": "Timeloop (dataflow mapping explorer)",
+    "url": "https://api.github.com/repos/NVLabs/timeloop",
+    "access": "HTTP 200",
+    "entrypoint_http_status": 200,
+    "access_scope": "repo_license_per_repo",
+    "registered": 4,
+    "enumeration_route": {
+      "mechanism": "github.com/NVLabs/timeloop, /NVLabs/timeloop-accelergy-exercises, /Accelergy-Project/accelergy (git trees; YAML components and constraints)"
+    },
+    "source_status_scope": "entrypoint response only; individual material access is tracked separately"
+  },
+  {
+    "id": "s46",
+    "name": "ARM Architecture Reference Manual (A-profile) + ARM system IP docs",
+    "url": "https://developer.arm.com/documentation/ddi0487/latest/",
+    "access": "HTTP 200",
+    "entrypoint_http_status": 200,
+    "access_scope": "license_gated_metadata_only",
+    "registered": 0,
+    "enumeration_route": {
+      "mechanism": "developer.arm.com/documentation/ddi0487/latest (ARM ARM, per-issue PDF/HTML); GIC/CCI docs under documentation/ index"
+    },
+    "source_status_scope": "entrypoint response only; individual material access is tracked separately"
+  },
+  {
+    "id": "s47",
+    "name": "Intel SDM (x86-64 ISA + platform)",
+    "url": "https://www.intel.com/content/www/us/en/developer/articles/technical/intel-sdm.html",
+    "access": "HTTP 200",
+    "entrypoint_http_status": 200,
+    "access_scope": "license_gated_metadata_only",
+    "registered": 0,
+    "enumeration_route": {
+      "mechanism": "intel.com SDM landing page → per-volume PDFs (vol 1-4) + order numbers; no API"
+    },
+    "source_status_scope": "entrypoint response only; individual material access is tracked separately"
+  },
+  {
+    "id": "s48",
+    "name": "PTX ISA (NVIDIA Parallel Thread Execution)",
+    "url": "https://docs.nvidia.com/cuda/parallel-thread-execution/",
+    "access": "HTTP 200",
+    "entrypoint_http_status": 200,
+    "access_scope": "public_read",
+    "registered": 1,
+    "enumeration_route": {
+      "mechanism": "docs.nvidia.com/cuda/parallel-thread-execution (Sphinx single doc, per-CUDA-version); docs.nvidia.com sitemap index"
+    },
+    "source_status_scope": "entrypoint response only; individual material access is tracked separately"
+  },
+  {
+    "id": "s49",
+    "name": "Khronos registry (SPIR-V, OpenCL, SYCL, Vulkan)",
+    "url": "https://registry.khronos.org/spir/",
+    "access": "HTTP 200",
+    "entrypoint_http_status": 200,
+    "access_scope": "license_gated_metadata_only",
+    "registered": 2,
+    "enumeration_route": {
+      "mechanism": "registry.khronos.org (static file registry) + github.com/KhronosGroup/*Specification (AsciiDoc) + spec release JSON"
+    },
+    "source_status_scope": "entrypoint response only; individual material access is tracked separately"
+  },
+  {
+    "id": "s50",
+    "name": "Accel-Sim / GPGPU-Sim",
+    "url": "https://api.github.com/repos/accel-sim/accel-sim-framework",
+    "access": "HTTP 200",
+    "entrypoint_http_status": 200,
+    "access_scope": "license_gated_metadata_only",
+    "registered": 3,
+    "enumeration_route": {
+      "mechanism": "github.com/accel-sim/accel-sim-framework (git trees; configs, trace format, SASS front-end) + ISCA/ISPASS papers"
+    },
+    "source_status_scope": "entrypoint response only; individual material access is tracked separately"
+  },
+  {
+    "id": "s51",
+    "name": "Vidur (LLM serving simulator)",
+    "url": "https://api.github.com/repos/microsoft/vidur",
+    "access": "HTTP 200",
+    "entrypoint_http_status": 200,
+    "access_scope": "repo_license_per_repo",
+    "registered": 4,
+    "enumeration_route": {
+      "mechanism": "github.com/microsoft/vidur (configs/profiles), github.com/astra-sim/astra-sim, github.com/defstore/LLMCompass (verify), SimAI (verify) — git trees + papers"
+    },
+    "source_status_scope": "entrypoint response only; individual material access is tracked separately"
+  },
+  {
+    "id": "s52",
+    "name": "Power/thermal models (HotSpot, 3D-ICE, McPAT, Accelergy)",
+    "url": "https://api.github.com/repos/HewlettPackard/mcpat",
+    "access": "HTTP 200",
+    "entrypoint_http_status": 200,
+    "access_scope": "license_gated_metadata_only",
+    "registered": 1,
+    "enumeration_route": {
+      "mechanism": "github VLSI-EDA? (verify) ; HotSpot (uvahotspot/HotSpot), 3D-ICE (esl-epfl/3d-ice), McPAT (HewlettPackard/mcpat) — git trees"
+    },
+    "source_status_scope": "entrypoint response only; individual material access is tracked separately"
+  },
+  {
+    "id": "s53",
+    "name": "Predictive PDKs (ASAP7, FreePDK45) + open RTL flow",
+    "url": "https://api.github.com/repos/The-OpenROAD-Project/asap7",
+    "access": "HTTP 200",
+    "entrypoint_http_status": 200,
+    "access_scope": "license_gated_metadata_only",
+    "registered": 1,
+    "enumeration_route": {
+      "mechanism": "github.com/The-OpenROAD-Project/asap7, FreePDK45 (NCSU) ; Yosys/Verilator for RTL→netlist"
+    },
+    "source_status_scope": "entrypoint response only; individual material access is tracked separately"
+  },
+  {
+    "id": "s54",
+    "name": "KV-cache reuse & PD-disaggregation (LMCache, Mooncake, NIXL)",
+    "url": "https://api.github.com/repos/kvcache-ai/Mooncake",
+    "access": "HTTP 200",
+    "entrypoint_http_status": 200,
+    "access_scope": "repo_license_per_repo",
+    "registered": 1,
+    "enumeration_route": {
+      "mechanism": "github.com/LMCache/LMCache, github.com/kvcache-ai/Mooncake, github.com/ai-dynamo/nixl (git trees + design docs)"
+    },
+    "source_status_scope": "entrypoint response only; individual material access is tracked separately"
+  },
+  {
+    "id": "s55",
+    "name": "Azure LLM inference trace + BurstGPT (session traces)",
+    "url": "https://api.github.com/repos/microsoft/AzurePublicDataset",
+    "access": "HTTP 200",
+    "entrypoint_http_status": 200,
+    "access_scope": "public_read",
+    "registered": 1,
+    "enumeration_route": {
+      "mechanism": "github.com/microsoft/AzurePublicDataset (AzureLLMInferenceTrace_*.csv), github.com/HPMLL/BurstGPT (data + paper), Alibaba cluster trace (form)"
+    },
+    "source_status_scope": "entrypoint response only; individual material access is tracked separately"
+  },
+  {
+    "id": "s56",
+    "name": "Long-context & agentic evaluation suites (RULER, LongBench, SWE-bench)",
+    "url": "https://api.github.com/repos/NVIDIA/RULER",
+    "access": "HTTP 200",
+    "entrypoint_http_status": 200,
+    "access_scope": "license_gated_metadata_only",
+    "registered": 1,
+    "enumeration_route": {
+      "mechanism": "github.com/NVIDIA/RULER, github.com/THUDM/LongBench, github.com/SWE-bench/SWE-bench (git trees + data)"
+    },
+    "source_status_scope": "entrypoint response only; individual material access is tracked separately"
+  },
+  {
+    "id": "s57",
+    "name": "OpenXLA / XLA HLO operation semantics",
+    "url": "https://openxla.org/xla/operation_semantics",
+    "access": "HTTP 200",
+    "entrypoint_http_status": 200,
+    "access_scope": "repo_license_per_repo",
+    "registered": 1,
+    "enumeration_route": {
+      "mechanism": "openxla.org/xla/operation_semantics (+ architecture, gpu backend docs) ; github.com/openxla/xla tree"
+    },
+    "source_status_scope": "entrypoint response only; individual material access is tracked separately"
+  },
+  {
+    "id": "s58",
+    "name": "Kernel benchmark suites (KernelBench, TritonBench, AITer)",
+    "url": "https://api.github.com/repos/ScalingIntelligence/KernelBench",
+    "access": "HTTP 200",
+    "entrypoint_http_status": 200,
+    "access_scope": "repo_license_per_repo",
+    "registered": 1,
+    "enumeration_route": {
+      "mechanism": "github.com/ScalingIntelligence/KernelBench, github.com/triton-lang/TritonBench (verify), AITer (verify) — git trees + task JSON"
+    },
+    "source_status_scope": "entrypoint response only; individual material access is tracked separately"
+  },
+  {
+    "id": "s59",
+    "name": "NCCL + collective communication docs",
+    "url": "https://docs.nvidia.com/deeplearning/nccl/user-guide/docs/",
+    "access": "HTTP 200",
+    "entrypoint_http_status": 200,
+    "access_scope": "repo_license_per_repo",
+    "registered": 126,
+    "enumeration_route": {
+      "mechanism": "docs.nvidia.com/deeplearning/nccl/user-guide/docs (Sphinx) + github.com/NVIDIA/nccl tree (tests, tuning)"
+    },
+    "source_status_scope": "entrypoint response only; individual material access is tracked separately"
+  },
+  {
+    "id": "s60",
+    "name": "Nsight Systems + CUPTI (timeline + counter APIs)",
+    "url": "https://docs.nvidia.com/nsight-systems/",
+    "access": "HTTP 200",
+    "entrypoint_http_status": 200,
+    "access_scope": "public_read",
+    "registered": 1,
+    "enumeration_route": {
+      "mechanism": "docs.nvidia.com/nsight-systems (Sphinx) ; docs.nvidia.com/cupti ; GitHub samples"
+    },
+    "source_status_scope": "entrypoint response only; individual material access is tracked separately"
+  },
+  {
+    "id": "s61",
+    "name": "UALink Consortium specification",
+    "url": "https://ualinkconsortium.org/",
+    "access": "HTTP 200",
+    "entrypoint_http_status": 200,
+    "access_scope": "license_gated_metadata_only",
+    "registered": 2,
+    "enumeration_route": {
+      "mechanism": "ualinkconsortium.org/specifications ; ultraethernet.org/specification ; infinibandta.org/specs — each is a small document index"
+    },
+    "source_status_scope": "entrypoint response only; individual material access is tracked separately"
+  },
+  {
+    "id": "s62",
+    "name": "Ultra Ethernet Consortium specification",
+    "url": "https://ultraethernet.org/",
+    "access": "HTTP 200",
+    "entrypoint_http_status": 200,
+    "access_scope": "license_gated_metadata_only",
+    "registered": 0,
+    "enumeration_route": {
+      "mechanism": "ualinkconsortium.org/specifications ; ultraethernet.org/specification ; infinibandta.org/specs — each is a small document index"
+    },
+    "source_status_scope": "entrypoint response only; individual material access is tracked separately"
+  },
+  {
+    "id": "s63",
+    "name": "IBTA InfiniBand architecture specification",
+    "url": "https://www.infinibandta.org/specs/",
+    "access": "HTTP 200",
+    "entrypoint_http_status": 200,
+    "access_scope": "license_gated_metadata_only",
+    "registered": 0,
+    "enumeration_route": {
+      "mechanism": "ualinkconsortium.org/specifications ; ultraethernet.org/specification ; infinibandta.org/specs — each is a small document index"
+    },
+    "source_status_scope": "entrypoint response only; individual material access is tracked separately"
+  },
+  {
+    "id": "s64",
+    "name": "OCP Open Rack V3 / power delivery + contribution repository",
+    "url": "https://www.opencompute.org/projects/open-rack-v3",
+    "access": "HTTP 200",
+    "entrypoint_http_status": 200,
+    "access_scope": "license_gated_metadata_only",
+    "registered": 1,
+    "enumeration_route": {
+      "mechanism": "opencompute.org/projects/open-rack-v3 (and /power) ; github.com/opencomputeproject/* repos (specs as PDF/markdown)"
+    },
+    "source_status_scope": "entrypoint response only; individual material access is tracked separately"
+  },
+  {
+    "id": "s65",
+    "name": "HBM/DRAM vendor datasheets (SK hynix, Micron, Samsung)",
+    "url": "https://www.skhynix.com/",
+    "access": "HTTP 200",
+    "entrypoint_http_status": 200,
+    "access_scope": "public_read",
+    "registered": 2,
+    "enumeration_route": {
+      "mechanism": "vendor product pages → per-part PDF datasheets (skhynix.com, micron.com/products, semiconductor.samsung.com) ; no API"
+    },
+    "source_status_scope": "entrypoint response only; individual material access is tracked separately"
+  },
+  {
+    "id": "s66",
+    "name": "Cloud instance & price catalogs (AWS EC2 price list, GCP, Azure)",
+    "url": "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonEC2/current/region_index.json",
+    "access": "HTTP 200",
+    "entrypoint_http_status": 200,
+    "access_scope": "public_read",
+    "registered": 0,
+    "enumeration_route": {
+      "mechanism": "pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonEC2/current/region_index.json → per-region index (100s MB); cloud.google.com/compute/docs/machine-resource (HTML); learn.microsoft.com azure VM sizes"
+    },
+    "source_status_scope": "entrypoint response only; individual material access is tracked separately"
+  },
+  {
+    "id": "s67",
+    "name": "MLPerf results repositories (measured submissions)",
+    "url": "https://api.github.com/repos/mlcommons/inference_results_v5.0",
+    "access": "HTTP 200",
+    "entrypoint_http_status": 200,
+    "access_scope": "public_read",
+    "registered": 0,
+    "enumeration_route": {
+      "mechanism": "github.com/mlcommons/inference_results_v*/ tree (per-round dirs: systems, measurements, compliance); MLCommons results dashboard"
+    },
+    "source_status_scope": "entrypoint response only; individual material access is tracked separately"
+  },
+  {
+    "id": "s68",
+    "name": "OpenReview API (submissions, reviews, decisions)",
+    "url": "https://api2.openreview.net/notes?limit=1",
+    "access": "HTTP 403",
+    "entrypoint_http_status": 403,
+    "access_scope": "public_read",
+    "registered": 0,
+    "enumeration_route": {
+      "mechanism": "api2.openreview.net/notes?invitation=...&limit=... (JSON, offset paging); venue invitation IDs per conference"
+    },
+    "source_status_scope": "entrypoint response only; individual material access is tracked separately"
+  },
+  {
+    "id": "s69",
+    "name": "DBLP (venue/author bibliography, bulk XML)",
+    "url": "https://dblp.org/search/publ/api?q=llm%20serving&format=json&h=1",
+    "access": "HTTP 202",
+    "entrypoint_http_status": 202,
+    "access_scope": "metadata_public_fulltext_licensed",
+    "registered": 0,
+    "enumeration_route": {
+      "mechanism": "dblp.org/search/publ/api?q=..&format=json (paged h/ f) + dblp.xml.gz bulk dump"
+    },
+    "source_status_scope": "entrypoint response only; individual material access is tracked separately"
+  },
+  {
+    "id": "s70",
+    "name": "IETF Datatracker (RFC + drafts)",
+    "url": "https://datatracker.ietf.org/api/v1/doc/document?limit=1",
+    "access": "HTTP 200",
+    "entrypoint_http_status": 200,
+    "access_scope": "public_read",
+    "registered": 0,
+    "enumeration_route": {
+      "mechanism": "datatracker.ietf.org/api/v1/doc/document (REST, paged) ; rfc-editor.org index"
+    },
+    "source_status_scope": "entrypoint response only; individual material access is tracked separately"
+  },
+  {
+    "id": "s71",
+    "name": "Metric/provenance metadata specs (OpenMetrics, Croissant, DCAT)",
+    "url": "https://prometheus.io/docs/instrumenting/exposition_formats/",
+    "access": "HTTP 200",
+    "entrypoint_http_status": 200,
+    "access_scope": "license_gated_metadata_only",
+    "registered": 2,
+    "enumeration_route": {
+      "mechanism": "prometheus.io/docs/instrumenting/exposition_formats ; docs.mlcommons.org/croissant ; w3.org/TR/vocab-dcat-3"
+    },
+    "source_status_scope": "entrypoint response only; individual material access is tracked separately"
+  },
+  {
+    "id": "s72",
+    "name": "Industry engineering blogs with measured numbers (NVIDIA technical blog, Meta/Google infra blogs)",
+    "url": "https://developer.nvidia.com/blog/",
+    "access": "HTTP 200",
+    "entrypoint_http_status": 200,
+    "access_scope": "public_read",
+    "registered": 2,
+    "enumeration_route": {
+      "mechanism": "developer.nvidia.com/blog (tag/category index, RSS) ; engineering.fb.com ; cloud.google.com/blog — RSS/sitemap crawl"
+    },
+    "source_status_scope": "entrypoint response only; individual material access is tracked separately"
+  },
+  {
+    "id": "s73",
+    "name": "PyTorch Inductor (torch.compile fusion/lowering)",
+    "url": "https://api.github.com/repos/pytorch/pytorch",
+    "access": "HTTP 200",
+    "entrypoint_http_status": 200,
+    "access_scope": "repo_license_per_repo",
+    "registered": 1,
+    "enumeration_route": {
+      "mechanism": "docs.pytorch.org/docs/stable/torch.compiler_inductor_provenance.html + github.com/pytorch/pytorch tree (torch/_inductor)"
+    },
+    "source_status_scope": "entrypoint response only; individual material access is tracked separately"
+  },
+  {
+    "id": "s74",
+    "name": "IREE (MLIR-based compiler/runtime for accelerators)",
+    "url": "https://api.github.com/repos/iree-org/iree",
+    "access": "HTTP 200",
+    "entrypoint_http_status": 200,
+    "access_scope": "repo_license_per_repo",
+    "registered": 90,
+    "enumeration_route": {
+      "mechanism": "iree.dev docs + github.com/iree-org/iree tree (compiler/, runtime/)"
+    },
+    "source_status_scope": "entrypoint response only; individual material access is tracked separately"
+  },
+  {
+    "id": "s75",
+    "name": "Constrained DSE/HPO tooling (Optuna, Ray Tune)",
+    "url": "https://docs.ray.io/en/latest/tune/index.html",
+    "access": "HTTP 200",
+    "entrypoint_http_status": 200,
+    "access_scope": "repo_license_per_repo",
+    "registered": 0,
+    "enumeration_route": {
+      "mechanism": "optuna.readthedocs.io + docs.ray.io/en/latest/tune + GitHub trees"
+    },
+    "source_status_scope": "entrypoint response only; individual material access is tracked separately"
+  },
+  {
+    "id": "s76",
+    "name": "SPEC benchmark results and power/energy methodology",
+    "url": "https://www.spec.org/power_ssj2008/results/",
+    "access": "HTTP 200",
+    "entrypoint_http_status": 200,
+    "access_scope": "license_gated_metadata_only",
+    "registered": 3,
+    "enumeration_route": {
+      "mechanism": "spec.org result pages (per benchmark, per system) + SPECpower published results index"
+    },
+    "source_status_scope": "entrypoint response only; individual material access is tracked separately"
+  },
+  {
+    "id": "s77",
+    "name": "CUDA math libraries + attention kernels (cuBLAS, cuDNN, CCCL/CUB, FlashAttention, FlashInfer)",
+    "url": "https://docs.nvidia.com/cuda/cublas/index.html",
+    "access": "HTTP 200",
+    "entrypoint_http_status": 200,
+    "access_scope": "license_gated_metadata_only",
+    "registered": 74,
+    "enumeration_route": {
+      "mechanism": "docs.nvidia.com deep-learning/CUDA library docs (Sphinx, per-version) + github Dao-AILab/flash-attention, flashinfer-ai/flashinfer, NVIDIA/cccl (raw READMEs, tree)"
+    },
+    "source_status_scope": "entrypoint response only; individual material access is tracked separately"
+  }
+]
