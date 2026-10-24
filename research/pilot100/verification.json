@@ -1,0 +1,180 @@
+{
+  "schema_version": "pilot-verification/v1",
+  "verified_at": "2026-10-24T21:35:43.452292+00:00",
+  "phase": "P1",
+  "product_scope": "100-source HTTP DSE decision-support workbench",
+  "source_counts": {
+    "materials": 100,
+    "revisions": 100,
+    "chunks": 1912,
+    "claims": 101,
+    "entities": 198,
+    "edges": 101
+  },
+  "category_counts": {
+    "compiler_kernel": 11,
+    "llm_model_workload": 18,
+    "hardware_architecture": 13,
+    "dse_optimization": 14,
+    "memory_interconnect": 10,
+    "simulation_measurement": 12,
+    "power_thermal_packaging": 7,
+    "serving_scheduling": 10,
+    "provenance_experiment": 5
+  },
+  "source_assertion_coverage": {
+    "materials_with_claims": 99,
+    "reference_only_materials": 1,
+    "reason": "Navigation overview with links; extraction returned no substantive assertion. No forced claim.",
+    "grade": "bounded_snippet_source_assertion_not_independent_validation"
+  },
+  "integrity": {
+    "cache_artifact_hashes_checked": 100,
+    "chunk_spans_checked": 1912,
+    "claim_quotes_offsets_checked": 101,
+    "broken_graph_references": 0,
+    "passed": true
+  },
+  "providers": {
+    "chat": {
+      "transport": "host_codex_cli",
+      "selected_model": "gpt-6.1-sol",
+      "reasoning_effort": "max",
+      "tested_cli_version": "0.164.0",
+      "model_revision_reported_by_cli": false,
+      "tool_calls_accepted": 0
+    },
+    "embedding": {
+      "provider": "deepinfra",
+      "model": "google/embeddinggemma-2",
+      "dimensions": 768,
+      "hosted_weight_revision": "not_reported"
+    },
+    "melete_experience_encoder": {
+      "backend": "native_hashing",
+      "dimensions": 256,
+      "separate_from_document_embedding": true
+    }
+  },
+  "tests": {
+    "command": "pytest -q",
+    "passed": 148,
+    "warnings": 1,
+    "warning": "Starlette/httpx TestClient deprecation",
+    "actual_http_e2e_gates": 18,
+    "actual_http_e2e_passed": 18,
+    "http_e2e_checks": {
+      "inventory": true,
+      "search_source_roundtrip": true,
+      "graph_source_link": true,
+      "native_minimal_dram_twin": true,
+      "native_component_bundle_boundary": true,
+      "experiment_unit_equivalent": true,
+      "experiment_pareto_tradeoff": true,
+      "experiment_missing_metric": true,
+      "experiment_cohort_mismatch": true,
+      "experiment_fixture_cleanup": true,
+      "job_hardware_submitted": true,
+      "job_hardware_result": true,
+      "job_kernel_submitted": true,
+      "job_kernel_result": true,
+      "needs_evidence_feedback_and_melete_query": true,
+      "job_experiment_submitted": true,
+      "job_experiment_result": true,
+      "experiment_snapshot_contains_feedback_memory": true
+    },
+    "browser": {
+      "viewport_checks": 22,
+      "widths": [
+        1440,
+        390,
+        375
+      ],
+      "horizontal_overflow": 0,
+      "http_network_console_page_errors": 0,
+      "status_badges_negative_state_checked": true
+    }
+  },
+  "actual_decision_results": [
+    {
+      "kind": "hardware",
+      "job_status": "succeeded",
+      "decision_status": "constraint_rejected",
+      "findings_count": 3,
+      "citation_count": 4,
+      "gaps_count": 4,
+      "proposals_count": 1
+    },
+    {
+      "kind": "kernel",
+      "job_status": "succeeded",
+      "decision_status": "insufficient_evidence",
+      "findings_count": 3,
+      "citation_count": 3,
+      "gaps_count": 5,
+      "proposals_count": 2
+    },
+    {
+      "kind": "experiment",
+      "job_status": "succeeded",
+      "decision_status": "insufficient_evidence",
+      "findings_count": 3,
+      "citation_count": 3,
+      "gaps_count": 5,
+      "proposals_count": 3
+    }
+  ],
+  "recovery": {
+    "controlled_restart_passed": true,
+    "new_llm_decision_calls": 0,
+    "same_feedback_event_replay_passed": true,
+    "same_memory_ids": true,
+    "canonical_receipt_synchronized": true,
+    "transport_outage_injected": false
+  },
+  "backup": {
+    "result": "sqlite_serialization_row_count_integrity_smoke_passed",
+    "tables": 15,
+    "archive_sha256": "1cf5994ed85f29b9b63838bef492995ee0165ebcaaa0299d9d1dad588f9ce440",
+    "scope": {
+      "included": "Logical row serialization from the allow-listed dse_knowledge tables, including schema_versions.",
+      "excluded": [
+        "Raw source artifact bytes; database rows retain metadata and paths only.",
+        "Native Melete document-store contents.",
+        "Off-host backup, replication, and retention.",
+        "PostgreSQL schema/role disaster recovery and a PostgreSQL restore test."
+      ],
+      "validation": "A local SQLite JSON serialization, row-count, and integrity smoke check only; this is not a full product backup or PostgreSQL disaster-recovery validation."
+    }
+  },
+  "advisory_reviews": {
+    "claim_support": {
+      "sample_size": 10,
+      "supported": 10,
+      "advisory_only": true
+    },
+    "source_triage": {
+      "sample_size": 100,
+      "observed_head_chars": 700,
+      "counts": {
+        "supporting_method": 35,
+        "direct_dse": 56,
+        "navigation_only": 9
+      },
+      "advisory_only": true,
+      "limits": "Head-only triage flags 9 navigation-like entries; it is not a complete document relevance evaluation. Some flags contain substantive API/version/provenance content. Source role curation remains preliminary."
+    }
+  },
+  "limitations": [
+    "Claims are source assertions from bounded snippets; no independent scientific validation.",
+    "Navigation and operational reference documents are present in the pilot; claim coverage is not a relevance score.",
+    "HAT schema structural validation only; no native HAT performance orchestration, committee integration, kernel execution, or B300 superiority result.",
+    "Assistant decision observations are native Melete trace_only; user feedback is stored and searchable.",
+    "Metric fixtures are synthetic controls and removed after verification; they are not measured results.",
+    "HTTP single-operator profile without login/tenant boundaries.",
+    "One fixed source revision; no incremental refresh or access revocation.",
+    "Local logical-row backup excludes artifact bytes, native Melete store, off-host backup, and PostgreSQL disaster recovery.",
+    "Fresh empty-project bootstrap was not executed; existing project migration/runtime permissions were tested.",
+    "100-source verification does not validate availability, quality, throughput or cost for 145748 materials."
+  ]
+}

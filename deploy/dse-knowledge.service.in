@@ -1,0 +1,27 @@
+[Unit]
+Description=DSE Knowledge HTTP workbench
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+WorkingDirectory=@REPOSITORY@
+Environment=DSE_CONFIG_DIR=%h/.config/dse-knowledge
+ExecStart=%h/.local/share/dse-knowledge/app-venv/bin/dse-knowledge serve
+Restart=on-failure
+RestartSec=3
+TimeoutStopSec=10
+KillMode=control-group
+UMask=0077
+CPUAccounting=true
+CPUQuota=200%
+MemoryAccounting=true
+MemoryMax=4G
+TasksMax=256
+LimitNOFILE=4096
+NoNewPrivileges=true
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=default.target

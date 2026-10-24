@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <meta name="description" content="DSE 자료의 출처와 근거를 확인하고 설계 판단과 실험을 기록하는 연구 워크벤치">
+  <title>DSE Knowledge Graph · 연구 워크벤치</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 48'%3E%3Crect width='48' height='48' rx='12' fill='%23111d32'/%3E%3Ctext x='24' y='34' text-anchor='middle' font-family='Georgia,serif' font-size='31' fill='%23a9d1ff'%3ED%3C/text%3E%3C/svg%3E">
+  <link rel="stylesheet" href="/static/style.css">
+  <script defer src="/static/app.js"></script>
+</head>
+<body>
+  <a class="skip-link" href="#page-content">본문으로 건너뛰기</a>
+  <div class="app-shell">
+    <aside class="sidebar" id="sidebar" aria-label="주 탐색">
+      <a class="brand" href="#overview" data-view="overview" aria-label="DSE 워크벤치 개요">
+        <span class="brand-mark" aria-hidden="true"><span>D</span><i></i></span>
+        <span class="brand-copy">
+          <span class="brand-title">DSE / KG</span>
+          <span class="brand-caption">RESEARCH WORKBENCH</span>
+        </span>
+      </a>
+
+      <div class="nav-label">WORKSPACE</div>
+      <nav class="primary-nav">
+        <button class="nav-item is-active" type="button" data-view="overview" aria-current="page">
+          <span class="nav-icon icon-overview" aria-hidden="true"></span><span>개요</span>
+        </button>
+        <button class="nav-item" type="button" data-view="materials">
+          <span class="nav-icon icon-materials" aria-hidden="true"></span><span>자료 라이브러리</span>
+        </button>
+        <button class="nav-item" type="button" data-view="retrieval">
+          <span class="nav-icon icon-search" aria-hidden="true"></span><span>근거 검색</span>
+        </button>
+        <button class="nav-item" type="button" data-view="graph">
+          <span class="nav-icon icon-graph" aria-hidden="true"></span><span>지식 그래프</span>
+        </button>
+        <button class="nav-item" type="button" data-view="decisions">
+          <span class="nav-icon icon-decisions" aria-hidden="true"></span><span>설계 판단</span>
+        </button>
+        <button class="nav-item" type="button" data-view="experiments">
+          <span class="nav-icon icon-experiments" aria-hidden="true"></span><span>실험 기록</span>
+        </button>
+      </nav>
+
+      <div class="sidebar-bottom">
+        <div class="pilot-note">
+          <span class="pilot-mark" aria-hidden="true"></span>
+          <div><strong>P1 자료 파일럿</strong><span>출처 기반 검토 보조</span></div>
+        </div>
+        <button class="nav-item nav-utility" type="button" data-view="system">
+          <span class="nav-icon icon-system" aria-hidden="true"></span><span>시스템 상태</span>
+        </button>
+        <p class="sidebar-foot">근거 범위 안에서만 판단합니다.<br>측정되지 않은 성능은 추정하지 않습니다.</p>
+      </div>
+    </aside>
+
+    <div class="mobile-backdrop" id="mobile-backdrop" hidden></div>
+    <main class="main-shell">
+      <header class="topbar">
+        <button class="mobile-menu" id="mobile-menu" type="button" aria-label="탐색 메뉴 열기" aria-expanded="false">
+          <span></span><span></span><span></span>
+        </button>
+        <div class="breadcrumb"><span>DSE KNOWLEDGE GRAPH</span><i aria-hidden="true">/</i><strong id="view-label">개요</strong></div>
+        <div class="topbar-actions">
+          <span class="connection-pill is-pending" id="connection-state" role="status" aria-live="polite">
+            <span class="connection-dot" aria-hidden="true"></span><span id="connection-label">데이터 연결 확인 중</span>
+          </span>
+          <button class="icon-button" id="refresh-button" type="button" aria-label="현재 화면 새로고침" title="새로고침">
+            <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M16.4 7.1A6.8 6.8 0 0 0 4.2 5.2L2.8 6.8M2.8 6.8V3.7M2.8 6.8h3.1M3.6 12.9A6.8 6.8 0 0 0 15.8 14l1.4-1.6m0 0v3.1m0-3.1h-3.1"/></svg>
+          </button>
+        </div>
+      </header>
+      <section class="page-content" id="page-content" tabindex="-1" aria-label="화면 내용"></section>
+      <footer class="app-footer">
+        <span>DSE / KG <span class="footer-sep">·</span> HTTP SELF-HOST PILOT</span>
+        <span>근거 인용은 주장 추적을 돕지만 독립 검증이나 물리 검증을 뜻하지 않습니다.</span>
+      </footer>
+    </main>
+  </div>
+  <div class="toast-region" id="toast-region" role="status" aria-live="polite" aria-atomic="true"></div>
+</body>
+</html>

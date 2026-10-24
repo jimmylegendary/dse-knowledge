@@ -1,8 +1,112 @@
-# DSE 지식·실험 시스템: 아키텍처와 구현 준비
+# DSE Knowledge Workbench — 지식·설계 판단·경험 환류
 
-상태: **architecture·planning + 실제 수집 대상 목록** · 기준일: 2026-10-21 KST · 보고용 webapp·metadata 목록 제공. RAG runtime·embedding·KG 등록 pipeline은 미실행.
+상태: **100개 자료 P1 runtime 실제 구축·연결·E2E 검증 완료** · 기준일: 2026-10-25 KST. 아래 P1 표가 실제 구현 범위이며, 나머지 architecture/scenario는 확장 설계다. 145,748건은 수집 대상 목록이고 그 전체를 본문 분석·KG 등록한 상태는 아니다.
 
 이 README는 DSE 결정별 지식 요구를 만들고, 허가된 source에서 evidence를 취득·구조화하며, hardware/kernel/experiment 결정에 쓰고 부족한 지식을 다시 수집하는 전체 구조를 설명한다. 2026-10-18 사용자 정정에 맞춘 상위 기준은 [2026-10-21-dse-knowledge-architecture.md](https://github.com/jimmylegendary/dse-knowledge/blob/docs/p0-episode-contracts/docs/superpowers/specs/2026-10-21-dse-knowledge-architecture.md)와 [2026-10-21-knowledge-architecture-plan.md](https://github.com/jimmylegendary/dse-knowledge/blob/docs/p0-episode-contracts/docs/superpowers/plans/2026-10-21-knowledge-architecture-plan.md)다. 이전 HAT native episode/adapter 계약은 세부 참고이며 이 architecture의 중심 gate가 아니다.
+
+## 실제 P1 — 100개 자료로 전체 경로를 확인
+
+Linux host에서 HTTP UI와 CLI를 실행하고 기존 Supabase project에 정본·검색·KG·job을 보존한다. 공개 원문 100개를 확보해 **1,912 chunks / 768차원 실제 embedding**을 저장했다. **99개 자료에서 Claim 101개·Entity 198개·Edge 101개**를 생성했다. 목차로 구성된 1개 자료는 검색 가능한 reference로 남기고 Claim을 만들지 않았다. Claim은 발췌에서 원문 인용과 절대 offset을 검증한 `source_assertion`이다. 원문 전체의 과학적 타당성을 검증한 결과는 아니다.
+
+```mermaid
+flowchart LR
+  S[100 source materials] --> I[Fetch · parse · revision/hash]
+  I --> C[Chunks + exact citation spans]
+  C --> E[DeepInfra embeddinggemma-2]
+  C --> L[Host Codex CLI]
+  E --> P[("Supabase PostgreSQL<br/>pgvector · FTS · claims · graph")]
+  L --> P
+  U[HTTP UI / CLI] --> R[Hybrid retrieval + RRF]
+  R <--> P
+  R --> D[Hardware · kernel · experiment review]
+  D --> Q[Evidence / unknown / gaps / proposals]
+  Q --> P
+  Q --> O[Transactional outbox]
+  O --> M[Native Melete trace / feedback memory]
+  M --> D
+  U --> V[Native HAT schema validation]
+  V --> Q
+```
+
+| 기능 | 실제 P1 경로 | 결과의 상한 |
+|---|---|---|
+| Insert | `sample → acquire → index → extract` CLI, 9개 분야 quota, 공개 원문·hash·revision·offset | 접근 실패·abstract-only는 전문 자료로 포함하지 않음; extraction은 기본 4개 분산 발췌(각 900자), 기본 1 claim/자료; 설정 상한 8개·각 1,400자·3 claims |
+| Read | UI 자료 목록·상세·인용, lexical + dense + exact + source-linked graph의 RRF | ranking은 근거 탐색이며 물리적 가능성의 증명이 아님 |
+| KG | PG의 Claim·Entity·Edge와 원문 연결, graph UI | P1 entity는 `concept` 분류; 관계/Claim kind와 source scope 보존. 정교한 HW ontology는 후속 해상도 |
+| DSE 판단 | 실제 Codex job, hardware/kernel/experiment 질문, citation whitelist, snapshot·gap·다음 제안 | 설계·kernel 제안은 실행·정확성·성능 검증 전 |
+| 필수 규칙 | 검색 top-k와 독립적인 전체 arithmetic rule 검사 | 제공된 숫자·단위의 연산만 검사; authority·physical feasibility는 미검증 |
+| 실험 | MetricVector 입력, 단위 정규화·cohort/method 검사·Pareto 비교 | 사용자 입력값 비교; HAT 성능 실행이나 B300 실측을 생성하지 않음 |
+| HAT | host의 실제 `hat-schema` 구조 검증 | component/assembly는 bundle 필요; committee·runtime simulation은 아직 미연결 |
+| Melete | 실제 native observe/query, canonical feedback·outbox·receipt | assistant 판단은 현재 native gate상 `trace_only`; user feedback의 검색 가능 여부는 실제 receipt로 구분 |
+| 복구 | durable jobs, 안정 decision ID, 단일 worker lock, outbox 재시도, local logical backup | 단일 host/process; off-host backup·PostgreSQL 재해복구·HA는 미검증 |
+
+브라우저: host에서 `http://127.0.0.1:8080`. LAN 접근 주소는 실행 host의 IP와 같은 port를 사용한다. 현재 profile은 단일 운영자용 HTTP self-host다. UI에 로그인·사용자별 권한 경계는 없으며 다중 사용자 배포 검증은 별도다.
+
+100개 목록과 공개 metadata/hash는 [manifest.json](https://github.com/jimmylegendary/dse-knowledge/blob/main/research/pilot100/manifest.json)에 보존한다. 본문·embedding·모델 응답·private 설정은 public Git에 올리지 않는다.
+
+### 실제 검증 결과 — 2026-10-25
+
+| 검증 | 실제 결과 | 해석 |
+|---|---|---|
+| Corpus/원문 연결 | 100 artifact hash · 1,912 chunk span · 101 quote/offset 검사 통과, 끊긴 graph reference 0 | 원문 인용의 정합성 확인; 과학적 사실 검증과 구분 |
+| Offline suite | `pytest -q`: 148 passed, deprecation warning 1 | env/provider/citation/retrieval/policy/API/recovery/운영 회귀 |
+| 실제 HTTP E2E | 18/18 gates 통과 | 실제 Supabase·embedding API·Codex·native HAT schema·Melete 사용 |
+| Hardware 판단 | `constraint_rejected`, 인용 4개 | 필수 arithmetic rule 13개 중 13번째 위반을 검색 top-k와 무관하게 거부 |
+| Kernel 판단 | `insufficient_evidence`, 인용 3개 | 확인된 근거와 미지원 ISA/정확성/성능 검증 gap을 분리 |
+| Experiment 판단 | `insufficient_evidence`, 인용 3개 | MetricVector 조건·tradeoff·추가 실험 제안; B300 수치 추측 없음 |
+| Melete 환류 | user feedback 저장·검색, 다음 experiment snapshot에서 동일 memory 참조 확인 | assistant 판단은 native `trace_only` 유지 |
+| 재시작/재전달 | 동일 decision ID 복구, 추가 LLM 호출 0; feedback 재전달 시 동일 memory ID·정본 receipt 유지 | 제어된 재시작/재전달 시험; 실제 네트워크 장애 주입은 아님 |
+| Browser | desktop 1440 / mobile 390·375의 22개 화면 상태, overflow·HTTP/network/console/page 오류 0 | 검색·인용·graph·판단 이력/상세·시스템 상태 확인 |
+| Local snapshot | 15개 table 행 직렬화·SQLite 행 수/무결성 smoke 통과 | 전체 제품 복구나 PostgreSQL restore 검증은 아님 |
+
+코드/공개 집계는 [verification.json](https://github.com/jimmylegendary/dse-knowledge/blob/main/research/pilot100/verification.json)에 있다. 실제 3개 판단은 모두 tool call 0인 결과만 저장했다. 초기 시험 중 timeout·host tool 설정 혼입은 실패로 남겼고, per-call instruction/skill/MCP 설정을 격리한 뒤 같은 미완료 job ID를 재시도했다. Codex의 JSONL이 backend model revision을 보고하지 않아 model ID는 요청 설정값으로 기록한다.
+
+자료 적합성은 별도 과제다. 100개 제목·요약·앞 700자를 Jev로 보조 검토했으며, 56개는 직접 DSE, 35개는 보조 방법론, 9개는 navigation 유사 자료로 표시됐다. 앞부분만 본 분류이므로 RISC-V 소개·API 설명·설치 version mapping처럼 실제 본문이 있는 자료도 flag된다. 이 수치를 전체 본문 품질 인증으로 사용하지 않는다. 문서/운영 reference가 섞인 pilot이며, 14만건 확장 전 source 역할 분류와 적합성 평가를 강화한다.
+
+### 실행과 설정
+
+Python 3.12+, `uv`, 기존 Supabase project, 로그인된 host Codex CLI, 선택된 embedding API가 필요하다. `uv.lock`으로 Python dependencies를 고정한다.
+
+```bash
+UV_PROJECT_ENVIRONMENT="$HOME/.local/share/dse-knowledge/app-venv" uv sync --frozen --extra test --python 3.12
+# owner-only 설정을 준비한 뒤 기존 project에 schema/최소권한 role을 설정한다.
+"$HOME/.local/share/dse-knowledge/app-venv/bin/python" scripts/bootstrap-database.py
+"$HOME/.local/share/dse-knowledge/app-venv/bin/dse-knowledge" serve
+```
+
+| 설정 파일 | 필요한 항목 | 보관 |
+|---|---|---|
+| `database.env` | 기존 Supabase pooler의 관리자 user/password, DB/schema, `verify-full`, 공식 CA 경로 | `~/.config/dse-knowledge`, 디렉터리 0700·파일 0600; bootstrap 전용 |
+| `runtime-database.env` | bootstrap이 생성한 `dse_knowledge_app.<ref>` 전용 자격증명 | HTTP runtime은 관리자 DB 설정을 사용하지 않음 |
+| `llm.env` | `CHAT_PROVIDER=codex_cli`, `CHAT_MODEL_ID=gpt-6.1-sol`, reasoning `max`, `CODEX_EXECUTABLE`, `CODEX_WORKDIR`, `CHAT_TIMEOUT_SECONDS` (1–600초; 기본 180초, 현재 profile 360초) | API key 복사 없이 기존 host CLI 로그인 사용 |
+| `embedding.env` | `EMBEDDING_PROVIDER=deepinfra`, `EMBEDDING_MODEL_ID=google/embeddinggemma-2`, 768차원, API key | document/query task 분리, provider의 task prefix 사용 |
+| `app.env` | data/artifact root, bind/port, extraction batch 1–5·발췌 2–8·발췌 길이 100–1,400·claim 1–3 | 기본 bind는 loopback; 현재 host profile은 `0.0.0.0:8080` |
+
+실제 지원하는 설정 예시는 [config.env.example](https://github.com/jimmylegendary/dse-knowledge/blob/main/deploy/config.env.example)에 있다. 이 P1은 Codex CLI + DeepInfra adapter 조합을 실행한다. OpenRouter·다른 model/embedding/reranker는 architecture 후보이며 현재 adapter에서 검증하지 않은 설정은 거부한다.
+
+서비스 설치: `python scripts/install-user-service.py`. systemd user service가 HTTP process와 자식의 CPU 200%, RAM 4 GiB, stop timeout을 제한한다. 수집은 2개 fetch worker, 생성은 process별 1개 호출로 제한한다. 이번 일회성 100개 추출은 ID가 겹치지 않는 4개 application process로 분할했고, HTTP 판단 worker는 1개다. 로그는 `journalctl --user -u dse-knowledge.service -f`로 확인한다. 자동 로그인 없이 부팅 시 user manager를 유지하는 linger/OS 정책은 host 설정에 따른다.
+
+CLI 작업은 동일 venv의 `dse-knowledge`로 실행한다.
+
+```bash
+dse-knowledge sample --registry /absolute/path/to/registry.sqlite --count 240 --output /absolute/path/to/candidates.json
+dse-knowledge acquire --candidates /absolute/path/to/candidates.json
+dse-knowledge index
+dse-knowledge extract
+dse-knowledge status
+python scripts/verify-live.py
+python scripts/backup-pilot.py
+```
+
+`acquire/index/extract`는 실제 원문/API/모델/DB를 사용한다. index는 이미 ingested인 자료, extract는 이미 Claim이 있는 자료를 건너뛴다. P1은 고정된 한 source revision을 기준으로 하며, 변경 감지·revision 교체·권한 철회·대량 재색인은 아래 확장 설계를 구현할 때 추가한다.
+
+| 해상도 | 종료 때 가능한 전체 여정 | 후속 확장 |
+|---|---|---|
+| P1 | 100개 원문→KG/검색→근거 있는 DSE 보조→실험 입력/비교→feedback/경험 | 단일 운영자·bounded extraction·native 지원 범위 명시 |
+| P2 | 같은 여정을 조직 corpus와 더 많은 자료에서 반복 | incremental version/권한, batch 재개·평가, HAT run orchestration, ontology/committee 확대 |
+| P3 | 같은 여정에서 자동 탐색과 검증의 깊이를 높임 | architecture/kernel 후보 실행·정확성/성능 검증, optimizer 비교·대규모 운영 |
+
+P2에서 145,748개를 처리하기 전 source 권한·원문 가용성·추출 품질·비용/처리량·index 용량을 검증한다. 100개 E2E 성공이 전체 자료의 가용성이나 동일한 품질을 보장하지 않는다. `backup-pilot.py`는 DB 행의 local logical serialization과 SQLite smoke check만 검증한다. 원문 artifact bytes와 native Melete DB, off-host 보관 및 PostgreSQL 재해복구는 이 snapshot에 포함하지 않는다.
 
 ## 실제 자료 목록 수집 결과 — 2026-10-21
 
@@ -125,58 +229,17 @@ flowchart LR
 
 ## 현재 dev baseline과 infra 경계
 
-아래는 이번 설계 준비에서 확인된 dev baseline이다. Supabase account 존재는 project·namespace 권한이나 연결 완료를 뜻하지 않는다. 이 README를 위해 계정에 접속하거나 host 설정을 바꾸지 않았다.
-
-```mermaid
-%%{init: {'theme':'base','themeVariables':{'background':'#f6f8fa','primaryColor':'#f6f8fa','primaryTextColor':'#1f2328','primaryBorderColor':'#d1d9e0','lineColor':'#59636e','secondaryColor':'#ffffff','tertiaryColor':'#ffffff'},'flowchart':{'curve':'stepAfter'}}}%%
-flowchart LR
-  U[User or agent] --> W[Linux CPU worker<br/>수집·파싱·검색·분석]
-  W --> PG[Existing Supabase PostgreSQL<br/>정본·Job/Outbox·pgvector·FTS·typed graph]
-  W --> A[Local artifact storage]
-  W --> PI[Configurable provider interface]
-  PI --> OR[OpenRouter option]
-  PI --> CX[Host Codex CLI option<br/>원격 모델 추론]
-  W --> LC[Optional CPU-local embedding/rerank]
-  classDef normal fill:#f6f8fa,stroke:#d1d9e0,color:#1f2328;
-  classDef focal fill:#0969da,stroke:#0969da,color:#ffffff;
-  classDef external fill:#ffffff,stroke:#d1d9e0,color:#59636e;
-  class W,PG focal;
-  class U,A,PI,LC normal;
-  class OR,CX external;
-```
-
-| 영역 | 현재 설계 기준 | 확인·준비 상태 |
+| 영역 | 실제 사용 구성 | 확인 범위 |
 |---|---|---|
-| Canonical data layer | Existing Supabase account; PostgreSQL, pgvector/FTS, typed-graph representation in PG | Dev baseline only; project ref, database route, schema permission, migration authority unconfirmed; Neo4j remains a later challenger, not the dev default |
-| Compute / job state | Current Linux host의 CPU worker; durable job state와 transactional outbox는 canonical ledger와 같은 PostgreSQL에 보존 | No service/configuration installed. Read-only observation dated 2026-10-21: 16 logical CPUs, 27.2 GiB total RAM. 가용 메모리는 변동하며 실제 parse/embedding 처리량은 미측정 |
-| Raw/document/run artifacts | Local artifact store on the current host | No dedicated backup mount/quota confirmed. Workspace free space is not backup capacity. Managed object storage is a future scale/recovery option, not an initial dependency |
-| Chat/model provider | OpenRouter or Codex through a configurable provider interface and existing environment names | Provider/model ID, account entitlement and auth mode remain unselected. No API key is requested, issued or pasted |
-| Embedding/reranking | Separate interfaces; CPU-local route possible; remote route optional | No GPU required or requested now. CPU throughput and retrieval quality are unmeasured |
-| Cloud and exposure | No new cloud resource; local development boundary | AWS is prohibited. Namespace, TTL/retention, CPU worker count, request/source size limits and query budgets are proposals, not active settings |
-| Internal data | Confluence, internal runs and HAT/Melete artifacts only through owner-approved allowlist | No private corpus or experiment log has been connected or bulk-collected |
+| Compute | 기존 Linux host CPU, self-host HTTP/systemd | AWS와 local GPU는 사용하지 않음 |
+| Canonical / retrieval / graph | Supabase PostgreSQL, pgvector 768/HNSW, FTS, relational typed graph | 정본 15 tables와 최소권한 role; Neo4j는 후속 challenger |
+| Artifact | host의 content-addressed raw files와 local logical backup | remote object storage·off-host 복구 미연결 |
+| Chat | host Codex CLI / selected gpt-6.1-sol, max | 실제 structured generation, 완료 이벤트·tool call 없음·인용 검증 |
+| Embedding | DeepInfra google/embeddinggemma-2 | document/query task, 768차원/finite/norm/index 검증 |
+| Native | host의 hat-schema + Melete core | 구조 검증·observe/query; HAT 성능 simulation 미연결 |
+| 사내 자료 | 연결하지 않음 | Confluence 권한·corpus·사내 run은 후속 범위 |
 
-All 48 existing names in [.env.example](https://github.com/jimmylegendary/dse-knowledge/blob/docs/p0-episode-contracts/.env.example) are configuration-contract names only; values there are blank/proposals and are not instructions to request credentials. No new environment key is introduced.
-
-| Group | Existing environment names |
-|---|---|
-| Supabase / namespace | <code>SUPABASE_PROJECT_REF</code>, <code>SUPABASE_DB_MODE</code>, <code>SUPABASE_AUTH_MODE</code>, <code>SUPABASE_DB_URL_REF</code>, <code>SUPABASE_DB_URL</code>, <code>SUPABASE_DB_SCHEMA</code>, <code>DSE_NAMESPACE</code>, <code>SUPABASE_DB_HOST</code>, <code>SUPABASE_DB_PORT</code>, <code>SUPABASE_DB_NAME</code>, <code>SUPABASE_DB_PASSWORD_REF</code>, <code>SUPABASE_DB_PASSWORD</code>, <code>SUPABASE_URL</code>, <code>SUPABASE_PUBLISHABLE_KEY_REF</code>, <code>SUPABASE_PUBLISHABLE_KEY</code> |
-| Linux worker / local paths | <code>DSE_SERVICE_MODE</code>, <code>DSE_SERVICE_USER</code>, <code>DSE_DATA_ROOT</code>, <code>DSE_ARTIFACT_ROOT</code>, <code>DSE_MODEL_CACHE_ROOT</code>, <code>DSE_LOG_ROOT</code>, <code>DSE_BACKUP_ROOT</code>, <code>DSE_CPU_WORKERS</code>, <code>DSE_BIND_HOST</code>, <code>DSE_ALLOWED_CIDRS</code> |
-| Chat | <code>CHAT_PROVIDER</code>, <code>CHAT_BASE_URL</code>, <code>CHAT_MODEL_ID</code>, <code>CHAT_AUTH_MODE</code>, <code>CHAT_API_KEY_REF</code>, <code>OPENROUTER_API_KEY</code>, <code>CODEX_EXECUTABLE</code>, <code>CODEX_AUTH_MODE</code>, <code>CODEX_API_KEY_REF</code>, <code>CODEX_API_KEY</code> |
-| Embedding | <code>EMBEDDING_PROVIDER</code>, <code>EMBEDDING_BASE_URL</code>, <code>EMBEDDING_MODEL_ID</code>, <code>EMBEDDING_DIMENSIONS</code>, <code>EMBEDDING_AUTH_MODE</code>, <code>EMBEDDING_API_KEY_REF</code>, <code>DSE_EMBEDDING_API_KEY</code> |
-| Reranker | <code>RERANKER_PROVIDER</code>, <code>RERANKER_BASE_URL</code>, <code>RERANKER_MODEL_ID</code>, <code>RERANKER_AUTH_MODE</code>, <code>RERANKER_API_KEY_REF</code>, <code>DSE_RERANKER_API_KEY</code> |
-
-Secrets stay in an owner-approved secret manager or untracked local environment. The README names existing references only; it contains no secret value, private path, or provider credential request.
-
-### 요청·자원 한도와 설정 상태
-
-| Input | Decision | Current status |
-|---|---|---|
-| Namespace | Existing key <code>DSE_NAMESPACE</code>; example namespace is a proposal only | Not finalized |
-| Worker count | Existing <code>DSE_CPU_WORKERS</code>; two workers is a proposal only | No service running |
-| TTL/retention | Separate raw, derived, index, cache, event and backup retention | Policy and durations are unselected proposals |
-| Work limits | Per-task budget, source bytes/pages, queue depth, parse timeout, retrieval budget, max result payload | Contract requirements to design; no active limiting settings |
-| Memory | 모델별 peak RAM을 측정하고 worker concurrency·cache 한도를 설정; remote/cpu-local route는 교체 가능 | CPU 경로의 용량·처리량 평가 전이며 GPU나 RAM 증설을 요구하지 않음 |
-| Credential timing | Provider auth reference can be set later if an approved route needs it | No API key is requested or issued |
+host→Supabase pooler 연결은 공식 CA의 `verify-full`이다. pooler 내부→PostgreSQL 구간까지 end-to-end TLS를 검증했다는 뜻은 아니다. 실제 key와 비밀번호는 owner-only 설정에만 있고 public repo에는 placeholder만 보존한다.
 
 ## DSE 결정별 필요한 지식
 
@@ -616,7 +679,7 @@ flowchart LR
 
 ## 설계 단계와 준비 상태
 
-D1–D5 are architecture design-detail phases, not implementation phases P1–P5. Every design phase keeps all DSE domains and the requirement→source→schema→write/read→decision→experiment/feedback loop.
+다음 D1–D5 표는 2026-10-21의 architecture 설계 이력이다. 현재 실행 상태와 P1–P3 해상도는 위 실제 P1 표가 우선한다. D1–D5 are architecture design-detail phases, not implementation phases P1–P5. Every design phase keeps all DSE domains and the requirement→source→schema→write/read→decision→experiment/feedback loop.
 
 | 설계 phase | Full-scope increase | Status |
 |---|---|---|
@@ -642,7 +705,7 @@ The implementation phase references P0–P5 in [phase-work-packages.md](https://
 | [deployment-profiles.md](https://github.com/jimmylegendary/dse-knowledge/blob/docs/p0-episode-contracts/docs/deployment-profiles.md) | Safe profile and environment boundaries |
 | [integration-state-map.md](https://github.com/jimmylegendary/dse-knowledge/blob/docs/p0-episode-contracts/docs/contracts/integration-state-map.md) | Detailed HAT/Melete/native-result interpretation only |
 
-**Not yet done:** no raw standards or internal corpus imported; no Supabase project queried; no AWS used; no GPU acquired; no API key requested/issued; no service, adapter, model inference, index migration or experiment runtime executed. README diagrams are Mermaid for GitHub rendering. Colors use the supplied github-primer-light profile: paper #f6f8fa, ink #1f2328, muted #59636e, accent #0969da, border #d1d9e0. GitHub controls final font/layout; no SVG export or pixel-level typography proof is claimed.
+**현재 경계:** 위 P1 표와 실제 검증 기록을 실행 사실의 기준으로 삼는다. 아래 상세 architecture는 확장 설계를 포함하며, 사내 corpus·HAT 성능 orchestration·B300 실측·자동 kernel 실행은 아직 수행하지 않았다. README diagrams are Mermaid for GitHub rendering. Colors use the supplied github-primer-light profile: paper #f6f8fa, ink #1f2328, muted #59636e, accent #0969da, border #d1d9e0. GitHub controls final font/layout; no SVG export or pixel-level typography proof is claimed.
 
 ## Diagram 스타일 프로필
 

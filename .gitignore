@@ -8,3 +8,13 @@ __pycache__/
 /data/raw/
 /data/private/
 /secrets/
+
+.venv/
+__pycache__/
+.pytest_cache/
+*.egg-info/
+.superpowers/
+.env
+.env.*
+!.env.example
+runtime/
