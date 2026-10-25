@@ -23,13 +23,13 @@
 
 ## Tasks
 
-- [ ] 1. Spec/기존worktree/ledger/preflight builder 검토. Root가minor구현선택을ruling으로고정한다. 기존161testsbaseline이이미verified임을보존한다.
-- [ ] 2. A TDD: source-role/contextschema, parameter·condition proof/normalization, curatedtopic registry, structuredextract opt-in; backwardtests와반례통과.
-- [ ] 3. B TDD: nonempty lexical·boundedgraph·role routing/rerank/diversity/neighbor·querycache; fakeStoretests→root실제후보trace검증.
-- [ ] 4. C TDD: durablecollectionlease·heartbeat·resume·counter·quota/storageguard, offline failurefixtures와DDL contract 검증.
-- [ ] 5. Root schema/Store/annotationprojection/rolehistory/pipeline/advisoryadapter/modelresultcache 통합. 필요한adminmigration만root적용, runtime권한확인. 기존100curation을revisionproof와함께반영한다.
-- [ ] 6. Root UI/CLI에서role/typedcontext/topic 표시와purpose선택, DSEsnapshot refs/Melete환류·metric·HAT구조검증회귀. 별도workerreview와root실제E2E후Q1deploy.
-- [ ] 7. 고정30regression와결과독립새질의/pairedlanguage로Q1평가. 실제3blindmodelprobe·feedback/native역할상한, 재시작/리트라이검증. Q1전체제품gate와정직한한계를공개한다.
+- [x] 1. Spec/기존worktree/ledger/preflight builder 검토. Root가minor구현선택을ruling으로고정한다. 기존161testsbaseline이이미verified임을보존한다.
+- [x] 2. A TDD: source-role/contextschema, parameter·condition proof/normalization, curatedtopic registry, structuredextract opt-in; backwardtests와반례통과.
+- [x] 3. B TDD: nonempty lexical·boundedgraph·role routing/rerank/diversity/neighbor·querycache; fakeStoretests→root실제후보trace검증.
+- [x] 4. C TDD: durablecollectionlease·heartbeat·resume·counter·quota/storageguard, offline failurefixtures와DDL contract 검증.
+- [x] 5. Root schema/Store/annotationprojection/rolehistory/pipeline/advisoryadapter/modelresultcache 통합. 필요한adminmigration만root적용, runtime권한확인. 기존100curation을revisionproof와함께반영한다.
+- [x] 6. Root UI/CLI에서role/typedcontext/topic 표시와purpose선택, DSEsnapshot refs/Melete환류·metric·HAT구조검증회귀. 별도workerreview와root실제E2E후Q1deploy.
+- [x] 7. 고정30regression와결과독립새질의/pairedlanguage로Q1평가. 실제3blindmodelprobe·feedback/native역할상한, 재시작/리트라이검증. Q1전체제품gate와정직한한계를공개한다.
 - [ ] 8. Root rawregistry에서1000용candidate준비, DB/host/공간/quota budget실측. 실제acquire→assess→index→structuredclaim lease workers를안전하게실행. 부분완료를전체완료로세지않는다.
 - [ ] 9. 실제1000의source/Claim/조건/graph/sourceRole와다른material새질의·같은UI/LLM/nativefeedback/metric/HAT회귀검증. Tokens/time/실패·재개·원문공간·DBindex/throughput평가.
 - [ ] 10. 별도최종review→root원자료·test·secret검증→README/metadata-only report→authorizedGitHub게시. Runtimeworktree는서비스경로여서삭제하지않는다.
@@ -37,3 +37,5 @@
 ## Ledger
 
 2026-10-25 start: accepted补완목표와f2e113cbaseline확인. 기존실서비스worktree를재사용하며개별구현선택은master판단으로상기spec에명시했다. 사용자에게재승인이나도메인/HTTPS질문을하지않는다.
+
+2026-10-25 08:51 UTC checkpoint: Tasks1–7/Q1 전체 제품은 실제 검증 후 게시했다(6a3fc9d, e5b90bd). Task8/Q2는 기존100포함1,000 target으로 실행 중이며 아직 미완료다. 반복 provider 오류의 bounded timeout/실패 ledger/repair 진단 보완은382tests와별도리뷰PASS후7dee23a로게시, live0.2.1에서같은batch재개를확인했다. Task9/10 최종평가·전체완료gate는1,000 corpus고정후수행한다. 상세 실행 증거는 private qa/quality-v2와 작업 ledger에 보존한다.
