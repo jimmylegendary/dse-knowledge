@@ -35,6 +35,7 @@
 - [ ] 9. 실제1000의source/Claim/조건/graph/sourceRole와다른material새질의·같은UI/LLM/nativefeedback/metric/HAT회귀검증. Tokens/time/실패·재개·원문공간·DBindex/throughput평가.
 - Task9 preflight: 수집 중 C가 ruling14의 helper-only guard를 TDD로 보완하고 별도 worker가 리뷰한다. Root는 fake HTTP의 accepted-but-ID-unsaved·inventory mismatch·scope mismatch 반례를 실제 helper에 적용해 provider 호출 없이 확인한다. 제품/API/DDL·수집 모델·read policy는 바꾸지 않는다. 실제1,000 완료 후 manifest equality→공개회귀→policy freeze→새gold/retrieval→blind3 실행·의미검토→native E2E/feedback 순서를 지킨다.
 - Task8 recovery: 934개 storage block은 ruling15에 따라 실제 atomic writer/scanner 경쟁을 격리 재현하고, bounded full-pass 재확인을 TDD·독립 리뷰·root 실제 파일 검증 후 배포한다. Baseline과 완료 데이터의 hash 보존, old coordinator/active lease 0, 같은 batch reasoned resume를 확인한다. Storage 오류를 provider 실패로 기록하거나 실패한 파일의 byte 수를 누락하지 않는다. Target1,000과 나머지 gate는 유지한다.
+- Task8 freeze: ruling16에 맞는 metadata-only freeze helper v2를 별도 파일로 만들고 v1/hash를 보존한다. Native terminal indexed failure는 오류와 함께 inventory에만 포함하며 KG 완료로 세지 않는다. Unindexed failure·active/미종료 stage·canonical/index 누락은 여전히 gate 실패다. 독립 리뷰와 반례 self-test 뒤 실제1,000 고정을 실행하고, all-eligible KG90%와 Task9 평가를 별도로 통과해야 한다.
 - [ ] 10. 별도최종review→root원자료·test·secret검증→README/metadata-only report→authorizedGitHub게시. Runtimeworktree는서비스경로여서삭제하지않는다.
 
 ## Ledger
