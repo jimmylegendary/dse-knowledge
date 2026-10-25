@@ -9,6 +9,7 @@ import hashlib
 import json
 import math
 import time
+from contextlib import contextmanager
 import urllib.request
 from pathlib import Path
 import re
@@ -292,6 +293,12 @@ class CaptureStore:
         self.channels = {}
         self.timings = Counter()
         self.channel_counts = Counter()
+        self.dense_scope_count = None
+
+    @contextmanager
+    def connection(self):
+        with self.store.connection() as connection:
+            yield _CapturedConnection(self, connection)
 
     def rows(self, sql, args=()):
         lowered = sql.lower()
@@ -322,6 +329,93 @@ class CaptureStore:
 
     def invocation(self, *args):
         return self.store.invocation(*args)
+
+
+class _CapturedConnection:
+    def __init__(self, capture, connection):
+        self.capture = capture
+        self.connection = connection
+
+    def execute(self, sql, args=()):
+        lowered = sql.lower()
+        channel = ('dense_scope_count' if 'visible_chunk_count' in lowered else
+                   'dense' if 'c.embedding <=>' in lowered else None)
+        started = time.monotonic() if channel else None
+        try:
+            cursor = self.connection.execute(sql, args)
+        except Exception:
+            if channel:
+                self.capture.timings[channel] += time.monotonic() - started
+            raise
+        if not channel:
+            return cursor
+        return _CapturedCursor(self.capture, channel, cursor, started)
+
+    def __getattr__(self, name):
+        return getattr(self.connection, name)
+
+
+class _CapturedCursor:
+    def __init__(self, capture, channel, cursor, started):
+        self.capture = capture
+        self.channel = channel
+        self.cursor = cursor
+        self.started = started
+        self.timing_recorded = False
+
+    def _finish_timing(self):
+        if not self.timing_recorded:
+            self.capture.timings[self.channel] += time.monotonic() - self.started
+            self.timing_recorded = True
+
+    def _record(self, result, *, multiple):
+        self._finish_timing()
+        if self.channel == 'dense_scope_count':
+            row = (result[0] if multiple and result else result)
+            if row is not None:
+                self.capture.dense_scope_count = row.get('visible_chunk_count')
+                self.capture.channel_counts['dense_scope_count_query'] = 1
+            else:
+                self.capture.channel_counts['dense_scope_count_query'] = 0
+            return
+        rows = result if multiple else ([result] if result is not None else [])
+        if rows:
+            self.capture.channels[self.channel] = self.capture.channels.get(self.channel, []) + rows
+        self.capture.channel_counts[self.channel] = len(self.capture.channels.get(self.channel, []))
+
+    def fetchone(self):
+        try:
+            result = self.cursor.fetchone()
+        except Exception:
+            self._finish_timing()
+            raise
+        self._record(result, multiple=False)
+        return result
+
+    def fetchall(self):
+        try:
+            result = self.cursor.fetchall()
+        except Exception:
+            self._finish_timing()
+            raise
+        self._record(result, multiple=True)
+        return result
+
+    def __getattr__(self, name):
+        return getattr(self.cursor, name)
+
+
+def execution_status(rows, http_rows):
+    errors = sum(row.get('error_type') is not None for row in rows)
+    http_errors = sum(
+        row.get('error_type') is not None or row.get('status') != 200
+        for row in http_rows
+    )
+    return {
+        'errors': errors,
+        'http_errors': http_errors,
+        'execution_gate_passed': errors == 0 and http_errors == 0,
+    }
 
 
 def run(cases_path, output_path, base_url, profile='legacy30'):
@@ -361,6 +455,7 @@ def run(cases_path, output_path, base_url, profile='legacy30'):
                'category': case['category'], 'language': case['language'], 'error_type': error,
                'latency_seconds': elapsed, 'channel_timings_seconds': dict(capture.timings),
                'captured_channel_rows': dict(capture.channel_counts),
+               'dense_scope_count': capture.dense_scope_count,
                'embedding_metadata': embedding.last_metadata if not error else {},
                'channels': result['channels'], **provenance,
                'modes': {name: metadata_items(items) for name, items in modes.items()},
@@ -405,7 +500,7 @@ def run(cases_path, output_path, base_url, profile='legacy30'):
     for field in ('language', 'category'):
         breakdown[field] = {value: aggregate_scores([r['scores']['hybrid'] for r in rows if r[field] == value]) for value in sorted({r[field] for r in rows})}
     report = {'profile': profile, 'qrels_sha256': hashlib.sha256(raw).hexdigest(), 'status': 'complete',
-              'observations': len(rows), 'errors': sum(r['error_type'] is not None for r in rows),
+              'observations': len(rows),
               'summary': summary, 'breakdown': breakdown,
               'latency': latency_summary([r['latency_seconds'] for r in rows if not r['error_type']]),
               'http_latency': latency_summary([r['latency_seconds'] for r in http_rows if r.get('status') == 200]),
@@ -418,6 +513,7 @@ def run(cases_path, output_path, base_url, profile='legacy30'):
                          'hybrid_without_graph is a legacy three-channel RRF reference, not a controlled graph-only ablation of v2 purpose/role/weight policies.',
                          'Latency describes successful calls only; errors are separately counted and score zero for positive cases.',
                          'Latency is a small sequential warm-service sample, not a saturation/capacity benchmark.']}
+    report.update(execution_status(rows, http_rows))
     report['mode_definitions'] = mode_definitions()
     if profile == 'paired28':
         report['dataset'] = {key: manifest[key] for key in ('schema_version', 'source_corpus_sha256', 'source_commit')}
@@ -438,9 +534,11 @@ def build_parser():
 def main():
     args = build_parser().parse_args()
     result = run(args.cases, args.output, args.base_url, profile=args.profile)
-    output_keys = ('profile', 'status', 'observations', 'errors', 'summary', 'latency', 'http_latency')
+    output_keys = ('profile', 'status', 'observations', 'errors', 'http_errors',
+                   'execution_gate_passed', 'summary', 'latency', 'http_latency')
     print(json.dumps({k: result[k] for k in output_keys}, ensure_ascii=False))
+    return 0 if result['execution_gate_passed'] else 1
 
 
 if __name__ == '__main__':
-    main()
+    raise SystemExit(main())

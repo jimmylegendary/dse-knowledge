@@ -1,6 +1,11 @@
 import importlib.util
+from contextlib import contextmanager
 from pathlib import Path
+import json
+import sys
 import uuid
+
+import pytest
 
 p = Path(__file__).resolve().parents[1] / 'scripts' / 'evaluate-pilot.py'
 spec = importlib.util.spec_from_file_location('evaluate_pilot', p)
@@ -306,6 +311,122 @@ def test_capture_store_separates_neighbors_and_delegates_projection(monkeypatch)
     }
     assert contexts == {'c1': [{'annotation_id': 'a1'}]}
     assert store.projection_args == (['c1'], 2)
+
+
+def test_capture_store_delegates_snapshot_and_captures_dense_fetchall_once(monkeypatch):
+    class Cursor:
+        def __init__(self, one=None, many=None):
+            self.one = one
+            self.many = many
+            self.fetchone_calls = 0
+            self.fetchall_calls = 0
+
+        def fetchone(self):
+            self.fetchone_calls += 1
+            return self.one
+
+        def fetchall(self):
+            self.fetchall_calls += 1
+            return self.many
+
+    dense_rows = [{'chunk_id': 'dense-1'}, {'chunk_id': 'dense-2'}]
+
+    class Connection:
+        def __init__(self, owner):
+            self.owner = owner
+
+        def execute(self, sql, args=()):
+            self.owner.executions.append((sql, args))
+            if sql.startswith('SET TRANSACTION'):
+                return Cursor()
+            if 'visible_chunk_count' in sql:
+                self.owner.scope_cursor = Cursor(one={'visible_chunk_count': 1234})
+                return self.owner.scope_cursor
+            if 'c.embedding <=>' in sql:
+                self.owner.dense_cursor = Cursor(many=dense_rows)
+                return self.owner.dense_cursor
+            raise AssertionError('unexpected SQL')
+
+    class Store:
+        def __init__(self):
+            self.executions = []
+            self.context_entries = 0
+            self.context_exits = 0
+
+        @contextmanager
+        def connection(self):
+            self.context_entries += 1
+            try:
+                yield Connection(self)
+            finally:
+                self.context_exits += 1
+
+    ticks = [0.0]
+
+    def clock():
+        ticks[0] += 0.25
+        return ticks[0]
+
+    monkeypatch.setattr(module.time, 'monotonic', clock)
+    store = Store()
+    capture = module.CaptureStore(store)
+    with capture.connection() as connection:
+        connection.execute('SET TRANSACTION ISOLATION LEVEL REPEATABLE READ, READ ONLY')
+        scope = connection.execute('SELECT visible_chunk_count', ('category-filter',)).fetchone()
+        captured_dense = connection.execute('SELECT c.embedding <=> vector', ('query-vector',)).fetchall()
+
+    assert store.context_entries == store.context_exits == 1
+    assert store.executions == [
+        ('SET TRANSACTION ISOLATION LEVEL REPEATABLE READ, READ ONLY', ()),
+        ('SELECT visible_chunk_count', ('category-filter',)),
+        ('SELECT c.embedding <=> vector', ('query-vector',)),
+    ]
+    assert scope == {'visible_chunk_count': 1234}
+    assert store.scope_cursor.fetchone_calls == 1
+    assert store.dense_cursor.fetchall_calls == 1
+    assert captured_dense is dense_rows
+    assert capture.dense_scope_count == 1234
+    assert capture.channel_counts['dense_scope_count_query'] == 1
+    assert capture.channels['dense'] == dense_rows
+    assert capture.channel_counts['dense'] == 2
+    assert capture.timings['dense'] == 0.25
+
+
+def test_execution_gate_counts_capture_and_http_failures_separately():
+    good_rows = [{'error_type': None}]
+    good_http = [{'status': 200}, {'status': 200}]
+    assert module.execution_status(good_rows, good_http) == {
+        'errors': 0, 'http_errors': 0, 'execution_gate_passed': True,
+    }
+
+    capture_error = module.execution_status([{'error_type': 'AttributeError'}], good_http)
+    assert capture_error == {'errors': 1, 'http_errors': 0, 'execution_gate_passed': False}
+
+    http_error = module.execution_status(good_rows, [{'error_type': 'HTTPError'}])
+    assert http_error == {'errors': 0, 'http_errors': 1, 'execution_gate_passed': False}
+    non_200 = module.execution_status(good_rows, [{'status': 503}])
+    assert non_200 == {'errors': 0, 'http_errors': 1, 'execution_gate_passed': False}
+
+
+@pytest.mark.parametrize(('errors', 'http_errors', 'gate_passed', 'exit_code'), [
+    (0, 0, True, 0),
+    (1, 0, False, 1),
+    (0, 1, False, 1),
+])
+def test_main_exit_code_follows_execution_gate(
+    monkeypatch, capsys, errors, http_errors, gate_passed, exit_code,
+):
+    result = {
+        'profile': 'legacy30', 'status': 'complete', 'observations': 30,
+        'errors': errors, 'http_errors': http_errors,
+        'execution_gate_passed': gate_passed, 'summary': {}, 'latency': {},
+        'http_latency': {},
+    }
+    monkeypatch.setattr(module, 'run', lambda *args, **kwargs: result)
+    monkeypatch.setattr(sys, 'argv', ['evaluate-pilot.py', '--cases', 'cases.json', '--output', 'report.json'])
+    assert module.main() == exit_code
+    output = json.loads(capsys.readouterr().out)
+    assert output['execution_gate_passed'] is gate_passed
 
 
 def test_cli_profile_is_opt_in_and_defaults_to_legacy30():

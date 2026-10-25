@@ -38,6 +38,7 @@
 - Task8 freeze: ruling16에 맞는 metadata-only freeze helper v2를 별도 파일로 만들고 v1/hash를 보존한다. Native terminal indexed failure는 오류와 함께 inventory에만 포함하며 KG 완료로 세지 않는다. Unindexed failure·active/미종료 stage·canonical/index 누락은 여전히 gate 실패다. 독립 리뷰와 반례 self-test 뒤 실제1,000 고정을 실행하고, all-eligible KG90%와 Task9 평가를 별도로 통과해야 한다.
 - Task9 recovery: ruling17의 실제 ANN 누락·mixed-script feature 손실을 TDD로 보완한다. B는 bounded exact dense SQL/trace와 Latin-Hangul features만 고치고, 별도 worker가 trust/scope·snapshot·scan cap·오류·ranking 불변성을 리뷰한다. Root는 실제 PG EXPLAIN/거리순위·cap 반례와 기존30/Q1 paired28을 재검증하고 corpus 불변성을 확인한 후 read policy를 고정한다. 처음20/24 실패와 진단 원자료를 보존하며 새 gold를 먼저 만들거나 qrels·gate를 바꾸지 않는다.
 - [ ] 10. 별도최종review→root원자료·test·secret검증→README/metadata-only report→authorizedGitHub게시. Runtimeworktree는서비스경로여서삭제하지않는다.
+- Task9 helper recovery: ruling18에 따라 CaptureStore connection/cursor 호환성과 실패 CLI 상태를 helper/tests 범위에서 보완한다. 30개 AttributeError 원보고서는 보존하며 production ranking·qrels·분모를 바꾸지 않는다. TDD·독립 리뷰 후 root는 기존 두 평가를 새 output에 재실행한다.
 
 ## Ledger
 
