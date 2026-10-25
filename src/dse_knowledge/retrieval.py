@@ -13,14 +13,19 @@ from .db import vector_literal
 from .providers import EMBEDDING_DIMENSIONS, EMBEDDING_MODEL
 
 
-POLICY_VERSION = "retrieval-policy/v2.1"
+POLICY_VERSION = "retrieval-policy/v2.2"
 PURPOSE_POLICY_VERSION = "purpose-policy/v1"
 EMBEDDING_CACHE_TTL_SECONDS = 300
 EMBEDDING_CACHE_MAX_ITEMS = 128
+DENSE_CANDIDATE_LIMIT = 40
+DENSE_EXACT_SCAN_CAP = 50_000
 _QUERY_EMBEDDINGS: OrderedDict[tuple, tuple[float, list[float], dict]] = OrderedDict()
 _QUERY_EMBEDDINGS_LOCK = threading.RLock()
 
-_TOKEN_RE = re.compile(r"[\w]+(?:[./+#:_-][\w+#-]+)*", re.UNICODE)
+_TOKEN_RE = re.compile(
+    r"[A-Za-z0-9]+(?:[./+#:_-][A-Za-z0-9+#-]+)*|[\uac00-\ud7a3]+|[^\W_]+",
+    re.UNICODE,
+)
 _QUOTED_PHRASE_RE = re.compile(r"\"([^\"]{2,240})\"|'([^']{2,240})'")
 _STOP_WORDS = frozenset({
     "a", "about", "an", "and", "are", "as", "at", "be", "by", "can", "could",
@@ -40,6 +45,20 @@ _BROAD_TOPIC_KEYS = frozenset({
     "performance", "software", "hardware", "accelerator", "accelerators",
 })
 _CHANNEL_WEIGHTS = {"dense": 1.0, "lexical": 0.45, "exact": 0.25, "graph": 0.18}
+_DENSE_PAYLOAD_FIELDS = (
+    "c.id AS chunk_id,c.material_id,c.revision_id,c.start_offset,c.end_offset,c.text,"
+    "m.title,m.url,m.source,m.category,m.scope,m.role,m.role_metadata"
+)
+
+
+class RetrievalCapacityError(RuntimeError):
+    """Search cannot run safely within the bounded exact-dense pilot scope."""
+
+    def __init__(self, code: str, *, scope_count=None, scope_cap: int = DENSE_EXACT_SCAN_CAP):
+        self.code = code
+        self.scope_count = scope_count
+        self.scope_cap = scope_cap
+        super().__init__(code)
 
 
 def reciprocal_rank_fusion(channels, limit=12):
@@ -123,6 +142,62 @@ def _title_patterns(features: dict[str, list[str]]) -> list[str]:
         if len(patterns) == 8:
             break
     return patterns
+
+
+def _dense_scope_count_query(category: str) -> tuple[str, tuple[str, str]]:
+    sql = (
+        "WITH latest_revision AS MATERIALIZED ("
+        "SELECT DISTINCT ON (r.material_id) r.material_id,r.id AS revision_id "
+        "FROM revisions r ORDER BY r.material_id,r.created_at DESC,r.id DESC) "
+        "SELECT COUNT(*) AS visible_chunk_count "
+        "FROM chunks c JOIN materials m ON m.id=c.material_id "
+        "JOIN latest_revision lr ON lr.material_id=c.material_id AND lr.revision_id=c.revision_id "
+        "WHERE (%s='' OR m.category=%s) "
+        "AND COALESCE(m.role,'unclassified') <> 'out_of_scope' AND c.embedding IS NOT NULL"
+    )
+    return sql, (category, category)
+
+
+def _exact_dense_candidates_query(
+    category: str,
+    embedding_vector: list[float],
+    fields: str,
+) -> tuple[str, tuple[str, str, str]]:
+    """Rank the bounded pilot's visible current-revision IDs before loading payload."""
+    vector = vector_literal(embedding_vector)
+    sql = (
+        "WITH latest_revision AS MATERIALIZED ("
+        "SELECT DISTINCT ON (r.material_id) r.material_id,r.id AS revision_id "
+        "FROM revisions r ORDER BY r.material_id,r.created_at DESC,r.id DESC), "
+        "dense_distances AS MATERIALIZED ("
+        "SELECT c.id AS chunk_id,c.material_id,"
+        "c.embedding <=> %s::extensions.vector AS distance "
+        "FROM chunks c JOIN materials m ON m.id=c.material_id "
+        "JOIN latest_revision lr ON lr.material_id=c.material_id AND lr.revision_id=c.revision_id "
+        "WHERE (%s='' OR m.category=%s) "
+        "AND COALESCE(m.role,'unclassified') <> 'out_of_scope' AND c.embedding IS NOT NULL), "
+        "dense_top AS MATERIALIZED ("
+        "SELECT chunk_id,material_id,distance FROM dense_distances "
+        f"ORDER BY distance,chunk_id LIMIT {DENSE_CANDIDATE_LIMIT}) "
+        "SELECT " + fields + " FROM dense_top "
+        "JOIN chunks c ON c.id=dense_top.chunk_id AND c.material_id=dense_top.material_id "
+        "JOIN materials m ON m.id=c.material_id "
+        "ORDER BY dense_top.distance,dense_top.chunk_id"
+    )
+    return sql, (vector, category, category)
+
+
+def build_dense_scope_count_query(category: str) -> tuple[str, tuple[str, str]]:
+    """Expose the bounded scan scope query for offline EXPLAIN and root verification."""
+    return _dense_scope_count_query(category)
+
+
+def build_exact_dense_candidates_query(
+    category: str,
+    embedding_vector: list[float],
+) -> tuple[str, tuple[str, str, str]]:
+    """Build the exact pilot candidate SQL without calling an embedding provider."""
+    return _exact_dense_candidates_query(category, embedding_vector, _DENSE_PAYLOAD_FIELDS)
 
 
 def _canonical_topics(query: str) -> list[dict]:
@@ -643,21 +718,39 @@ class Retriever:
         topic_alias_patterns = [pattern for pattern, _ in topic_alias_matches]
         topic_alias_keys = [key for _, key in topic_alias_matches]
 
-        embedding_vector, cache_hit, embedding_metadata = _query_embedding(self.embedding, query, self.store)
-        fields = (
-            "c.id AS chunk_id,c.material_id,c.revision_id,c.start_offset,c.end_offset,c.text,"
-            "m.title,m.url,m.source,m.category,m.scope,m.role,m.role_metadata"
-        )
+        fields = _DENSE_PAYLOAD_FIELDS
         common = " FROM chunks c JOIN materials m ON m.id=c.material_id "
         category_args = (category, category)
         visible_role = "COALESCE(m.role,'unclassified') <> 'out_of_scope'"
+        with self.store.connection() as connection:
+            connection.execute("SET TRANSACTION ISOLATION LEVEL REPEATABLE READ, READ ONLY")
+            scope_sql, scope_args = build_dense_scope_count_query(category)
+            scope_row = connection.execute(scope_sql, scope_args).fetchone()
+            scope_count = (
+                scope_row.get("visible_chunk_count")
+                if isinstance(scope_row, dict) else None
+            )
+            if type(scope_count) is not int or scope_count < 0:
+                raise RetrievalCapacityError(
+                    "retrieval_scope_count_invalid", scope_count=scope_count,
+                )
+            if scope_count > DENSE_EXACT_SCAN_CAP:
+                raise RetrievalCapacityError(
+                    "retrieval_capacity_exceeded", scope_count=scope_count,
+                )
 
-        dense = self.store.rows(
-            "SELECT " + fields + common
-            + "WHERE (%s='' OR m.category=%s) AND " + visible_role
-            + " ORDER BY c.embedding <=> %s::extensions.vector LIMIT 40",
-            (*category_args, vector_literal(embedding_vector)),
-        )
+            embedding_vector, cache_hit, embedding_metadata = _query_embedding(
+                self.embedding, query, self.store,
+            )
+            dense_sql, dense_args = build_exact_dense_candidates_query(category, embedding_vector)
+            dense = connection.execute(dense_sql, dense_args).fetchall()
+        dense_candidate_trace = {
+            "method": "exact_dense_scan",
+            "scope_count": scope_count,
+            "scope_cap": DENSE_EXACT_SCAN_CAP,
+            "candidate_limit": DENSE_CANDIDATE_LIMIT,
+            "policy_version": POLICY_VERSION,
+        }
         lexical = []
         if lexical_query:
             lexical = self.store.rows(
@@ -775,6 +868,11 @@ class Retriever:
                 "query_embedding_task": embedding_metadata.get("task", "search_query"),
                 "purpose_rule": purpose_trace["rule"],
                 "purpose_uncertain": purpose_trace["uncertain"],
+                "dense_candidate_method": dense_candidate_trace["method"],
+                "dense_scope_count": dense_candidate_trace["scope_count"],
+                "dense_scope_cap": dense_candidate_trace["scope_cap"],
+                "dense_candidate_limit": dense_candidate_trace["candidate_limit"],
+                "dense_candidate_policy_version": dense_candidate_trace["policy_version"],
                 "graph_truncated": graph_truncated,
                 "graph_candidate_limit": 30,
                 "graph_discarded_link_count": item.get("graph_discarded_link_count", 0),
@@ -788,6 +886,7 @@ class Retriever:
             "locators": locators,
             "source_results": source_results,
             "semantic_anchors": {"items": item_anchor, "source_results": source_anchor},
+            "dense_candidate_trace": dense_candidate_trace,
             "channels": {key: len(rows) for key, rows in channels.items()},
             "graph_truncated": graph_truncated,
             "graph_trace": {

@@ -15,7 +15,7 @@ from .config import Settings
 from .db import Store
 from .decisions import DecisionEngine,JobLoop
 from .policies import validate_metrics,compare_experiments
-from .retrieval import Retriever
+from .retrieval import Retriever, RetrievalCapacityError
 
 
 class Body(BaseModel):model_config=ConfigDict(extra='forbid',strict=True)
@@ -69,6 +69,9 @@ def create_app(settings=None,store=None,embedding=None,chat=None,native=None,run
 
     @app.exception_handler(ValueError)
     async def value_error(request,exc):return JSONResponse({'detail':'Invalid input or provider contract violation'},status_code=400)
+    @app.exception_handler(RetrievalCapacityError)
+    async def retrieval_capacity_error(request,exc):
+        return JSONResponse({'detail':'Search unavailable for current corpus scope','code':exc.code},status_code=503)
     @app.exception_handler(Exception)
     async def safe_error(request,exc):return JSONResponse({'detail':'Operation failed; inspect private runtime verification'},status_code=503)
 

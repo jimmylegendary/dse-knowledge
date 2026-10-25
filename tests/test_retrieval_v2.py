@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from copy import deepcopy
+from contextlib import contextmanager
 from types import SimpleNamespace
 
 import pytest
@@ -30,17 +31,61 @@ class FakeEmbedding:
         return [[0.0] * 768 for _ in texts]
 
 
+class FakeCursor:
+    def __init__(self, *, one=None, rows=()):
+        self.one = one
+        self.rows = list(rows)
+
+    def fetchone(self):
+        return deepcopy(self.one)
+
+    def fetchall(self):
+        return deepcopy(self.rows)
+
+
+class FakeConnection:
+    def __init__(self, store):
+        self.store = store
+        self.queries = []
+        self.transaction_read_only = False
+
+    def execute(self, sql, args=()):
+        self.queries.append((sql, deepcopy(args)))
+        self.store.connection_queries.append((sql, deepcopy(args)))
+        if "SET TRANSACTION ISOLATION LEVEL REPEATABLE READ, READ ONLY" in sql:
+            self.transaction_read_only = True
+            return FakeCursor()
+        if "visible_chunk_count" in sql:
+            if not self.store.scope_count_row_present:
+                return FakeCursor(one=None)
+            return FakeCursor(one={"visible_chunk_count": self.store.visible_chunk_count})
+        if "dense_distances AS MATERIALIZED" in sql:
+            return FakeCursor(rows=self.store.dense)
+        raise AssertionError("unexpected fake connection query")
+
+
 class FakeStore:
-    def __init__(self, *, dense=(), lexical=(), exact=(), graph=(), neighbors=(), contexts=None):
+    def __init__(self, *, dense=(), lexical=(), exact=(), graph=(), neighbors=(), contexts=None,
+                 visible_chunk_count=1, scope_count_row_present=True):
         self.dense = list(dense)
         self.lexical = list(lexical)
         self.exact = list(exact)
         self.graph = list(graph)
         self.neighbors = list(neighbors)
         self.contexts = contexts or {}
+        self.visible_chunk_count = visible_chunk_count
+        self.scope_count_row_present = scope_count_row_present
         self.queries = []
         self.invocations = []
         self.context_projection_calls = []
+        self.connection_queries = []
+        self.connection_instances = []
+
+    @contextmanager
+    def connection(self):
+        connection = FakeConnection(self)
+        self.connection_instances.append(connection)
+        yield connection
 
     def rows(self, sql, args=()):
         self.queries.append((sql, args))
@@ -111,6 +156,161 @@ def test_lexical_query_uses_core_terms_phrase_and_identifiers_not_full_question(
     assert "OR" in lexical_query
     assert "%s" in lexical_sql
     assert "Which official source explains" not in lexical_sql
+
+
+@pytest.mark.parametrize(
+    ("query", "base_identifier", "particle_attached_token"),
+    [
+        ("Occamy는 sparse-dense workload", "Occamy", "Occamy는"),
+        ("Gem5Pred는 gem5 prediction", "Gem5Pred", "Gem5Pred는"),
+        ("GLOW의 WDM routing", "GLOW", "GLOW의"),
+    ],
+)
+def test_lexical_features_split_latin_identifier_from_hangul_particle(
+    query, base_identifier, particle_attached_token,
+):
+    features = retrieval._lexical_features(query)
+
+    assert base_identifier in features["terms"]
+    assert particle_attached_token not in features["terms"]
+
+
+@pytest.mark.parametrize(
+    ("query", "expected_features"),
+    [
+        ("MatrixOrbit는", ["MatrixOrbit"]),
+        ("TileBoost의", ["TileBoost"]),
+        ("target_fidelity를", ["target_fidelity"]),
+        ("dtype_fp16을", ["dtype_fp16"]),
+        ("C++로", ["C++"]),
+        ("qTuneKG tutorial에서 target_fidelity는", ["qTuneKG", "target_fidelity"]),
+        ("MatrixOrbit control", ["MatrixOrbit"]),
+    ],
+)
+def test_lexical_features_preserve_mixed_script_code_identifiers(query, expected_features):
+    features = retrieval._lexical_features(query)
+
+    assert all(feature in features["terms"] for feature in expected_features)
+
+
+def test_mixed_script_lexical_features_keep_quoted_phrases_and_twelve_term_cap():
+    query = '"MatrixOrbit는" ' + " ".join(f"term{index}" for index in range(20))
+    features = retrieval._lexical_features(query)
+
+    assert features["phrases"] == ["MatrixOrbit는"]
+    assert len(features["terms"]) == 12
+    assert retrieval._websearch_query(features).startswith('"MatrixOrbit는" OR ')
+
+
+def test_exact_dense_scan_uses_one_read_only_snapshot_and_materializes_only_rank_fields():
+    store = FakeStore(
+        dense=[row("dense-a"), row("dense-b")],
+        visible_chunk_count=2,
+    )
+    result = Retriever(store, FakeEmbedding()).search(
+        "KV cache throughput", category="compiler_kernel", limit=4,
+    )
+
+    assert len(store.connection_instances) == 1
+    connection = store.connection_instances[0]
+    assert connection.transaction_read_only is True
+    assert len(connection.queries) == 3
+    assert "SET TRANSACTION ISOLATION LEVEL REPEATABLE READ, READ ONLY" in connection.queries[0][0]
+
+    count_sql, count_args = connection.queries[1]
+    dense_sql, dense_args = connection.queries[2]
+    for sql in (count_sql, dense_sql):
+        assert "latest_revision" in sql
+        assert "COALESCE(m.role,'unclassified') <> 'out_of_scope'" in sql
+        assert "(%s='' OR m.category=%s)" in sql
+        assert "c.embedding IS NOT NULL" in sql
+    assert count_args == ("compiler_kernel", "compiler_kernel")
+    assert "dense_distances AS MATERIALIZED" in dense_sql
+    assert "dense_top AS MATERIALIZED" in dense_sql
+    distance_projection = dense_sql.split("dense_distances AS MATERIALIZED", 1)[1].split(
+        "dense_top AS MATERIALIZED", 1,
+    )[0]
+    assert "c.id AS chunk_id" in distance_projection
+    assert "c.material_id" in distance_projection
+    assert "c.text" not in distance_projection
+    assert "m.title" not in distance_projection
+    assert "ORDER BY distance,chunk_id LIMIT 40" in dense_sql
+    assert "JOIN chunks c ON c.id=dense_top.chunk_id" in dense_sql
+    assert dense_args[-2:] == ("compiler_kernel", "compiler_kernel")
+
+    trace = result["dense_candidate_trace"]
+    assert trace == {
+        "method": "exact_dense_scan",
+        "scope_count": 2,
+        "scope_cap": 50_000,
+        "candidate_limit": 40,
+        "policy_version": "retrieval-policy/v2.2",
+    }
+    assert result["policy_version"] == "retrieval-policy/v2.2"
+    assert all(item["trace"]["dense_candidate_method"] == "exact_dense_scan" for item in result["items"])
+
+
+def test_exact_dense_candidate_sql_builder_is_available_for_root_explain_check():
+    sql, args = retrieval.build_exact_dense_candidates_query("compiler_kernel", [0.0] * 768)
+
+    assert "dense_distances AS MATERIALIZED" in sql
+    assert "dense_top AS MATERIALIZED" in sql
+    assert "ORDER BY distance,chunk_id LIMIT 40" in sql
+    assert "JOIN chunks c ON c.id=dense_top.chunk_id" in sql
+    assert args[1:] == ("compiler_kernel", "compiler_kernel")
+    assert retrieval.build_dense_scope_count_query("compiler_kernel")[1] == (
+        "compiler_kernel", "compiler_kernel",
+    )
+
+
+def test_exact_dense_scan_accepts_scope_count_at_the_pilot_cap():
+    store = FakeStore(dense=[row("at-cap")], visible_chunk_count=50_000)
+    result = Retriever(store, FakeEmbedding()).search("GPU memory")
+
+    assert result["dense_candidate_trace"]["scope_count"] == 50_000
+    assert len(store.connection_instances[0].queries) == 3
+
+
+def test_exact_dense_scan_fails_closed_before_embedding_or_payload_query_over_cap():
+    store = FakeStore(dense=[row("must-not-be-read")], visible_chunk_count=50_001)
+    embedding = FakeEmbedding()
+
+    with pytest.raises(retrieval.RetrievalCapacityError) as exc_info:
+        Retriever(store, embedding).search("GPU memory")
+
+    assert exc_info.value.code == "retrieval_capacity_exceeded"
+    assert exc_info.value.scope_count == 50_001
+    assert exc_info.value.scope_cap == 50_000
+    assert embedding.calls == []
+    assert len(store.connection_instances) == 1
+    assert len(store.connection_instances[0].queries) == 2
+    assert not store.queries
+    assert not store.context_projection_calls
+    assert not store.invocations
+
+
+@pytest.mark.parametrize(
+    ("visible_chunk_count", "scope_count_row_present"),
+    [(None, True), (-1, True), ("18512", True), (True, True), (0, False)],
+)
+def test_invalid_exact_scan_scope_count_fails_closed_without_ann_fallback(
+    visible_chunk_count, scope_count_row_present,
+):
+    store = FakeStore(
+        dense=[row("must-not-be-read")],
+        visible_chunk_count=visible_chunk_count,
+        scope_count_row_present=scope_count_row_present,
+    )
+    embedding = FakeEmbedding()
+
+    with pytest.raises(retrieval.RetrievalCapacityError) as exc_info:
+        Retriever(store, embedding).search("GPU memory")
+
+    assert exc_info.value.code == "retrieval_scope_count_invalid"
+    assert embedding.calls == []
+    assert len(store.connection_instances[0].queries) == 2
+    assert not store.queries
+    assert not store.context_projection_calls
 
 
 def test_purpose_auto_routes_and_excludes_out_of_scope_with_versioned_trace():
@@ -275,7 +475,7 @@ def test_semantic_anchor_selects_dense_material_then_its_best_hybrid_passage(mon
         "authority_changed": False,
     }
     assert result["items"][0]["trace"]["semantic_anchors"]["items"] == anchor
-    assert result["policy_version"] == "retrieval-policy/v2.1"
+    assert result["policy_version"] == "retrieval-policy/v2.2"
 
 
 def test_mixed_source_results_anchor_navigation_safely_with_unique_top_k_slots():
@@ -421,7 +621,7 @@ def test_query_embedding_cache_hit_has_zero_usage_and_does_not_call_provider(mon
     assert store.invocations[1][2]["cache_hit"] is True
     assert store.invocations[1][2]["usage"] == {}
     assert store.invocations[1][2]["provider_usage_recorded"] is False
-    assert sum("c.embedding <=>" in sql for sql, _ in store.queries) == 2
+    assert sum("dense_distances AS MATERIALIZED" in sql for sql, _ in store.connection_queries) == 2
 
 
 def test_query_embedding_cache_preserves_case_sensitive_unit_tokens():
