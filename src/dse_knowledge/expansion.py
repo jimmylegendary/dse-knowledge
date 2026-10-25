@@ -7,6 +7,7 @@ import os
 import re
 import stat
 import datetime as dt
+import time
 from pathlib import Path
 from typing import Any
 
@@ -36,6 +37,13 @@ DEFAULT_COLLECTION_POLICY = {
 _SAFE_REASON = re.compile(r"^[A-Za-z0-9_.-]{1,96}$")
 _TRANSIENT_SOURCE_STATUS = {408, 425, 429, 500, 502, 503, 504}
 _PRIVATE_ROOT = "pilot1000"
+_ARTIFACT_INVENTORY_MAX_PASSES = 3
+_ARTIFACT_INVENTORY_RETRY_SECONDS = 0.05
+_RAW_ARTIFACT_TEMP_NAME = re.compile(r"^\.artifact-[a-z0-9_]{8}$")
+
+
+class _ArtifactInventoryWriterActive(Exception):
+    """A trusted raw artifact writer temp requires a fresh whole inventory pass."""
 
 
 def _construct_store(settings):
@@ -67,7 +75,7 @@ def _baseline_path(settings):
     return Path(settings.data_root) / _PRIVATE_ROOT / "artifact-baseline.json"
 
 
-def _scan_artifact_inventory(settings, ops):
+def _scan_artifact_inventory_once(settings, ops):
     data_root = Path(settings.data_root)
     artifact_root = Path(settings.artifact_root)
     prepared_root = data_root / _PRIVATE_ROOT / "prepared"
@@ -83,7 +91,13 @@ def _scan_artifact_inventory(settings, ops):
         for artifact in sorted(prefix.iterdir()):
             info = artifact.lstat()
             if (artifact.is_symlink() or not stat.S_ISREG(info.st_mode) or info.st_uid != os.getuid()
-                    or stat.S_IMODE(info.st_mode) & 0o077 or not re.fullmatch(r"[0-9a-f]{64}", artifact.name)
+                    or stat.S_IMODE(info.st_mode) & 0o077):
+                raise ValueError("artifact_inventory_untrusted")
+            if _RAW_ARTIFACT_TEMP_NAME.fullmatch(artifact.name):
+                if stat.S_IMODE(info.st_mode) != 0o600:
+                    raise ValueError("artifact_inventory_untrusted")
+                raise _ArtifactInventoryWriterActive from None
+            if (not re.fullmatch(r"[0-9a-f]{64}", artifact.name)
                     or not artifact.name.startswith(prefix.name)):
                 raise ValueError("artifact_inventory_untrusted")
             raw_files[artifact.name] = int(info.st_size)
@@ -99,6 +113,17 @@ def _scan_artifact_inventory(settings, ops):
                 raise ValueError("prepared_inventory_untrusted")
             prepared_files[prepared.relative_to(data_root).as_posix()] = int(info.st_size)
     return {"raw_files": raw_files, "prepared_files": prepared_files}
+
+
+def _scan_artifact_inventory(settings, ops):
+    """Accept only a complete trust-checked pass, retrying narrow atomic-writer races."""
+    for attempt in range(_ARTIFACT_INVENTORY_MAX_PASSES):
+        try:
+            return _scan_artifact_inventory_once(settings, ops)
+        except (FileNotFoundError, _ArtifactInventoryWriterActive):
+            if attempt + 1 < _ARTIFACT_INVENTORY_MAX_PASSES:
+                time.sleep(_ARTIFACT_INVENTORY_RETRY_SECONDS)
+    raise ResourceCollectionError("artifact_inventory_unavailable")
 
 
 def _load_artifact_baseline(settings, ops=None):

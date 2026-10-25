@@ -1,16 +1,18 @@
 from __future__ import annotations
 
 import json
+import hashlib
 import os
 import re
 import stat
+import threading
 import time
 from pathlib import Path
 from types import SimpleNamespace
 
 import pytest
 
-from dse_knowledge import expansion
+from dse_knowledge import expansion, ingestion, pipeline
 from dse_knowledge.collection import (
     PermanentCollectionError,
     ResourceCollectionError,
@@ -140,6 +142,61 @@ def _ops():
         save_json=save_json,
         cached_material_reason=cached_material_reason,
     )
+
+
+def _race_real_atomic_writer_rename(monkeypatch, settings, target, writer):
+    """Hold a production writer at os.replace until the scanner lists its temp."""
+    replace_ready = threading.Event()
+    release_replace = threading.Event()
+    writer_done = threading.Event()
+    temp_path = {}
+    triggered = []
+    writer_result = []
+    writer_errors = []
+    sleeps = []
+    real_replace = os.replace
+    real_lstat = Path.lstat
+
+    def gated_replace(source, destination, *args, **kwargs):
+        if Path(os.fspath(destination)).name == target.name and not replace_ready.is_set():
+            source_path = Path(os.fspath(source))
+            temp_path["path"] = source_path if source_path.is_absolute() else target.parent / source_path
+            replace_ready.set()
+            if not release_replace.wait(timeout=5):
+                raise TimeoutError("test did not release atomic rename")
+        return real_replace(source, destination, *args, **kwargs)
+
+    def rename_before_lstat(path, *args, **kwargs):
+        if path == temp_path.get("path") and not triggered:
+            triggered.append(True)
+            release_replace.set()
+            if not writer_done.wait(timeout=5):
+                raise TimeoutError("atomic writer did not finish after release")
+        return real_lstat(path, *args, **kwargs)
+
+    def run_writer():
+        try:
+            writer_result.append(writer())
+        except BaseException as exc:
+            writer_errors.append(exc)
+        finally:
+            writer_done.set()
+
+    monkeypatch.setattr(os, "replace", gated_replace)
+    monkeypatch.setattr(Path, "lstat", rename_before_lstat)
+    monkeypatch.setattr(time, "sleep", sleeps.append)
+    thread = threading.Thread(target=run_writer, daemon=True)
+    thread.start()
+    assert replace_ready.wait(timeout=5), "production writer never reached atomic replace"
+    try:
+        delta = expansion.artifact_inventory_delta(settings)
+    finally:
+        release_replace.set()
+        thread.join(timeout=5)
+    assert not thread.is_alive()
+    assert not writer_errors
+    assert triggered == [True]
+    return delta, writer_result[0], sleeps
 
 
 def _document(record, settings, *, scope="public_fulltext", chars=600, artifact_created=True):
@@ -391,6 +448,237 @@ def test_artifact_inventory_counts_growth_of_existing_content_addressed_file(tmp
 
     assert delta["raw_artifact_bytes_delta"] == 1024
     assert delta["physical_artifact_bytes_delta"] == 1024
+
+
+def test_inventory_retries_actual_prepared_writer_rename_and_counts_whole_file(tmp_path, monkeypatch):
+    settings = Settings(tmp_path)
+    expansion.freeze_artifact_baseline(settings)
+    target = settings.data_root / "pilot1000" / "prepared" / "synthetic.json"
+
+    delta, _writer_result, sleeps = _race_real_atomic_writer_rename(
+        monkeypatch, settings, target,
+        lambda: pipeline.save_json(target, {"synthetic": "prepared cache payload"}),
+    )
+
+    assert sleeps == [0.05]
+    assert delta["prepared_cache_bytes_delta"] == target.stat().st_size
+    assert delta["physical_artifact_bytes_delta"] == target.stat().st_size
+
+
+def test_inventory_retries_actual_raw_artifact_writer_rename_and_counts_whole_file(tmp_path, monkeypatch):
+    settings = Settings(tmp_path)
+    expansion.freeze_artifact_baseline(settings)
+    raw = b"synthetic content-addressed artifact bytes"
+    digest = hashlib.sha256(raw).hexdigest()
+    target = settings.artifact_root / digest[:2] / digest
+
+    delta, writer_result, sleeps = _race_real_atomic_writer_rename(
+        monkeypatch, settings, target,
+        lambda: ingestion._store_artifact(raw, settings),
+    )
+
+    assert writer_result == (digest, str(target))
+    assert sleeps == [0.05]
+    assert delta["raw_artifact_bytes_delta"] == len(raw)
+    assert delta["physical_artifact_bytes_delta"] == len(raw)
+
+
+def test_inventory_retries_persistent_raw_temp_only_three_passes_then_fails_closed(tmp_path, monkeypatch):
+    settings = Settings(tmp_path)
+    expansion.freeze_artifact_baseline(settings)
+    prefix = settings.artifact_root / "ab"
+    prefix.mkdir(mode=0o700)
+    temp = prefix / ".artifact-abcdefgh"
+    temp.write_bytes(b"partial")
+    temp.chmod(0o600)
+    real_lstat = Path.lstat
+    listed_temp_lstats = []
+    sleeps = []
+
+    def count_temp_lstat(path, *args, **kwargs):
+        if path == temp:
+            listed_temp_lstats.append(True)
+        return real_lstat(path, *args, **kwargs)
+
+    monkeypatch.setattr(Path, "lstat", count_temp_lstat)
+    monkeypatch.setattr(time, "sleep", sleeps.append)
+    with pytest.raises(ResourceCollectionError) as error:
+        expansion._physical_delta(settings)
+
+    assert error.value.code == "artifact_inventory_unavailable"
+    assert len(listed_temp_lstats) >= 3
+    assert sleeps == [0.05, 0.05]
+
+
+def test_missing_listed_path_retries_whole_inventory_three_passes_then_fails_closed(tmp_path, monkeypatch):
+    settings = Settings(tmp_path)
+    expansion.freeze_artifact_baseline(settings)
+    prefix = settings.artifact_root / "ab"
+    prefix.mkdir(mode=0o700)
+    target = prefix / ("ab" + "1" * 62)
+    target.write_bytes(b"complete artifact")
+    target.chmod(0o600)
+    real_lstat = Path.lstat
+    missing_path_lstats = []
+    sleeps = []
+
+    def disappear_at_lstat(path, *args, **kwargs):
+        if path == target:
+            missing_path_lstats.append(True)
+            raise FileNotFoundError("simulated rename after directory enumeration")
+        return real_lstat(path, *args, **kwargs)
+
+    monkeypatch.setattr(Path, "lstat", disappear_at_lstat)
+    monkeypatch.setattr(time, "sleep", sleeps.append)
+    with pytest.raises(ResourceCollectionError) as error:
+        expansion._physical_delta(settings)
+
+    assert error.value.code == "artifact_inventory_unavailable"
+    assert len(missing_path_lstats) == 3
+    assert sleeps == [0.05, 0.05]
+
+
+@pytest.mark.parametrize("entry_kind", ["unknown_name", "unsafe_mode", "symlink"])
+def test_inventory_untrusted_entries_fail_without_retry(tmp_path, monkeypatch, entry_kind):
+    settings = Settings(tmp_path)
+    expansion.freeze_artifact_baseline(settings)
+    prefix = settings.artifact_root / "ab"
+    prefix.mkdir(mode=0o700)
+    if entry_kind == "unknown_name":
+        bad = prefix / ".artifact-unrecognized"
+        bad.write_bytes(b"x")
+        bad.chmod(0o600)
+    elif entry_kind == "unsafe_mode":
+        bad = prefix / ".artifact-abcdefgh"
+        bad.write_bytes(b"x")
+        bad.chmod(0o640)
+    else:
+        target = prefix / ("ab" + "1" * 62)
+        target.write_bytes(b"x")
+        target.chmod(0o600)
+        bad = prefix / ("ab" + "2" * 62)
+        bad.symlink_to(target)
+    sleeps = []
+    monkeypatch.setattr(time, "sleep", sleeps.append)
+
+    with pytest.raises(ValueError, match="artifact_inventory_untrusted"):
+        expansion.artifact_inventory_delta(settings)
+
+    assert sleeps == []
+
+
+def test_inventory_permission_error_fails_closed_without_retry(tmp_path, monkeypatch):
+    settings = Settings(tmp_path)
+    expansion.freeze_artifact_baseline(settings)
+    prefix = settings.artifact_root / "ab"
+    prefix.mkdir(mode=0o700)
+    target = prefix / ("ab" + "1" * 62)
+    target.write_bytes(b"complete artifact")
+    target.chmod(0o600)
+    real_lstat = Path.lstat
+    sleeps = []
+
+    def permission_denied(path, *args, **kwargs):
+        if path == target:
+            raise PermissionError("simulated inventory permission failure")
+        return real_lstat(path, *args, **kwargs)
+
+    monkeypatch.setattr(Path, "lstat", permission_denied)
+    monkeypatch.setattr(time, "sleep", sleeps.append)
+    with pytest.raises(ResourceCollectionError) as error:
+        expansion._physical_delta(settings)
+
+    assert error.value.code == "artifact_inventory_unavailable"
+    assert sleeps == []
+
+
+def test_acquire_does_not_succeed_when_full_inventory_delta_never_stabilizes(tmp_path, monkeypatch):
+    settings = Settings(tmp_path)
+    expansion.freeze_artifact_baseline(settings)
+    prefix = settings.artifact_root / "ab"
+    prefix.mkdir(mode=0o700)
+    temp = prefix / ".artifact-abcdefgh"
+    temp.write_bytes(b"partial")
+    temp.chmod(0o600)
+    monkeypatch.setattr(time, "sleep", lambda _seconds: None)
+    acquire = expansion.make_handlers(settings, FakeStore())["acquire"]
+
+    with pytest.raises(ResourceCollectionError) as error:
+        acquire(_record("doc-1"), {
+            "artifact_budget_bytes": 40 * 1024 * 1024,
+            "artifact_budget_remaining_bytes": 40 * 1024 * 1024,
+            "artifact_bytes_committed": 0,
+        })
+
+    assert error.value.code == "artifact_inventory_unavailable"
+
+
+def test_persistent_inventory_race_blocks_acquire_without_provider_retry(tmp_path, monkeypatch):
+    settings = Settings(tmp_path)
+    expansion.freeze_artifact_baseline(settings)
+    prefix = settings.artifact_root / "ab"
+    prefix.mkdir(mode=0o700)
+    temp = prefix / ".artifact-abcdefgh"
+    temp.write_bytes(b"partial")
+    temp.chmod(0o600)
+    monkeypatch.setattr(time, "sleep", lambda _seconds: None)
+
+    class Repository:
+        durable_stage_events = True
+
+        def __init__(self):
+            self.batch = {"id": "batch-1", "target": 1, "state": "running", "policy": {}}
+            self.provider_failures = {}
+            self.item = {
+                "material_id": "doc-1", "record": _record("doc-1"), "state": "pending",
+                "next_stage": "acquire", "attempts": 1, "metadata": {}, "artifact_bytes": 0,
+                "last_error": None,
+            }
+
+        def get_batch(self, _batch_id):
+            return dict(self.batch)
+
+        def progress(self, _batch_id, _now):
+            return {
+                "candidate_count": 1, "indexed_count": 0, "reserved_count": 1,
+                "complete_count": 0, "reference_count": 0, "acquire_completed_count": 0,
+                "assess_completed_count": 0, "index_completed_count": 0,
+                "extract_completed_count": 0, "indexed_needs_review_count": 0,
+                "excluded_count": 0, "needs_review_count": 0, "retry_wait_count": int(self.item["state"] == "retry_wait"),
+                "failed_count": 0, "active_lease_count": 0, "artifact_bytes_used": 0,
+                "error_counts": ({self.item["last_error"]["code"]: 1} if self.item["last_error"] else {}),
+                "last_error": self.item["last_error"], "unfinished_count": 1,
+                "pending_unreserved_count": 0,
+            }
+
+        def promote(self, _batch_id):
+            return None
+
+        def claim_next(self, *_args):
+            return dict(self.item, lease_owner="worker-1:lease", lease_until=None)
+
+        def block(self, _batch_id, _material_id, _owner, _now, error, artifact_bytes=0):
+            self.batch["state"] = "blocked"
+            self.item.update(state="retry_wait", last_error=dict(error), artifact_bytes=artifact_bytes)
+            return True
+
+        def set_batch_state(self, _batch_id, state, _now=None):
+            self.batch["state"] = state
+
+    store = FakeStore()
+    repository = Repository()
+    manager = expansion.CollectionManager(
+        store, settings.data_root, expansion.make_handlers(settings, store),
+        {"repository": repository, "heartbeat_interval_seconds": None,
+         "disk_usage": lambda _path: SimpleNamespace(free=20 * 1024**3)},
+    )
+
+    summary = manager.run_worker("batch-1", "worker-1", max_steps=1)
+
+    assert summary["batch_state"] == "blocked"
+    assert summary["retry_wait_count"] == 1
+    assert summary["last_error"]["code"] == "artifact_inventory_unavailable"
+    assert repository.provider_failures == {}
 
 
 def test_acquire_preflight_subtracts_physical_delta_before_fetch(tmp_path, monkeypatch):

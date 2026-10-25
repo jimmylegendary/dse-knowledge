@@ -34,6 +34,7 @@
 - Task8 recovery: ruling12의 provider stage attempt 상한을 C가 TDD로 보완하고 D가 독립 리뷰한다. Root는 실제 PG rollback에서 소진·circuit·resume·stale owner를 확인하고 전체 회귀 후 v0.2.3을 배포한다. 600초 단일 진단의 품질 실패는 유지하며 같은 batch의 collection unit만 600초로 재개한다. 완료된 438개 정본은 보존하고 이후 500개 지점의 상태·사용량·DB/host 공간을 확인한다.
 - [ ] 9. 실제1000의source/Claim/조건/graph/sourceRole와다른material새질의·같은UI/LLM/nativefeedback/metric/HAT회귀검증. Tokens/time/실패·재개·원문공간·DBindex/throughput평가.
 - Task9 preflight: 수집 중 C가 ruling14의 helper-only guard를 TDD로 보완하고 별도 worker가 리뷰한다. Root는 fake HTTP의 accepted-but-ID-unsaved·inventory mismatch·scope mismatch 반례를 실제 helper에 적용해 provider 호출 없이 확인한다. 제품/API/DDL·수집 모델·read policy는 바꾸지 않는다. 실제1,000 완료 후 manifest equality→공개회귀→policy freeze→새gold/retrieval→blind3 실행·의미검토→native E2E/feedback 순서를 지킨다.
+- Task8 recovery: 934개 storage block은 ruling15에 따라 실제 atomic writer/scanner 경쟁을 격리 재현하고, bounded full-pass 재확인을 TDD·독립 리뷰·root 실제 파일 검증 후 배포한다. Baseline과 완료 데이터의 hash 보존, old coordinator/active lease 0, 같은 batch reasoned resume를 확인한다. Storage 오류를 provider 실패로 기록하거나 실패한 파일의 byte 수를 누락하지 않는다. Target1,000과 나머지 gate는 유지한다.
 - [ ] 10. 별도최종review→root원자료·test·secret검증→README/metadata-only report→authorizedGitHub게시. Runtimeworktree는서비스경로여서삭제하지않는다.
 
 ## Ledger
