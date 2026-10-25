@@ -4,8 +4,10 @@ from __future__ import annotations
 
 import argparse
 import datetime as dt
+import hashlib
 import json
 import os
+import re
 import stat
 import sys
 import time
@@ -346,6 +348,14 @@ def _resolve_expected_inventory(expected_materials: int, expected_chunks: int | 
     return expected_materials, expected_chunks
 
 
+def _validate_corpus_manifest_sha256(value: str | None) -> str | None:
+    if value is None:
+        return None
+    if not isinstance(value, str) or re.fullmatch(r'[0-9a-f]{64}', value) is None:
+        raise VerificationError('corpus_manifest_sha256_invalid')
+    return value
+
+
 def _inventory_result(inventory: dict, chunk_count: int,
                       expected_materials: int, expected_chunks: int) -> tuple[bool, dict]:
     total = inventory.get('total')
@@ -365,17 +375,23 @@ def _inventory_result(inventory: dict, chunk_count: int,
 
 
 def _load_report(path: Path, base_url: str, *, resume: bool,
-                 expected_materials: int = 100, expected_chunks: int | None = None) -> dict:
+                 expected_materials: int = 100, expected_chunks: int | None = None,
+                 corpus_manifest_sha256: str | None = None) -> dict:
     expected_materials, expected_chunks = _resolve_expected_inventory(
         expected_materials, expected_chunks,
     )
+    corpus_manifest_sha256 = _validate_corpus_manifest_sha256(corpus_manifest_sha256)
     inventory_scope = {'materials': expected_materials, 'chunks': expected_chunks}
+    if corpus_manifest_sha256 is not None:
+        inventory_scope['corpus_manifest_sha256'] = corpus_manifest_sha256
     if not resume:
+        if path.exists() or path.is_symlink():
+            raise VerificationError('fresh_report_exists')
         return {
             'run_id': uuid.uuid4().hex, 'status': 'running', 'base_url': base_url,
             'inventory_scope': inventory_scope,
             'started_at': dt.datetime.now(dt.timezone.utc).isoformat(), 'checks': {},
-            'jobs': [], 'limitations': [
+            'jobs': [], 'decision_submission_intents': {}, 'limitations': [
                 f"This verifies the configured frozen set of {expected_materials} materials and "
                 f"{expected_chunks} chunks only; it does not validate broader corpus completeness.",
                 'Native HAT status is structural only; physical feasibility and B300 measurements are not assessed.',
@@ -398,6 +414,7 @@ def _load_report(path: Path, base_url: str, *, resume: bool,
         stored_scope = inventory_scope
     if stored_scope != inventory_scope:
         raise VerificationError('resume_inventory_scope_mismatch')
+    _validate_resume_submissions(report)
     report['inventory_scope'] = inventory_scope
     report['status'] = 'running'
     report.pop('finished_at', None)
@@ -407,7 +424,84 @@ def _load_report(path: Path, base_url: str, *, resume: bool,
     return report
 
 
+def _decision_payload_sha256(payload: dict) -> str:
+    encoded = json.dumps(payload, ensure_ascii=False, sort_keys=True, separators=(',', ':')).encode('utf-8')
+    return hashlib.sha256(encoded).hexdigest()
+
+
+def _decision_job_ids(report: dict, kind: str) -> set[str]:
+    ids = set()
+    intents = report.get('decision_submission_intents') if isinstance(report.get('decision_submission_intents'), dict) else {}
+    intent = intents.get(kind) if isinstance(intents.get(kind), dict) else {}
+    if isinstance(intent.get('job_id'), str) and intent['job_id']:
+        ids.add(intent['job_id'])
+    checks = report.get('checks') if isinstance(report.get('checks'), dict) else {}
+    for name in (f'job_{kind}_submitted', f'job_{kind}_result'):
+        check = checks.get(name) if isinstance(checks.get(name), dict) else {}
+        details = check.get('details') if isinstance(check.get('details'), dict) else {}
+        job_id = details.get('job_id')
+        if isinstance(job_id, str) and job_id:
+            ids.add(job_id)
+    jobs = report.get('jobs') if isinstance(report.get('jobs'), list) else []
+    for item in jobs:
+        if not isinstance(item, dict) or item.get('kind') != kind:
+            continue
+        summary = item.get('summary') if isinstance(item.get('summary'), dict) else {}
+        job_id = item.get('job_id') or summary.get('job_id')
+        if isinstance(job_id, str) and job_id:
+            ids.add(job_id)
+    active = report.get('active_job') if isinstance(report.get('active_job'), dict) else {}
+    active_id = active.get('job_id') if active.get('kind') == kind else None
+    if isinstance(active_id, str) and active_id:
+        ids.add(active_id)
+    return ids
+
+
+def _validate_resume_submissions(report: dict) -> None:
+    intents = report.get('decision_submission_intents', {})
+    if not isinstance(intents, dict):
+        raise VerificationError('decision_submission_intent_invalid')
+    expected_payloads = dict(_decision_payloads(report['run_id']))
+    kinds = set(expected_payloads)
+    kinds.update(intents)
+    checks = report.get('checks') if isinstance(report.get('checks'), dict) else {}
+    for name in checks:
+        for kind in expected_payloads:
+            if name in (f'job_{kind}_submitted', f'job_{kind}_result'):
+                kinds.add(kind)
+    jobs = report.get('jobs') if isinstance(report.get('jobs'), list) else []
+    kinds.update(item.get('kind') for item in jobs if isinstance(item, dict) and isinstance(item.get('kind'), str))
+    active = report.get('active_job') if isinstance(report.get('active_job'), dict) else {}
+    if isinstance(active.get('kind'), str):
+        kinds.add(active['kind'])
+
+    job_id_owners = {}
+    for kind in kinds:
+        intent = intents.get(kind)
+        if intent is not None:
+            if not isinstance(intent, dict):
+                raise VerificationError('decision_submission_intent_invalid')
+            expected = expected_payloads.get(kind)
+            if expected is None or intent.get('payload_sha256') != _decision_payload_sha256(expected):
+                raise VerificationError('decision_submission_payload_mismatch')
+        ids = _decision_job_ids(report, kind)
+        if len(ids) > 1:
+            raise VerificationError('decision_submission_id_conflict')
+        if intent is not None and not ids:
+            raise VerificationError('decision_submission_outcome_unknown')
+        for job_id in ids:
+            owner = job_id_owners.get(job_id)
+            if owner is not None and owner != kind:
+                raise VerificationError('decision_submission_id_conflict')
+            job_id_owners[job_id] = kind
+
+
 def _existing_decision_job_id(report: dict, kind: str) -> str | None:
+    intents = report.get('decision_submission_intents') if isinstance(report.get('decision_submission_intents'), dict) else {}
+    intent = intents.get(kind) if isinstance(intents.get(kind), dict) else {}
+    intent_job_id = intent.get('job_id')
+    if isinstance(intent_job_id, str) and intent_job_id:
+        return intent_job_id
     checks = report.get('checks') if isinstance(report.get('checks'), dict) else {}
     for name in (f'job_{kind}_submitted', f'job_{kind}_result'):
         check = checks.get(name) if isinstance(checks.get(name), dict) else {}
@@ -430,20 +524,71 @@ def _existing_decision_job_id(report: dict, kind: str) -> str | None:
 
 def _submit_or_resume_decision_job(client: HTTPClient, report_path: Path, report: dict,
                                    kind: str, payload: dict) -> str:
+    payload_sha256 = _decision_payload_sha256(payload)
+    intents = report.setdefault('decision_submission_intents', {})
+    if not isinstance(intents, dict):
+        raise VerificationError('decision_submission_intent_invalid')
+    intent = intents.get(kind)
+    if intent is not None:
+        if not isinstance(intent, dict) or intent.get('payload_sha256') != payload_sha256:
+            raise VerificationError('decision_submission_payload_mismatch')
+        saved_job_id = intent.get('job_id')
+        if isinstance(saved_job_id, str) and saved_job_id:
+            return saved_job_id
+        existing = _existing_decision_job_id(report, kind)
+        if existing:
+            return existing
+        raise VerificationError('decision_submission_outcome_unknown')
     existing = _existing_decision_job_id(report, kind)
     if existing:
         return existing
-    submitted = client.request('POST', '/api/decisions', payload)
-    job_id = submitted.get('job_id')
+    intent = {
+        'kind': kind, 'payload_sha256': payload_sha256, 'state': 'pending',
+        'intent_recorded_at': dt.datetime.now(dt.timezone.utc).isoformat(),
+    }
+    intents[kind] = intent
+    try:
+        _save(report_path, report)
+    except Exception:
+        raise VerificationError('decision_submission_intent_write_failed') from None
+    try:
+        submitted = client.request('POST', '/api/decisions', payload)
+    except Exception:
+        intent['state'] = 'outcome_unknown'
+        intent['outcome_unknown_at'] = dt.datetime.now(dt.timezone.utc).isoformat()
+        try:
+            _save(report_path, report)
+        except Exception:
+            pass
+        raise VerificationError('decision_submission_outcome_unknown') from None
+    job_id = submitted.get('job_id') if isinstance(submitted, dict) else None
     if not isinstance(job_id, str) or not job_id:
-        raise VerificationError('decision_job_id_missing')
-    _check(report_path, report, 'job_' + kind + '_submitted', True, {'job_id': job_id})
+        intent['state'] = 'outcome_unknown'
+        intent['outcome_unknown_at'] = dt.datetime.now(dt.timezone.utc).isoformat()
+        try:
+            _save(report_path, report)
+        except Exception:
+            pass
+        raise VerificationError('decision_submission_outcome_unknown')
+    intent.update(state='submitted', job_id=job_id,
+                  job_id_saved_at=dt.datetime.now(dt.timezone.utc).isoformat())
+    # Persist the accepted job ID before any further report writes can fail.
+    report.setdefault('checks', {})['job_' + kind + '_submitted'] = {
+        'passed': True, 'details': {'job_id': job_id},
+    }
     report['active_job'] = {
         'kind': kind, 'job_id': job_id, 'status': 'queued',
         'last_polled_at': dt.datetime.now(dt.timezone.utc).isoformat(),
     }
-    _save(report_path, report)
+    try:
+        _save(report_path, report)
+    except Exception:
+        raise VerificationError('decision_submission_job_id_save_failed') from None
     return job_id
+
+
+def _is_submission_control_failure(error: VerificationError) -> bool:
+    return error.reason.startswith('decision_submission_')
 
 
 def _receipt_summary(result: dict | None) -> dict:
@@ -611,7 +756,8 @@ def run_verification(base_url: str = DEFAULT_BASE_URL, *, resume: bool = False,
                      settings: Settings | None = None, store: Store | None = None,
                      client: HTTPClient | None = None, report_path: Path | None = None,
                      expected_materials: int = 100,
-                     expected_chunks: int | None = None) -> tuple[Path, dict]:
+                     expected_chunks: int | None = None,
+                     corpus_manifest_sha256: str | None = None) -> tuple[Path, dict]:
     expected_materials, expected_chunks = _resolve_expected_inventory(
         expected_materials, expected_chunks,
     )
@@ -622,10 +768,12 @@ def run_verification(base_url: str = DEFAULT_BASE_URL, *, resume: bool = False,
     report = _load_report(
         report_path, client.base_url, resume=resume,
         expected_materials=expected_materials, expected_chunks=expected_chunks,
+        corpus_manifest_sha256=corpus_manifest_sha256,
     )
     run_id = report['run_id']
     _save(report_path, report)
 
+    inventory_passed = False
     try:
         inventory = store.one(
             "SELECT count(*) AS total, count(*) FILTER (WHERE status='ingested') AS ingested FROM materials")
@@ -634,8 +782,14 @@ def run_verification(base_url: str = DEFAULT_BASE_URL, *, resume: bool = False,
             inventory, chunk_count, expected_materials, expected_chunks,
         )
         _check(report_path, report, 'inventory', passed, details)
+        inventory_passed = passed
     except Exception:
         _check(report_path, report, 'inventory', False, {'reason': 'database_inventory_unavailable'})
+    if not inventory_passed:
+        report['finished_at'] = dt.datetime.now(dt.timezone.utc).isoformat()
+        report['status'] = 'failed'
+        _save(report_path, report)
+        return report_path, report
 
     try:
         search = client.request('POST', '/api/search', {
@@ -765,6 +919,10 @@ def run_verification(base_url: str = DEFAULT_BASE_URL, *, resume: bool = False,
             jobs.append({'kind': kind, 'job_id': job_id, 'summary': summary})
             report['jobs'] = jobs
         except VerificationError as error:
+            if _is_submission_control_failure(error):
+                # A POST may have been accepted without a durable job ID. Stop the whole
+                # coordinator before any other submission, feedback, or report mutation.
+                raise
             _check(report_path, report, 'job_' + kind + '_result', False,
                    {'reason': error.reason, 'http_status': error.http_status, 'job_id': job_id})
             jobs = [item for item in report.get('jobs', [])
@@ -775,6 +933,11 @@ def run_verification(base_url: str = DEFAULT_BASE_URL, *, resume: bool = False,
                 _check(report_path, report, 'experiment_snapshot_contains_feedback_memory', False,
                        {'reason': error.reason, 'job_id': job_id})
         except Exception:
+            # Do not turn any failure in submission-intent persistence into a normal
+            # per-kind verification error. The next POST could duplicate accepted work.
+            intent = report.get('decision_submission_intents', {}).get(kind, {})
+            if isinstance(intent, dict) and intent.get('state') in ('pending', 'outcome_unknown'):
+                raise VerificationError('decision_submission_outcome_unknown') from None
             _check(report_path, report, 'job_' + kind + '_result', False,
                    {'reason': 'decision_verification_failed', 'job_id': job_id})
             jobs = [item for item in report.get('jobs', [])
@@ -809,12 +972,15 @@ def main() -> int:
                         help='Expected prepared material count (default: 100).')
     parser.add_argument('--expected-chunks', type=int,
                         help='Expected prepared chunk count (required unless expected materials is 100).')
+    parser.add_argument('--corpus-manifest-sha256',
+                        help='Optional frozen corpus manifest SHA256; recorded in report scope, never sent to the model.')
     args = parser.parse_args()
     report_path = args.output
     try:
         report_path, report = run_verification(
             args.base_url, resume=args.resume, report_path=args.output,
             expected_materials=args.expected_materials, expected_chunks=args.expected_chunks,
+            corpus_manifest_sha256=args.corpus_manifest_sha256,
         )
         summary = {'status': report['status'], 'report_path': str(report_path),
                    'checks_passed': sum(check['passed'] for check in report['checks'].values()),
