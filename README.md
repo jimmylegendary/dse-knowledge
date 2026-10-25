@@ -86,7 +86,7 @@ Embedding 비용의 기준은 [DeepInfra 공식 단가](https://deepinfra.com/go
 
 정답셋은 24개 정상 질의(한국어/영어 각 12, 9개 category마다 최소 2개)와 6개 미지원 질의로 먼저 고정했다. Unsupported의 source 참조는 근접 문맥을 설명하는 boundary이지 정답이 아니다. 미지원 질의에서 검색 결과가 나오는 것만으로 실패로 처리하지 않는다. 한국어와 영어 질문이 서로 달라 subgroup 차이를 embedding의 언어 성능 차이로 단정하지 않는다.
 
-초기 판단 probe 3개는 입력 case ID의 pos/neg prefix가 모델에 보여 독립 평가에서 제외했다. 같은 질문을 공통 kind=knowledge, model-visible input={}로 다시 실행했고 **blind 결과 3개만** 위 성적에 사용했다. 기존 결과는 지우지 않고 invalidation audit와 함께 보존했다. 새 gold feedback은 Melete에 추가하지 않았다. 재현 helper는 metadata·expected label을 model input에 싣지 않는 회귀 테스트를 가진다.
+초기 판단 probe 3개는 입력 case ID의 pos/neg prefix가 모델에 보여 독립 평가에서 제외했다. 같은 질문을 공통 kind=knowledge, model-visible input={}로 다시 실행했고 **blind 결과 3개만** 위 성적에 사용했다. 기존 결과는 지우지 않고 invalidation audit와 함께 보존했다. 새 gold feedback은 Melete에 추가하지 않았다. Semantic review는 AI worker/root가 수행했고 reviewer model/revision은 artifact에 기록되지 않았으므로 독립 human benchmark로 보지 않는다. 공개된 30개 qrels는 이후 blind holdout으로 사용할 수 없다. 재현 helper는 metadata·expected label을 model input에 싣지 않는 회귀 테스트를 가진다.
 
 169건 acquisition 시도 중 69건은 allowlist 63 · revision pin 4 · 크기 제한 2로 제외됐다. 이를 전체 자료의 원문 접근 가능률로 해석하지 않는다. source metadata의 title/abstract origin과 실제 PDF fulltext revision도 구분한다. 예를 들어 Glacierware는 abstract-origin catalog record지만 실제 PDF를 확보했다. Lithography hotspot은 thermal hotspot과 다르므로 category 보완 대상으로 기록했다.
 

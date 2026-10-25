@@ -320,7 +320,8 @@
       "Latency describes successful calls only; errors are separately counted and score zero for positive cases.",
       "Latency is a small sequential warm-service sample, not a saturation/capacity benchmark.",
       "Korean/English questions differ; language subgroup differences are not a paired language-capability experiment.",
-      "Source@1/MRR changes do not by themselves establish downstream answer correctness changes."
+      "Source@1/MRR changes do not by themselves establish downstream answer correctness changes.",
+      "The published 30-case qrels are now a public regression set and cannot serve as a future blind holdout."
     ]
   },
   "answerability": {
@@ -405,8 +406,15 @@
     "limits": [
       "Only two supported factual source questions and one B300 measurement question were tested, not architecture/kernel execution.",
       "Alternative retrieved context supports scoped uncertainty; it does not prove corpus-wide absence.",
-      "Prior assistant observations remained trace_only; no new gold feedback was added to Melete."
-    ]
+      "Prior assistant observations remained trace_only; no new gold feedback was added to Melete.",
+      "The semantic-review worker model/revision was not captured; this is advisory AI review, not a fully traced independent human benchmark."
+    ],
+    "semantic_reviewer_provenance": {
+      "kind": "managed AI worker plus root source-context review",
+      "worker_task": "/root/embedding_infra_review",
+      "exact_reviewer_model_and_revision_logged": false,
+      "human_gold_review": false
+    }
   },
   "capacity": {
     "baseline_recorded_groups": {
