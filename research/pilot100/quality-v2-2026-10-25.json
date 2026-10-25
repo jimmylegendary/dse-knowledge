@@ -1,0 +1,1018 @@
+{
+  "schema_version": "dse-knowledge-quality-evaluation/v2",
+  "phase": "Q1",
+  "status": "verified",
+  "generated_at": "2026-10-25T07:37:21.949099+00:00",
+  "baseline_commit": "f2e113cb720566df79a7368745da3be50c93c23c",
+  "runtime_version": "0.2.0",
+  "retrieval_policy": "retrieval-policy/v2.1",
+  "code_tree_sha256": "04738353d6546c1eed4a02e7501f7b9bfe978326b0e4b65e561c15ad1118eeec",
+  "retrieval_policy_sha256": "be2405aee0989ce7b751017d33c163c6810f953c8b6be6afc4ad42254acd4777",
+  "web_sha256": {
+    "web/app.js": "1799d52a3ddef93449f2672d621cec61242cc37379a6d201b73fcc92bfc834ba",
+    "web/style.css": "775aceec6efb6f512f751efa0448bf171019851a622f01ee181af6118e352cae"
+  },
+  "corpus": {
+    "material_count": 100,
+    "revision_count": 100,
+    "current_revision_characters": 5174455,
+    "all_revision_characters": 5174455,
+    "chunk_count": 1912,
+    "claim_count": 101,
+    "annotation_count": 91,
+    "category_counts": {
+      "compiler_kernel": 11,
+      "dse_optimization": 14,
+      "hardware_architecture": 13,
+      "llm_model_workload": 18,
+      "memory_interconnect": 10,
+      "power_thermal_packaging": 7,
+      "provenance_experiment": 5,
+      "serving_scheduling": 10,
+      "simulation_measurement": 12
+    }
+  },
+  "roles": {
+    "core_technical": {
+      "status": "evaluated",
+      "kg_eligible": true,
+      "material_count": 35,
+      "claim_count_all_revisions": 37,
+      "current_revision_claim_count": 37,
+      "source_valid_current_claim_count": 37,
+      "materials_with_source_valid_claims": 35,
+      "current_claim_material_count": 35,
+      "fully_annotated_material_count": 34,
+      "claim_material_coverage_rate": 1.0,
+      "fully_annotated_material_rate": 0.9714285714285714,
+      "kg_complete_count": 34
+    },
+    "supporting_method": {
+      "status": "evaluated",
+      "kg_eligible": true,
+      "material_count": 29,
+      "claim_count_all_revisions": 29,
+      "current_revision_claim_count": 29,
+      "source_valid_current_claim_count": 29,
+      "materials_with_source_valid_claims": 29,
+      "current_claim_material_count": 29,
+      "fully_annotated_material_count": 27,
+      "claim_material_coverage_rate": 1.0,
+      "fully_annotated_material_rate": 0.9310344827586207,
+      "kg_complete_count": 27
+    },
+    "integration_operations": {
+      "status": "evaluated",
+      "kg_eligible": true,
+      "material_count": 30,
+      "claim_count_all_revisions": 30,
+      "current_revision_claim_count": 30,
+      "source_valid_current_claim_count": 30,
+      "materials_with_source_valid_claims": 30,
+      "current_claim_material_count": 30,
+      "fully_annotated_material_count": 28,
+      "claim_material_coverage_rate": 1.0,
+      "fully_annotated_material_rate": 0.9333333333333333,
+      "kg_complete_count": 28
+    },
+    "source_navigation": {
+      "status": "not_applicable",
+      "kg_eligible": false,
+      "material_count": 5,
+      "claim_count_all_revisions": 4,
+      "current_revision_claim_count": 4,
+      "source_valid_current_claim_count": 4,
+      "materials_with_source_valid_claims": 4,
+      "current_claim_material_count": 4,
+      "fully_annotated_material_count": 0,
+      "claim_material_coverage_rate": null,
+      "fully_annotated_material_rate": null,
+      "kg_complete_count": 0
+    },
+    "out_of_scope": {
+      "status": "not_applicable",
+      "kg_eligible": false,
+      "material_count": 1,
+      "claim_count_all_revisions": 1,
+      "current_revision_claim_count": 1,
+      "source_valid_current_claim_count": 1,
+      "materials_with_source_valid_claims": 1,
+      "current_claim_material_count": 1,
+      "fully_annotated_material_count": 0,
+      "claim_material_coverage_rate": null,
+      "fully_annotated_material_rate": null,
+      "kg_complete_count": 0
+    },
+    "unclassified": {
+      "status": "not_evaluated",
+      "kg_eligible": false,
+      "material_count": 0,
+      "claim_count_all_revisions": 0,
+      "current_revision_claim_count": 0,
+      "source_valid_current_claim_count": 0,
+      "materials_with_source_valid_claims": 0,
+      "current_claim_material_count": 0,
+      "fully_annotated_material_count": 0,
+      "claim_material_coverage_rate": null,
+      "fully_annotated_material_rate": null,
+      "kg_complete_count": 0
+    }
+  },
+  "technical_eligible": {
+    "roles": [
+      "core_technical",
+      "supporting_method",
+      "integration_operations"
+    ],
+    "status": "evaluated",
+    "material_count": 94,
+    "materials_with_source_valid_claims": 94,
+    "current_claim_material_count": 94,
+    "fully_annotated_material_count": 89,
+    "claim_material_coverage_rate": 1.0,
+    "fully_annotated_material_rate": 0.9468085106382979,
+    "kg_complete_count": 89,
+    "claim_coverage_threshold": 0.9,
+    "claim_coverage_target_met": true
+  },
+  "annotations": {
+    "count": 91,
+    "valid_count": 91,
+    "invalid_count": 0,
+    "ignored_version_count": 0,
+    "parameter_count": 89,
+    "condition_count": 116,
+    "normalization_status_counts": {
+      "normalized": 3,
+      "not_numeric": 165,
+      "unit_unspecified": 11,
+      "unresolved": 26
+    },
+    "normalization_status_errors": 0
+  },
+  "vectors": {
+    "dimension_counts": {
+      "768": 1912
+    },
+    "count": 1912,
+    "chunk_count": 1912,
+    "missing_vector_count": 0,
+    "dimension_768_count": 1912,
+    "dimension_mismatch_count": 0
+  },
+  "graph": {
+    "node_count": 226,
+    "edge_count": 197,
+    "invalid_edge_count": 0,
+    "component_count": 60,
+    "largest_component_node_count": 65,
+    "largest_component_source_count": 26,
+    "multisource_component_count": 8,
+    "largest_multisource_component_node_count": 65,
+    "largest_multisource_component_source_count": 26,
+    "edge_kind_counts": {
+      "assertion": 101,
+      "topic": 96
+    }
+  },
+  "canonical_validation_errors": 0,
+  "original_claims_preserved": {
+    "count": 101,
+    "changed_count": 0,
+    "checked_fields": [
+      "id",
+      "material_id",
+      "revision_id",
+      "chunk_id",
+      "kind",
+      "subject",
+      "predicate",
+      "object",
+      "summary",
+      "quote",
+      "scope",
+      "metadata",
+      "created_at"
+    ]
+  },
+  "tests": {
+    "passed": 345,
+    "warning_count": 1,
+    "command": "python -m pytest -q"
+  },
+  "native_http_e2e": {
+    "passed": 18,
+    "total": 18,
+    "source": "real Supabase, Codex, embedding, HAT schema, Melete",
+    "limits": [
+      "This verifies the configured frozen set of 100 materials and 1912 chunks only; it does not validate broader corpus completeness.",
+      "Native HAT status is structural only; physical feasibility and B300 measurements are not assessed.",
+      "Experiment policy fixtures are synthetic declared values, not hardware measurements."
+    ]
+  },
+  "public_regression": {
+    "profile": "legacy30",
+    "qrels_sha256": "34bedaf0eb6efe539a5de172f1ffe013e8b8c8364db58c8637714c563797cb6e",
+    "status": "complete",
+    "observations": 30,
+    "errors": 0,
+    "summary": {
+      "hybrid": {
+        "denominator": 24,
+        "known_source_hit_at_1": 0.9583333333333334,
+        "known_source_hit_at_5": 1.0,
+        "known_source_hit_at_10": 1.0,
+        "known_chunk_hit_at_5": 0.7083333333333334,
+        "known_chunk_hit_at_10": 0.7916666666666666,
+        "all_expected_sources_at_5": 0.9166666666666666,
+        "reciprocal_rank": 0.9791666666666666
+      },
+      "hybrid_evidence": {
+        "denominator": 24,
+        "known_source_hit_at_1": 0.9166666666666666,
+        "known_source_hit_at_5": 0.9583333333333334,
+        "known_source_hit_at_10": 0.9583333333333334,
+        "known_chunk_hit_at_5": 0.6666666666666666,
+        "known_chunk_hit_at_10": 0.75,
+        "all_expected_sources_at_5": 0.875,
+        "reciprocal_rank": 0.9375
+      },
+      "dense": {
+        "denominator": 24,
+        "known_source_hit_at_1": 0.9583333333333334,
+        "known_source_hit_at_5": 1.0,
+        "known_source_hit_at_10": 1.0,
+        "known_chunk_hit_at_5": 0.4166666666666667,
+        "known_chunk_hit_at_10": 0.5,
+        "all_expected_sources_at_5": 0.9583333333333334,
+        "reciprocal_rank": 0.9791666666666666
+      },
+      "lexical": {
+        "denominator": 24,
+        "known_source_hit_at_1": 0.3333333333333333,
+        "known_source_hit_at_5": 0.75,
+        "known_source_hit_at_10": 0.7916666666666666,
+        "known_chunk_hit_at_5": 0.6666666666666666,
+        "known_chunk_hit_at_10": 0.7083333333333334,
+        "all_expected_sources_at_5": 0.5416666666666666,
+        "reciprocal_rank": 0.45740740740740743
+      },
+      "dense_lexical": {
+        "denominator": 24,
+        "known_source_hit_at_1": 0.7083333333333334,
+        "known_source_hit_at_5": 0.9166666666666666,
+        "known_source_hit_at_10": 1.0,
+        "known_chunk_hit_at_5": 0.625,
+        "known_chunk_hit_at_10": 0.6666666666666666,
+        "all_expected_sources_at_5": 0.7083333333333334,
+        "reciprocal_rank": 0.7997685185185185
+      },
+      "hybrid_without_graph": {
+        "denominator": 24,
+        "known_source_hit_at_1": 0.7083333333333334,
+        "known_source_hit_at_5": 0.9166666666666666,
+        "known_source_hit_at_10": 1.0,
+        "known_chunk_hit_at_5": 0.6666666666666666,
+        "known_chunk_hit_at_10": 0.75,
+        "all_expected_sources_at_5": 0.75,
+        "reciprocal_rank": 0.7844907407407408
+      }
+    },
+    "breakdown": {
+      "language": {
+        "en": {
+          "denominator": 12,
+          "known_source_hit_at_1": 0.9166666666666666,
+          "known_source_hit_at_5": 1.0,
+          "known_source_hit_at_10": 1.0,
+          "known_chunk_hit_at_5": 0.8333333333333334,
+          "known_chunk_hit_at_10": 0.9166666666666666,
+          "all_expected_sources_at_5": 0.9166666666666666,
+          "reciprocal_rank": 0.9583333333333334
+        },
+        "ko": {
+          "denominator": 12,
+          "known_source_hit_at_1": 1.0,
+          "known_source_hit_at_5": 1.0,
+          "known_source_hit_at_10": 1.0,
+          "known_chunk_hit_at_5": 0.5833333333333334,
+          "known_chunk_hit_at_10": 0.6666666666666666,
+          "all_expected_sources_at_5": 0.9166666666666666,
+          "reciprocal_rank": 1.0
+        }
+      },
+      "category": {
+        "compiler_kernel": {
+          "denominator": 3,
+          "known_source_hit_at_1": 1.0,
+          "known_source_hit_at_5": 1.0,
+          "known_source_hit_at_10": 1.0,
+          "known_chunk_hit_at_5": 1.0,
+          "known_chunk_hit_at_10": 1.0,
+          "all_expected_sources_at_5": 1.0,
+          "reciprocal_rank": 1.0
+        },
+        "dse_optimization": {
+          "denominator": 3,
+          "known_source_hit_at_1": 1.0,
+          "known_source_hit_at_5": 1.0,
+          "known_source_hit_at_10": 1.0,
+          "known_chunk_hit_at_5": 0.3333333333333333,
+          "known_chunk_hit_at_10": 0.3333333333333333,
+          "all_expected_sources_at_5": 1.0,
+          "reciprocal_rank": 1.0
+        },
+        "hardware_architecture": {
+          "denominator": 3,
+          "known_source_hit_at_1": 1.0,
+          "known_source_hit_at_5": 1.0,
+          "known_source_hit_at_10": 1.0,
+          "known_chunk_hit_at_5": 0.3333333333333333,
+          "known_chunk_hit_at_10": 0.6666666666666666,
+          "all_expected_sources_at_5": 0.6666666666666666,
+          "reciprocal_rank": 1.0
+        },
+        "llm_model_workload": {
+          "denominator": 3,
+          "known_source_hit_at_1": 1.0,
+          "known_source_hit_at_5": 1.0,
+          "known_source_hit_at_10": 1.0,
+          "known_chunk_hit_at_5": 0.3333333333333333,
+          "known_chunk_hit_at_10": 0.6666666666666666,
+          "all_expected_sources_at_5": 1.0,
+          "reciprocal_rank": 1.0
+        },
+        "memory_interconnect": {
+          "denominator": 2,
+          "known_source_hit_at_1": 0.5,
+          "known_source_hit_at_5": 1.0,
+          "known_source_hit_at_10": 1.0,
+          "known_chunk_hit_at_5": 1.0,
+          "known_chunk_hit_at_10": 1.0,
+          "all_expected_sources_at_5": 1.0,
+          "reciprocal_rank": 0.75
+        },
+        "power_thermal_packaging": {
+          "denominator": 3,
+          "known_source_hit_at_1": 1.0,
+          "known_source_hit_at_5": 1.0,
+          "known_source_hit_at_10": 1.0,
+          "known_chunk_hit_at_5": 1.0,
+          "known_chunk_hit_at_10": 1.0,
+          "all_expected_sources_at_5": 0.6666666666666666,
+          "reciprocal_rank": 1.0
+        },
+        "provenance_experiment": {
+          "denominator": 3,
+          "known_source_hit_at_1": 1.0,
+          "known_source_hit_at_5": 1.0,
+          "known_source_hit_at_10": 1.0,
+          "known_chunk_hit_at_5": 0.6666666666666666,
+          "known_chunk_hit_at_10": 0.6666666666666666,
+          "all_expected_sources_at_5": 1.0,
+          "reciprocal_rank": 1.0
+        },
+        "serving_scheduling": {
+          "denominator": 2,
+          "known_source_hit_at_1": 1.0,
+          "known_source_hit_at_5": 1.0,
+          "known_source_hit_at_10": 1.0,
+          "known_chunk_hit_at_5": 1.0,
+          "known_chunk_hit_at_10": 1.0,
+          "all_expected_sources_at_5": 1.0,
+          "reciprocal_rank": 1.0
+        },
+        "simulation_measurement": {
+          "denominator": 2,
+          "known_source_hit_at_1": 1.0,
+          "known_source_hit_at_5": 1.0,
+          "known_source_hit_at_10": 1.0,
+          "known_chunk_hit_at_5": 1.0,
+          "known_chunk_hit_at_10": 1.0,
+          "all_expected_sources_at_5": 1.0,
+          "reciprocal_rank": 1.0
+        }
+      }
+    },
+    "latency": {
+      "count": 30,
+      "p50_seconds": 9.615121059119701,
+      "p95_seconds": 23.076845979318023,
+      "max_seconds": 23.6815175851807
+    },
+    "http_latency": {
+      "count": 6,
+      "p50_seconds": 6.689322533085942,
+      "p95_seconds": 15.525832098908722,
+      "max_seconds": 15.525832098908722
+    },
+    "mode_definitions": {
+      "hybrid": "Production mixed source_results ordering. Includes evidence and locator rows; locator evidence_authority is zero. Known-source metrics measure source lookup, not technical assertion authority.",
+      "hybrid_evidence": "Production items ordering with locator rows excluded; evidence-only result class, still subject to source-role use ceilings.",
+      "dense": "Historical dense candidate order with legacy diversity cap; retained for comparison with the previous report.",
+      "lexical": "Legacy single-channel lexical reference.",
+      "dense_lexical": "Legacy unweighted two-channel RRF reference.",
+      "hybrid_without_graph": "Legacy unweighted dense/lexical/title RRF reference; multiple policies differ from production v2."
+    },
+    "limits": [
+      "Partial qrels measure known-source/chunk hit, not exhaustive relevance precision/recall.",
+      "Failed answerable requests remain zero in the metric denominator.",
+      "Unsupported queries are excluded from source-hit denominators; retrieval is not an answerability gate.",
+      "hybrid source-hit metrics include zero-authority locators as source lookup results; hybrid_evidence excludes them and remains bounded by role policy.",
+      "Channel subsets reuse the actual query vector and production candidates, but use legacy unweighted RRF for historical comparison.",
+      "hybrid_without_graph is a legacy three-channel RRF reference, not a controlled graph-only ablation of v2 purpose/role/weight policies.",
+      "Latency describes successful calls only; errors are separately counted and score zero for positive cases.",
+      "Latency is a small sequential warm-service sample, not a saturation/capacity benchmark."
+    ],
+    "successful_http_checks": 6
+  },
+  "fresh_paired_holdout": {
+    "profile": "paired28",
+    "qrels_sha256": "62c3456c6e1ba635f7e4d2c8c4f22320dc1326171186fec0a75748776dc75f78",
+    "status": "complete",
+    "observations": 28,
+    "errors": 0,
+    "summary": {
+      "hybrid": {
+        "denominator": 24,
+        "known_source_hit_at_1": 1.0,
+        "known_source_hit_at_5": 1.0,
+        "known_source_hit_at_10": 1.0,
+        "known_chunk_hit_at_5": 0.9583333333333334,
+        "known_chunk_hit_at_10": 0.9583333333333334,
+        "all_expected_sources_at_5": 1.0,
+        "reciprocal_rank": 1.0
+      },
+      "hybrid_evidence": {
+        "denominator": 24,
+        "known_source_hit_at_1": 1.0,
+        "known_source_hit_at_5": 1.0,
+        "known_source_hit_at_10": 1.0,
+        "known_chunk_hit_at_5": 0.9583333333333334,
+        "known_chunk_hit_at_10": 0.9583333333333334,
+        "all_expected_sources_at_5": 1.0,
+        "reciprocal_rank": 1.0
+      },
+      "dense": {
+        "denominator": 24,
+        "known_source_hit_at_1": 1.0,
+        "known_source_hit_at_5": 1.0,
+        "known_source_hit_at_10": 1.0,
+        "known_chunk_hit_at_5": 0.9583333333333334,
+        "known_chunk_hit_at_10": 0.9583333333333334,
+        "all_expected_sources_at_5": 1.0,
+        "reciprocal_rank": 1.0
+      },
+      "lexical": {
+        "denominator": 24,
+        "known_source_hit_at_1": 0.625,
+        "known_source_hit_at_5": 0.875,
+        "known_source_hit_at_10": 0.9166666666666666,
+        "known_chunk_hit_at_5": 0.6666666666666666,
+        "known_chunk_hit_at_10": 0.75,
+        "all_expected_sources_at_5": 0.875,
+        "reciprocal_rank": 0.7149305555555556
+      },
+      "dense_lexical": {
+        "denominator": 24,
+        "known_source_hit_at_1": 0.9166666666666666,
+        "known_source_hit_at_5": 1.0,
+        "known_source_hit_at_10": 1.0,
+        "known_chunk_hit_at_5": 0.8333333333333334,
+        "known_chunk_hit_at_10": 0.8333333333333334,
+        "all_expected_sources_at_5": 1.0,
+        "reciprocal_rank": 0.9458333333333333
+      },
+      "hybrid_without_graph": {
+        "denominator": 24,
+        "known_source_hit_at_1": 0.6666666666666666,
+        "known_source_hit_at_5": 0.9583333333333334,
+        "known_source_hit_at_10": 0.9583333333333334,
+        "known_chunk_hit_at_5": 0.75,
+        "known_chunk_hit_at_10": 0.7916666666666666,
+        "all_expected_sources_at_5": 0.9583333333333334,
+        "reciprocal_rank": 0.7708333333333334
+      }
+    },
+    "breakdown": {
+      "language": {
+        "en": {
+          "denominator": 12,
+          "known_source_hit_at_1": 1.0,
+          "known_source_hit_at_5": 1.0,
+          "known_source_hit_at_10": 1.0,
+          "known_chunk_hit_at_5": 1.0,
+          "known_chunk_hit_at_10": 1.0,
+          "all_expected_sources_at_5": 1.0,
+          "reciprocal_rank": 1.0
+        },
+        "ko": {
+          "denominator": 12,
+          "known_source_hit_at_1": 1.0,
+          "known_source_hit_at_5": 1.0,
+          "known_source_hit_at_10": 1.0,
+          "known_chunk_hit_at_5": 0.9166666666666666,
+          "known_chunk_hit_at_10": 0.9166666666666666,
+          "all_expected_sources_at_5": 1.0,
+          "reciprocal_rank": 1.0
+        }
+      },
+      "category": {
+        "compiler_kernel": {
+          "denominator": 4,
+          "known_source_hit_at_1": 1.0,
+          "known_source_hit_at_5": 1.0,
+          "known_source_hit_at_10": 1.0,
+          "known_chunk_hit_at_5": 1.0,
+          "known_chunk_hit_at_10": 1.0,
+          "all_expected_sources_at_5": 1.0,
+          "reciprocal_rank": 1.0
+        },
+        "dse_optimization": {
+          "denominator": 4,
+          "known_source_hit_at_1": 1.0,
+          "known_source_hit_at_5": 1.0,
+          "known_source_hit_at_10": 1.0,
+          "known_chunk_hit_at_5": 1.0,
+          "known_chunk_hit_at_10": 1.0,
+          "all_expected_sources_at_5": 1.0,
+          "reciprocal_rank": 1.0
+        },
+        "hardware_architecture": {
+          "denominator": 2,
+          "known_source_hit_at_1": 1.0,
+          "known_source_hit_at_5": 1.0,
+          "known_source_hit_at_10": 1.0,
+          "known_chunk_hit_at_5": 1.0,
+          "known_chunk_hit_at_10": 1.0,
+          "all_expected_sources_at_5": 1.0,
+          "reciprocal_rank": 1.0
+        },
+        "llm_model_workload": {
+          "denominator": 2,
+          "known_source_hit_at_1": 1.0,
+          "known_source_hit_at_5": 1.0,
+          "known_source_hit_at_10": 1.0,
+          "known_chunk_hit_at_5": 0.5,
+          "known_chunk_hit_at_10": 0.5,
+          "all_expected_sources_at_5": 1.0,
+          "reciprocal_rank": 1.0
+        },
+        "memory_interconnect": {
+          "denominator": 2,
+          "known_source_hit_at_1": 1.0,
+          "known_source_hit_at_5": 1.0,
+          "known_source_hit_at_10": 1.0,
+          "known_chunk_hit_at_5": 1.0,
+          "known_chunk_hit_at_10": 1.0,
+          "all_expected_sources_at_5": 1.0,
+          "reciprocal_rank": 1.0
+        },
+        "power_thermal_packaging": {
+          "denominator": 2,
+          "known_source_hit_at_1": 1.0,
+          "known_source_hit_at_5": 1.0,
+          "known_source_hit_at_10": 1.0,
+          "known_chunk_hit_at_5": 1.0,
+          "known_chunk_hit_at_10": 1.0,
+          "all_expected_sources_at_5": 1.0,
+          "reciprocal_rank": 1.0
+        },
+        "provenance_experiment": {
+          "denominator": 2,
+          "known_source_hit_at_1": 1.0,
+          "known_source_hit_at_5": 1.0,
+          "known_source_hit_at_10": 1.0,
+          "known_chunk_hit_at_5": 1.0,
+          "known_chunk_hit_at_10": 1.0,
+          "all_expected_sources_at_5": 1.0,
+          "reciprocal_rank": 1.0
+        },
+        "serving_scheduling": {
+          "denominator": 2,
+          "known_source_hit_at_1": 1.0,
+          "known_source_hit_at_5": 1.0,
+          "known_source_hit_at_10": 1.0,
+          "known_chunk_hit_at_5": 1.0,
+          "known_chunk_hit_at_10": 1.0,
+          "all_expected_sources_at_5": 1.0,
+          "reciprocal_rank": 1.0
+        },
+        "simulation_measurement": {
+          "denominator": 4,
+          "known_source_hit_at_1": 1.0,
+          "known_source_hit_at_5": 1.0,
+          "known_source_hit_at_10": 1.0,
+          "known_chunk_hit_at_5": 1.0,
+          "known_chunk_hit_at_10": 1.0,
+          "all_expected_sources_at_5": 1.0,
+          "reciprocal_rank": 1.0
+        }
+      }
+    },
+    "latency": {
+      "count": 28,
+      "p50_seconds": 16.87566141691059,
+      "p95_seconds": 24.28771240171045,
+      "max_seconds": 24.59568354021758
+    },
+    "http_latency": {
+      "count": 6,
+      "p50_seconds": 14.970560126937926,
+      "p95_seconds": 23.45497550908476,
+      "max_seconds": 23.45497550908476
+    },
+    "mode_definitions": {
+      "hybrid": "Production mixed source_results ordering. Includes evidence and locator rows; locator evidence_authority is zero. Known-source metrics measure source lookup, not technical assertion authority.",
+      "hybrid_evidence": "Production items ordering with locator rows excluded; evidence-only result class, still subject to source-role use ceilings.",
+      "dense": "Historical dense candidate order with legacy diversity cap; retained for comparison with the previous report.",
+      "lexical": "Legacy single-channel lexical reference.",
+      "dense_lexical": "Legacy unweighted two-channel RRF reference.",
+      "hybrid_without_graph": "Legacy unweighted dense/lexical/title RRF reference; multiple policies differ from production v2."
+    },
+    "limits": [
+      "Partial qrels measure known-source/chunk hit, not exhaustive relevance precision/recall.",
+      "Failed answerable requests remain zero in the metric denominator.",
+      "Unsupported queries are excluded from source-hit denominators; retrieval is not an answerability gate.",
+      "hybrid source-hit metrics include zero-authority locators as source lookup results; hybrid_evidence excludes them and remains bounded by role policy.",
+      "Channel subsets reuse the actual query vector and production candidates, but use legacy unweighted RRF for historical comparison.",
+      "hybrid_without_graph is a legacy three-channel RRF reference, not a controlled graph-only ablation of v2 purpose/role/weight policies.",
+      "Latency describes successful calls only; errors are separately counted and score zero for positive cases.",
+      "Latency is a small sequential warm-service sample, not a saturation/capacity benchmark."
+    ],
+    "successful_http_checks": 6,
+    "paired_language": {
+      "weighting": "equal_per_bilingual_pair",
+      "paired_denominator": 12,
+      "unsupported_pairs_excluded": 2,
+      "modes": {
+        "dense": {
+          "paired_denominator": 12,
+          "unsupported_pairs_excluded": 2,
+          "ko": {
+            "denominator": 12,
+            "known_source_hit_at_1": 1.0,
+            "known_source_hit_at_5": 1.0,
+            "known_source_hit_at_10": 1.0,
+            "known_chunk_hit_at_5": 1.0,
+            "known_chunk_hit_at_10": 1.0,
+            "all_expected_sources_at_5": 1.0,
+            "reciprocal_rank": 1.0
+          },
+          "en": {
+            "denominator": 12,
+            "known_source_hit_at_1": 1.0,
+            "known_source_hit_at_5": 1.0,
+            "known_source_hit_at_10": 1.0,
+            "known_chunk_hit_at_5": 0.9166666666666666,
+            "known_chunk_hit_at_10": 0.9166666666666666,
+            "all_expected_sources_at_5": 1.0,
+            "reciprocal_rank": 1.0
+          },
+          "en_minus_ko": {
+            "denominator": 12,
+            "known_source_hit_at_1": 0.0,
+            "known_source_hit_at_5": 0.0,
+            "known_source_hit_at_10": 0.0,
+            "known_chunk_hit_at_5": -0.08333333333333333,
+            "known_chunk_hit_at_10": -0.08333333333333333,
+            "all_expected_sources_at_5": 0.0,
+            "reciprocal_rank": 0.0
+          }
+        },
+        "dense_lexical": {
+          "paired_denominator": 12,
+          "unsupported_pairs_excluded": 2,
+          "ko": {
+            "denominator": 12,
+            "known_source_hit_at_1": 0.9166666666666666,
+            "known_source_hit_at_5": 1.0,
+            "known_source_hit_at_10": 1.0,
+            "known_chunk_hit_at_5": 0.8333333333333334,
+            "known_chunk_hit_at_10": 0.8333333333333334,
+            "all_expected_sources_at_5": 1.0,
+            "reciprocal_rank": 0.9333333333333332
+          },
+          "en": {
+            "denominator": 12,
+            "known_source_hit_at_1": 0.9166666666666666,
+            "known_source_hit_at_5": 1.0,
+            "known_source_hit_at_10": 1.0,
+            "known_chunk_hit_at_5": 0.8333333333333334,
+            "known_chunk_hit_at_10": 0.8333333333333334,
+            "all_expected_sources_at_5": 1.0,
+            "reciprocal_rank": 0.9583333333333334
+          },
+          "en_minus_ko": {
+            "denominator": 12,
+            "known_source_hit_at_1": 0.0,
+            "known_source_hit_at_5": 0.0,
+            "known_source_hit_at_10": 0.0,
+            "known_chunk_hit_at_5": 0.0,
+            "known_chunk_hit_at_10": 0.0,
+            "all_expected_sources_at_5": 0.0,
+            "reciprocal_rank": 0.025000000000000005
+          }
+        },
+        "hybrid": {
+          "paired_denominator": 12,
+          "unsupported_pairs_excluded": 2,
+          "ko": {
+            "denominator": 12,
+            "known_source_hit_at_1": 1.0,
+            "known_source_hit_at_5": 1.0,
+            "known_source_hit_at_10": 1.0,
+            "known_chunk_hit_at_5": 0.9166666666666666,
+            "known_chunk_hit_at_10": 0.9166666666666666,
+            "all_expected_sources_at_5": 1.0,
+            "reciprocal_rank": 1.0
+          },
+          "en": {
+            "denominator": 12,
+            "known_source_hit_at_1": 1.0,
+            "known_source_hit_at_5": 1.0,
+            "known_source_hit_at_10": 1.0,
+            "known_chunk_hit_at_5": 1.0,
+            "known_chunk_hit_at_10": 1.0,
+            "all_expected_sources_at_5": 1.0,
+            "reciprocal_rank": 1.0
+          },
+          "en_minus_ko": {
+            "denominator": 12,
+            "known_source_hit_at_1": 0.0,
+            "known_source_hit_at_5": 0.0,
+            "known_source_hit_at_10": 0.0,
+            "known_chunk_hit_at_5": 0.08333333333333333,
+            "known_chunk_hit_at_10": 0.08333333333333333,
+            "all_expected_sources_at_5": 0.0,
+            "reciprocal_rank": 0.0
+          }
+        },
+        "hybrid_evidence": {
+          "paired_denominator": 12,
+          "unsupported_pairs_excluded": 2,
+          "ko": {
+            "denominator": 12,
+            "known_source_hit_at_1": 1.0,
+            "known_source_hit_at_5": 1.0,
+            "known_source_hit_at_10": 1.0,
+            "known_chunk_hit_at_5": 0.9166666666666666,
+            "known_chunk_hit_at_10": 0.9166666666666666,
+            "all_expected_sources_at_5": 1.0,
+            "reciprocal_rank": 1.0
+          },
+          "en": {
+            "denominator": 12,
+            "known_source_hit_at_1": 1.0,
+            "known_source_hit_at_5": 1.0,
+            "known_source_hit_at_10": 1.0,
+            "known_chunk_hit_at_5": 1.0,
+            "known_chunk_hit_at_10": 1.0,
+            "all_expected_sources_at_5": 1.0,
+            "reciprocal_rank": 1.0
+          },
+          "en_minus_ko": {
+            "denominator": 12,
+            "known_source_hit_at_1": 0.0,
+            "known_source_hit_at_5": 0.0,
+            "known_source_hit_at_10": 0.0,
+            "known_chunk_hit_at_5": 0.08333333333333333,
+            "known_chunk_hit_at_10": 0.08333333333333333,
+            "all_expected_sources_at_5": 0.0,
+            "reciprocal_rank": 0.0
+          }
+        },
+        "hybrid_without_graph": {
+          "paired_denominator": 12,
+          "unsupported_pairs_excluded": 2,
+          "ko": {
+            "denominator": 12,
+            "known_source_hit_at_1": 0.5833333333333334,
+            "known_source_hit_at_5": 0.9166666666666666,
+            "known_source_hit_at_10": 0.9166666666666666,
+            "known_chunk_hit_at_5": 0.6666666666666666,
+            "known_chunk_hit_at_10": 0.75,
+            "all_expected_sources_at_5": 0.9166666666666666,
+            "reciprocal_rank": 0.7152777777777778
+          },
+          "en": {
+            "denominator": 12,
+            "known_source_hit_at_1": 0.75,
+            "known_source_hit_at_5": 1.0,
+            "known_source_hit_at_10": 1.0,
+            "known_chunk_hit_at_5": 0.8333333333333334,
+            "known_chunk_hit_at_10": 0.8333333333333334,
+            "all_expected_sources_at_5": 1.0,
+            "reciprocal_rank": 0.8263888888888888
+          },
+          "en_minus_ko": {
+            "denominator": 12,
+            "known_source_hit_at_1": 0.16666666666666666,
+            "known_source_hit_at_5": 0.08333333333333333,
+            "known_source_hit_at_10": 0.08333333333333333,
+            "known_chunk_hit_at_5": 0.16666666666666666,
+            "known_chunk_hit_at_10": 0.08333333333333333,
+            "all_expected_sources_at_5": 0.08333333333333333,
+            "reciprocal_rank": 0.1111111111111111
+          }
+        },
+        "lexical": {
+          "paired_denominator": 12,
+          "unsupported_pairs_excluded": 2,
+          "ko": {
+            "denominator": 12,
+            "known_source_hit_at_1": 0.5,
+            "known_source_hit_at_5": 0.8333333333333334,
+            "known_source_hit_at_10": 0.8333333333333334,
+            "known_chunk_hit_at_5": 0.5,
+            "known_chunk_hit_at_10": 0.5833333333333334,
+            "all_expected_sources_at_5": 0.8333333333333334,
+            "reciprocal_rank": 0.6069444444444444
+          },
+          "en": {
+            "denominator": 12,
+            "known_source_hit_at_1": 0.75,
+            "known_source_hit_at_5": 0.9166666666666666,
+            "known_source_hit_at_10": 1.0,
+            "known_chunk_hit_at_5": 0.8333333333333334,
+            "known_chunk_hit_at_10": 0.9166666666666666,
+            "all_expected_sources_at_5": 0.9166666666666666,
+            "reciprocal_rank": 0.8229166666666666
+          },
+          "en_minus_ko": {
+            "denominator": 12,
+            "known_source_hit_at_1": 0.25,
+            "known_source_hit_at_5": 0.08333333333333333,
+            "known_source_hit_at_10": 0.16666666666666666,
+            "known_chunk_hit_at_5": 0.3333333333333333,
+            "known_chunk_hit_at_10": 0.3333333333333333,
+            "all_expected_sources_at_5": 0.08333333333333333,
+            "reciprocal_rank": 0.21597222222222223
+          }
+        }
+      }
+    }
+  },
+  "holdout_tuning": false,
+  "phase_gate_threshold": 0.85,
+  "blind_generation_probes": {
+    "count": 3,
+    "payload": "knowledge/question_only/input={}",
+    "all_succeeded": true,
+    "actual_statuses": [
+      "evidence_supported",
+      "evidence_supported",
+      "insufficient_evidence"
+    ],
+    "advisory_reviews": [
+      {
+        "case_id": "dc1b3376ea514b0ca8c8801fecba66cb",
+        "status": "evaluated",
+        "model_reported": "typesafe/jev-1.13-20260917",
+        "answers": {
+          "quality": {
+            "type": "choice",
+            "probabilities": {
+              "faithful_supported_answer": 0.98,
+              "correct_unknown": 0,
+              "unnecessary_unknown": 0,
+              "unsupported_assertion": 0.02,
+              "insufficient_review_context": 0
+            },
+            "confidence": 0.97,
+            "choice": "faithful_supported_answer"
+          }
+        },
+        "usage": {
+          "inputTokens": 3559,
+          "costUsd": 0.000149478
+        }
+      },
+      {
+        "case_id": "9edc1904c78349399ecc60d1625970c1",
+        "status": "evaluated",
+        "model_reported": "typesafe/jev-1.13-20260917",
+        "answers": {
+          "quality": {
+            "type": "choice",
+            "probabilities": {
+              "faithful_supported_answer": 1,
+              "correct_unknown": 0,
+              "unnecessary_unknown": 0,
+              "unsupported_assertion": 0,
+              "insufficient_review_context": 0
+            },
+            "confidence": 1,
+            "choice": "faithful_supported_answer"
+          }
+        },
+        "usage": {
+          "inputTokens": 3519,
+          "costUsd": 0.000147798
+        }
+      },
+      {
+        "case_id": "6be0afa3b23345ec9800e2697bf34583",
+        "status": "evaluated",
+        "model_reported": "typesafe/jev-1.13-20260917",
+        "answers": {
+          "quality": {
+            "type": "choice",
+            "probabilities": {
+              "faithful_supported_answer": 0.1,
+              "correct_unknown": 0.9,
+              "unnecessary_unknown": 0,
+              "unsupported_assertion": 0,
+              "insufficient_review_context": 0
+            },
+            "confidence": 0.87,
+            "choice": "correct_unknown"
+          }
+        },
+        "usage": {
+          "inputTokens": 5310,
+          "costUsd": 0.00022302
+        }
+      }
+    ],
+    "human_review": false,
+    "independent_scientific_validations": 0,
+    "limits": "Three small probes, repeated on final policy; not six independent test cases."
+  },
+  "browser": {
+    "schema_version": "browser-smoke/v2",
+    "recorded_at": "2026-10-25T07:25:30.502660+00:00",
+    "method": "root-observed Paseo real browser DOM, form submission, viewport resize and screenshot",
+    "query": "SGLang Advanced Features 문서 목록",
+    "purpose": "discovery",
+    "real_search_rows": 12,
+    "locator_rows": 4,
+    "locator_authority_warning_visible": true,
+    "viewports": [
+      {
+        "requested_width": 375,
+        "actual_inner_width": 376,
+        "client_width": 361,
+        "scroll_width": 361,
+        "overflow": false
+      },
+      {
+        "requested_width": 1440,
+        "actual_inner_width": 1440,
+        "scroll_width": 1425,
+        "overflow": false
+      }
+    ],
+    "fixed_defect": "Implicit grid minimum widths and long revision/chunk proof text spilled on mobile; content now wraps without clipping.",
+    "limits": [
+      "One actual search scenario on two viewports; not an exhaustive browser/device benchmark."
+    ]
+  },
+  "snapshot_provenance": {
+    "status": "complete",
+    "passed": true,
+    "job_id": "aa157eba6c014a74b3b69b3c38438147",
+    "decision_status": "evidence_supported",
+    "retrieval_policy": "retrieval-policy/v2.1",
+    "traced_kept_primary_count": 11,
+    "kept_evidence_count": 12,
+    "omitted_retrieval_count": 1,
+    "actual_chunk_ids_match_snapshot": true,
+    "trace_not_in_model_evidence": true,
+    "anchor": {
+      "chunk_id": "chunk-e486f3d6c435ab7f53e1adfb08dbf105",
+      "promoted": false,
+      "material_id": "mat-ce36d41a73243e00dbafaa35",
+      "selection_basis": "dense_material_then_best_hybrid_passage",
+      "authority_changed": false,
+      "original_dense_rank": 1,
+      "original_hybrid_position": 1
+    },
+    "source_data_preserved_after_restart": true,
+    "old_completed_decision_preserved_after_restart": true,
+    "tool_calls": 0,
+    "decisions_code_sha256": "3464f50e9fa763ebba954d327fdf5d5d294fd3033d432dd64b0bd04cbbc42b65",
+    "independent_semantic_test": false
+  },
+  "limits": [
+    "Q1 verifies the original 100 sources only; the 1000-source Q2 gate is separate.",
+    "Source literals and citation identity are checked, not scientific truth or value-metric association.",
+    "Role and semantic rank do not establish physical feasibility or native runtime support.",
+    "Graph changes were not isolated in a controlled causal ablation.",
+    "Original v2 failure source@5=22/24 is retained privately; v2.1 selection policy preceded fresh holdout retrieval.",
+    "Raw source bodies, extracted values, vectors, generated answers, credentials and private integration code are not published."
+  ],
+  "evaluation_code_tree_sha256": "be8a54f1531a64959271620ea879ea43f7d81a40abe76ed1d8918cd0824b5e5c",
+  "post_evaluation_change": {
+    "kind": "EOF blank-line cleanup only",
+    "python_ast_identical": true,
+    "paths": [
+      "src/dse_knowledge/collection.py",
+      "src/dse_knowledge/expansion.py",
+      "tests/test_collection.py",
+      "tests/test_expansion.py",
+      "tests/test_quality_resume.py",
+      "tests/test_retrieval_v2.py"
+    ]
+  }
+}

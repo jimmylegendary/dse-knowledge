@@ -9,6 +9,105 @@ import urllib.request
 
 import pytest
 
+
+def test_codex_application_slots_bound_parallel_processes_and_release(tmp_path):
+    from contextlib import ExitStack
+    from dse_knowledge.providers import _generation_slot,ProviderError
+    with ExitStack() as stack:
+        for _ in range(4):stack.enter_context(_generation_slot(tmp_path,wait_seconds=.01))
+        with pytest.raises(ProviderError,match='codex_capacity_busy'):
+            with _generation_slot(tmp_path,wait_seconds=.01):pass
+    with _generation_slot(tmp_path,wait_seconds=.01):pass
+
+@pytest.mark.parametrize('failure_at',['fstat','flock'])
+def test_generation_slot_closes_fd_when_post_open_syscall_fails(tmp_path,monkeypatch,failure_at):
+    from dse_knowledge.providers import _generation_slot,ProviderError
+    real_fstat=providers.os.fstat
+    opened=[]
+    def tracked_fstat(fd):
+        opened.append(fd)
+        if failure_at=='fstat':raise OSError('injected fstat failure')
+        return real_fstat(fd)
+    monkeypatch.setattr(providers.os,'fstat',tracked_fstat)
+    if failure_at=='flock':
+        monkeypatch.setattr(providers.fcntl,'flock',lambda *args: (_ for _ in ()).throw(OSError('injected flock failure')))
+    with pytest.raises(ProviderError,match='codex_capacity_lock_unavailable'):
+        with _generation_slot(tmp_path,wait_seconds=.01):pass
+    monkeypatch.setattr(providers.os,'fstat',real_fstat)
+    assert opened
+    try:real_fstat(opened[0])
+    except OSError:pass
+    else:
+        providers.os.close(opened[0])
+        pytest.fail('slot descriptor remained open after the syscall error')
+
+def test_generation_slot_fd_keeps_capacity_lease_after_owner_death(tmp_path):
+    import ctypes
+    import os
+    import select
+    import signal
+    import sys
+    import time
+    from pathlib import Path
+    from dse_knowledge.providers import _generation_slot,ProviderError
+    if not sys.platform.startswith('linux'):
+        pytest.skip('child-subreaper support is Linux-specific')
+    libc=ctypes.CDLL(None,use_errno=True)
+    previous=ctypes.c_int()
+    if libc.prctl(37,ctypes.byref(previous),0,0,0)!=0:
+        pytest.skip('PR_GET_CHILD_SUBREAPER unavailable')
+    if libc.prctl(36,1,0,0,0)!=0:
+        pytest.skip('PR_SET_CHILD_SUBREAPER unavailable')
+    worker_code='''
+import subprocess,sys,time
+from pathlib import Path
+from dse_knowledge.providers import _generation_slot
+with _generation_slot(Path(sys.argv[1]),wait_seconds=.1) as lease_fd:
+    child=subprocess.Popen([sys.executable,'-c','import signal; signal.pause()'],
+        stdin=subprocess.DEVNULL,stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL,
+        close_fds=True,pass_fds=(lease_fd,),start_new_session=True)
+    print(child.pid,flush=True)
+    while True: time.sleep(1)
+'''
+    env=os.environ.copy()
+    source=str(Path(__file__).resolve().parents[1]/'src')
+    env['PYTHONPATH']=source+(os.pathsep+env['PYTHONPATH'] if env.get('PYTHONPATH') else '')
+    owner=subprocess.Popen([sys.executable,'-c',worker_code,str(tmp_path)],stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,text=True,env=env,start_new_session=True)
+    child_pid=None
+    try:
+        ready,_,_=select.select([owner.stdout],[],[],3)
+        assert ready,'lease owner did not report its inherited child'
+        line=owner.stdout.readline()
+        if not line:
+            _,stderr=owner.communicate(timeout=2)
+            pytest.fail('lease owner exited before spawning its child: '+stderr[-1000:])
+        child_pid=int(line)
+        owner.kill()
+        owner.wait(timeout=2)
+        from contextlib import ExitStack
+        with ExitStack() as stack:
+            for _ in range(3):stack.enter_context(_generation_slot(tmp_path,wait_seconds=.02))
+            with pytest.raises(ProviderError,match='codex_capacity_busy'):
+                with _generation_slot(tmp_path,wait_seconds=.02):pass
+    finally:
+        if owner.poll() is None:
+            owner.kill()
+            owner.wait(timeout=2)
+        if child_pid is not None:
+            try:os.killpg(child_pid,signal.SIGKILL)
+            except ProcessLookupError:pass
+            deadline=time.monotonic()+3
+            while time.monotonic()<deadline:
+                try:waited,_=os.waitpid(child_pid,os.WNOHANG)
+                except ChildProcessError:
+                    time.sleep(.01)
+                    continue
+                if waited==child_pid:break
+                time.sleep(.01)
+            else:pytest.fail('inherited lease child was not reaped')
+        libc.prctl(36,previous.value,0,0,0)
+
 from dse_knowledge.config import Settings
 from dse_knowledge import providers
 from dse_knowledge.providers import ChatClient, EmbeddingClient, ProviderError
@@ -211,6 +310,7 @@ def test_chat_client_uses_read_only_cli_safe_environment_and_cleans_group(monkey
     assert '--skip-git-repo-check' in args and '--ephemeral' in args and '--json' in args
     assert captured['stdin'] == subprocess.DEVNULL
     assert captured['start_new_session'] is True
+    assert len(captured['pass_fds']) == 1
     assert captured['env']['HOME'] == '/home/test-user'
     assert captured['env']['CODEX_HOME'] == str(codex_home)
     assert 'mcp_servers.fixture.enabled=false' in args

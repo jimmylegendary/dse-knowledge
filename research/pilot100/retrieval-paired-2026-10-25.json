@@ -1,0 +1,853 @@
+{
+  "schema_version": "dse-quality-v2-holdout/1",
+  "source_corpus_sha256": "f8f1086e509149a2fe60dc615b8a5ed549a59af0f8f12e5b813ca299c6161315",
+  "source_commit": "4fda59347f6db7d59f89a821fc34bfc83166c6d9",
+  "original_private_qrels_sha256": "62c3456c6e1ba635f7e4d2c8c4f22320dc1326171186fec0a75748776dc75f78",
+  "projection": "Queries and qrels only; source quotes replaced with hashes.",
+  "cases": [
+    {
+      "id": "a3f0c25ef91e4ccfa04f7db4aa0adb59",
+      "paired_id": "acf42d1b326c4c41b9f71d4b777c3d19",
+      "query": "TritonMoE는 expert 수가 늘어도 kernel launch 수를 어떻게 고정하며, gate+up GEMM에서 메모리 트래픽을 줄이는 핵심 기법은 무엇인가?",
+      "language": "ko",
+      "category": "compiler_kernel",
+      "answerability": "answerable",
+      "expected_material_ids": [
+        "mat-923be7f4f5caabc8fd5e302e"
+      ],
+      "expected_behavior": "전문가 수와 무관하게 5개 Triton kernel launch를 사용한다. gate+up GEMM은 두 SwiGLU projection을 공유 L2 input tile로 계산하고 SiLU를 register 안에서 적용해, 논문 보고 기준 global memory traffic을 35% 줄인다.",
+      "expected_chunks": [
+        {
+          "chunk_id": "chunk-ddbf42ecefa3576aafa2ee398a70b002",
+          "material_id": "mat-923be7f4f5caabc8fd5e302e",
+          "quote_sha256": "c711a0ddd37c124ea6844f982f3e2bc831c3f52decc9e47df191f2b909fb27b9"
+        },
+        {
+          "chunk_id": "chunk-f35770b01c71eebeb7b36ec143b899af",
+          "material_id": "mat-923be7f4f5caabc8fd5e302e",
+          "quote_sha256": "4a9dbd954f97e88e0ad0fae918741fdef054920fccfc7832fbb3d35dc1131dd0"
+        },
+        {
+          "chunk_id": "chunk-f35770b01c71eebeb7b36ec143b899af",
+          "material_id": "mat-923be7f4f5caabc8fd5e302e",
+          "quote_sha256": "a9f8e278b0a3ab1edae06d91f68204f42631b6153d09e1175faafd06115c9a77"
+        }
+      ]
+    },
+    {
+      "id": "9edc1904c78349399ecc60d1625970c1",
+      "paired_id": "acf42d1b326c4c41b9f71d4b777c3d19",
+      "query": "How does TritonMoE keep the kernel-launch count fixed as the number of experts grows, and what key gate+up GEMM technique reduces memory traffic?",
+      "language": "en",
+      "category": "compiler_kernel",
+      "answerability": "answerable",
+      "expected_material_ids": [
+        "mat-923be7f4f5caabc8fd5e302e"
+      ],
+      "expected_behavior": "It uses five Triton kernel launches regardless of expert count. The fused gate+up GEMM computes both SwiGLU projections from shared L2 input tiles and applies SiLU in registers, reducing global-memory traffic by the paper’s reported 35%.",
+      "expected_chunks": [
+        {
+          "chunk_id": "chunk-ddbf42ecefa3576aafa2ee398a70b002",
+          "material_id": "mat-923be7f4f5caabc8fd5e302e",
+          "quote_sha256": "c711a0ddd37c124ea6844f982f3e2bc831c3f52decc9e47df191f2b909fb27b9"
+        },
+        {
+          "chunk_id": "chunk-f35770b01c71eebeb7b36ec143b899af",
+          "material_id": "mat-923be7f4f5caabc8fd5e302e",
+          "quote_sha256": "4a9dbd954f97e88e0ad0fae918741fdef054920fccfc7832fbb3d35dc1131dd0"
+        },
+        {
+          "chunk_id": "chunk-f35770b01c71eebeb7b36ec143b899af",
+          "material_id": "mat-923be7f4f5caabc8fd5e302e",
+          "quote_sha256": "a9f8e278b0a3ab1edae06d91f68204f42631b6153d09e1175faafd06115c9a77"
+        }
+      ]
+    },
+    {
+      "id": "d00d3f4e1c22449a8173bad3fea472c2",
+      "paired_id": "e69d9c7a5e6d4ac7b0f849bfaa447f21",
+      "query": "해시 기반 TSDF workload에서 CUDA, Rust, Triton의 regular/irregular stage 성능 차이는 어떻게 나뉘며, synthetic scene이 Triton 비용을 왜 과소평가하나?",
+      "language": "ko",
+      "category": "compiler_kernel",
+      "answerability": "answerable",
+      "expected_material_ids": [
+        "mat-ba3e6eb8a9365876a568e794"
+      ],
+      "expected_behavior": "정규 stage에서는 세 언어가 비슷한 범위에 있고, irregular probe/insert stage에서는 Rust가 CUDA에 가깝지만 Triton은 한 자릿수 배 이상 느리다. synthetic scene은 Triton이 표현하지 못하는 구성의 비용을 실제보다 낮게 보이게 한다.",
+      "expected_chunks": [
+        {
+          "chunk_id": "chunk-8d6cafe1e8da4656978c897f2f9512e1",
+          "material_id": "mat-ba3e6eb8a9365876a568e794",
+          "quote_sha256": "8c3d74cef43368083e323b563a9265685a5d5c739331e704890f12aa9605f13b"
+        },
+        {
+          "chunk_id": "chunk-8d6cafe1e8da4656978c897f2f9512e1",
+          "material_id": "mat-ba3e6eb8a9365876a568e794",
+          "quote_sha256": "f8db343a876d169b97662fcbf3f8abc41a3787cbc789b66977728aee55c451f8"
+        },
+        {
+          "chunk_id": "chunk-0e8035ea0b56ec73ace7305b224a369c",
+          "material_id": "mat-ba3e6eb8a9365876a568e794",
+          "quote_sha256": "2af7f0b24b749c8dd6daff0aa170cf9a98e65705ef8c52ab9a7bb2ad16cba89d"
+        }
+      ]
+    },
+    {
+      "id": "e6aafaef991b4274aa1c0fd14d537111",
+      "paired_id": "e69d9c7a5e6d4ac7b0f849bfaa447f21",
+      "query": "How do CUDA, Rust, and Triton differ across the regular and irregular stages of the hash-based TSDF workload, and why do synthetic scenes understate Triton’s cost?",
+      "language": "en",
+      "category": "compiler_kernel",
+      "answerability": "answerable",
+      "expected_material_ids": [
+        "mat-ba3e6eb8a9365876a568e794"
+      ],
+      "expected_behavior": "The three languages are close on the regular stage. On irregular probing and insertion, Rust stays near CUDA while Triton is more than an order of magnitude slower. Synthetic scenes understate the cost of the construct that Triton lacks.",
+      "expected_chunks": [
+        {
+          "chunk_id": "chunk-8d6cafe1e8da4656978c897f2f9512e1",
+          "material_id": "mat-ba3e6eb8a9365876a568e794",
+          "quote_sha256": "8c3d74cef43368083e323b563a9265685a5d5c739331e704890f12aa9605f13b"
+        },
+        {
+          "chunk_id": "chunk-8d6cafe1e8da4656978c897f2f9512e1",
+          "material_id": "mat-ba3e6eb8a9365876a568e794",
+          "quote_sha256": "f8db343a876d169b97662fcbf3f8abc41a3787cbc789b66977728aee55c451f8"
+        },
+        {
+          "chunk_id": "chunk-0e8035ea0b56ec73ace7305b224a369c",
+          "material_id": "mat-ba3e6eb8a9365876a568e794",
+          "quote_sha256": "2af7f0b24b749c8dd6daff0aa170cf9a98e65705ef8c52ab9a7bb2ad16cba89d"
+        }
+      ]
+    },
+    {
+      "id": "dc1b3376ea514b0ca8c8801fecba66cb",
+      "paired_id": "8192bd08165e4918bb6bdacfc3e9c77d",
+      "query": "AdaSpec의 confidence-prior verifier는 draft token을 어떤 순서로 제거 후보에 올리고, 제거를 언제 멈추나?",
+      "language": "ko",
+      "category": "llm_model_workload",
+      "answerability": "answerable",
+      "expected_material_ids": [
+        "mat-ce36d41a73243e00dbafaa35"
+      ],
+      "expected_behavior": "수락률이 낮은 draft token부터 오름차순으로 제거를 검토한다. 제거가 효율을 높일 때만 수락률 집합을 갱신하며, 추가 제거가 더는 효율을 높이지 않을 때 멈춘다.",
+      "expected_chunks": [
+        {
+          "chunk_id": "chunk-fee8245a3fcec45e8704042d235b19eb",
+          "material_id": "mat-ce36d41a73243e00dbafaa35",
+          "quote_sha256": "fbb09c0182fe7b5fb6bb956422888d29bbbc639f7cb50adf9f92fd3c3d420c68"
+        },
+        {
+          "chunk_id": "chunk-fee8245a3fcec45e8704042d235b19eb",
+          "material_id": "mat-ce36d41a73243e00dbafaa35",
+          "quote_sha256": "670afaf7cead8b7207bf77cf57077d2214a0043e571a047be5c556db700160a2"
+        },
+        {
+          "chunk_id": "chunk-fee8245a3fcec45e8704042d235b19eb",
+          "material_id": "mat-ce36d41a73243e00dbafaa35",
+          "quote_sha256": "14da6ce8f6829ce65a1a115d7f8e5f7a29963425f7a0694c2cde0347771ffe54"
+        }
+      ]
+    },
+    {
+      "id": "1b0cd8cb359c417e842c8ab7dcaa54d0",
+      "paired_id": "8192bd08165e4918bb6bdacfc3e9c77d",
+      "query": "In what order does AdaSpec’s confidence-prior verifier consider draft tokens for removal, and when does it stop removing them?",
+      "language": "en",
+      "category": "llm_model_workload",
+      "answerability": "answerable",
+      "expected_material_ids": [
+        "mat-ce36d41a73243e00dbafaa35"
+      ],
+      "expected_behavior": "It considers tokens in ascending order of acceptance rate, applies a removal only when it improves speculative-decoding efficiency, updates the acceptance-rate set, and stops when no further removal helps.",
+      "expected_chunks": [
+        {
+          "chunk_id": "chunk-fee8245a3fcec45e8704042d235b19eb",
+          "material_id": "mat-ce36d41a73243e00dbafaa35",
+          "quote_sha256": "fbb09c0182fe7b5fb6bb956422888d29bbbc639f7cb50adf9f92fd3c3d420c68"
+        },
+        {
+          "chunk_id": "chunk-fee8245a3fcec45e8704042d235b19eb",
+          "material_id": "mat-ce36d41a73243e00dbafaa35",
+          "quote_sha256": "670afaf7cead8b7207bf77cf57077d2214a0043e571a047be5c556db700160a2"
+        },
+        {
+          "chunk_id": "chunk-fee8245a3fcec45e8704042d235b19eb",
+          "material_id": "mat-ce36d41a73243e00dbafaa35",
+          "quote_sha256": "14da6ce8f6829ce65a1a115d7f8e5f7a29963425f7a0694c2cde0347771ffe54"
+        }
+      ]
+    },
+    {
+      "id": "0d97225876bc4efaafb8119d540a74c7",
+      "paired_id": "cf2a0d62a57b4279a5c2ec3a51cf864c",
+      "query": "Occamy는 sparse-dense workload의 간접 접근과 sparse 결과 인덱스 생성을 어떤 special unit들로 지원하나?",
+      "language": "ko",
+      "category": "hardware_architecture",
+      "answerability": "answerable",
+      "expected_material_ids": [
+        "mat-f9b95011dec08d2e047249a2"
+      ],
+      "expected_behavior": "각 SU는 SPM에 최대 4D affine decoupled stream으로 접근한다. 두 SU는 8/16/32-bit indexed indirect stream으로 sparse-dense LA와 stencil을 처리하고, 세 번째 SU는 sparse 결과의 joint index를 쓴다.",
+      "expected_chunks": [
+        {
+          "chunk_id": "chunk-1c2fb5f311e632acaf61cf14786d0a57",
+          "material_id": "mat-f9b95011dec08d2e047249a2",
+          "quote_sha256": "83a8610d98da335cbbd4de46f6a07f4da9a45b043f99987b56eb7cb682166cbd"
+        },
+        {
+          "chunk_id": "chunk-1c2fb5f311e632acaf61cf14786d0a57",
+          "material_id": "mat-f9b95011dec08d2e047249a2",
+          "quote_sha256": "f7d36d9b84c72c5cd1c84b2619f6d4e88d881803935aeabab49f9faddf61d7a3"
+        }
+      ]
+    },
+    {
+      "id": "c70100debfbd410f8215df762c717da3",
+      "paired_id": "cf2a0d62a57b4279a5c2ec3a51cf864c",
+      "query": "How does Occamy support indirect access for sparse-dense workloads and generation of sparse-result indices with its special units?",
+      "language": "en",
+      "category": "hardware_architecture",
+      "answerability": "answerable",
+      "expected_material_ids": [
+        "mat-f9b95011dec08d2e047249a2"
+      ],
+      "expected_behavior": "Each SU accesses the SPM through up-to-4D affine decoupled streams. Two SUs provide 8-, 16-, or 32-bit-indexed indirect streams for sparse-dense linear algebra and stencil codes; the third writes joint indices for sparse results.",
+      "expected_chunks": [
+        {
+          "chunk_id": "chunk-1c2fb5f311e632acaf61cf14786d0a57",
+          "material_id": "mat-f9b95011dec08d2e047249a2",
+          "quote_sha256": "83a8610d98da335cbbd4de46f6a07f4da9a45b043f99987b56eb7cb682166cbd"
+        },
+        {
+          "chunk_id": "chunk-1c2fb5f311e632acaf61cf14786d0a57",
+          "material_id": "mat-f9b95011dec08d2e047249a2",
+          "quote_sha256": "f7d36d9b84c72c5cd1c84b2619f6d4e88d881803935aeabab49f9faddf61d7a3"
+        }
+      ]
+    },
+    {
+      "id": "8ede73f3c5434a268eea611cac0a08d8",
+      "paired_id": "bbdb96b2952d442e98fa4c976fec1edb",
+      "query": "qMFKG tutorial에서 target fidelity는 어떻게 지정하며, observation cost 반영과 target fidelity projection은 어떤 설정으로 연결되나?",
+      "language": "ko",
+      "category": "dse_optimization",
+      "answerability": "answerable",
+      "expected_material_ids": [
+        "mat-77fedfb418c149d23700b542"
+      ],
+      "expected_behavior": "예시에서는 7차원 입력의 6번 fidelity 좌표를 1.0으로 target 지정한다. 비용은 해당 fidelity weight 1.0과 fixed cost 5.0의 affine model로 계산하고 InverseCostWeightedUtility에 연결하며, projection helper가 fidelity를 target으로 보낸다.",
+      "expected_chunks": [
+        {
+          "chunk_id": "chunk-5143c99acdb8861989ad631807c32620",
+          "material_id": "mat-77fedfb418c149d23700b542",
+          "quote_sha256": "5b0110b47589e127a440138ad83cb5d20e7a32669002f4b375a74ab5c8e6a4ec"
+        },
+        {
+          "chunk_id": "chunk-5143c99acdb8861989ad631807c32620",
+          "material_id": "mat-77fedfb418c149d23700b542",
+          "quote_sha256": "866f1678c32b3eb069f906a58df8a1234ca8879437d34c78f4d0beadc7e3d13d"
+        },
+        {
+          "chunk_id": "chunk-5143c99acdb8861989ad631807c32620",
+          "material_id": "mat-77fedfb418c149d23700b542",
+          "quote_sha256": "4c664eeef9bf41c091b4191721e9e0a668d165e9692f6d28ee1b16896bea9584"
+        },
+        {
+          "chunk_id": "chunk-5143c99acdb8861989ad631807c32620",
+          "material_id": "mat-77fedfb418c149d23700b542",
+          "quote_sha256": "af3c3fa368434f023c5b32d2714da1168cae1946ee5c28ce31829e96b3427d0d"
+        }
+      ]
+    },
+    {
+      "id": "ee4d31ec4e8346f486f64d86132cf661",
+      "paired_id": "bbdb96b2952d442e98fa4c976fec1edb",
+      "query": "In the qMFKG tutorial, how is target fidelity specified, and how are observation cost and projection to target fidelity wired into the acquisition?",
+      "language": "en",
+      "category": "dse_optimization",
+      "answerability": "answerable",
+      "expected_material_ids": [
+        "mat-77fedfb418c149d23700b542"
+      ],
+      "expected_behavior": "The example sets coordinate 6 of the 7-dimensional input to target fidelity 1.0. It models cost with fidelity weight 1.0 plus fixed cost 5.0, connects that model through InverseCostWeightedUtility, and projects candidates to the target fidelity.",
+      "expected_chunks": [
+        {
+          "chunk_id": "chunk-5143c99acdb8861989ad631807c32620",
+          "material_id": "mat-77fedfb418c149d23700b542",
+          "quote_sha256": "5b0110b47589e127a440138ad83cb5d20e7a32669002f4b375a74ab5c8e6a4ec"
+        },
+        {
+          "chunk_id": "chunk-5143c99acdb8861989ad631807c32620",
+          "material_id": "mat-77fedfb418c149d23700b542",
+          "quote_sha256": "866f1678c32b3eb069f906a58df8a1234ca8879437d34c78f4d0beadc7e3d13d"
+        },
+        {
+          "chunk_id": "chunk-5143c99acdb8861989ad631807c32620",
+          "material_id": "mat-77fedfb418c149d23700b542",
+          "quote_sha256": "4c664eeef9bf41c091b4191721e9e0a668d165e9692f6d28ee1b16896bea9584"
+        },
+        {
+          "chunk_id": "chunk-5143c99acdb8861989ad631807c32620",
+          "material_id": "mat-77fedfb418c149d23700b542",
+          "quote_sha256": "af3c3fa368434f023c5b32d2714da1168cae1946ee5c28ce31829e96b3427d0d"
+        }
+      ]
+    },
+    {
+      "id": "962e3f47a8a4496f8bd4e639acb7a18b",
+      "paired_id": "2511053da9284f15a7384eb0d66a9c23",
+      "query": "CEI는 고정 alpha 비용 벌점과 비교해 accuracy-cost 균형을 반복마다 어떻게 조정하며, lambda는 어떤 역할을 하나?",
+      "language": "ko",
+      "category": "dse_optimization",
+      "answerability": "answerable",
+      "expected_material_ids": [
+        "mat-f24214dde6ff5d6c42cfe986"
+      ],
+      "expected_behavior": "CEI는 매 iteration Pareto front에 맞춰 선택하고, 이에 상응하는 alpha를 동적으로 배분한다. lambda가 accuracy-cost trade-off를 직접 조절한다.",
+      "expected_chunks": [
+        {
+          "chunk_id": "chunk-9bb874e2dc26007b3c2ea5c6fb31a2fb",
+          "material_id": "mat-f24214dde6ff5d6c42cfe986",
+          "quote_sha256": "496ce3378014f8a9871dc3775e1a1107c6d1e56ca09577ecf9687a71c90b9c62"
+        },
+        {
+          "chunk_id": "chunk-9bb874e2dc26007b3c2ea5c6fb31a2fb",
+          "material_id": "mat-f24214dde6ff5d6c42cfe986",
+          "quote_sha256": "99729c1c8a80b80c900a4706ddd7e8add3c4c181f4cd31556591433e231027d6"
+        },
+        {
+          "chunk_id": "chunk-9bb874e2dc26007b3c2ea5c6fb31a2fb",
+          "material_id": "mat-f24214dde6ff5d6c42cfe986",
+          "quote_sha256": "50196a5da72e3ecd7b35ba30b4baadd3371eb69ae934d88c064a38115086b240"
+        }
+      ]
+    },
+    {
+      "id": "d6637fed5676424cb0701590ae92de08",
+      "paired_id": "2511053da9284f15a7384eb0d66a9c23",
+      "query": "How does CEI adjust the accuracy-cost trade-off across iterations relative to a fixed-alpha cost penalty, and what role does lambda play?",
+      "language": "en",
+      "category": "dse_optimization",
+      "answerability": "answerable",
+      "expected_material_ids": [
+        "mat-f24214dde6ff5d6c42cfe986"
+      ],
+      "expected_behavior": "CEI adapts its choice to the Pareto front at each iteration, corresponding to a dynamically allocated alpha; lambda directly controls the accuracy-cost trade-off.",
+      "expected_chunks": [
+        {
+          "chunk_id": "chunk-9bb874e2dc26007b3c2ea5c6fb31a2fb",
+          "material_id": "mat-f24214dde6ff5d6c42cfe986",
+          "quote_sha256": "496ce3378014f8a9871dc3775e1a1107c6d1e56ca09577ecf9687a71c90b9c62"
+        },
+        {
+          "chunk_id": "chunk-9bb874e2dc26007b3c2ea5c6fb31a2fb",
+          "material_id": "mat-f24214dde6ff5d6c42cfe986",
+          "quote_sha256": "99729c1c8a80b80c900a4706ddd7e8add3c4c181f4cd31556591433e231027d6"
+        },
+        {
+          "chunk_id": "chunk-9bb874e2dc26007b3c2ea5c6fb31a2fb",
+          "material_id": "mat-f24214dde6ff5d6c42cfe986",
+          "quote_sha256": "50196a5da72e3ecd7b35ba30b4baadd3371eb69ae934d88c064a38115086b240"
+        }
+      ]
+    },
+    {
+      "id": "a8ecb5f103944566a6569acf8274a453",
+      "paired_id": "e2b796e8161d46d897e71835152bff1d",
+      "query": "NCCL symmetric-window 등록이 필요한 이유와 등록된 peer rank 주소 계산법은 무엇이며, raw cudaMalloc은 왜 충분하지 않나?",
+      "language": "ko",
+      "category": "memory_interconnect",
+      "answerability": "answerable",
+      "expected_material_ids": [
+        "mat-8d26d23a9bc1b39cd77f634a"
+      ],
+      "expected_behavior": "각 rank의 raw allocation은 주소 공간이 서로 달라 peer buffer를 직접 볼 수 없다. 등록은 통합된 lsaFlatBase view를 만들며, peer 주소는 lsaFlatBase + peer*stride + offset으로 계산한다.",
+      "expected_chunks": [
+        {
+          "chunk_id": "chunk-5e29574f8dd743990e2eecbc21088e9f",
+          "material_id": "mat-8d26d23a9bc1b39cd77f634a",
+          "quote_sha256": "0df973ab01eabe4d7b289371ad602968ed416faf93a95437b00993b40425a129"
+        },
+        {
+          "chunk_id": "chunk-5e29574f8dd743990e2eecbc21088e9f",
+          "material_id": "mat-8d26d23a9bc1b39cd77f634a",
+          "quote_sha256": "6b02a99f474f5a366807066da0d538fc5e6cb18b64188e5a6774946e2a0554f9"
+        },
+        {
+          "chunk_id": "chunk-5e29574f8dd743990e2eecbc21088e9f",
+          "material_id": "mat-8d26d23a9bc1b39cd77f634a",
+          "quote_sha256": "42ca0a455e1365cb7beeceee78e8fd82c4991bc80b18c2eb631c4a6282da1572"
+        }
+      ]
+    },
+    {
+      "id": "be34102a24a744778c0d15bcd3a5580a",
+      "paired_id": "e2b796e8161d46d897e71835152bff1d",
+      "query": "Why does NCCL require symmetric-window registration, how is a peer-rank address computed from the registered window, and why is raw cudaMalloc insufficient?",
+      "language": "en",
+      "category": "memory_interconnect",
+      "answerability": "answerable",
+      "expected_material_ids": [
+        "mat-8d26d23a9bc1b39cd77f634a"
+      ],
+      "expected_behavior": "Raw allocations give each rank unrelated virtual addresses, so peer buffers are not directly reachable. Registration creates a unified lsaFlatBase view; a peer address is computed as lsaFlatBase + peer*stride + offset.",
+      "expected_chunks": [
+        {
+          "chunk_id": "chunk-5e29574f8dd743990e2eecbc21088e9f",
+          "material_id": "mat-8d26d23a9bc1b39cd77f634a",
+          "quote_sha256": "0df973ab01eabe4d7b289371ad602968ed416faf93a95437b00993b40425a129"
+        },
+        {
+          "chunk_id": "chunk-5e29574f8dd743990e2eecbc21088e9f",
+          "material_id": "mat-8d26d23a9bc1b39cd77f634a",
+          "quote_sha256": "6b02a99f474f5a366807066da0d538fc5e6cb18b64188e5a6774946e2a0554f9"
+        },
+        {
+          "chunk_id": "chunk-5e29574f8dd743990e2eecbc21088e9f",
+          "material_id": "mat-8d26d23a9bc1b39cd77f634a",
+          "quote_sha256": "42ca0a455e1365cb7beeceee78e8fd82c4991bc80b18c2eb631c4a6282da1572"
+        }
+      ]
+    },
+    {
+      "id": "df490ca0da6b4595b0333da1d5483187",
+      "paired_id": "0aea57c8991e45519306baf471102726",
+      "query": "Gem5Pred는 gem5 simulation-time prediction을 위해 CodeBERT embedding+SVR, 직접 회귀, 시간 구간 분류의 세 구성을 어떻게 구분하나?",
+      "language": "ko",
+      "category": "simulation_measurement",
+      "answerability": "answerable",
+      "expected_material_ids": [
+        "mat-e3c72dd781567bd215989806"
+      ],
+      "expected_behavior": "첫 구성은 CodeBERT embedding 위에 SVR을 적용해 연속 시간을 예측한다. 나머지 두 구성은 CodeBERT를 미세조정해 하나는 연속값 회귀, 하나는 simulation-time 구간 분류를 직접 수행한다.",
+      "expected_chunks": [
+        {
+          "chunk_id": "chunk-4c8e1721ef478779953f0921ca570bda",
+          "material_id": "mat-e3c72dd781567bd215989806",
+          "quote_sha256": "4ece31d7570922842b264d8406bcc17822646b3d05d0955ae8052f52cc1fd5d3"
+        },
+        {
+          "chunk_id": "chunk-4c8e1721ef478779953f0921ca570bda",
+          "material_id": "mat-e3c72dd781567bd215989806",
+          "quote_sha256": "9cfce3ef10ed95e956e51837cd73b475c7e9f4e65ed760b71b2c385fb1ff89e0"
+        },
+        {
+          "chunk_id": "chunk-4c8e1721ef478779953f0921ca570bda",
+          "material_id": "mat-e3c72dd781567bd215989806",
+          "quote_sha256": "9a40a31a0988c0d96cd2c37f899ce79bafbbf0a1c097df724f9a5d55569f2577"
+        }
+      ]
+    },
+    {
+      "id": "3440f23ca08d4d9ca6309e0ee4e6ecd2",
+      "paired_id": "0aea57c8991e45519306baf471102726",
+      "query": "How does Gem5Pred distinguish its three CodeBERT approaches for gem5 simulation-time prediction: embedding plus SVR, direct regression, and time-range classification?",
+      "language": "en",
+      "category": "simulation_measurement",
+      "answerability": "answerable",
+      "expected_material_ids": [
+        "mat-e3c72dd781567bd215989806"
+      ],
+      "expected_behavior": "The first approach feeds CodeBERT embeddings to SVR for continuous-time prediction. The other two fine-tune CodeBERT directly, one for continuous regression and one for simulation-time-range classification.",
+      "expected_chunks": [
+        {
+          "chunk_id": "chunk-4c8e1721ef478779953f0921ca570bda",
+          "material_id": "mat-e3c72dd781567bd215989806",
+          "quote_sha256": "4ece31d7570922842b264d8406bcc17822646b3d05d0955ae8052f52cc1fd5d3"
+        },
+        {
+          "chunk_id": "chunk-4c8e1721ef478779953f0921ca570bda",
+          "material_id": "mat-e3c72dd781567bd215989806",
+          "quote_sha256": "9cfce3ef10ed95e956e51837cd73b475c7e9f4e65ed760b71b2c385fb1ff89e0"
+        },
+        {
+          "chunk_id": "chunk-4c8e1721ef478779953f0921ca570bda",
+          "material_id": "mat-e3c72dd781567bd215989806",
+          "quote_sha256": "9a40a31a0988c0d96cd2c37f899ce79bafbbf0a1c097df724f9a5d55569f2577"
+        }
+      ]
+    },
+    {
+      "id": "269fb280a942432eb2982b81963d2109",
+      "paired_id": "cfaddd0e227d43b49281864e05e565a4",
+      "query": "gem5-CIMD의 cim_malloc()은 같은 CIM operation의 operands를 한 DRAM subarray에 어떻게 배치하고, 그 co-location을 어떤 방식으로 재검증하나?",
+      "language": "ko",
+      "category": "simulation_measurement",
+      "answerability": "answerable",
+      "expected_material_ids": [
+        "mat-951680fa7fdd38c506f2696c"
+      ],
+      "expected_behavior": "컴파일러는 같은 CIM operation의 operand에 같은 subarray label을 부여한다. allocator는 label별 요청을 한 allocation region에 배치해 co-location을 구성으로 보장하고, memory controller가 subarray-level assertion으로 다시 확인한다.",
+      "expected_chunks": [
+        {
+          "chunk_id": "chunk-2124c14ad80e2b249f57f0a80416f769",
+          "material_id": "mat-951680fa7fdd38c506f2696c",
+          "quote_sha256": "162340403760f9c64304370b9134c07b5de9b9c7effc69527404bd42b57d5408"
+        },
+        {
+          "chunk_id": "chunk-2124c14ad80e2b249f57f0a80416f769",
+          "material_id": "mat-951680fa7fdd38c506f2696c",
+          "quote_sha256": "75a24845da2c98c347419567a49184d8c3366b212148ca510486a0777369d169"
+        },
+        {
+          "chunk_id": "chunk-2124c14ad80e2b249f57f0a80416f769",
+          "material_id": "mat-951680fa7fdd38c506f2696c",
+          "quote_sha256": "77689f7de588e3ad0b0fafa0b1a4711697e8426b753739357deeb49f77cd2cb1"
+        }
+      ]
+    },
+    {
+      "id": "9593f277b2234ab7b742a3daff3ae981",
+      "paired_id": "cfaddd0e227d43b49281864e05e565a4",
+      "query": "How does gem5-CIMD’s cim_malloc() place operands for the same CIM operation in one DRAM subarray, and how is that co-location checked again?",
+      "language": "en",
+      "category": "simulation_measurement",
+      "answerability": "answerable",
+      "expected_material_ids": [
+        "mat-951680fa7fdd38c506f2696c"
+      ],
+      "expected_behavior": "The compiler gives operands for one CIM operation the same subarray label. The allocator serves same-label requests from one allocation region, enforcing co-location by construction, and the memory controller checks it again with a subarray-level assertion.",
+      "expected_chunks": [
+        {
+          "chunk_id": "chunk-2124c14ad80e2b249f57f0a80416f769",
+          "material_id": "mat-951680fa7fdd38c506f2696c",
+          "quote_sha256": "162340403760f9c64304370b9134c07b5de9b9c7effc69527404bd42b57d5408"
+        },
+        {
+          "chunk_id": "chunk-2124c14ad80e2b249f57f0a80416f769",
+          "material_id": "mat-951680fa7fdd38c506f2696c",
+          "quote_sha256": "75a24845da2c98c347419567a49184d8c3366b212148ca510486a0777369d169"
+        },
+        {
+          "chunk_id": "chunk-2124c14ad80e2b249f57f0a80416f769",
+          "material_id": "mat-951680fa7fdd38c506f2696c",
+          "quote_sha256": "77689f7de588e3ad0b0fafa0b1a4711697e8426b753739357deeb49f77cd2cb1"
+        }
+      ]
+    },
+    {
+      "id": "6d46690630ba46f2adee07419951e5a6",
+      "paired_id": "58df71abad5741a4a92e7b543d956034",
+      "query": "GLOW의 WDM routing이 만족해야 하는 열·신호·타이밍 조건은 무엇이고, 총 구동 전력 목적함수는 어떤 두 항으로 나뉘나?",
+      "language": "ko",
+      "category": "power_thermal_packaging",
+      "answerability": "answerable",
+      "expected_material_ids": [
+        "mat-3af097153dca9bd701911ead"
+      ],
+      "expected_behavior": "라우팅은 열적 신뢰성과 기능, 최소 optical drive power, signal integrity/data conversion quality, timing/channel utilization 및 opto-electrical design-rule legalization을 고려한다. Ptotal은 optical loss Ploss와 switching power Pdynamic의 합으로 나뉜다.",
+      "expected_chunks": [
+        {
+          "chunk_id": "chunk-91aa21923d7c3cb5652db5704cb7c4c0",
+          "material_id": "mat-3af097153dca9bd701911ead",
+          "quote_sha256": "e59c19f012d347640f929d54501ba4bf974b7ceab36edbb2d68c18d9a7a1a708"
+        },
+        {
+          "chunk_id": "chunk-91aa21923d7c3cb5652db5704cb7c4c0",
+          "material_id": "mat-3af097153dca9bd701911ead",
+          "quote_sha256": "b26d9c60a0d4eba5fc40037e1bfe9579a16099db939d45808da0279cf7b8a492"
+        },
+        {
+          "chunk_id": "chunk-91aa21923d7c3cb5652db5704cb7c4c0",
+          "material_id": "mat-3af097153dca9bd701911ead",
+          "quote_sha256": "bb8dca27059261fa42c6b437498040f35f20b55fe16d130c74bffffcc3e72f91"
+        },
+        {
+          "chunk_id": "chunk-177032fb21f4b2d677c5dd891593c06e",
+          "material_id": "mat-3af097153dca9bd701911ead",
+          "quote_sha256": "8a8b45d562eee816370b0f367c9ec2ab3f3335b0b1ade29e2428a09c0041601b"
+        },
+        {
+          "chunk_id": "chunk-177032fb21f4b2d677c5dd891593c06e",
+          "material_id": "mat-3af097153dca9bd701911ead",
+          "quote_sha256": "89bbad6fb2e043ee5376822ad50612dae32331105f0be541c57d02588104fbd7"
+        },
+        {
+          "chunk_id": "chunk-177032fb21f4b2d677c5dd891593c06e",
+          "material_id": "mat-3af097153dca9bd701911ead",
+          "quote_sha256": "bbb29f8d1ee5277858dfa2da57d13ee6e486f8c3d00e3366ffad042b9b74ed77"
+        }
+      ]
+    },
+    {
+      "id": "6bb16a6b3d374422a43e8734a7e63903",
+      "paired_id": "58df71abad5741a4a92e7b543d956034",
+      "query": "Which thermal, signal, and timing constraints must GLOW’s WDM routing satisfy, and which two terms make up its total driving-power objective?",
+      "language": "en",
+      "category": "power_thermal_packaging",
+      "answerability": "answerable",
+      "expected_material_ids": [
+        "mat-3af097153dca9bd701911ead"
+      ],
+      "expected_behavior": "Routing considers thermal reliability and functionality, minimum optical drive power, signal integrity and data-conversion quality, timing and WDM-channel use, and opto-electrical legalization rules. Ptotal comprises optical loss Ploss and switching power Pdynamic.",
+      "expected_chunks": [
+        {
+          "chunk_id": "chunk-91aa21923d7c3cb5652db5704cb7c4c0",
+          "material_id": "mat-3af097153dca9bd701911ead",
+          "quote_sha256": "e59c19f012d347640f929d54501ba4bf974b7ceab36edbb2d68c18d9a7a1a708"
+        },
+        {
+          "chunk_id": "chunk-91aa21923d7c3cb5652db5704cb7c4c0",
+          "material_id": "mat-3af097153dca9bd701911ead",
+          "quote_sha256": "b26d9c60a0d4eba5fc40037e1bfe9579a16099db939d45808da0279cf7b8a492"
+        },
+        {
+          "chunk_id": "chunk-91aa21923d7c3cb5652db5704cb7c4c0",
+          "material_id": "mat-3af097153dca9bd701911ead",
+          "quote_sha256": "bb8dca27059261fa42c6b437498040f35f20b55fe16d130c74bffffcc3e72f91"
+        },
+        {
+          "chunk_id": "chunk-177032fb21f4b2d677c5dd891593c06e",
+          "material_id": "mat-3af097153dca9bd701911ead",
+          "quote_sha256": "8a8b45d562eee816370b0f367c9ec2ab3f3335b0b1ade29e2428a09c0041601b"
+        },
+        {
+          "chunk_id": "chunk-177032fb21f4b2d677c5dd891593c06e",
+          "material_id": "mat-3af097153dca9bd701911ead",
+          "quote_sha256": "89bbad6fb2e043ee5376822ad50612dae32331105f0be541c57d02588104fbd7"
+        },
+        {
+          "chunk_id": "chunk-177032fb21f4b2d677c5dd891593c06e",
+          "material_id": "mat-3af097153dca9bd701911ead",
+          "quote_sha256": "bbb29f8d1ee5277858dfa2da57d13ee6e486f8c3d00e3366ffad042b9b74ed77"
+        }
+      ]
+    },
+    {
+      "id": "70c46fbc066f4174a1c3e95a25e323b3",
+      "paired_id": "4eecaa2a19624269aff6e19d80aa8386",
+      "query": "SGLang /v1/classify 요청의 필수 입력은 무엇이며, 모델 config.json에 id2label이 없을 때 label은 어떤 순서로 대체되나?",
+      "language": "ko",
+      "category": "serving_scheduling",
+      "answerability": "answerable",
+      "expected_material_ids": [
+        "mat-a6e56b1a664a1dd3007d0ffc"
+      ],
+      "expected_behavior": "model과 input은 필수다. id2label이 있으면 그 mapping을 사용하고, 없으면 LABEL_0, LABEL_1 등의 이름을 사용하며 최종 fallback은 Class_0, Class_1이다.",
+      "expected_chunks": [
+        {
+          "chunk_id": "chunk-4e4f3eba71b0c777abfe2875a42637c2",
+          "material_id": "mat-a6e56b1a664a1dd3007d0ffc",
+          "quote_sha256": "9c89f53fa86b5f692d08aa991fb9577b9aac88dec9fd8aba42ac0b94531e218f"
+        },
+        {
+          "chunk_id": "chunk-4e4f3eba71b0c777abfe2875a42637c2",
+          "material_id": "mat-a6e56b1a664a1dd3007d0ffc",
+          "quote_sha256": "b78d056280df44ba160964c2601986063a75f29dd76cc5eea20c5070971540d6"
+        },
+        {
+          "chunk_id": "chunk-66bda3c6679d3e6a9360d8f8c54a2ae0",
+          "material_id": "mat-a6e56b1a664a1dd3007d0ffc",
+          "quote_sha256": "ca6ae46f65667fa87c461417c0f0192658aa932fa499de4648710ab6011f0e0f"
+        }
+      ]
+    },
+    {
+      "id": "04d8f178555c430ea8a9602068197ca6",
+      "paired_id": "4eecaa2a19624269aff6e19d80aa8386",
+      "query": "What inputs are required for an SGLang /v1/classify request, and what label fallback is used when the model’s config.json has no id2label?",
+      "language": "en",
+      "category": "serving_scheduling",
+      "answerability": "answerable",
+      "expected_material_ids": [
+        "mat-a6e56b1a664a1dd3007d0ffc"
+      ],
+      "expected_behavior": "model and input are required. The API uses id2label when available; otherwise it falls back to LABEL_0, LABEL_1, and ultimately Class_0, Class_1.",
+      "expected_chunks": [
+        {
+          "chunk_id": "chunk-4e4f3eba71b0c777abfe2875a42637c2",
+          "material_id": "mat-a6e56b1a664a1dd3007d0ffc",
+          "quote_sha256": "9c89f53fa86b5f692d08aa991fb9577b9aac88dec9fd8aba42ac0b94531e218f"
+        },
+        {
+          "chunk_id": "chunk-4e4f3eba71b0c777abfe2875a42637c2",
+          "material_id": "mat-a6e56b1a664a1dd3007d0ffc",
+          "quote_sha256": "b78d056280df44ba160964c2601986063a75f29dd76cc5eea20c5070971540d6"
+        },
+        {
+          "chunk_id": "chunk-66bda3c6679d3e6a9360d8f8c54a2ae0",
+          "material_id": "mat-a6e56b1a664a1dd3007d0ffc",
+          "quote_sha256": "ca6ae46f65667fa87c461417c0f0192658aa932fa499de4648710ab6011f0e0f"
+        }
+      ]
+    },
+    {
+      "id": "df36d73950664eeb9ed056a9a5701a59",
+      "paired_id": "87e8313f9bd94af1a7c1683a26debe69",
+      "query": "Qiskit transpilation의 각 compiler pass마다 framework는 어떤 circuit 결과·metric·metadata를 기록하며, 이 추적은 어떤 분석을 가능하게 하나?",
+      "language": "ko",
+      "category": "provenance_experiment",
+      "answerability": "answerable",
+      "expected_material_ids": [
+        "mat-44228aa9a6ecc4e912c6e481"
+      ],
+      "expected_behavior": "각 pass의 결과 circuit, QProv metric Q4–Q7/C5, pass name, transpilation stage를 기록한다. 이를 통해 pass별 circuit 변환과 병목을 분석하고 컴파일 과정을 visualization/debugging용으로 재구성한다.",
+      "expected_chunks": [
+        {
+          "chunk_id": "chunk-0a5cdbef8ac152420c0751b27c7494b5",
+          "material_id": "mat-44228aa9a6ecc4e912c6e481",
+          "quote_sha256": "ac83793d6bd44c48453c61489d550d0f4c443187de2e296391e3cf353f7edb59"
+        },
+        {
+          "chunk_id": "chunk-0a5cdbef8ac152420c0751b27c7494b5",
+          "material_id": "mat-44228aa9a6ecc4e912c6e481",
+          "quote_sha256": "1b351d449479d9fd41565460ed6a645a0fdce64ff98c629ddd46bd02f5d711d4"
+        },
+        {
+          "chunk_id": "chunk-0a5cdbef8ac152420c0751b27c7494b5",
+          "material_id": "mat-44228aa9a6ecc4e912c6e481",
+          "quote_sha256": "b4948087e04e1288dbbc84f2bab6dcc1dd712aca4f4bcc8213f622be0ab934d9"
+        }
+      ]
+    },
+    {
+      "id": "297b56eabf4b4b9c956f4783cc9688fe",
+      "paired_id": "87e8313f9bd94af1a7c1683a26debe69",
+      "query": "For each Qiskit transpilation compiler pass, what circuit result, metrics, and metadata does the framework record, and what analysis does this trace enable?",
+      "language": "en",
+      "category": "provenance_experiment",
+      "answerability": "answerable",
+      "expected_material_ids": [
+        "mat-44228aa9a6ecc4e912c6e481"
+      ],
+      "expected_behavior": "It records each pass’s resulting circuit, QProv metrics Q4–Q7/C5, pass name, and transpilation stage. Those records support analysis of circuit transformations and bottlenecks and reconstruction of the compilation process for visualization and debugging.",
+      "expected_chunks": [
+        {
+          "chunk_id": "chunk-0a5cdbef8ac152420c0751b27c7494b5",
+          "material_id": "mat-44228aa9a6ecc4e912c6e481",
+          "quote_sha256": "ac83793d6bd44c48453c61489d550d0f4c443187de2e296391e3cf353f7edb59"
+        },
+        {
+          "chunk_id": "chunk-0a5cdbef8ac152420c0751b27c7494b5",
+          "material_id": "mat-44228aa9a6ecc4e912c6e481",
+          "quote_sha256": "1b351d449479d9fd41565460ed6a645a0fdce64ff98c629ddd46bd02f5d711d4"
+        },
+        {
+          "chunk_id": "chunk-0a5cdbef8ac152420c0751b27c7494b5",
+          "material_id": "mat-44228aa9a6ecc4e912c6e481",
+          "quote_sha256": "b4948087e04e1288dbbc84f2bab6dcc1dd712aca4f4bcc8213f622be0ab934d9"
+        }
+      ]
+    },
+    {
+      "id": "6be0afa3b23345ec9800e2697bf34583",
+      "paired_id": "33c6061d82d8425eb6ae6920d2e44908",
+      "query": "Occamy의 die-to-die fabric 위에서 NCCL GIN symmetric window를 별도 bridge 없이 직접 등록해 peer address로 사용할 수 있는가?",
+      "language": "ko",
+      "category": "hardware_architecture",
+      "answerability": "unsupported",
+      "expected_material_ids": [
+        "mat-f9b95011dec08d2e047249a2",
+        "mat-8d26d23a9bc1b39cd77f634a"
+      ],
+      "expected_behavior": "unknown으로 답한다. 자료는 두 경로를 각각 설명할 뿐 Occamy의 die-to-die fabric이 NCCL GIN registration과 호환되는지 입증하지 않는다.",
+      "expected_chunks": [
+        {
+          "chunk_id": "chunk-9d7f79728cd492e960b013b593ee9f16",
+          "material_id": "mat-f9b95011dec08d2e047249a2",
+          "quote_sha256": "7f6c135943769fd633ad6707380de942aaed9d3c0bcdd79f4567fc0fbe2fc500"
+        },
+        {
+          "chunk_id": "chunk-5e29574f8dd743990e2eecbc21088e9f",
+          "material_id": "mat-8d26d23a9bc1b39cd77f634a",
+          "quote_sha256": "0df973ab01eabe4d7b289371ad602968ed416faf93a95437b00993b40425a129"
+        },
+        {
+          "chunk_id": "chunk-5e29574f8dd743990e2eecbc21088e9f",
+          "material_id": "mat-8d26d23a9bc1b39cd77f634a",
+          "quote_sha256": "6b02a99f474f5a366807066da0d538fc5e6cb18b64188e5a6774946e2a0554f9"
+        }
+      ]
+    },
+    {
+      "id": "3f3163723ed64b28bf7f7ec0c259577e",
+      "paired_id": "33c6061d82d8425eb6ae6920d2e44908",
+      "query": "Can an NCCL GIN symmetric window be registered directly over Occamy’s die-to-die fabric and used as a peer address without an added bridge?",
+      "language": "en",
+      "category": "hardware_architecture",
+      "answerability": "unsupported",
+      "expected_material_ids": [
+        "mat-f9b95011dec08d2e047249a2",
+        "mat-8d26d23a9bc1b39cd77f634a"
+      ],
+      "expected_behavior": "Answer unknown. The sources describe the two paths separately and do not establish that Occamy’s die-to-die fabric is compatible with NCCL GIN registration.",
+      "expected_chunks": [
+        {
+          "chunk_id": "chunk-9d7f79728cd492e960b013b593ee9f16",
+          "material_id": "mat-f9b95011dec08d2e047249a2",
+          "quote_sha256": "7f6c135943769fd633ad6707380de942aaed9d3c0bcdd79f4567fc0fbe2fc500"
+        },
+        {
+          "chunk_id": "chunk-5e29574f8dd743990e2eecbc21088e9f",
+          "material_id": "mat-8d26d23a9bc1b39cd77f634a",
+          "quote_sha256": "0df973ab01eabe4d7b289371ad602968ed416faf93a95437b00993b40425a129"
+        },
+        {
+          "chunk_id": "chunk-5e29574f8dd743990e2eecbc21088e9f",
+          "material_id": "mat-8d26d23a9bc1b39cd77f634a",
+          "quote_sha256": "6b02a99f474f5a366807066da0d538fc5e6cb18b64188e5a6774946e2a0554f9"
+        }
+      ]
+    },
+    {
+      "id": "799511f566734c829fb214515b9b2e5b",
+      "paired_id": "3afc499f07494b38bd0d4bb528a650e5",
+      "query": "GLOW가 2,048개 optical net, 75°C 주변 온도, port 90% 활성 조건의 제작 칩에서 측정한 절대 wall-plug power는 몇 W인가?",
+      "language": "ko",
+      "category": "power_thermal_packaging",
+      "answerability": "unsupported",
+      "expected_material_ids": [
+        "mat-3af097153dca9bd701911ead"
+      ],
+      "expected_behavior": "unknown으로 답한다. 제공된 source는 benchmark 기반 simulation과 CK1 대비 정규화된 전력을 설명하며, 질문의 제작 칩·조건에 대한 절대 watt 측정값을 주지 않는다.",
+      "expected_chunks": [
+        {
+          "chunk_id": "chunk-07be7affdf6e9f0bf41d7a8ac8284a7a",
+          "material_id": "mat-3af097153dca9bd701911ead",
+          "quote_sha256": "7c6a2c5f8cbc074e47443296ba09029a7bd2fe6e1a79c360e2e710c76c4f9491"
+        },
+        {
+          "chunk_id": "chunk-64bb1bde08c5103ab425f394e04c733f",
+          "material_id": "mat-3af097153dca9bd701911ead",
+          "quote_sha256": "8c2313b6b7f54d4d2957aafc5e033c874d8bdf923fbc6fd8391dac7aac2fc052"
+        },
+        {
+          "chunk_id": "chunk-64bb1bde08c5103ab425f394e04c733f",
+          "material_id": "mat-3af097153dca9bd701911ead",
+          "quote_sha256": "e713841f01106d85538fdab91e487b0c929f4199c97efe0210621c660ffd0705"
+        }
+      ]
+    },
+    {
+      "id": "029f3dc3bcf1426db5bda3c457f14c9a",
+      "paired_id": "3afc499f07494b38bd0d4bb528a650e5",
+      "query": "What absolute wall-plug power in watts did GLOW measure on fabricated hardware with 2,048 optical nets, 75°C ambient, and 90% port activity?",
+      "language": "en",
+      "category": "power_thermal_packaging",
+      "answerability": "unsupported",
+      "expected_material_ids": [
+        "mat-3af097153dca9bd701911ead"
+      ],
+      "expected_behavior": "Answer unknown. The source reports benchmark-based simulation and power normalized to CK1, not an absolute-watt measurement on fabricated hardware under the stated conditions.",
+      "expected_chunks": [
+        {
+          "chunk_id": "chunk-07be7affdf6e9f0bf41d7a8ac8284a7a",
+          "material_id": "mat-3af097153dca9bd701911ead",
+          "quote_sha256": "7c6a2c5f8cbc074e47443296ba09029a7bd2fe6e1a79c360e2e710c76c4f9491"
+        },
+        {
+          "chunk_id": "chunk-64bb1bde08c5103ab425f394e04c733f",
+          "material_id": "mat-3af097153dca9bd701911ead",
+          "quote_sha256": "8c2313b6b7f54d4d2957aafc5e033c874d8bdf923fbc6fd8391dac7aac2fc052"
+        },
+        {
+          "chunk_id": "chunk-64bb1bde08c5103ab425f394e04c733f",
+          "material_id": "mat-3af097153dca9bd701911ead",
+          "quote_sha256": "e713841f01106d85538fdab91e487b0c929f4199c97efe0210621c660ffd0705"
+        }
+      ]
+    }
+  ]
+}

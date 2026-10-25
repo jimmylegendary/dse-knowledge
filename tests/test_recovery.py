@@ -164,7 +164,7 @@ class FakeRetriever:
     def __init__(self):
         self.calls = 0
 
-    def search(self, question, limit):
+    def search(self, question, limit, purpose='auto'):
         self.calls += 1
         return {'items': deepcopy(EVIDENCE)}
 

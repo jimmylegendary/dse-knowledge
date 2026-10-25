@@ -39,7 +39,7 @@
     overviewMaterials: { items: [], total: null, loading: false, error: null },
     materials: { items: [], total: null, offset: 0, limit: 10, query: "", category: "", loading: false, error: null },
     materialDetail: null, selectedMaterialId: null, materialDetailLoading: false, materialDetailError: null,
-    retrieval: { query: "", category: "", loading: false, error: null, response: null },
+    retrieval: { query: "", category: "", purpose: "auto", loading: false, error: null, response: null },
     graph: { query: "", loading: false, error: null, response: null, selectedId: null },
     decisions: { items: [], loading: false, error: null, selectedId: null, detail: null, detailError: null, loadingDetail: false },
     decisionKind: "hardware", jobs: readStoredJobs(), jobResult: null,
@@ -531,11 +531,16 @@
       text("p", asText(valueAt(material, "summary", "description"), "이 자료에 등록된 요약이 없습니다."), "material-summary"));
     if (sourceUrl) body.append(link("원문 자료 열기", sourceUrl));
     const meta = el("dl", "detail-meta");
-    [["자료 ID", valueAt(material, "id")], ["상태", valueAt(material, "status")], ["출처", valueAt(material, "source")], ["범위", valueAt(material, "scope")]].forEach(([label, value]) => {
+    [["자료 ID", valueAt(material, "id")], ["상태", valueAt(material, "status")], ["출처", valueAt(material, "source")], ["범위", valueAt(material, "scope")], ["자료 역할", retrievalRoleLabel(material.role)]].forEach(([label, value]) => {
       if (value === undefined) return;
       const group = el("div"); add(group, text("dt", label), text("dd", asText(value))); meta.append(group);
     });
     body.append(meta);
+    body.append(text("p", "자료 역할은 활용 목적의 분류입니다. 원문의 주장·수치·적용 조건은 독립 검증이 필요합니다.", "small muted"));
+    if (isObject(data.annotation_coverage)) {
+      const coverage = data.annotation_coverage;
+      body.append(text("p", `Claim 문맥 annotation · ${fmtCount(coverage.claims_annotated)} / ${fmtCount(coverage.claims_total)}${coverage.status === "needs_review" ? " · 추가 검토 필요" : ""}. 추출 범위는 원문의 일부 구간이며 전체 지식의 완전성을 뜻하지 않습니다.`, "small muted"));
+    }
     const claimSection = el("section", "detail-section");
     const claimTitle = el("h3", "detail-section-title"); add(claimTitle, text("span", "인용 주장"), text("span", `${claims.length}개 인용`)); claimSection.append(claimTitle);
     if (!claims.length) claimSection.append(text("p", "연결된 인용 주장이 없습니다.", "small muted"));
@@ -561,7 +566,7 @@
       const summary = el("summary"); add(summary, text("strong", `구간 ${index + 1}`, "small"), text("span", ` · ${asText(valueAt(chunk, "id"), "ID 없음")}`, "small muted"));
       const content = text("p", asText(valueAt(chunk, "text"), "본문 없음"), "evidence-quote");
       const footer = el("div", "evidence-footer"); add(footer, text("span", `source span ${asText(valueAt(chunk, "start"), "?")}–${asText(valueAt(chunk, "end"), "?")}`), text("span", `revision ${asText(valueAt(chunk, "revision_id"), "ID 없음")}`));
-      add(card, summary, content, footer); chunkSection.append(card);
+      add(card, summary, content, renderClaimContexts(chunk, 32), footer); chunkSection.append(card);
     });
     body.append(chunkSection); panel.append(body); return panel;
   }
@@ -571,7 +576,7 @@
     if (!model.query.trim()) { toast("검색어를 입력해 주세요.", true); return; }
     model.loading = true; model.error = null; model.response = null;
     renderRetrieval();
-    const body = { query: model.query.trim(), limit: 12 };
+    const body = { query: model.query.trim(), limit: 12, purpose: model.purpose || "auto" };
     if (model.category) body.category = model.category;
     try { model.response = await api("/api/search", { method: "POST", body }); }
     catch (error) { model.error = safeError(error); }
@@ -590,6 +595,15 @@
     const categoryLabel = text("label", "Category (선택)"); categoryLabel.htmlFor = "retrieval-category";
     const category = el("select", "select"); category.id = "retrieval-category"; categoryOptions(category, state.retrieval.category);
     categoryField.append(categoryLabel, category);
+    const purposeField = el("div", "field");
+    const purposeLabel = text("label", "검색 목적"); purposeLabel.htmlFor = "retrieval-purpose";
+    const purpose = el("select", "select"); purpose.id = "retrieval-purpose";
+    [["auto", "자동 분류 (auto)"], ["design", "설계 근거 (design)"],
+      ["operations", "설치·설정·운영 (operations)"], ["discovery", "자료 탐색 (discovery)"]].forEach(([value, label]) => {
+      const option = text("option", label); option.value = value; purpose.append(option);
+    });
+    purpose.value = ["auto", "design", "operations", "discovery"].includes(state.retrieval.purpose) ? state.retrieval.purpose : "auto";
+    purposeField.append(purposeLabel, purpose, text("span", "자동은 질문 표현으로 목적을 정하고 불명확하면 역할 상한을 유지합니다.", "field-hint"));
     const limitField = el("div", "field");
     const limitLabel = text("label", "결과 수"); limitLabel.htmlFor = "retrieval-limit";
     const limit = el("input", "input"); limit.id = "retrieval-limit"; limit.type = "text"; limit.value = "12"; limit.readOnly = true; limit.setAttribute("aria-describedby", "retrieval-limit-note");
@@ -598,8 +612,11 @@
     const submit = button("근거 검색", null, "button", "submit");
     submit.disabled = state.retrieval.loading;
     actions.append(submit);
-    form.addEventListener("submit", event => { event.preventDefault(); state.retrieval.query = query.value; state.retrieval.category = category.value; runRetrieval(); });
-    add(form, queryField, categoryField, limitField, actions); formPanel.append(form);
+    form.addEventListener("submit", event => {
+      event.preventDefault(); state.retrieval.query = query.value; state.retrieval.category = category.value;
+      state.retrieval.purpose = purpose.value; runRetrieval();
+    });
+    add(form, queryField, categoryField, purposeField, limitField, actions); formPanel.append(form);
     const results = el("section", "surface overview-section");
     const header = el("div", "surface-header"); add(header, text("div", "검색 결과", ""));
     const heading = el("div"); add(heading, text("h2", "검색 결과"), text("p", "원문 인용 구간과 검색 순위")); header.replaceChildren(heading);
@@ -612,8 +629,202 @@
     results.append(body);
     page.append(formPanel, results);
   }
+  function retrievalRoleLabel(role) {
+    return ({
+      core_technical: "핵심 기술",
+      supporting_method: "보조 방법",
+      integration_operations: "통합·운영",
+      source_navigation: "자료 위치",
+      out_of_scope: "범위 밖",
+      unclassified: "미분류"
+    })[role] || "미분류";
+  }
+  function valueWithUnit(value, unit, fallback = "값 미지정") {
+    const renderedValue = value === undefined ? fallback : asText(value, fallback);
+    const renderedUnit = unit === undefined ? "" : ` ${asText(unit, "")}`;
+    return `${renderedValue}${renderedUnit}`;
+  }
+  function appendContextProof(container, evidence) {
+    if (!isObject(evidence)) return;
+    const proofChunk = valueAt(evidence, "chunk_id", "evidence_chunk_id");
+    const start = valueAt(evidence, "source_start", "start_offset", "start");
+    const end = valueAt(evidence, "source_end", "end_offset", "end");
+    const revision = valueAt(evidence, "revision_id", "revision_sha256");
+    const refs = [];
+    if (proofChunk !== undefined) refs.push(`proof chunk ${asText(proofChunk)}`);
+    if (start !== undefined || end !== undefined) refs.push(`source span ${asText(start, "?")}–${asText(end, "?")}`);
+    if (revision !== undefined) refs.push(`revision ${asText(revision)}`);
+    if (refs.length) container.append(text("div", refs.join(" · "), "evidence-footer"));
+    const quote = valueAt(evidence, "quote", "proof_quote");
+    if (quote !== undefined) container.append(text("blockquote", asText(quote), "evidence-quote"));
+  }
+  function renderClaimContexts(item, maxItems = 2) {
+    const contexts = listOf(valueAt(item, "claim_contexts"));
+    if (!contexts.length) return null;
+    const section = el("section", "detail-section");
+    const heading = el("h4", "detail-section-title");
+    add(heading, text("span", "Claim 문맥"), text("span", `${fmtCount(contexts.length)}개 annotation${contexts.length > maxItems ? ` · 최대 ${maxItems}개 표시` : ""}`));
+    section.append(heading);
+    contexts.slice(0, maxItems).forEach(context => {
+      if (!isObject(context)) return;
+      const card = el("article", "evidence-card");
+      const annotationId = valueAt(context, "annotation_id", "id");
+      const claimId = valueAt(context, "claim_id");
+      const version = valueAt(context, "version", "schema_version");
+      const identifiers = [
+        annotationId !== undefined ? `annotation ${asText(annotationId)}` : "annotation ID 없음",
+        claimId !== undefined ? `Claim ${asText(claimId)}` : null,
+        version !== undefined ? `v${asText(version)}` : null
+      ].filter(Boolean).join(" · ");
+      card.append(text("strong", identifiers, "small"));
+      const revision = valueAt(context, "revision_sha256");
+      if (revision !== undefined) card.append(text("div", `proof revision ${asText(revision)}`, "evidence-footer"));
+
+      const parameters = listOf(valueAt(context, "parameters"));
+      if (parameters.length) {
+        card.append(text("h5", `Parameter · ${fmtCount(parameters.length)}`, "detail-section-title"));
+        parameters.forEach(parameter => {
+          if (!isObject(parameter)) return;
+          const row = el("div", "evidence-card");
+          const name = valueAt(parameter, "name", "metric_or_parameter_name");
+          const rawValue = valueAt(parameter, "value_raw", "value");
+          const rawUnit = valueAt(parameter, "unit_raw", "unit");
+          const normalized = valueAt(parameter, "normalized", "normalized_value");
+          const rawLine = text("p", `원문 값 · ${asText(name, "Parameter")} · ${valueWithUnit(rawValue, rawUnit)}`);
+          row.append(rawLine);
+          if (isObject(normalized)) {
+            const normalizedValue = valueAt(normalized, "value");
+            const normalizedUnit = valueAt(normalized, "unit");
+            const status = valueAt(normalized, "status");
+            row.append(text("p", `정규화 값 · ${valueWithUnit(normalizedValue, normalizedUnit)}${status !== undefined ? ` · 상태 ${asText(status)}` : ""}`));
+          } else if (normalized !== undefined) {
+            row.append(text("p", `정규화 값 · ${asText(normalized)}`));
+          } else row.append(text("p", "정규화 값 또는 단위 상태가 제공되지 않았습니다."));
+          appendContextProof(row, valueAt(parameter, "evidence", "proof"));
+          card.append(row);
+        });
+      }
+
+      const conditions = listOf(valueAt(context, "conditions"));
+      if (conditions.length) {
+        card.append(text("h5", `Source 조건 · ${fmtCount(conditions.length)}`, "detail-section-title"));
+        conditions.forEach(condition => {
+          if (!isObject(condition)) return;
+          const row = el("div", "evidence-card");
+          const dimension = valueAt(condition, "dimension", "name");
+          const operator = valueAt(condition, "operator");
+          const rawValue = valueAt(condition, "value_raw", "value", "values");
+          const rawUnit = valueAt(condition, "unit_raw", "unit");
+          row.append(text("p", `${asText(dimension, "조건 차원")} ${asText(operator, "operator 미지정")} · 원문 조건 ${valueWithUnit(rawValue, rawUnit)}`));
+          appendContextProof(row, valueAt(condition, "evidence", "proof"));
+          card.append(row);
+        });
+      }
+
+      const scopeNote = valueAt(context, "source_scope_note");
+      if (scopeNote !== undefined) card.append(text("p", `자료 적용 범위 메모 · ${asText(scopeNote)}`, "small muted"));
+      if (context.projection?.truncated) card.append(text("p", "검색용으로 일부 값·조건을 표시합니다. 자료 상세의 해당 구간에서 전체 annotation을 확인할 수 있습니다.", "small muted"));
+      const usePolicy = valueAt(context, "use_policy");
+      const validation = valueAt(context, "validation");
+      const validationText = validation === "literal_grounded_unverified_association"
+        ? "원문 literal에 연결된 문맥입니다. 주장과 조건의 의미상 연관 또는 적용 가능성을 독립 검증한 결과가 아닙니다."
+        : "Claim 문맥은 별도 과학 검증을 뜻하지 않습니다.";
+      card.append(text("p", `사용 정책 · ${asText(usePolicy, "source_assertion_only")}. ${validationText}`, "small muted"));
+      section.append(card);
+    });
+    return section;
+  }
+  function renderNeighborEvidence(item) {
+    const neighbors = listOf(valueAt(item, "neighbor_evidence"));
+    if (!neighbors.length) return null;
+    const section = el("section", "detail-section");
+    const heading = el("h4", "detail-section-title");
+    add(heading, text("span", "이웃 문맥 (별도 인용 ID)"), text("span", `${fmtCount(neighbors.length)}개 chunk`));
+    section.append(heading);
+    neighbors.forEach(neighbor => {
+      if (!isObject(neighbor)) return;
+      const card = el("article", "evidence-card");
+      const id = valueAt(neighbor, "chunk_id");
+      const start = valueAt(neighbor, "start_offset", "start");
+      const end = valueAt(neighbor, "end_offset", "end");
+      add(card, text("strong", `${asText(valueAt(neighbor, "relation"), "neighbor")} · chunk ${asText(id, "ID 없음")}`, "small"),
+        text("p", asText(valueAt(neighbor, "text", "excerpt"), "이웃 본문 없음"), "evidence-quote"),
+        text("div", `material ${asText(valueAt(neighbor, "material_id"), "ID 없음")} · revision ${asText(valueAt(neighbor, "revision_id"), "ID 없음")} · source span ${asText(start, "?")}–${asText(end, "?")}`, "evidence-footer"));
+      section.append(card);
+    });
+    return section;
+  }
+  function renderRetrievalItem(item, index, locatorOnly = false) {
+    const row = el("article", "result-row");
+    const head = el("div", "result-row-head");
+    const copy = el("div");
+    const title = el("h3", "result-title");
+    const titleValue = asText(valueAt(item, "title"), "자료 제목 없음");
+    const materialId = valueAt(item, "material_id");
+    if (materialId !== undefined) {
+      const open = el("button", "", titleValue); open.type = "button"; open.addEventListener("click", () => openMaterialFromSearch(materialId)); title.append(open);
+    } else title.append(text("span", titleValue));
+    const meta = el("div", "result-meta");
+    const chunkId = valueAt(item, "chunk_id");
+    const revisionId = valueAt(item, "revision_id");
+    const role = asText(valueAt(item, "role"), "unclassified");
+    const rolePolicy = valueAt(item, "role_policy");
+    const isLocator = locatorOnly || valueAt(item, "result_kind") === "locator"
+      || role === "source_navigation" || (isObject(rolePolicy) && valueAt(rolePolicy, "is_locator") === true);
+    add(meta, text("span", asText(valueAt(item, "category"), "category 없음")), text("span", "·"),
+      text("span", `chunk ${asText(chunkId, "ID 없음")}`), text("span", "·"), text("span", `revision ${asText(revisionId, "ID 없음")}`),
+      text("span", "·"), text("span", retrievalRoleLabel(role), "tag tag-blue"));
+    if (isLocator) meta.append(text("span", "locator · evidence authority 0 · source assertion 아님", "tag tag-amber"));
+    else if (isObject(rolePolicy) && rolePolicy.needs_review) meta.append(text("span", "검토 필요", "tag tag-amber"));
+    const url = valueAt(item, "url", "source_url");
+    if (url && safeUrl(url)) { meta.append(text("span", "·")); meta.append(link("원문", url)); }
+    add(copy, title, meta);
+    const rank = valueAt(item, "rank");
+    head.append(copy, text("span", rank === undefined ? `#${index + 1}` : `검색 점수 ${asText(rank)}`, "rank-pill"));
+    row.append(head);
+    row.append(text("p", asText(valueAt(item, "text", "excerpt"), "검색 구간 본문이 없습니다."), "result-excerpt"));
+
+    const start = valueAt(item, "start_offset", "start");
+    const end = valueAt(item, "end_offset", "end");
+    const useCeiling = isObject(rolePolicy) ? valueAt(rolePolicy, "use_ceiling", "evidence_ceiling") : undefined;
+    const policyLine = el("div", "trace-line");
+    add(policyLine, text("strong", "ROLE / SCOPE"),
+      text("span", `${retrievalRoleLabel(role)} · ${asText(useCeiling, isLocator ? "locator only" : "상한 미지정")}`),
+      text("span", `chunk ${asText(chunkId, "ID 없음")} · source span ${asText(start, "?")}–${asText(end, "?")}`));
+    row.append(policyLine);
+    if (isObject(valueAt(item, "role_metadata"))) {
+      const metadata = item.role_metadata;
+      row.append(text("div", `역할 판정 metadata · ${shortText(safeJson(metadata, 0), 320)}`, "trace-line"));
+    }
+    if (isLocator) row.append(text("p", "이 구간은 자료를 찾기 위한 locator입니다. Claim quote로 확인되기 전에는 설계·운영 주장의 근거로 사용하지 않습니다.", "small muted"));
+    const scores = valueAt(item, "scores");
+    if (scores !== undefined) row.append(text("div", `채널 점수 · ${shortText(safeJson(scores, 0), 220)}`, "trace-line"));
+    const trace = valueAt(item, "trace");
+    if (trace !== undefined) row.append(text("div", `검색 trace · ${shortText(safeJson(trace, 0), 360)}`, "trace-line"));
+    const contexts = renderClaimContexts(item);
+    const neighbors = renderNeighborEvidence(item);
+    if (contexts) row.append(contexts);
+    if (neighbors) row.append(neighbors);
+    return row;
+  }
   function renderRetrievalResponse(body, response) {
-    const items = listOf(response);
+    const items = listOf(valueAt(response, "items") ?? response);
+    const locators = listOf(valueAt(response, "locators"));
+    const sourceResultsValue = valueAt(response, "source_results");
+    const hasSourceResults = Array.isArray(sourceResultsValue);
+    const sourceResults = hasSourceResults ? sourceResultsValue : [];
+    const purposeTrace = valueAt(response, "purpose_trace");
+    const resolvedPurpose = valueAt(response, "purpose") ?? valueAt(purposeTrace, "resolved");
+    const selectedPurpose = valueAt(purposeTrace, "requested") ?? state.retrieval.purpose ?? "auto";
+    const purposeBox = el("div", "trace-line");
+    add(purposeBox, text("strong", "PURPOSE"),
+      text("span", `${asText(selectedPurpose)} → ${asText(resolvedPurpose, "분류 없음")}`),
+      text("span", `policy ${asText(valueAt(response, "policy_version"), asText(valueAt(purposeTrace, "version"), "버전 없음"))}`),
+      text("span", `rule ${asText(valueAt(purposeTrace, "rule"), "rule 없음")}`));
+    body.append(purposeBox);
+    if (valueAt(purposeTrace, "uncertain") === true) {
+      body.append(text("p", "자동 목적 분류가 불명확해 설계 기본 정책을 적용했습니다. source role별 사용 상한과 검토 표시를 확인해 주세요.", "small muted"));
+    }
     const trace = el("div", "trace-line");
     add(trace, text("strong", "TRACE"), text("span", asText(valueAt(response, "trace_id"), "trace ID 없음")));
     const channels = valueAt(response, "channels");
@@ -621,11 +832,13 @@
       const channelBox = el("div", "trace-line"); channelBox.append(text("strong", "CHANNELS"));
       const channelItems = Array.isArray(channels) ? channels : isObject(channels) ? Object.entries(channels).map(([name, value]) => ({ name, value })) : [channels];
       channelItems.forEach(channel => {
-        const label = isObject(channel) ? `${asText(valueAt(channel, "name", "channel", "kind"), "channel")}${valueAt(channel, "count") !== undefined ? ` · ${fmtCount(channel.count)}` : ""}` : asText(channel);
+        const label = isObject(channel) ? `${asText(valueAt(channel, "name", "channel", "kind"), "channel")}${valueAt(channel, "count", "value") !== undefined ? ` · ${fmtCount(valueAt(channel, "count", "value"))}` : ""}` : asText(channel);
         channelBox.append(text("span", label, "tag tag-blue"));
       });
       body.append(channelBox);
     }
+    const embeddingCacheHit = valueAt(response, "query_embedding_cache_hit");
+    if (embeddingCacheHit !== undefined) trace.append(text("span", `query embedding cache · ${embeddingCacheHit ? "hit · provider usage 0" : "miss"}`));
     body.append(trace);
     const limitations = valueAt(response, "limitations");
     if (limitations) {
@@ -639,33 +852,49 @@
       add(answerPanel, text("strong", "검색 응답", "small"), text("p", asText(answer), "result-excerpt"));
       body.append(answerPanel);
     }
-    if (!items.length) { body.append(emptyState("검색 근거가 없습니다", "이 질문에 맞는 검색 구간이 없습니다. 검색어를 조정하거나 자료 상태를 확인해 주세요.")); return; }
-    const toolbar = el("div", "results-toolbar"); add(toolbar, text("span", `${fmtCount(items.length)}개 검색 구간`), text("span", "원문 링크는 http(s) 주소만 열립니다."));
-    const results = el("div", "results-list");
-    items.forEach((item, index) => {
-      const row = el("article", "result-row");
-      const head = el("div", "result-row-head");
-      const copy = el("div");
-      const title = el("h3", "result-title");
-      const titleValue = asText(valueAt(item, "title"), "자료 제목 없음");
-      const materialId = valueAt(item, "material_id");
-      if (materialId !== undefined) {
-        const open = el("button", "", titleValue); open.type = "button"; open.addEventListener("click", () => openMaterialFromSearch(materialId)); title.append(open);
-      } else title.append(text("span", titleValue));
-      const meta = el("div", "result-meta");
-      add(meta, text("span", asText(valueAt(item, "category"), "category 없음")), text("span", "·"), text("span", `chunk ${asText(valueAt(item, "chunk_id"), "ID 없음")}`));
-      const url = valueAt(item, "url", "source_url");
-      if (url && safeUrl(url)) { meta.append(text("span", "·")); meta.append(link("원문", url)); }
-      add(copy, title, meta);
-      const rank = valueAt(item, "rank");
-      head.append(copy, text("span", rank === undefined ? `#${index + 1}` : `RRF ${asText(rank)}`, "rank-pill"));
-      row.append(head);
-      row.append(text("p", asText(valueAt(item, "text", "excerpt"), "검색 구간 본문이 없습니다."), "result-excerpt"));
-      const scores = valueAt(item, "scores");
-      if (scores !== undefined) row.append(text("div", `채널 점수 · ${shortText(safeJson(scores, 0), 220)}`, "trace-line"));
-      results.append(row);
-    });
-    body.append(toolbar, results);
+    if (hasSourceResults) {
+      if (!sourceResults.length && !items.length && !locators.length) {
+        body.append(emptyState("검색 근거가 없습니다", "이 질문에 맞는 검색 구간이나 자료 위치가 없습니다. 검색어를 조정하거나 자료 상태를 확인해 주세요."));
+        return;
+      }
+      if (!items.length && locators.length) {
+        body.append(emptyState("Locator만 있습니다", "인용 가능한 source assertion은 없고 자료 위치만 반환됐습니다. locator를 Claim 근거로 취급하지 마세요."));
+      }
+      if (sourceResults.length) {
+        const toolbar = el("div", "results-toolbar");
+        add(toolbar,
+          text("span", `${fmtCount(sourceResults.length)}개 혼합 source 결과`),
+          text("span", `evidence items ${fmtCount(items.length)} · locators ${fmtCount(locators.length)}`),
+          text("span", "locator 권위 0 · 원문 링크는 http(s)만 열립니다."));
+        const results = el("div", "results-list");
+        sourceResults.forEach((item, index) => results.append(renderRetrievalItem(item, index)));
+        body.append(toolbar, results);
+      }
+    } else {
+      if (!items.length && !locators.length) {
+        body.append(emptyState("검색 근거가 없습니다", "이 질문에 맞는 검색 구간이나 자료 위치가 없습니다. 검색어를 조정하거나 자료 상태를 확인해 주세요."));
+        return;
+      }
+      if (items.length) {
+        const toolbar = el("div", "results-toolbar");
+        add(toolbar, text("span", `${fmtCount(items.length)}개 검색 근거`), text("span", "원문 링크는 http(s) 주소만 열립니다."));
+        const results = el("div", "results-list");
+        items.forEach((item, index) => results.append(renderRetrievalItem(item, index, false)));
+        body.append(toolbar, results);
+      } else if (locators.length) {
+        body.append(emptyState("Locator만 있습니다", "인용 가능한 source assertion은 없고 자료 위치만 반환됐습니다. locator를 Claim 근거로 취급하지 마세요."));
+      }
+      if (locators.length) {
+        const locatorSection = el("section", "detail-section");
+        const heading = el("h3", "detail-section-title");
+        add(heading, text("span", "자료 위치만 (locator)"), text("span", `${fmtCount(locators.length)}개 · 주장 근거 사용 금지`));
+        locatorSection.append(heading, text("p", "이 항목은 위치 탐색 또는 역할 검토용입니다. source assertion 근거가 아닙니다.", "small muted"));
+        const results = el("div", "results-list");
+        locators.forEach((item, index) => results.append(renderRetrievalItem(item, index, true)));
+        locatorSection.append(results);
+        body.append(locatorSection);
+      }
+    }
   }
 
   async function loadGraph() {
@@ -699,9 +928,25 @@
         const layout = el("div", "graph-layout");
         const viz = el("div", "graph-canvas"); viz.append(buildGraphSvg(nodes, edges));
         const legend = el("div", "graph-legend");
+        legend.setAttribute("role", "group"); legend.setAttribute("aria-label", "노드 유형과 relation 근거 범례");
         Array.from(new Set(nodes.map(node => asText(valueAt(node, "kind"), "type 미지정")))).forEach(kind => {
           const entry = el("span", "legend-item"); const swatch = el("span", "legend-swatch"); swatch.style.background = colorForKind(kind).stroke;
           add(entry, swatch, text("span", kind)); legend.append(entry);
+        });
+        [
+          ["assertion", "source assertion · Claim quote reference"],
+          ["topic", "topic mention · quote-grounded; not causality or inheritance"]
+        ].forEach(([kind, description]) => {
+          const entry = el("span", "legend-item");
+          const sample = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+          sample.setAttribute("viewBox", "0 0 28 10"); sample.setAttribute("width", "28"); sample.setAttribute("height", "10"); sample.setAttribute("aria-hidden", "true");
+          const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
+          line.setAttribute("x1", "1"); line.setAttribute("y1", "5"); line.setAttribute("x2", "27"); line.setAttribute("y2", "5");
+          line.setAttribute("stroke", "#7d8590"); line.setAttribute("stroke-width", "1.6");
+          if (kind === "topic") line.setAttribute("stroke-dasharray", "4 3");
+          sample.append(line);
+          add(entry, sample, text("span", kind, `tag ${kind === "topic" ? "tag-amber" : "tag-blue"}`), text("span", description));
+          legend.append(entry);
         });
         const graphSurface = el("section", "surface graph-panel");
         graphSurface.append(viz, legend);
@@ -741,6 +986,7 @@
       if (!from || !to) return;
       const line = document.createElementNS(ns, "line");
       line.setAttribute("x1", String(from.x)); line.setAttribute("y1", String(from.y)); line.setAttribute("x2", String(to.x)); line.setAttribute("y2", String(to.y)); line.setAttribute("class", `graph-edge${state.graph.selectedId && (idOf(edge.source) === state.graph.selectedId || idOf(edge.target) === state.graph.selectedId) ? " is-related" : ""}`);
+      if (valueAt(edge, "relation_kind") === "topic") line.setAttribute("stroke-dasharray", "4 3");
       const title = document.createElementNS(ns, "title"); title.textContent = asText(edge.relation, "relation"); line.append(title); lines.append(line);
     });
     svg.append(lines);
@@ -777,7 +1023,15 @@
         const source = idOf(edge.source), target = idOf(edge.target);
         if (source !== id && target !== id) return;
         const other = nodes.find(candidate => idOf(candidate) === (source === id ? target : source));
-        relations.push({ incoming: target === id, relation: valueAt(edge, "relation"), other: other ? valueAt(other, "label", "name", "title") : (source === id ? target : source), kind: other ? valueAt(other, "kind") : undefined });
+        relations.push({
+          incoming: target === id,
+          relation: valueAt(edge, "relation"),
+          relationKind: valueAt(edge, "relation_kind") ?? "assertion",
+          other: other ? valueAt(other, "label", "name", "title") : (source === id ? target : source),
+          kind: other ? valueAt(other, "kind") : undefined,
+          claimId: valueAt(edge, "claim_id"), evidenceChunkId: valueAt(edge, "evidence_chunk_id"),
+          materialId: valueAt(edge, "material_id"), metadata: valueAt(edge, "metadata")
+        });
       });
       body.append(text("h4", `연결 관계 ${fmtCount(relations.length)}`, "detail-section-title"));
       if (!relations.length) body.append(text("p", "이 응답 범위에서 연결된 relation이 없습니다.", "small muted"));
@@ -788,6 +1042,22 @@
           if (item.incoming) add(row, text("strong", asText(item.other)), text("span", ` → ${asText(item.relation, "relation")} → `, "relation-arrow"), text("strong", label));
           else add(row, text("strong", label), text("span", ` → ${asText(item.relation, "relation")} → `, "relation-arrow"), text("strong", asText(item.other)));
           if (item.kind) row.append(text("span", ` · ${asText(item.kind)}`, "soft"));
+          const isTopic = item.relationKind === "topic";
+          row.append(text("span", `${isTopic ? "Topic mention" : "Source assertion"} · relation_kind ${asText(item.relationKind)}`, `tag ${isTopic ? "tag-amber" : "tag-blue"}`));
+          const proofRefs = [];
+          if (item.claimId !== undefined) proofRefs.push(`Claim ${asText(item.claimId)}`);
+          if (item.evidenceChunkId !== undefined) proofRefs.push(`evidence chunk ${asText(item.evidenceChunkId)}`);
+          if (item.materialId !== undefined) proofRefs.push(`material ${asText(item.materialId)}`);
+          const proofStart = valueAt(item.metadata, "source_start");
+          const proofEnd = valueAt(item.metadata, "source_end");
+          if (proofStart !== undefined || proofEnd !== undefined) proofRefs.push(`source span ${asText(proofStart, "?")}–${asText(proofEnd, "?")}`);
+          const proofRevision = valueAt(item.metadata, "revision_sha256");
+          if (proofRevision !== undefined) proofRefs.push(`revision ${asText(proofRevision)}`);
+          row.append(text("div", `Source proof · ${proofRefs.join(" · ") || "proof reference 없음"}`, "trace-line"));
+          const proofScope = valueAt(item.metadata, "scope");
+          if (proofScope !== undefined) row.append(text("div", `proof scope · ${asText(proofScope)}`, "trace-line"));
+          const proofQuote = valueAt(item.metadata, "quote", "proof_quote");
+          if (proofQuote !== undefined) row.append(text("blockquote", asText(proofQuote), "evidence-quote"));
           list.append(row);
         });
         body.append(list);

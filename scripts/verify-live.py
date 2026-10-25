@@ -334,13 +334,50 @@ def _decision_checks_pass(kind: str, summary: dict) -> bool:
     return True
 
 
-def _load_report(path: Path, base_url: str, *, resume: bool) -> dict:
+def _resolve_expected_inventory(expected_materials: int, expected_chunks: int | None) -> tuple[int, int]:
+    if type(expected_materials) is not int or expected_materials <= 0:
+        raise VerificationError('expected_materials_invalid')
+    if expected_chunks is None:
+        if expected_materials != 100:
+            raise VerificationError('expected_chunks_required')
+        expected_chunks = 1912
+    if type(expected_chunks) is not int or expected_chunks <= 0:
+        raise VerificationError('expected_chunks_invalid')
+    return expected_materials, expected_chunks
+
+
+def _inventory_result(inventory: dict, chunk_count: int,
+                      expected_materials: int, expected_chunks: int) -> tuple[bool, dict]:
+    total = inventory.get('total')
+    ingested = inventory.get('ingested')
+    passed = (total == expected_materials and ingested == expected_materials
+              and chunk_count == expected_chunks)
+    return passed, {
+        'materials': total,
+        'ingested_materials': ingested,
+        'chunks': chunk_count,
+        'expected': {
+            'materials': expected_materials,
+            'ingested_materials': expected_materials,
+            'chunks': expected_chunks,
+        },
+    }
+
+
+def _load_report(path: Path, base_url: str, *, resume: bool,
+                 expected_materials: int = 100, expected_chunks: int | None = None) -> dict:
+    expected_materials, expected_chunks = _resolve_expected_inventory(
+        expected_materials, expected_chunks,
+    )
+    inventory_scope = {'materials': expected_materials, 'chunks': expected_chunks}
     if not resume:
         return {
             'run_id': uuid.uuid4().hex, 'status': 'running', 'base_url': base_url,
+            'inventory_scope': inventory_scope,
             'started_at': dt.datetime.now(dt.timezone.utc).isoformat(), 'checks': {},
             'jobs': [], 'limitations': [
-                'This verifies the 100-material HTTP/PG pilot only; it does not validate the later 145k corpus.',
+                f"This verifies the configured frozen set of {expected_materials} materials and "
+                f"{expected_chunks} chunks only; it does not validate broader corpus completeness.",
                 'Native HAT status is structural only; physical feasibility and B300 measurements are not assessed.',
                 'Experiment policy fixtures are synthetic declared values, not hardware measurements.',
             ],
@@ -355,6 +392,13 @@ def _load_report(path: Path, base_url: str, *, resume: bool) -> dict:
         raise VerificationError('resume_report_invalid')
     if report.get('base_url') != base_url:
         raise VerificationError('resume_base_url_mismatch')
+    stored_scope = report.get('inventory_scope')
+    if stored_scope is None and inventory_scope == {'materials': 100, 'chunks': 1912}:
+        # Pre-scope default reports remain resumable without changing their run or job IDs.
+        stored_scope = inventory_scope
+    if stored_scope != inventory_scope:
+        raise VerificationError('resume_inventory_scope_mismatch')
+    report['inventory_scope'] = inventory_scope
     report['status'] = 'running'
     report.pop('finished_at', None)
     report['resume_count'] = int(report.get('resume_count', 0)) + 1
@@ -565,12 +609,20 @@ def _record_experiment_feedback_snapshot(report_path: Path, report: dict,
 
 def run_verification(base_url: str = DEFAULT_BASE_URL, *, resume: bool = False,
                      settings: Settings | None = None, store: Store | None = None,
-                     client: HTTPClient | None = None) -> tuple[Path, dict]:
+                     client: HTTPClient | None = None, report_path: Path | None = None,
+                     expected_materials: int = 100,
+                     expected_chunks: int | None = None) -> tuple[Path, dict]:
+    expected_materials, expected_chunks = _resolve_expected_inventory(
+        expected_materials, expected_chunks,
+    )
     settings = settings or Settings.load()
     store = store or Store(settings)
-    report_path = settings.data_root / 'qa' / 'live-verification.json'
+    report_path = Path(report_path) if report_path is not None else settings.data_root / 'qa' / 'live-verification.json'
     client = client or HTTPClient(base_url)
-    report = _load_report(report_path, client.base_url, resume=resume)
+    report = _load_report(
+        report_path, client.base_url, resume=resume,
+        expected_materials=expected_materials, expected_chunks=expected_chunks,
+    )
     run_id = report['run_id']
     _save(report_path, report)
 
@@ -578,10 +630,10 @@ def run_verification(base_url: str = DEFAULT_BASE_URL, *, resume: bool = False,
         inventory = store.one(
             "SELECT count(*) AS total, count(*) FILTER (WHERE status='ingested') AS ingested FROM materials")
         chunk_count = store.one('SELECT count(*) AS n FROM chunks')['n']
-        _check(report_path, report, 'inventory',
-               inventory['total'] == 100 and inventory['ingested'] == 100 and chunk_count == 1912,
-               {'materials': inventory['total'], 'ingested_materials': inventory['ingested'], 'chunks': chunk_count,
-                'expected': {'materials': 100, 'chunks': 1912}})
+        passed, details = _inventory_result(
+            inventory, chunk_count, expected_materials, expected_chunks,
+        )
+        _check(report_path, report, 'inventory', passed, details)
     except Exception:
         _check(report_path, report, 'inventory', False, {'reason': 'database_inventory_unavailable'})
 
@@ -750,11 +802,20 @@ def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--base-url', default=DEFAULT_BASE_URL)
     parser.add_argument('--resume', action='store_true',
-                        help='Resume the private default report and reuse its submitted decision job IDs.')
+                        help='Resume the selected report and reuse its submitted decision job IDs.')
+    parser.add_argument('--output', type=Path,
+                        help='Write to this report path instead of the configured default report path.')
+    parser.add_argument('--expected-materials', type=int, default=100,
+                        help='Expected prepared material count (default: 100).')
+    parser.add_argument('--expected-chunks', type=int,
+                        help='Expected prepared chunk count (required unless expected materials is 100).')
     args = parser.parse_args()
-    report_path = None
+    report_path = args.output
     try:
-        report_path, report = run_verification(args.base_url, resume=args.resume)
+        report_path, report = run_verification(
+            args.base_url, resume=args.resume, report_path=args.output,
+            expected_materials=args.expected_materials, expected_chunks=args.expected_chunks,
+        )
         summary = {'status': report['status'], 'report_path': str(report_path),
                    'checks_passed': sum(check['passed'] for check in report['checks'].values()),
                    'checks_failed': sum(not check['passed'] for check in report['checks'].values())}

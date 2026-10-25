@@ -1,4 +1,6 @@
 import hashlib
+import inspect
+import json
 from pathlib import Path
 
 import pytest
@@ -295,6 +297,137 @@ def claim(chunk_id='chunk-1', quote='reuses prefix blocks to reduce request late
     return {'chunk_id': chunk_id, 'quote': quote, 'kind': 'mechanism',
             'subject': 'Paged KV cache', 'predicate': 'reuses', 'object': 'prefix blocks',
             'summary': 'Prefix reuse lowers request latency.', 'scope': 'LLM inference'}
+
+
+def test_extract_claims_exposes_structured_opt_in_without_changing_default():
+    assert inspect.signature(extract_claims).parameters['structured'].default is False
+
+
+def test_extract_claims_structured_mode_validates_and_returns_normalized_context():
+    text = 'KV cache on V100 has request latency 6.4 ms per request.'
+    doc = prepared_for_claims(text)
+    quote = 'has request latency 6.4 ms per request'
+    context = {
+        'schema_version': 'claim-context/v1',
+        'parameters': [{
+            'name': 'request latency', 'value': 6.4, 'unit': 'ms',
+            'evidence': {'chunk_id': 'chunk-1', 'quote': quote},
+        }],
+        'conditions': [{
+            'dimension': 'hardware.from', 'operator': 'eq', 'value': 'V100', 'unit': None,
+            'evidence': {'chunk_id': 'chunk-1', 'quote': 'on V100'},
+        }],
+        'source_scope_note': 'The quoted configuration only.',
+    }
+    extracted_claim = {
+        **claim(quote=quote), 'subject': 'KV cache', 'predicate': 'has',
+        'object': 'request latency 6.4 ms per request',
+        'summary': 'A V100 run reports 6.4 ms request latency.', 'context': context,
+    }
+    chat = FakeChat({'documents': [{'material_id': 'mat-claims-1', 'claims': [extracted_claim]}]})
+
+    result = extract_claims([doc], chat, structured=True)
+
+    normalized = result[0]['claims'][0]['context']
+    assert result[0]['claims'][0]['context_raw'] == context
+    assert result[0]['material_id'] == 'mat-claims-1'
+    assert normalized['parameters'][0]['value_raw'] == 6.4
+    assert normalized['parameters'][0]['normalized'] == {
+        'value': 0.0064, 'unit': 's', 'status': 'normalized',
+    }
+    assert normalized['conditions'][0]['value_raw'] == 'V100'
+    claim_schema = chat.calls[0][1]['properties']['documents']['items']['properties']['claims']['items']
+    assert 'context' in claim_schema['required']
+    provider_context_schema = claim_schema['properties']['context']
+    assert provider_context_schema == ingestion._provider_context_schema()
+    emitted_json_schema = json.dumps(provider_context_schema)
+    assert '"oneOf"' not in emitted_json_schema
+    assert '"allOf"' not in emitted_json_schema
+    assert '"if"' not in emitted_json_schema
+    assert '"then"' not in emitted_json_schema
+    assert '"const"' not in emitted_json_schema
+
+
+def test_extract_claims_structured_mode_rejects_missing_context():
+    doc = prepared_for_claims()
+    chat = FakeChat({'documents': [{'material_id': 'mat-claims-1', 'claims': [claim()]}]})
+
+    with pytest.raises(IngestionError, match='claim_context_missing'):
+        extract_claims([doc], chat, structured=True)
+
+
+def test_extract_claims_provider_documents_cardinality_matches_each_batch():
+    class BatchChat:
+        def __init__(self):
+            self.calls = []
+
+        def complete(self, prompt, schema):
+            marker = 'UNTRUSTED SOURCE DATA JSON:' + chr(10)
+            prompt_documents = json.loads(prompt.split(marker, 1)[1])
+            self.calls.append((prompt_documents, json.loads(json.dumps(schema))))
+            return {'documents': [
+                {'material_id': item['material_id'], 'claims': []}
+                for item in prompt_documents
+            ]}
+
+    documents = []
+    for index in range(6):
+        document = prepared_for_claims()
+        document['material']['id'] = f'mat-batch-{index}'
+        document['chunks'][0]['id'] = f'chunk-batch-{index}'
+        documents.append(document)
+    chat = BatchChat()
+
+    result = extract_claims(documents, chat, claims_per_material=1)
+
+    assert len(result) == 6
+    assert [len(prompt_documents) for prompt_documents, _ in chat.calls] == [5, 1]
+    for prompt_documents, schema in chat.calls:
+        cardinality = len(prompt_documents)
+        documents_schema = schema['properties']['documents']
+        assert documents_schema['minItems'] == cardinality
+        assert documents_schema['maxItems'] == cardinality
+
+
+def test_extract_claim_contexts_backfills_existing_claim_ids_without_rewriting_claims():
+    text = 'Paged KV cache on V100 reports request latency of 6.4 ms.'
+    doc = prepared_for_claims(text)
+    quote = 'request latency of 6.4 ms'
+    existing = [{
+        'id': 'claim-existing-1', 'material_id': 'mat-claims-1', 'revision_id': 'rev-1',
+        'chunk_id': 'chunk-1', 'kind': 'measurement', 'subject': 'KV cache',
+        'predicate': 'reports', 'object': 'request latency', 'summary': 'Existing summary',
+        'quote': quote, 'scope': 'source_assertion',
+    }]
+    context = {
+        'schema_version': 'claim-context/v1',
+        'parameters': [{
+            'name': 'request latency', 'value': 6.4, 'unit': 'ms',
+            'evidence': {'chunk_id': 'chunk-1', 'quote': quote},
+        }],
+        'conditions': [{
+            'dimension': 'hardware.from', 'operator': 'eq', 'value': 'V100', 'unit': None,
+            'evidence': {'chunk_id': 'chunk-1', 'quote': 'on V100'},
+        }],
+        'source_scope_note': 'The quoted run only.',
+    }
+    chat = FakeChat({'claims': [{'claim_id': 'claim-existing-1', 'context': context}]})
+
+    result = ingestion.extract_claim_contexts(doc, existing, chat)
+
+    assert result[0]['claim_id'] == 'claim-existing-1'
+    assert result[0]['context_raw'] == context
+    assert result[0]['context']['parameters'][0]['normalized']['value'] == 0.0064
+    assert result[0]['context']['conditions'][0]['value_raw'] == 'V100'
+    assert existing[0]['summary'] == 'Existing summary'
+    assert chat.calls[0][1]['additionalProperties'] is False
+
+
+def test_extract_claim_contexts_empty_input_does_not_call_provider():
+    chat = FakeChat(None)
+
+    assert ingestion.extract_claim_contexts(prepared_for_claims(), [], chat) == []
+    assert chat.calls == []
 
 
 def test_extract_claims_validates_exact_quote_and_adds_offsets():

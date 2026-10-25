@@ -1,10 +1,42 @@
 # DSE Knowledge Workbench — 지식·설계 판단·경험 환류
 
-상태: **100개 자료 P1 runtime 실제 구축·연결·E2E 검증 완료** · 기준일: 2026-10-25 KST. 아래 P1 표가 실제 구현 범위이며, 나머지 architecture/scenario는 확장 설계다. 145,748건은 수집 대상 목록이고 그 전체를 본문 분석·KG 등록한 상태는 아니다.
+상태: **100개 실제 Workbench의 v0.2 품질 보완 Q1 검증 통과 · 1,000개 확장 Q2 진행 중** · 기준일: 2026-10-25 KST. 145,748건은 수집 대상 목록이며 전체 본문 분석·KG 등록은 실행하지 않는다. 현재 결과와 기존 v0.1 결과를 아래에서 구분한다.
 
 이 README는 DSE 결정별 지식 요구를 만들고, 허가된 source에서 evidence를 취득·구조화하며, hardware/kernel/experiment 결정에 쓰고 부족한 지식을 다시 수집하는 전체 구조를 설명한다. 2026-10-18 사용자 정정에 맞춘 상위 기준은 [2026-10-21-dse-knowledge-architecture.md](https://github.com/jimmylegendary/dse-knowledge/blob/docs/p0-episode-contracts/docs/superpowers/specs/2026-10-21-dse-knowledge-architecture.md)와 [2026-10-21-knowledge-architecture-plan.md](https://github.com/jimmylegendary/dse-knowledge/blob/docs/p0-episode-contracts/docs/superpowers/plans/2026-10-21-knowledge-architecture-plan.md)다. 이전 HAT native episode/adapter 계약은 세부 참고이며 이 architecture의 중심 gate가 아니다.
 
-## 실제 P1 — 100개 자료로 전체 경로를 확인
+## 지식 품질 보완 v0.2 — 실제 100개 전체 제품
+
+기존 Linux HTTP UI·Supabase·host Codex CLI·외부 `google/embeddinggemma-2`를 그대로 사용한다. 원문/embedding/기존 Claim을 다시 생성하지 않고 source 역할, source-grounded 값·조건, topic 연결과 검색을 보완했다. 기존 회귀·새 holdout·실제 모델 판단·전체 연결 및 snapshot 저장을 확인했다.
+
+| 항목 | 현재 실제 결과 | 보장과 상한 |
+|---|---|---|
+| 원자료 보존 | 100 materials · 1,912 chunks · 기존 Claim 101개 전체 필드 보존 | artifact hash·chunk span·인용 연결 검사; 새 과학 검증 횟수는 0 |
+| 역할별 사용 | core 35 · method 29 · operations 30 · navigation 5 · out-of-scope 1을 정본에 반영 | operations의 설계 사용은 workflow/interface, navigation은 locator, 미분류는 검토 필요 |
+| 조건과 값 | 기술 역할 94개 자료 중 89개에 annotation 91개; parameters 89 · conditions 116 | literal/revision/단위 표기 확인; 5개 자료는 `needs_review`, metric과 값의 의미 연결은 독립 검증 전 |
+| 단위 정규화 | 3 normalized · 165 not_numeric · 11 unit_unspecified · 26 unresolved | 알려진 단위만 변환; 문자 값·불명 단위를 숫자나 확정 단위로 추정하지 않음 |
+| KG | 226 nodes · 197 edges = assertion 101 + topic 96 | `mentions`는 인용에 나타난 공통 주제이며 compatibility/causality 증명이 아님 |
+| 연결성 | components 97→60 · 최대 component 4→65 nodes/26 sources · 여러 source component 3→8 | source 연결 증가 자체를 답변 정확도나 물리 검증으로 해석하지 않음 |
+| 검색 | `retrieval-policy/v2.1`: dense로 source를 선택하고 해당 source의 hybrid passage를 우선 | typed `source_results`는 UI 자료 탐색, `items`는 LLM 근거, 모든 locator의 authority는 0 |
+| 공개 회귀 30개 | 정상 24개 source Hit@1 **23/24**, Hit@5 **24/24**, 지정 chunk Hit@5 **17/24**, 요청 오류 0 | v0.1은 16/24·24/24·14/24. 같은 k개의 chunk slot; 부분 qrels이며 정밀도/전체 recall은 아님 |
+| 기술 근거 전용 회귀 | `hybrid_evidence`: source Hit@1 22/24 · Hit@5 23/24 · chunk Hit@5 16/24 | 기존 qrel의 navigation 1건도 분모에 유지하되 기술 근거에서 제외한 결과를 별도로 표시 |
+| 새 한·영 번역쌍 | 정상 12쌍의 source Hit@1·Hit@5 **24/24**, chunk Hit@5 **23/24**, 요청 오류 0 | 한국어/영어 source 각각 12/12, chunk는 11/12·12/12; 결과 독립으로 만든 작은 부분 정답셋 |
+| 검색 시간 | 공개 회귀 실제 30건 p50 9.62s · p95 23.08s; HTTP 6건 p50 6.69s · p95 15.53s | 작은 순차 표본이며 provider 지연/동시 job 영향 포함; latency 개선·용량 보장으로 주장하지 않음 |
+| 전체 실행 | 실제 Supabase·Codex·embedding·HAT schema·Melete의 HTTP E2E **18/18** | HAT는 구조검증만; native committee/runtime/B300 실측 및 kernel correctness는 미연결 |
+| 최종 정책 모델 probe | 공통 `kind=knowledge`, `input={}`로 실제 3건 성공: 정상 2건 `evidence_supported`, 미지원 1건 `insufficient_evidence` | expected label·evaluator case ID를 생성 모델에 보내지 않음; Jev 보조 검토도 faithful 2·correct unknown 1, human/scientific 검증 0 |
+| 자동·데이터 검증 | `pytest -q` **345 passed**, warning 1; canonical 원문/Claim/context/graph/vector 감사 오류 **0** | actual dependency E2E와 offline tests를 별도로 유지 |
+| UI | 실제 자료 탐색 12개 결과/4개 locator, desktop 1440 및 mobile 요청 375에서 수평 overflow 0 | 긴 proof ID를 자르지 않고 줄바꿈; 한 실제 검색 시나리오의 화면 확인 |
+| 판단 기록 | 재시작 후 실제 새 판단의 12개 근거와 11개 primary trace 저장, 제외 후보 1개도 구분 | trace는 감사 snapshot에만 저장; 생성 모델 입력은 유지. 기존 trace 없는 기록을 사후 추정해 덮어쓰지 않음 |
+| 확장 실행 | durable batch/lease·heartbeat·fencing·재개·provider 실패 정지, 5,000개 후보 고정, 실제 supervisor worker 3개 | 기존 100개 포함 target 1,000; 가져오기 1·index 2·generation 최대 4, host reserve 10 GiB·추가 artifact budget 4 GiB. Q2 완료를 뜻하지 않음 |
+
+공개 회귀의 최초 v2는 source Hit@5 22/24로 실패했다. 기존 hybrid 채널 순위가 의미상 적절한 source를 밀어내고 locator를 별도 분리한 결과를 평가에서 누락한 것을 확인했다. source 선택과 source 내 passage 선택을 구분하고, 실제 UI 검색과 기술근거 스트림을 나눠 위 결과를 얻었다. 이 정책과 새 한·영 14개 번역쌍(정상 12쌍·미지원 2쌍)을 먼저 고정했으며, 새 결과로 정책을 튜닝하지 않는다. Graph 유무만 바꾼 통제 실험이 아니므로 개선을 graph의 단독 효과로 주장하지 않는다.
+
+1,000개 단계는 **기존 100개 포함** 실제 ingested fulltext 1,000개와 기술 역할 자료의 grounded Claim/annotation coverage 90% 이상을 목표로 한다. 정상·미지원 판단, HAT 구조검증, metric 비교, Melete 환류, 재개와 같은 전체 제품 경로를 다시 확인해야 종료한다. metadata 1,000개나 provider 실패를 성공으로 세지 않는다. 145,748개 전체 실행은 이 작업 범위가 아니다.
+
+공개 재현 자료: [quality-v2-2026-10-25.json](https://github.com/jimmylegendary/dse-knowledge/blob/main/research/pilot100/quality-v2-2026-10-25.json), [retrieval-paired-2026-10-25.json](https://github.com/jimmylegendary/dse-knowledge/blob/main/research/pilot100/retrieval-paired-2026-10-25.json). 새 질문셋도 결과를 공개한 이후에는 regression이며 다시 blind holdout으로 사용하지 않는다. 본문 quote는 hash로 대체했고 모델 답변·vector·private 설정은 게시하지 않는다.
+
+## 기존 v0.1 P1 기록 — 100개 자료로 전체 경로를 확인
+
+이 절부터 다음 실행/설정 절 전까지의 P1·평가 수치는 `f2e113c` 시점의 기록이다. v0.2의 현재 역할·graph·검색 결과는 위 표를 기준으로 한다.
 
 Linux host에서 HTTP UI와 CLI를 실행하고 기존 Supabase project에 정본·검색·KG·job을 보존한다. 공개 원문 100개를 확보해 **1,912 chunks / 768차원 실제 embedding**을 저장했다. **99개 자료에서 Claim 101개·Entity 198개·Edge 101개**를 생성했다. 목차로 구성된 1개 자료는 검색 가능한 reference로 남기고 Claim을 만들지 않았다. Claim은 발췌에서 원문 인용과 절대 offset을 검증한 `source_assertion`이다. 원문 전체의 과학적 타당성을 검증한 결과는 아니다.
 

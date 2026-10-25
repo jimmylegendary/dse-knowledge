@@ -23,9 +23,9 @@ from dse_knowledge.db import Store
 TABLES = (
     'schema_versions', 'materials', 'revisions', 'chunks', 'claims', 'entities',
     'edges', 'decisions', 'gaps', 'jobs', 'feedback', 'experiments', 'outbox',
-    'ingest_events', 'invocations',
+    'ingest_events', 'invocations', 'claim_annotations', 'collection_batches', 'collection_items',
 )
-PRIMARY_KEYS = {'schema_versions': 'version'}
+PRIMARY_KEYS = {'schema_versions': 'version', 'collection_items': ('batch_id','material_id')}
 DIRECTORY_FLAGS = os.O_RDONLY | getattr(os, 'O_DIRECTORY', 0) | getattr(os, 'O_CLOEXEC', 0)
 NOFOLLOW = getattr(os, 'O_NOFOLLOW', 0)
 
@@ -156,7 +156,8 @@ def _sqlite_serialization_check(root: Path, directory_fd: int, name: str, tables
             db.execute(f'CREATE TABLE {table} (id TEXT PRIMARY KEY, payload TEXT NOT NULL)')
             db.executemany(
                 f'INSERT INTO {table} VALUES(?,?)',
-                [(str(row[key_column]), json.dumps(row, ensure_ascii=False, default=str)) for row in rows],
+                [(json.dumps([row[k] for k in key_column]) if isinstance(key_column,tuple) else str(row[key_column]),
+                  json.dumps(row, ensure_ascii=False, default=str)) for row in rows],
             )
         db.commit()
         counts = {table: db.execute(f'SELECT count(*) FROM {table}').fetchone()[0] for table in tables}

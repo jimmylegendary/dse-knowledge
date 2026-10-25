@@ -2,12 +2,14 @@
 from __future__ import annotations
 
 import json
+import fcntl
 import math
 import os
 import re
 import shutil
 import signal
 import ssl
+import stat
 import subprocess
 import tempfile
 import threading
@@ -16,6 +18,7 @@ import tomllib
 import urllib.error
 import urllib.request
 from pathlib import Path
+from contextlib import contextmanager
 from typing import Any
 
 
@@ -48,6 +51,51 @@ class ProviderError(RuntimeError):
         super().__init__(reason)
         self.reason = reason
         self.http_status = http_status
+
+
+@contextmanager
+def _generation_slot(workdir: Path,wait_seconds=120):
+    """Four owner-only file leases shared by DSE HTTP and collection processes."""
+    directory=workdir.lstat()
+    if (not stat.S_ISDIR(directory.st_mode) or directory.st_uid!=os.getuid()
+            or stat.S_IMODE(directory.st_mode)&0o077):
+        raise ProviderError('codex_capacity_directory_untrusted')
+    started=time.monotonic();held=None
+    try:
+        while held is None:
+            for slot in range(4):
+                fd=None
+                try:
+                    fd=os.open(workdir/('.generation-slot-'+str(slot)),os.O_CREAT|os.O_RDWR|getattr(os,'O_NOFOLLOW',0)|getattr(os,'O_CLOEXEC',0),0o600)
+                    info=os.fstat(fd)
+                    if (not stat.S_ISREG(info.st_mode) or info.st_uid!=os.getuid()
+                            or stat.S_IMODE(info.st_mode)&0o077):
+                        os.close(fd);fd=None
+                        raise ProviderError('codex_capacity_file_untrusted')
+                    try:fcntl.flock(fd,fcntl.LOCK_EX|fcntl.LOCK_NB)
+                    except BlockingIOError:
+                        os.close(fd);fd=None
+                        continue
+                    held=fd;fd=None
+                    break
+                except ProviderError:
+                    if fd is not None:
+                        try:os.close(fd)
+                        except OSError:pass
+                    raise
+                except OSError:
+                    if fd is not None:
+                        try:os.close(fd)
+                        except OSError:pass
+                    raise ProviderError('codex_capacity_lock_unavailable') from None
+            if held is None:
+                if time.monotonic()-started>=wait_seconds:raise ProviderError('codex_capacity_busy')
+                time.sleep(min(.1,wait_seconds))
+        yield held
+    finally:
+        if held is not None:
+            try:fcntl.flock(held,fcntl.LOCK_UN)
+            finally:os.close(held)
 
 
 class _NoRedirect(urllib.request.HTTPRedirectHandler):
@@ -569,7 +617,7 @@ class ChatClient:
             raise ProviderError('codex_cli_unavailable')
         self.last_metadata.update(provider='codex_cli', model=selected_model,
                                   model_reported_by_cli=False, timeout_seconds=timeout_seconds)
-        with _CODEX_LOCK:
+        with _CODEX_LOCK, _generation_slot(workdir) as generation_fd:
             try:
                 with tempfile.TemporaryDirectory(prefix='dse-codex-', dir=workdir) as temp:
                     tempdir = Path(temp)
@@ -614,6 +662,7 @@ class ChatClient:
                                 env=_codex_environment(),
                                 start_new_session=True,
                                 close_fds=True,
+                                pass_fds=(generation_fd,),
                             )
                             self._active_pgids.add(process.pid)
                     except ProviderError:

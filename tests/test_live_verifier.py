@@ -194,6 +194,87 @@ def test_resume_reuses_existing_run_and_submitted_job_without_posting_again(tmp_
     assert not any(method == 'POST' and route == '/api/decisions' for method, route, _ in client.calls)
 
 
+def test_expected_inventory_defaults_and_requires_explicit_chunks_for_other_scopes():
+    assert verify_live._resolve_expected_inventory(100, None) == (100, 1912)
+    assert verify_live._resolve_expected_inventory(100, 2000) == (100, 2000)
+    assert verify_live._resolve_expected_inventory(24, 624) == (24, 624)
+
+    with pytest.raises(verify_live.VerificationError, match='expected_chunks_required'):
+        verify_live._resolve_expected_inventory(24, None)
+    with pytest.raises(verify_live.VerificationError, match='expected_chunks_invalid'):
+        verify_live._resolve_expected_inventory(24, 0)
+
+
+def test_inventory_gate_uses_all_configured_counts():
+    passed, details = verify_live._inventory_result(
+        {'total': 24, 'ingested': 24}, 624, 24, 624,
+    )
+
+    assert passed is True
+    assert details['expected'] == {
+        'materials': 24, 'ingested_materials': 24, 'chunks': 624,
+    }
+    assert verify_live._inventory_result({'total': 24, 'ingested': 23}, 624, 24, 624)[0] is False
+    assert verify_live._inventory_result({'total': 24, 'ingested': 24}, 623, 24, 624)[0] is False
+
+
+def test_initial_report_records_configured_frozen_scope_without_legacy_fixed_count(tmp_path):
+    path = tmp_path / 'report.json'
+
+    report = verify_live._load_report(
+        path, 'http://127.0.0.1:8080', resume=False,
+        expected_materials=24, expected_chunks=624,
+    )
+
+    assert report['inventory_scope'] == {'materials': 24, 'chunks': 624}
+    assert any('24 materials and 624 chunks' in item for item in report['limitations'])
+    assert not any('100-material' in item for item in report['limitations'])
+
+
+def test_resume_preserves_run_job_ids_and_rejects_different_inventory_scope(tmp_path):
+    path = tmp_path / 'report.json'
+    path.write_text(json.dumps({
+        'run_id': 'same-run', 'base_url': 'http://127.0.0.1:8080', 'status': 'running',
+        'inventory_scope': {'materials': 24, 'chunks': 624},
+        'checks': {'job_hardware_submitted': {'passed': True, 'details': {'job_id': 'job-existing'}}},
+        'jobs': [],
+    }))
+    path.chmod(0o600)
+
+    report = verify_live._load_report(
+        path, 'http://127.0.0.1:8080', resume=True,
+        expected_materials=24, expected_chunks=624,
+    )
+
+    assert report['run_id'] == 'same-run'
+    assert verify_live._existing_decision_job_id(report, 'hardware') == 'job-existing'
+    with pytest.raises(verify_live.VerificationError, match='resume_inventory_scope_mismatch'):
+        verify_live._load_report(
+            path, 'http://127.0.0.1:8080', resume=True,
+            expected_materials=100, expected_chunks=1912,
+        )
+
+
+def test_cli_forwards_output_and_expected_inventory(monkeypatch, tmp_path):
+    output = tmp_path / 'custom.json'
+    calls = []
+
+    def fake_run(base_url, **kwargs):
+        calls.append((base_url, kwargs))
+        return output, {'status': 'complete', 'checks': {'one': {'passed': True}}}
+
+    monkeypatch.setattr(verify_live, 'run_verification', fake_run)
+    monkeypatch.setattr(verify_live.sys, 'argv', [
+        str(VERIFY_PATH), '--output', str(output), '--expected-materials', '24',
+        '--expected-chunks', '624', '--resume',
+    ])
+
+    assert verify_live.main() == 0
+    assert calls == [(verify_live.DEFAULT_BASE_URL, {
+        'resume': True, 'report_path': output, 'expected_materials': 24, 'expected_chunks': 624,
+    })]
+
+
 def test_later_experiment_snapshot_must_include_feedback_memory_source_event(tmp_path):
     report = {
         'checks': {},

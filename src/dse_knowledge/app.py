@@ -18,7 +18,7 @@ from .retrieval import Retriever
 
 
 class Body(BaseModel):model_config=ConfigDict(extra='forbid',strict=True)
-class SearchBody(Body):query:str=Field(min_length=1,max_length=2000);category:str='';limit:int=Field(default=12,ge=1,le=30)
+class SearchBody(Body):query:str=Field(min_length=1,max_length=2000);category:str='';limit:int=Field(default=12,ge=1,le=30);purpose:Literal['auto','design','operations','discovery']='auto'
 class DecisionBody(Body):kind:Literal['hardware','kernel','experiment','knowledge'];question:str=Field(min_length=3,max_length=4000);input:dict=Field(default_factory=dict)
 class FeedbackBody(Body):decision_id:str;verdict:Literal['useful','incorrect','needs_evidence'];notes:str=Field(default='',max_length=8000)
 class Metric(Body):name:str=Field(min_length=1,max_length=80);value:float;unit:str=Field(min_length=1,max_length=50);direction:Literal['min','max']
@@ -47,7 +47,7 @@ def create_app(settings=None,store=None,embedding=None,chat=None,native=None,run
         yield
         jobs.close()
 
-    app=FastAPI(title='DSE Knowledge Workbench',version='0.1.0',lifespan=lifespan)
+    app=FastAPI(title='DSE Knowledge Workbench',version='0.2.0',lifespan=lifespan)
     app.state.store=store
     @app.middleware('http')
     async def guards(request:Request,call_next):
@@ -74,7 +74,8 @@ def create_app(settings=None,store=None,embedding=None,chat=None,native=None,run
     def capabilities():
         return {'native':native.capabilities(),'chat':{'provider':settings.get('CHAT_PROVIDER'),'model':settings.get('CHAT_MODEL_ID')},
                 'embedding':{'provider':settings.get('EMBEDDING_PROVIDER'),'model':settings.get('EMBEDDING_MODEL_ID'),'dimensions':768},
-                'scope':'100-material pilot; single operator HTTP self-host. Source assertions and proposed designs require scoped validation.',
+                'scope':'Quality v2 pilot; single operator HTTP self-host. Source assertions and proposed designs require scoped validation.',
+                'knowledge_quality':{'source_roles':True,'claim_context':'literal_grounded_unverified_association','topic_edges':'evidence_topic_not_property'},
                 'automatic_b300_dse':'not_implemented','performance_simulation':'native HAT run orchestration not yet enabled'}
 
     @app.get('/api/health')
@@ -82,7 +83,7 @@ def create_app(settings=None,store=None,embedding=None,chat=None,native=None,run
         with store.connection() as c:
             c.execute('SELECT 1')
             tls=bool(c.pgconn.ssl_in_use)
-        return {'status':'ok','database':'connected','client_pooler_tls':tls,'version':'0.1.0'}
+        return {'status':'ok','database':'connected','client_pooler_tls':tls,'version':'0.2.0'}
 
     @app.get('/api/stats')
     def stats():
@@ -98,7 +99,10 @@ def create_app(settings=None,store=None,embedding=None,chat=None,native=None,run
         if not result:raise HTTPException(404,'Material not found')
         return result
     @app.post('/api/search')
-    def search(body:SearchBody):return retriever.search(body.query,body.category,body.limit)
+    def search(body:SearchBody):return retriever.search(body.query,body.category,body.limit,purpose=body.purpose)
+    @app.get('/api/collections')
+    def collections():
+        return {'items':store.rows('SELECT id,target,state,counters,created_at,updated_at FROM collection_batches ORDER BY created_at DESC LIMIT 20')}
     @app.get('/api/graph')
     def graph(query:str='',limit:int=Query(80,ge=1,le=200)):return store.graph(query[:1000],limit)
     @app.get('/api/decisions')

@@ -51,6 +51,114 @@ class Store:
         row=self.one('SELECT status FROM materials WHERE id=%s',(str(material_id),))
         return bool(row and row['status']=='ingested')
 
+    def assess_material(self, material_id, role, metadata):
+        """Revision-bound advisory annotation, committed together with its audit event."""
+        from .knowledge import SOURCE_ROLES
+        if role not in SOURCE_ROLES:
+            raise ValueError('material_role_invalid')
+        proof=dict(metadata)
+        with self.connection() as c:
+            material=c.execute('SELECT id,role,role_metadata FROM materials WHERE id=%s FOR UPDATE',(str(material_id),)).fetchone()
+            if not material:raise ValueError('material_not_found')
+            revision=c.execute('SELECT id,sha256 FROM revisions WHERE material_id=%s ORDER BY created_at DESC,id DESC LIMIT 1',(str(material_id),)).fetchone()
+            if not revision or proof.get('revision_sha256')!=revision['sha256']:
+                raise ValueError('material_role_revision_mismatch')
+            proof.update(schema_version='source-role/v1',revision_id=revision['id'],advisory=True,
+                         independent_validations=0)
+            proof['assessment_id']=identity('role',material_id,role,json.dumps(proof,sort_keys=True,ensure_ascii=False))
+            c.execute('UPDATE materials SET role=%s,role_metadata=%s WHERE id=%s',(role,Jsonb(proof),str(material_id)))
+            c.execute('INSERT INTO ingest_events(id,material_id,status,detail) VALUES(%s,%s,%s,%s) ON CONFLICT(id) DO NOTHING',
+                      (proof['assessment_id'],str(material_id),'role_assessed',Jsonb({'role':role,**proof})))
+        return proof
+
+    def put_claim_context(self, claim_id, context, metadata):
+        """Validate against canonical source bytes before appending an annotation."""
+        from .knowledge import validate_claim_context
+        with self.connection() as c:
+            claim=c.execute('SELECT * FROM claims WHERE id=%s',(claim_id,)).fetchone()
+            if not claim:raise ValueError('claim_not_found')
+            revision=c.execute('SELECT * FROM revisions WHERE id=%s',(claim['revision_id'],)).fetchone()
+            chunks=c.execute('SELECT id,material_id,revision_id,text,start_offset AS start,end_offset AS end FROM chunks WHERE revision_id=%s ORDER BY start_offset',(revision['id'],)).fetchall()
+            if (revision['material_id']!=claim['material_id'] or not any(x['id']==claim['chunk_id'] for x in chunks)
+                    or any(x['material_id']!=claim['material_id'] for x in chunks)):
+                raise ValueError('claim_material_revision_chunk_mismatch')
+            document={'material':{'id':claim['material_id']},'text':revision['content'],
+                      'revision':{'id':revision['id'],'sha256':revision['sha256']},'chunks':chunks}
+            # Callers supply the raw schema, never their own allegedly validated proof.
+            validated=validate_claim_context(context,document)
+            aid=identity('context',claim_id,revision['sha256'],json.dumps(validated,sort_keys=True,ensure_ascii=False))
+            proof={**metadata,'revision_sha256':revision['sha256'],'validation':'literal_grounded_unverified_association',
+                   'use_policy':'source_assertion_only','independent_validations':0}
+            c.execute('''INSERT INTO claim_annotations(id,claim_id,revision_id,version,context,metadata)
+              VALUES(%s,%s,%s,%s,%s,%s) ON CONFLICT(id) DO NOTHING''',
+                      (aid,claim_id,revision['id'],'claim-context/v1',Jsonb(validated),Jsonb(proof)))
+            self._put_topic_links(c,claim,chunks,revision,validated)
+        return aid
+
+    @staticmethod
+    def _put_topic_links(c,claim,chunks,revision,context=None):
+        from .knowledge import canonical_topic_mentions
+        chunks_by_id={x['id']:x for x in chunks}
+        evidence=[{'chunk_id':claim['chunk_id'],'quote':claim['quote'],
+                   'source_start':claim.get('metadata',{}).get('source_start')}]
+        for group in ('parameters','conditions'):
+            evidence.extend(x['evidence'] for x in (context or {}).get(group,[]))
+        source_id=identity('entity',' '.join(claim['subject'].casefold().split())[:400])
+        for item in evidence:
+            chunk=chunks_by_id.get(item['chunk_id']);quote=item['quote']
+            if not chunk or quote not in chunk['text']:raise ValueError('topic_evidence_mismatch')
+            for topic in canonical_topic_mentions(quote):
+                key=topic['key'];tid=identity('topic',key)
+                c.execute('''INSERT INTO entities(id,label,kind,normalized,metadata) VALUES(%s,%s,%s,%s,%s)
+                  ON CONFLICT(normalized) DO NOTHING''',
+                          (tid,topic['label'],topic['kind'],'topic:v1:'+key,Jsonb({'topic_key':key,'registry_version':'v1'})))
+                start=item.get('source_start')
+                if start is None:
+                    if chunk['text'].count(quote)!=1:raise ValueError('topic_quote_ambiguous')
+                    start=chunk['start']+chunk['text'].find(quote)
+                if (type(start) is not int or start<chunk['start'] or start+len(quote)>chunk['end']
+                        or chunk['text'][start-chunk['start']:start-chunk['start']+len(quote)]!=quote):
+                    raise ValueError('topic_quote_offset_mismatch')
+                proof={'scope':'evidence_topic_not_property','registry_version':'v1','quote':quote,
+                       'source_start':start,'source_end':start+len(quote),'revision_sha256':revision['sha256']}
+                c.execute('''INSERT INTO edges(id,source,target,relation,claim_id,material_id,relation_kind,evidence_chunk_id,metadata)
+                  VALUES(%s,%s,%s,'mentions',%s,%s,'topic',%s,%s) ON CONFLICT(id) DO NOTHING''',
+                          (identity('topic-edge',claim['id'],tid,item['chunk_id'],quote),source_id,tid,claim['id'],claim['material_id'],item['chunk_id'],Jsonb(proof)))
+
+    def backfill_topic_links(self):
+        """Deterministic projection of existing exact Claim quotes; no model calls."""
+        with self.connection() as c:
+            claims=c.execute('SELECT * FROM claims ORDER BY id').fetchall()
+            annotations=c.execute('SELECT DISTINCT ON(claim_id) claim_id,context FROM claim_annotations ORDER BY claim_id,created_at DESC,id DESC').fetchall()
+            contexts={x['claim_id']:x['context'] for x in annotations}
+            for claim in claims:
+                revision=c.execute('SELECT id,sha256 FROM revisions WHERE id=%s',(claim['revision_id'],)).fetchone()
+                context=contexts.get(claim['id'],{})
+                ids={claim['chunk_id']}|{x['evidence']['chunk_id'] for group in ('parameters','conditions') for x in context.get(group,[])}
+                chunks=c.execute('SELECT id,text,start_offset AS start,end_offset AS end FROM chunks WHERE revision_id=%s AND id=ANY(%s)',(claim['revision_id'],list(ids))).fetchall()
+                self._put_topic_links(c,claim,chunks,revision,context)
+        return len(claims)
+
+    def context_projection(self, chunk_ids, max_per_chunk=2, full=False):
+        if not chunk_ids:return {}
+        rows=self.rows('''SELECT cl.id AS claim_id,cl.chunk_id,a.id AS annotation_id,a.version,a.context,a.metadata
+          FROM claims cl JOIN LATERAL (SELECT * FROM claim_annotations x WHERE x.claim_id=cl.id ORDER BY created_at DESC,id DESC LIMIT 1) a ON true
+          WHERE cl.chunk_id=ANY(%s) ORDER BY cl.chunk_id,a.created_at DESC,a.id''',(list(chunk_ids),))
+        result={}
+        for row in rows:
+            items=result.setdefault(row['chunk_id'],[])
+            if len(items)>=max_per_chunk:continue
+            context=row['context']
+            parameters=context.get('parameters',[]);conditions=context.get('conditions',[]);note=context.get('source_scope_note','')
+            items.append({'annotation_id':row['annotation_id'],'claim_id':row['claim_id'],'version':row['version'],
+                          'parameters':parameters if full else parameters[:6],'conditions':conditions if full else conditions[:8],
+                          'source_scope_note':note if full else note[:1200],
+                          'projection':{'parameters_total':len(parameters),'conditions_total':len(conditions),
+                                        'truncated':False if full else len(parameters)>6 or len(conditions)>8 or len(note)>1200},
+                          'use_policy':'source_assertion_only','validation':'literal_grounded_unverified_association',
+                          'revision_sha256':row['metadata'].get('revision_sha256'),'independent_validations':0})
+        return result
+
     def put_material(self, prepared, embeddings):
         m=prepared['material']; rev=prepared['revision']; mid=str(m.get('id') or m.get('mid'))
         rid=identity(mid,rev['sha256']); chunks=prepared['chunks']
@@ -59,7 +167,7 @@ class Store:
         with self.connection() as c:
             c.execute('''INSERT INTO materials(id,title,url,source,category,material_type,summary,status,scope,metadata)
               VALUES(%s,%s,%s,%s,%s,%s,%s,'ingested',%s,%s)
-              ON CONFLICT(id) DO UPDATE SET status='ingested',scope=excluded.scope,metadata=excluded.metadata''',
+              ON CONFLICT(id) DO UPDATE SET status='ingested',scope=excluded.scope,metadata=materials.metadata||excluded.metadata''',
               (mid,m['title'],m.get('url') or m['link'],str(m['source']),m['category'],m.get('material_type','document'),m.get('summary',''),rev['scope'],Jsonb({'sample_seed':20261025})))
             c.execute('''INSERT INTO revisions(id,material_id,sha256,url,parser,scope,artifact_path,content,metadata)
               VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s) ON CONFLICT(id) DO NOTHING''',
@@ -101,7 +209,13 @@ class Store:
         if not material:return None
         chunks=self.rows('SELECT id,revision_id,text,start_offset AS start,end_offset AS end FROM chunks WHERE material_id=%s ORDER BY start_offset',(mid,))
         claims=self.rows('SELECT * FROM claims WHERE material_id=%s ORDER BY created_at',(mid,))
-        return {'material':material,'chunks':chunks,'claims':claims}
+        projection=self.context_projection([x['id'] for x in chunks],max_per_chunk=32,full=True)
+        for chunk in chunks:chunk['claim_contexts']=projection.get(chunk['id'],[])
+        annotated={a['claim_id'] for values in projection.values() for a in values}
+        coverage={'claims_total':len(claims),'claims_annotated':len(annotated),
+                  'status':'no_claims' if not claims else ('annotations_available' if len(annotated)==len(claims) else 'needs_review'),
+                  'scope':'bounded_source_excerpts_not_exhaustive','independent_validations':0}
+        return {'material':material,'chunks':chunks,'claims':claims,'annotation_coverage':coverage}
 
     def materials(self,q='',category='',offset=0,limit=25):
         where="WHERE (%s='' OR title ILIKE %s OR summary ILIKE %s) AND (%s='' OR category=%s)"
@@ -111,13 +225,13 @@ class Store:
         return {'items':rows,'total':total}
 
     def graph(self,query='',limit=80):
-        edges=self.rows('''SELECT e.*,s.label AS source_label,t.label AS target_label FROM edges e
+        edges=self.rows('''SELECT e.*,s.label AS source_label,t.label AS target_label,s.kind AS source_kind,t.kind AS target_kind FROM edges e
           JOIN entities s ON s.id=e.source JOIN entities t ON t.id=e.target
-          WHERE (%s='' OR s.label ILIKE %s OR t.label ILIKE %s OR e.relation ILIKE %s) LIMIT %s''',
+          WHERE (%s='' OR s.label ILIKE %s OR t.label ILIKE %s OR e.relation ILIKE %s) ORDER BY e.relation_kind DESC,e.id LIMIT %s''',
           (query,'%'+query+'%','%'+query+'%','%'+query+'%',limit))
         nodes={}
         for e in edges:
-            for key in ('source','target'):nodes[e[key]]={'id':e[key],'label':e[key+'_label'],'kind':'concept'}
+            for key in ('source','target'):nodes[e[key]]={'id':e[key],'label':e[key+'_label'],'kind':e[key+'_kind']}
         return {'nodes':list(nodes.values()),'edges':edges}
 
     def stats(self):
@@ -126,6 +240,9 @@ class Store:
             result[table]=self.one('SELECT count(*) AS n FROM '+table)['n']
         result['category_counts']=self.rows('SELECT category,count(*) AS count FROM materials GROUP BY category ORDER BY category')
         result['scope_counts']=self.rows('SELECT scope,count(*) AS count FROM materials GROUP BY scope')
+        result['role_counts']=self.rows('SELECT role,count(*) AS count FROM materials GROUP BY role ORDER BY role')
+        result['claim_annotations']=self.one('SELECT count(*) AS n FROM claim_annotations')['n']
+        result['edge_kind_counts']=self.rows('SELECT relation_kind,count(*) AS count FROM edges GROUP BY relation_kind ORDER BY relation_kind')
         return result
 
     def new_job(self, kind, payload):

@@ -18,7 +18,7 @@ UNIT = Path(__file__).resolve().parents[1] / 'deploy' / 'dse-knowledge.service.i
 TABLES = (
     'schema_versions', 'materials', 'revisions', 'chunks', 'claims', 'entities',
     'edges', 'decisions', 'gaps', 'jobs', 'feedback', 'experiments', 'outbox',
-    'ingest_events', 'invocations',
+    'ingest_events', 'invocations', 'claim_annotations', 'collection_batches', 'collection_items',
 )
 
 
@@ -60,6 +60,8 @@ class FakeConnection:
         table = statement[len(prefix):]
         if table == 'schema_versions':
             return FakeCursor([{'version': 2, 'applied_at': '2026-10-25T00:00:00Z'}])
+        if table == 'collection_items':
+            return FakeCursor([{'batch_id':'batch-a','material_id':'material-a'}, {'batch_id':'batch-b','material_id':'material-a'}])
         return FakeCursor([{'id': f'{table}-1', 'content': f'row for {table}'}])
 
 

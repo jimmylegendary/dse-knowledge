@@ -1,0 +1,39 @@
+# Knowledge quality v2 Implementation Plan
+
+> **For agentic workers:** Use superpowers:subagent-driven-development. No nested delegation. Root owns DB/credentials/live providers/deploy/commit.
+
+**Goal:** 승인된 Write/KG/Read 보완을 실제 제품에 반영하고, 같은 전체 사용자 여정으로1,000개를처리·평가한다.
+**Architecture:** 기존PG정본·vector/FTS·topic graph·HTTP/CLI·Codex/embedding·native integrations를유지하고versionedannotation/role/collectionlease를추가한다.
+**Tech Stack:** Python3.12/FastAPI/psycopg/PG17/pgvector768, stdlibcache/process/HTTP, 기존modeladapters.
+**Spec:** [2026-10-25-knowledge-quality-v2-design.md](https://github.com/jimmylegendary/dse-knowledge/blob/main/docs/superpowers/specs/2026-10-25-knowledge-quality-v2-design.md)
+
+## Global constraints
+
+사용자가보완3단계를실행승인했다. 승인된Linux·Supabase·현재provider만사용한다. 14만일괄실행X; credential/private원문/public답변Git노출X; epoch별originalsource/Claim/decision/audit보존. Phase마다실제UI·실제dependencies·DSE/feedback전체여정을확인한다. Mandatory validation과permission/physicaltruth구분은유지한다.
+
+## Ownership/Review focus
+
+|Task|파일/producer|consumer|검사할interface·위험|
+|---|---|---|---|
+|A|knowledge.py/ingestion.py, tests|rootdb/pipeline·Btopicquery|literalproof/조건범위/units; 모델조건을hardconstraint로승격금지|
+|B|retrieval.py/tests/test_retrieval_v2.py|rootapp/decisions/UI|3positional호환/purpose/role SQL; graphnoise·캐시usage·문맥citationID/단위보존|
+|C|collection.py/004_collection.sql/tests|rootpipeline/CLI|leasedstagehandler계약/staleowner/counters/resourceguards·실패분모|
+|Root|003migration/db.py/pipeline.py/app.py/decisions.py/cli.py/web/scripts|전체|A/B/C계약순차통합, schema-firstdeploy, snapshot·native boundaries, secrets·명령·실출력|
+|Review|각task와전체read-only|root수정|labelblinding·source/Claimimmutable·authority·공개범위·단계별실제제품gate|
+
+## Tasks
+
+- [ ] 1. Spec/기존worktree/ledger/preflight builder 검토. Root가minor구현선택을ruling으로고정한다. 기존161testsbaseline이이미verified임을보존한다.
+- [ ] 2. A TDD: source-role/contextschema, parameter·condition proof/normalization, curatedtopic registry, structuredextract opt-in; backwardtests와반례통과.
+- [ ] 3. B TDD: nonempty lexical·boundedgraph·role routing/rerank/diversity/neighbor·querycache; fakeStoretests→root실제후보trace검증.
+- [ ] 4. C TDD: durablecollectionlease·heartbeat·resume·counter·quota/storageguard, offline failurefixtures와DDL contract 검증.
+- [ ] 5. Root schema/Store/annotationprojection/rolehistory/pipeline/advisoryadapter/modelresultcache 통합. 필요한adminmigration만root적용, runtime권한확인. 기존100curation을revisionproof와함께반영한다.
+- [ ] 6. Root UI/CLI에서role/typedcontext/topic 표시와purpose선택, DSEsnapshot refs/Melete환류·metric·HAT구조검증회귀. 별도workerreview와root실제E2E후Q1deploy.
+- [ ] 7. 고정30regression와결과독립새질의/pairedlanguage로Q1평가. 실제3blindmodelprobe·feedback/native역할상한, 재시작/리트라이검증. Q1전체제품gate와정직한한계를공개한다.
+- [ ] 8. Root rawregistry에서1000용candidate준비, DB/host/공간/quota budget실측. 실제acquire→assess→index→structuredclaim lease workers를안전하게실행. 부분완료를전체완료로세지않는다.
+- [ ] 9. 실제1000의source/Claim/조건/graph/sourceRole와다른material새질의·같은UI/LLM/nativefeedback/metric/HAT회귀검증. Tokens/time/실패·재개·원문공간·DBindex/throughput평가.
+- [ ] 10. 별도최종review→root원자료·test·secret검증→README/metadata-only report→authorizedGitHub게시. Runtimeworktree는서비스경로여서삭제하지않는다.
+
+## Ledger
+
+2026-10-25 start: accepted补완목표와f2e113cbaseline확인. 기존실서비스worktree를재사용하며개별구현선택은master판단으로상기spec에명시했다. 사용자에게재승인이나도메인/HTTPS질문을하지않는다.
