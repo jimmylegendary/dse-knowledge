@@ -1,0 +1,652 @@
+{
+  "schema_version": "pilot-quality-evaluation/v1",
+  "evaluated_at": "2026-10-25T04:47:52.236881+00:00",
+  "system_source_commit": "4fda59347f6db7d59f89a821fc34bfc83166c6d9",
+  "evaluation_runner_sha256": "e9209d3e6cef0153214f4c7d53136b94bff8ce269683b1f252c5cadf76ae4bf3",
+  "blinded_probe_runner_sha256": "fde43fd6e9599647a322b616ad3fe78a6aa9c87531fa1547e597bd6f306d9762",
+  "overall_recommendation": {
+    "continue_100_material_workbench": true,
+    "bulk_145748_kg_generation": "hold",
+    "reasons": [
+      "Sparse generic-concept graph and roughly one claim per document do not establish all-stage DSE knowledge coverage.",
+      "Natural-language lexical/exact channels produced no candidates in this suite; graph fusion trades source ranking against designated passage hits.",
+      "Same-size artifact scenario exceeds current host free disk; generation quota, large-index performance and full extraction throughput are unmeasured."
+    ]
+  },
+  "source_assessment": {
+    "materials": 100,
+    "role_counts": {
+      "core_technical": 35,
+      "integration_operations": 30,
+      "supporting_method": 29,
+      "source_navigation": 5,
+      "out_of_scope": 1
+    },
+    "verdict_counts": {
+      "retain_core_candidate": 35,
+      "retain_operational_reference": 30,
+      "retain_supporting_method": 29,
+      "navigation_only": 5,
+      "exclude_from_DSE_knowledge": 1
+    },
+    "category_counts": {
+      "compiler_kernel": 11,
+      "llm_model_workload": 18,
+      "hardware_architecture": 13,
+      "dse_optimization": 14,
+      "memory_interconnect": 10,
+      "simulation_measurement": 12,
+      "power_thermal_packaging": 7,
+      "serving_scheduling": 10,
+      "provenance_experiment": 5
+    },
+    "category_mismatches": 1,
+    "flagged_materials": 46,
+    "method": "AI worker and Jev advisory assessment of title/summary/head plus selected source context; master checked disputed records and aggregate consistency. No independent human or scientific validation.",
+    "not_applied_to_production": true,
+    "acquisition": {
+      "attempts": 169,
+      "acquired": 100,
+      "policy_or_size_rejected": 69,
+      "local_allowlist": 63,
+      "repository_revision_not_pinned": 4,
+      "source_too_large": 2,
+      "not_an_internet_accessibility_rate": true
+    }
+  },
+  "claim_assessment": {
+    "claims": 101,
+    "materials_with_claims": 99,
+    "verdict_counts": {
+      "supported_source_assertion": 99,
+      "supported_with_condition_note": 2
+    },
+    "mechanically_valid_quotes_offsets": 101,
+    "source_assertion_epistemic_metadata_count": 101,
+    "independent_scientific_validations": 0,
+    "condition_notes": [
+      {
+        "claim_id": "4646b72a9666c8acf259840ab15dcf48",
+        "note": "Retain tested V100-to-A100/InfPop/model conditions; do not apply throughput figures to a different GPU/workload."
+      },
+      {
+        "claim_id": "5c7039d5b0cf6d3f0ceb2fa4beb6c50a",
+        "note": "Summary should retain the fixed memory-capacity/bandwidth and hotspot/orientation assumptions; full quote/scope already supports the assertion."
+      }
+    ]
+  },
+  "graph": {
+    "nodes": 198,
+    "edges": 101,
+    "entity_kind_counts": {
+      "concept": 198
+    },
+    "weak_components": 97,
+    "component_size_distribution": {
+      "2": 94,
+      "3": 2,
+      "4": 1
+    },
+    "largest_component_nodes": 4,
+    "components_with_multiple_source_materials": 3,
+    "relations_distinct": 92,
+    "average_undirected_degree": 1.02020202020202,
+    "punctuation_alias_candidates": [],
+    "limits": "Weak connectivity only; components do not establish semantic consistency. Alias candidates are advisory, not auto-merge instructions."
+  },
+  "retrieval": {
+    "qrels_sha256": "34bedaf0eb6efe539a5de172f1ffe013e8b8c8364db58c8637714c563797cb6e",
+    "cases": 30,
+    "answerable": 24,
+    "unsupported_search_only": 6,
+    "errors": 0,
+    "partial_qrels": true,
+    "summary": {
+      "hybrid": {
+        "denominator": 24,
+        "known_source_hit_at_1": 0.6666666666666666,
+        "known_source_hit_at_5": 1.0,
+        "known_source_hit_at_10": 1.0,
+        "known_chunk_hit_at_5": 0.5833333333333334,
+        "known_chunk_hit_at_10": 0.5833333333333334,
+        "all_expected_sources_at_5": 0.9166666666666666,
+        "reciprocal_rank": 0.813888888888889
+      },
+      "dense": {
+        "denominator": 24,
+        "known_source_hit_at_1": 0.9583333333333334,
+        "known_source_hit_at_5": 1.0,
+        "known_source_hit_at_10": 1.0,
+        "known_chunk_hit_at_5": 0.4166666666666667,
+        "known_chunk_hit_at_10": 0.5,
+        "all_expected_sources_at_5": 0.9583333333333334,
+        "reciprocal_rank": 0.9791666666666666
+      },
+      "lexical": {
+        "denominator": 24,
+        "known_source_hit_at_1": 0.0,
+        "known_source_hit_at_5": 0.0,
+        "known_source_hit_at_10": 0.0,
+        "known_chunk_hit_at_5": 0.0,
+        "known_chunk_hit_at_10": 0.0,
+        "all_expected_sources_at_5": 0.0,
+        "reciprocal_rank": 0.0
+      },
+      "dense_lexical": {
+        "denominator": 24,
+        "known_source_hit_at_1": 0.9583333333333334,
+        "known_source_hit_at_5": 1.0,
+        "known_source_hit_at_10": 1.0,
+        "known_chunk_hit_at_5": 0.4166666666666667,
+        "known_chunk_hit_at_10": 0.5,
+        "all_expected_sources_at_5": 0.9583333333333334,
+        "reciprocal_rank": 0.9791666666666666
+      },
+      "hybrid_without_graph": {
+        "denominator": 24,
+        "known_source_hit_at_1": 0.9583333333333334,
+        "known_source_hit_at_5": 1.0,
+        "known_source_hit_at_10": 1.0,
+        "known_chunk_hit_at_5": 0.4166666666666667,
+        "known_chunk_hit_at_10": 0.5,
+        "all_expected_sources_at_5": 0.9583333333333334,
+        "reciprocal_rank": 0.9791666666666666
+      }
+    },
+    "breakdown": {
+      "language": {
+        "en": {
+          "denominator": 12,
+          "known_source_hit_at_1": 0.6666666666666666,
+          "known_source_hit_at_5": 1.0,
+          "known_source_hit_at_10": 1.0,
+          "known_chunk_hit_at_5": 0.75,
+          "known_chunk_hit_at_10": 0.75,
+          "all_expected_sources_at_5": 0.9166666666666666,
+          "reciprocal_rank": 0.8194444444444445
+        },
+        "ko": {
+          "denominator": 12,
+          "known_source_hit_at_1": 0.6666666666666666,
+          "known_source_hit_at_5": 1.0,
+          "known_source_hit_at_10": 1.0,
+          "known_chunk_hit_at_5": 0.4166666666666667,
+          "known_chunk_hit_at_10": 0.4166666666666667,
+          "all_expected_sources_at_5": 0.9166666666666666,
+          "reciprocal_rank": 0.8083333333333332
+        }
+      },
+      "category": {
+        "compiler_kernel": {
+          "denominator": 3,
+          "known_source_hit_at_1": 1.0,
+          "known_source_hit_at_5": 1.0,
+          "known_source_hit_at_10": 1.0,
+          "known_chunk_hit_at_5": 0.6666666666666666,
+          "known_chunk_hit_at_10": 0.6666666666666666,
+          "all_expected_sources_at_5": 0.6666666666666666,
+          "reciprocal_rank": 1.0
+        },
+        "dse_optimization": {
+          "denominator": 3,
+          "known_source_hit_at_1": 0.6666666666666666,
+          "known_source_hit_at_5": 1.0,
+          "known_source_hit_at_10": 1.0,
+          "known_chunk_hit_at_5": 0.3333333333333333,
+          "known_chunk_hit_at_10": 0.3333333333333333,
+          "all_expected_sources_at_5": 0.6666666666666666,
+          "reciprocal_rank": 0.8333333333333334
+        },
+        "hardware_architecture": {
+          "denominator": 3,
+          "known_source_hit_at_1": 0.6666666666666666,
+          "known_source_hit_at_5": 1.0,
+          "known_source_hit_at_10": 1.0,
+          "known_chunk_hit_at_5": 0.3333333333333333,
+          "known_chunk_hit_at_10": 0.3333333333333333,
+          "all_expected_sources_at_5": 1.0,
+          "reciprocal_rank": 0.7777777777777778
+        },
+        "llm_model_workload": {
+          "denominator": 3,
+          "known_source_hit_at_1": 0.3333333333333333,
+          "known_source_hit_at_5": 1.0,
+          "known_source_hit_at_10": 1.0,
+          "known_chunk_hit_at_5": 0.3333333333333333,
+          "known_chunk_hit_at_10": 0.3333333333333333,
+          "all_expected_sources_at_5": 1.0,
+          "reciprocal_rank": 0.6666666666666666
+        },
+        "memory_interconnect": {
+          "denominator": 2,
+          "known_source_hit_at_1": 1.0,
+          "known_source_hit_at_5": 1.0,
+          "known_source_hit_at_10": 1.0,
+          "known_chunk_hit_at_5": 0.5,
+          "known_chunk_hit_at_10": 0.5,
+          "all_expected_sources_at_5": 1.0,
+          "reciprocal_rank": 1.0
+        },
+        "power_thermal_packaging": {
+          "denominator": 3,
+          "known_source_hit_at_1": 0.6666666666666666,
+          "known_source_hit_at_5": 1.0,
+          "known_source_hit_at_10": 1.0,
+          "known_chunk_hit_at_5": 0.6666666666666666,
+          "known_chunk_hit_at_10": 0.6666666666666666,
+          "all_expected_sources_at_5": 1.0,
+          "reciprocal_rank": 0.8333333333333334
+        },
+        "provenance_experiment": {
+          "denominator": 3,
+          "known_source_hit_at_1": 0.3333333333333333,
+          "known_source_hit_at_5": 1.0,
+          "known_source_hit_at_10": 1.0,
+          "known_chunk_hit_at_5": 0.6666666666666666,
+          "known_chunk_hit_at_10": 0.6666666666666666,
+          "all_expected_sources_at_5": 1.0,
+          "reciprocal_rank": 0.6666666666666666
+        },
+        "serving_scheduling": {
+          "denominator": 2,
+          "known_source_hit_at_1": 0.5,
+          "known_source_hit_at_5": 1.0,
+          "known_source_hit_at_10": 1.0,
+          "known_chunk_hit_at_5": 1.0,
+          "known_chunk_hit_at_10": 1.0,
+          "all_expected_sources_at_5": 1.0,
+          "reciprocal_rank": 0.6
+        },
+        "simulation_measurement": {
+          "denominator": 2,
+          "known_source_hit_at_1": 1.0,
+          "known_source_hit_at_5": 1.0,
+          "known_source_hit_at_10": 1.0,
+          "known_chunk_hit_at_5": 1.0,
+          "known_chunk_hit_at_10": 1.0,
+          "all_expected_sources_at_5": 1.0,
+          "reciprocal_rank": 1.0
+        }
+      }
+    },
+    "channels_nonempty": {
+      "lexical": {
+        "all_30": 0,
+        "answerable_24": 0,
+        "unsupported_6": 0
+      },
+      "exact": {
+        "all_30": 0,
+        "answerable_24": 0,
+        "unsupported_6": 0
+      },
+      "dense": {
+        "all_30": 30,
+        "answerable_24": 24,
+        "unsupported_6": 6
+      },
+      "graph": {
+        "all_30": 27,
+        "answerable_24": 21,
+        "unsupported_6": 6
+      }
+    },
+    "latency_success_only": {
+      "count": 30,
+      "p50_seconds": 8.619382468983531,
+      "p95_seconds": 12.108709225431085,
+      "max_seconds": 12.213599674403667
+    },
+    "http_latency_success_only": {
+      "count": 6,
+      "p50_seconds": 9.058460406959057,
+      "p95_seconds": 15.405233971774578,
+      "max_seconds": 15.405233971774578
+    },
+    "query_embedding_latency_p50_seconds": 7.996499999999999,
+    "four_db_queries_total_p50_seconds": 0.4890122511424124,
+    "known_chunk_miss_posthoc_ai_review": {
+      "misses": 10,
+      "related_alternative_passage": 6,
+      "partial_evidence": 3,
+      "core_mechanism_missing_at_top5": 1,
+      "not_a_replacement_gold_or_exhaustive_precision_metric": true
+    },
+    "limits": [
+      "Partial qrels measure known-source/chunk hit, not exhaustive relevance precision/recall.",
+      "Failed answerable requests remain zero in the metric denominator.",
+      "Unsupported queries are excluded from source-hit denominators; retrieval is not an answerability gate.",
+      "Ablations reuse the same actual query vector and production channel candidates; full hybrid is unchanged.",
+      "Latency describes successful calls only; errors are separately counted and score zero for positive cases.",
+      "Latency is a small sequential warm-service sample, not a saturation/capacity benchmark.",
+      "Korean/English questions differ; language subgroup differences are not a paired language-capability experiment.",
+      "Source@1/MRR changes do not by themselves establish downstream answer correctness changes."
+    ]
+  },
+  "answerability": {
+    "protocol": "same kind knowledge, empty model-visible input; private case labels and qrels omitted",
+    "initial_attempts_excluded": 3,
+    "exclusion_reason": "Expected-class pos/neg prefixes were model-visible. Original results retained; replaced by three blinded requests.",
+    "scored_blind_probes": 3,
+    "results": [
+      {
+        "case_id": "pos-compiler-en-fused-attention",
+        "expected_answerability": "answerable",
+        "model_visible_kind": "knowledge",
+        "model_visible_input": {},
+        "actual_status": "evidence_supported",
+        "findings": 3,
+        "proposals": 1,
+        "tool_calls": 0,
+        "turn_completed": true,
+        "model_duration_seconds": 117.285,
+        "usage": {
+          "input_tokens": 26957,
+          "output_tokens": 4436,
+          "cached_input_tokens": 12672
+        }
+      },
+      {
+        "case_id": "pos-serving-en-blockserve",
+        "expected_answerability": "answerable",
+        "model_visible_kind": "knowledge",
+        "model_visible_input": {},
+        "actual_status": "evidence_supported",
+        "findings": 3,
+        "proposals": 2,
+        "tool_calls": 0,
+        "turn_completed": true,
+        "model_duration_seconds": 129.351,
+        "usage": {
+          "input_tokens": 20074,
+          "output_tokens": 4886,
+          "cached_input_tokens": 0
+        }
+      },
+      {
+        "case_id": "neg-ko-b300-serving-measurement",
+        "expected_answerability": "unsupported",
+        "model_visible_kind": "knowledge",
+        "model_visible_input": {},
+        "actual_status": "insufficient_evidence",
+        "findings": 3,
+        "proposals": 2,
+        "tool_calls": 0,
+        "turn_completed": true,
+        "model_duration_seconds": 138.801,
+        "usage": {
+          "input_tokens": 26088,
+          "output_tokens": 4991,
+          "cached_input_tokens": 0
+        }
+      }
+    ],
+    "semantic_review": {
+      "probe_count": 3,
+      "answerability_matches": 3,
+      "verdict_counts": {
+        "supported_answer": 2,
+        "correct_scoped_abstention": 1
+      },
+      "actual_result_status_counts": {
+        "evidence_supported": 2,
+        "insufficient_evidence": 1
+      },
+      "finding_count": 9,
+      "proposal_count": 5,
+      "missing_saved_finding_citations": 0,
+      "missing_saved_proposal_evidence_refs": 0,
+      "unnecessary_abstentions_on_answerable_cases": 0,
+      "fabricated_b300_p95_ttft_or_power_values": 0,
+      "b300_qrel_near_miss_chunks_retrieved": 0
+    },
+    "unsupported_final_answers_tested": 1,
+    "all_six_unsupported_final_answers_tested": false,
+    "limits": [
+      "Only two supported factual source questions and one B300 measurement question were tested, not architecture/kernel execution.",
+      "Alternative retrieved context supports scoped uncertainty; it does not prove corpus-wide absence.",
+      "Prior assistant observations remained trace_only; no new gold feedback was added to Melete."
+    ]
+  },
+  "capacity": {
+    "baseline_recorded_groups": {
+      "codex_cli/claim_extraction": {
+        "rows": 96,
+        "usage": {
+          "input_tokens": 1923927,
+          "cached_input_tokens": 847232,
+          "output_tokens": 98306,
+          "prompt_tokens": 0,
+          "total_tokens": 0
+        },
+        "duration_count": 96,
+        "duration_sum_seconds": 2767.511,
+        "duration_p50_seconds": 27.502499999999998,
+        "duration_min_seconds": 16.428,
+        "duration_max_seconds": 165.651,
+        "vectors_observed": 0,
+        "first_created_at": "2026-10-24 20:41:32.063960+00:00",
+        "last_created_at": "2026-10-24 21:22:00.000741+00:00"
+      },
+      "codex_cli/decision": {
+        "rows": 3,
+        "usage": {
+          "input_tokens": 165222,
+          "cached_input_tokens": 96256,
+          "output_tokens": 21466,
+          "prompt_tokens": 0,
+          "total_tokens": 0
+        },
+        "duration_count": 3,
+        "duration_sum_seconds": 553.264,
+        "duration_p50_seconds": 192.001,
+        "duration_min_seconds": 141.216,
+        "duration_max_seconds": 220.047,
+        "vectors_observed": 0,
+        "first_created_at": "2026-10-24 21:12:20.381622+00:00",
+        "last_created_at": "2026-10-24 21:28:31.936385+00:00"
+      },
+      "codex_cli/decision_failed": {
+        "rows": 3,
+        "usage": {
+          "input_tokens": 902157,
+          "cached_input_tokens": 831104,
+          "output_tokens": 24166,
+          "prompt_tokens": 0,
+          "total_tokens": 0
+        },
+        "duration_count": 3,
+        "duration_sum_seconds": 493.436,
+        "duration_p50_seconds": 196.41,
+        "duration_min_seconds": 15.869,
+        "duration_max_seconds": 281.157,
+        "vectors_observed": 0,
+        "first_created_at": "2026-10-24 21:08:38.594786+00:00",
+        "last_created_at": "2026-10-24 21:22:52.801688+00:00",
+        "separate_extraction_failure_material_events": 26,
+        "extraction_failure_event_reasons": {
+          "null": 5,
+          "claim_provider_failed:codex_timeout": 15,
+          "claim_provider_failed": 5,
+          "ambiguous_claim_quote": 1
+        }
+      },
+      "deepinfra/ingest_embedding": {
+        "rows": 293,
+        "usage": {
+          "input_tokens": 0,
+          "cached_input_tokens": 0,
+          "output_tokens": 0,
+          "prompt_tokens": 1956001,
+          "total_tokens": 1956001
+        },
+        "duration_count": 293,
+        "duration_sum_seconds": 534.086,
+        "duration_p50_seconds": 1.596,
+        "duration_min_seconds": 0.682,
+        "duration_max_seconds": 8.107,
+        "vectors_observed": 1912,
+        "first_created_at": "2026-10-24 20:20:03.731608+00:00",
+        "last_created_at": "2026-10-24 20:30:47.671976+00:00"
+      },
+      "embedding/query": {
+        "rows": 20,
+        "usage": {
+          "input_tokens": 0,
+          "cached_input_tokens": 0,
+          "output_tokens": 0,
+          "prompt_tokens": 626,
+          "total_tokens": 626
+        },
+        "duration_count": 18,
+        "duration_sum_seconds": 15.145999999999999,
+        "duration_p50_seconds": 0.8180000000000001,
+        "duration_min_seconds": 0.672,
+        "duration_max_seconds": 1.442,
+        "vectors_observed": 18,
+        "first_created_at": "2026-10-24 20:30:56.962075+00:00",
+        "last_created_at": "2026-10-24 21:27:35.755889+00:00"
+      },
+      "local_runtime/controlled_retry": {
+        "rows": 1,
+        "usage": {
+          "input_tokens": 0,
+          "cached_input_tokens": 0,
+          "output_tokens": 0,
+          "prompt_tokens": 0,
+          "total_tokens": 0
+        },
+        "duration_count": 0,
+        "duration_sum_seconds": 0,
+        "duration_p50_seconds": null,
+        "duration_min_seconds": null,
+        "duration_max_seconds": null,
+        "vectors_observed": 0,
+        "first_created_at": "2026-10-24 21:05:20.535308+00:00",
+        "last_created_at": "2026-10-24 21:05:20.535308+00:00"
+      },
+      "system/controlled_retry_after_configuration_isolation": {
+        "rows": 1,
+        "usage": {
+          "input_tokens": 0,
+          "cached_input_tokens": 0,
+          "output_tokens": 0,
+          "prompt_tokens": 0,
+          "total_tokens": 0
+        },
+        "duration_count": 0,
+        "duration_sum_seconds": 0,
+        "duration_p50_seconds": null,
+        "duration_min_seconds": null,
+        "duration_max_seconds": null,
+        "vectors_observed": 0,
+        "first_created_at": "2026-10-24 21:22:34.744449+00:00",
+        "last_created_at": "2026-10-24 21:22:34.744449+00:00"
+      },
+      "system/controlled_retry_after_service_restart": {
+        "rows": 1,
+        "usage": {
+          "input_tokens": 0,
+          "cached_input_tokens": 0,
+          "output_tokens": 0,
+          "prompt_tokens": 0,
+          "total_tokens": 0
+        },
+        "duration_count": 0,
+        "duration_sum_seconds": 0,
+        "duration_p50_seconds": null,
+        "duration_min_seconds": null,
+        "duration_max_seconds": null,
+        "vectors_observed": 0,
+        "first_created_at": "2026-10-24 21:23:19.183595+00:00",
+        "last_created_at": "2026-10-24 21:23:19.183595+00:00"
+      }
+    },
+    "corpus": {
+      "materials": 100,
+      "artifact_bytes": 90828697,
+      "normalized_characters": 5174455,
+      "chunks": 1912
+    },
+    "database": {
+      "database_bytes": 51328691,
+      "chunk_total_bytes": 35225600,
+      "chunk_heap_bytes": 1646592,
+      "chunk_index_bytes": 13762560,
+      "schema_total_bytes": "39813120"
+    },
+    "embedding_cost": {
+      "currency": "USD",
+      "price_per_million_tokens": 0.02,
+      "source": "https://deepinfra.com/google/embeddinggemma-2/api",
+      "observed_document_input_tokens": 1956001,
+      "estimated_pilot_document_cost": 0.039120020000000005,
+      "not_provider_invoice": true,
+      "price_checked_on": "2026-10-25"
+    },
+    "linear_scenario_145748": {
+      "scale": 1457.48,
+      "assumption": "Same document size/category distribution, chunking, embedding dimension, bounded extraction and no retries/change refresh; not a measured capacity test.",
+      "estimated_document_input_tokens": 2850832337.48,
+      "estimated_embedding_document_cost_usd": 57.01664674960001,
+      "estimated_chunks": 2786702,
+      "estimated_float32_vector_bytes": 8560747807,
+      "estimated_source_artifact_bytes": 132381009304,
+      "estimated_schema_bytes_at_current_layout": 58026826138,
+      "estimated_recorded_extraction_process_seconds": 4033591.93228,
+      "idealized_4_worker_days_from_process_seconds": 11.671272952199073,
+      "estimated_recorded_extraction_input_tokens": 2804085123.96,
+      "estimated_recorded_extraction_output_tokens": 143279028.88,
+      "cli_subscription_cost_usd": null,
+      "extraction_usage_is_observed_lower_bound": true
+    },
+    "host_filesystem_available_bytes_at_measurement": 58216370176,
+    "limits": [
+      "Observed invocation rows are not a complete provider bill. Failed extraction may omit token usage; repeated batch error events cannot be counted as distinct calls.",
+      "Codex CLI usage is not an API invoice; subscription/quota and master/worker/human/retry totals are not priced here."
+    ]
+  },
+  "quality_gates": {
+    "source_quote_offset_integrity": "pass_101_of_101",
+    "severe_unsupported_source_claim_in_ai_review": "none_found_in_101",
+    "known_source_at5_target_85_percent": "pass_24_of_24_partial_qrels",
+    "supported_positive_completion": "pass_2_of_2_blinded_source_questions",
+    "correct_unknown_on_missing_measurement": "pass_1_of_1_blinded_question",
+    "all_stage_typed_dse_knowledge_coverage": "not_established",
+    "large_scale_storage_and_throughput": "not_ready_not_load_tested"
+  },
+  "verification": {
+    "pytest_command": "pytest -q",
+    "pytest_passed": 161,
+    "pytest_warnings": 1,
+    "warning": "Starlette/httpx TestClient deprecation",
+    "source_body_published": false,
+    "raw_model_answer_published": false
+  },
+  "limitations": [
+    "Convenience/stratified allowed-source pilot, not a representative sample of all 145748 material candidates.",
+    "AI-assisted source and claim audits are not independent scientific/human validation.",
+    "No production source/claim/retrieval/model configuration was tuned during evaluation.",
+    "No HAT performance simulation, kernel correctness/execution, physical feasibility or B300 superiority was evaluated."
+  ],
+  "independent_review": {
+    "status": "reviewed_p1_scale_hold",
+    "publication_method_blockers_open": 0,
+    "scale_blockers": [
+      "Host-local artifact capacity; 145748 throughput, quota and database scale unmeasured."
+    ],
+    "resolved": [
+      "Initial probe labels leaked through model input; initial three excluded and blinded replay used.",
+      "Source review aggregate counters recomputed from final 100 rows."
+    ],
+    "verification": {
+      "independent_qrels_and_result_hash_check": "passed",
+      "independent_exact_quote_and_chunk_span_checks": "passed",
+      "independent_metric_recalculation": "passed; no stored row-score mismatches",
+      "blind_payload_and_status_check": "passed; all three payloads label-blind; two supported and one scoped abstention",
+      "source_quality_aggregate_recalculation": "passed; final row counts and category-role cross-tab match; 46 flagged materials and 48 flag occurrences",
+      "offline_tests": "tests/test_evaluation.py: 6 passed; tests/test_probe_protocol.py: 7 passed; root reports full suite 161 passed, 1 warning",
+      "network_database_api_or_credential_access": false
+    }
+  }
+}

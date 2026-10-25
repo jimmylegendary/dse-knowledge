@@ -63,6 +63,48 @@ flowchart LR
 
 자료 적합성은 별도 과제다. 100개 제목·요약·앞 700자를 Jev로 보조 검토했으며, 56개는 직접 DSE, 35개는 보조 방법론, 9개는 navigation 유사 자료로 표시됐다. 앞부분만 본 분류이므로 RISC-V 소개·API 설명·설치 version mapping처럼 실제 본문이 있는 자료도 flag된다. 이 수치를 전체 본문 품질 인증으로 사용하지 않는다. 문서/운영 reference가 섞인 pilot이며, 14만건 확장 전 source 역할 분류와 적합성 평가를 강화한다.
 
+### 품질·검색·규모 평가 — 2026-10-25
+
+**판정: 현재 100개 Workbench는 계속 사용하면서 개선할 수 있다. 145,748건의 전면 KG 생성은 보류한다.** 아래 값은 고정된 P1과 편의·분야별 표본의 관측이며 전체 corpus 정확도나 처리량 보장이 아니다. 평가 중 source/Claim/검색/model 설정은 바꾸지 않았다.
+
+| 평가 | 실제 결과 | 해석 |
+|---|---|---|
+| 자료 100개 역할 | 핵심기술 35 · 보조방법 29 · 운영/연동 30 · 목차 5 · 범위밖 1 | 같은 retrieval·판단 목적으로 모두 사용하면 안 됨. 역할 분류는 평가 artifact이며 정본에는 아직 미반영 |
+| Claim 101개 | 명확한 원문지지 99 · 조건/요약 보완 2 · 불지지 0, quote/offset 101/101 | AI 보조 문맥 검토. 논문 주장의 독립 과학 검증은 0이며, 두 보완 건도 원문 의미가 틀렸다는 판정은 아님 |
+| Graph | 198 nodes · 101 edges · 97개 연결 묶음, 최대 4 nodes, 여러 자료가 연결된 묶음 3 | entity는 모두 concept, relation 92종. 약 1 Claim/자료의 얇은 graph로 모든 DSE 단계의 typed reasoning을 약속하지 못함 |
+| 정답 자료 Hit@5 | Hybrid 24/24, dense 24/24 | 결과를 보기 전에 만든 부분 정답 기준. 검색 정확도 100%라는 뜻이 아님 |
+| 정답 자료 Hit@1 / MRR | Hybrid 16/24·0.814, dense 23/24·0.979 | graph를 합치면 원래 정답 자료의 첫 순위가 내려가는 사례가 있음. 최종 답변 정확도 비교는 별도 |
+| 지정 근거 chunk Hit@5 | Hybrid 14/24, dense 10/24 | graph가 일부 근거 위치를 더 찾음. 반면 놓친 10건의 사후 AI 검토는 관련 대체 passage 6 · 부분 근거 3 · 핵심 메커니즘 누락 1; 이를 새 gold/precision으로 승격하지 않음 |
+| Lexical / exact | 30건 모두 후보 0 | 전체 자연어 질문을 AND 조건·title substring으로 쓰는 방식의 한계. Query decomposition·task별 fusion/reranking 실험 필요 |
+| Blind 판단 3건 | 정상 source 질문 2/2 완료, B300 미지원 실측 질문 1/1 unknown, 수치 날조 0 | 두 factual 질문과 한 미지원 질문의 AI 보조 검토. 6개 미지원 질의 전부의 최종 답변을 평가한 것은 아님 |
+| 검색 지연 | 실제 Retriever 30건 p50 8.62s / p95 12.11s; HTTP 6건 p50 9.06s / p95 15.41s | 성공 요청 기준의 작은 순차 표본. Embedding median 8.00s, DB 네 질의 합 median 0.49s; saturation 시험 아님 |
+| 100개 embedding | 1,956,001 input tokens, 현재 단가 적용 추정 $0.03912 | provider invoice가 아니며 overlap·반복 title 등 실제 usage에 포함된 입력 기준 |
+| 생성 처리량 | 기록된 추출 성공 96호출의 합계 2,767.51s, p50 27.50s | 실패 usage 누락·수동 대기·전체 coordinator 비용을 포함하지 않은 하한. CLI token을 API 청구액으로 환산하지 않음 |
+| 145,748건 가정 | 약 279만 chunks · 원문 artifact 132GB · 현 layout PG schema 약 58GB; ideal 4-worker 생성 약 11.7일 | 같은 자료 크기/추출 깊이의 선형 scenario. 현재 host 여유 약 58GB는 원문 예상량보다 작고 quota·대형 index·실패 재시도·더 깊은 추출은 미검증 |
+
+Embedding 비용의 기준은 [DeepInfra 공식 단가](https://deepinfra.com/google/embeddinggemma-2/api)의 $0.020 / 1M tokens다(2026-10-25 확인). 같은 분포의 전체 문서 embedding scenario는 약 $57이지만, 생성·review·DB·storage 비용 전체를 뜻하지 않는다.
+
+정답셋은 24개 정상 질의(한국어/영어 각 12, 9개 category마다 최소 2개)와 6개 미지원 질의로 먼저 고정했다. Unsupported의 source 참조는 근접 문맥을 설명하는 boundary이지 정답이 아니다. 미지원 질의에서 검색 결과가 나오는 것만으로 실패로 처리하지 않는다. 한국어와 영어 질문이 서로 달라 subgroup 차이를 embedding의 언어 성능 차이로 단정하지 않는다.
+
+초기 판단 probe 3개는 입력 case ID의 pos/neg prefix가 모델에 보여 독립 평가에서 제외했다. 같은 질문을 공통 kind=knowledge, model-visible input={}로 다시 실행했고 **blind 결과 3개만** 위 성적에 사용했다. 기존 결과는 지우지 않고 invalidation audit와 함께 보존했다. 새 gold feedback은 Melete에 추가하지 않았다. 재현 helper는 metadata·expected label을 model input에 싣지 않는 회귀 테스트를 가진다.
+
+169건 acquisition 시도 중 69건은 allowlist 63 · revision pin 4 · 크기 제한 2로 제외됐다. 이를 전체 자료의 원문 접근 가능률로 해석하지 않는다. source metadata의 title/abstract origin과 실제 PDF fulltext revision도 구분한다. 예를 들어 Glacierware는 abstract-origin catalog record지만 실제 PDF를 확보했다. Lithography hotspot은 thermal hotspot과 다르므로 category 보완 대상으로 기록했다.
+
+| 다음 보완 우선순위 | 전체 제품에서 높일 해상도 |
+|---|---|
+| 1. Write 품질 | source 역할/지식 수요별 수집·사용 정책, Claim의 값·단위·대상 revision·적용 조건, 조건부 연구결과의 scope 보존 |
+| 2. KG와 read | typed entity/관계·alias·source 간 연결, 핵심어 분해, 역할별 검색·근거 reranking/이웃 문맥 확장; 현재 30개는 회귀용으로 두고 새 held-out/번역쌍도 평가 |
+| 3. 규모 검증 | artifact 공간, durable batch/재개·quota·budget·대형 index를 확인하면서 같은 UI→DSE 판단→feedback 여정으로 1,000개 수준 재평가 |
+
+공개 재현 자료: [평가 집계](https://github.com/jimmylegendary/dse-knowledge/blob/main/research/pilot100/evaluation-2026-10-25.json), [자료별 역할](https://github.com/jimmylegendary/dse-knowledge/blob/main/research/pilot100/source-roles-2026-10-25.json), [본문/quote를 제외한 qrels](https://github.com/jimmylegendary/dse-knowledge/blob/main/research/pilot100/retrieval-cases-2026-10-25.json). 실제 채팅 답변·source 본문·query vector·credential은 공개하지 않는다.
+
+```bash
+"$HOME/.local/share/dse-knowledge/app-venv/bin/python" scripts/evaluate-pilot.py --cases research/pilot100/retrieval-cases-2026-10-25.json --output "$HOME/.local/share/dse-knowledge/qa/evaluation-next/retrieval-results.json"
+"$HOME/.local/share/dse-knowledge/app-venv/bin/python" scripts/evaluate-decision-probes.py --cases research/pilot100/retrieval-cases-2026-10-25.json --case-id pos-compiler-en-fused-attention --case-id pos-serving-en-blockserve --case-id neg-ko-b300-serving-measurement --output "$HOME/.local/share/dse-knowledge/qa/evaluation-next/decision-probes.json"
+```
+
+두 command는 같은 100개 source snapshot이 적재된 runtime에서 실제 provider를 호출한다. Public qrels는 본문 quote를 hash로 대체한 projection이므로 original frozen private qrels SHA와 파일 SHA는 다르다. 평가 helper는 현재 24/6 구성을 검증하며, 이 결과를 HAT 실행·kernel correctness·physical feasibility·B300 우월성 평가로 해석하지 않는다.
+
 ### 실행과 설정
 
 Python 3.12+, `uv`, 기존 Supabase project, 로그인된 host Codex CLI, 선택된 embedding API가 필요하다. `uv.lock`으로 Python dependencies를 고정한다.

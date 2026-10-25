@@ -1,0 +1,621 @@
+{
+  "schema_version": "pilot-qrels-public/v1",
+  "source_system_commit": "4fda59347f6db7d59f89a821fc34bfc83166c6d9",
+  "private_frozen_qrels_sha256": "34bedaf0eb6efe539a5de172f1ffe013e8b8c8364db58c8637714c563797cb6e",
+  "source_corpus_sha256": "f8f1086e509149a2fe60dc615b8a5ed549a59af0f8f12e5b813ca299c6161315",
+  "method": "Known-source/chunk partial qrels written without retrieval implementation or results. Unsupported references are boundary context, not answers. Public projection omits quotes and source bodies.",
+  "cases": [
+    {
+      "id": "pos-compiler-en-fused-attention",
+      "query": "For a Hopper attention tile pipeline, which fusion and copy/compute mechanisms does the source describe?",
+      "category": "compiler_kernel",
+      "language": "en",
+      "answerability": "answerable",
+      "expected_material_ids": [
+        "mat-32494794ad99fab9a2f68fe4"
+      ],
+      "expected_chunks": [
+        {
+          "material_id": "mat-32494794ad99fab9a2f68fe4",
+          "chunk_id": "chunk-08939783f54de299d1efd70735456185",
+          "quote_sha256": "8bf7294111d343626ed295faf8a84ff0a4abcb18e359df169a5fc64d925d4668"
+        }
+      ]
+    },
+    {
+      "id": "pos-compiler-ko-triton-diagnosis",
+      "query": "Triton 커널이 느리지만 원인이 소스 코드에서 드러나지 않을 때, compiler-grounded 진단은 어떤 단계까지 살펴보나?",
+      "category": "compiler_kernel",
+      "language": "ko",
+      "answerability": "answerable",
+      "expected_material_ids": [
+        "mat-f19417e144f6f259b2088df0"
+      ],
+      "expected_chunks": [
+        {
+          "material_id": "mat-f19417e144f6f259b2088df0",
+          "chunk_id": "chunk-ff09046c0187a62e41e0003745379c70",
+          "quote_sha256": "6c45f564930a718ca41bdf3eaa53a782c3fa90e82d973ee7591a68414b5f92eb"
+        }
+      ]
+    },
+    {
+      "id": "pos-llm-en-paged-kv",
+      "query": "Why does PagedAttention use logical-to-physical KV block tables instead of reserving one contiguous cache for the maximum context?",
+      "category": "llm_model_workload",
+      "language": "en",
+      "answerability": "answerable",
+      "expected_material_ids": [
+        "mat-26c336c25455ffe59e3b36b8"
+      ],
+      "expected_chunks": [
+        {
+          "material_id": "mat-26c336c25455ffe59e3b36b8",
+          "chunk_id": "chunk-204bdb7fadff1b14cdd22a6c97ef584e",
+          "quote_sha256": "83ae4612a8f9dfa2defd37462cdcae6f80c1de2787bb99d52e71548b83da8fab"
+        }
+      ]
+    },
+    {
+      "id": "pos-llm-ko-vattention",
+      "query": "KV 캐시를 GPU 가상 주소 공간에서는 연속으로 유지하면서 물리 메모리 단편화를 줄이는 vAttention의 핵심 방법은?",
+      "category": "llm_model_workload",
+      "language": "ko",
+      "answerability": "answerable",
+      "expected_material_ids": [
+        "mat-26a415f1493129b4b229e7d8"
+      ],
+      "expected_chunks": [
+        {
+          "material_id": "mat-26a415f1493129b4b229e7d8",
+          "chunk_id": "chunk-d855b119455ee3e9137754017d651cfd",
+          "quote_sha256": "cdfa42ca6ad1982434b50187edd73aadfccddde0d3148a76be100be2b23a5416"
+        }
+      ]
+    },
+    {
+      "id": "pos-hardware-en-mi300-package",
+      "query": "Which major compute, memory, and I/O components are integrated in the MI300 series package?",
+      "category": "hardware_architecture",
+      "language": "en",
+      "answerability": "answerable",
+      "expected_material_ids": [
+        "mat-c1c103fddd2e509926baa48c"
+      ],
+      "expected_chunks": [
+        {
+          "material_id": "mat-c1c103fddd2e509926baa48c",
+          "chunk_id": "chunk-e730db3d1d9b1fb2121be948c9030b70",
+          "quote_sha256": "1df628fd774caa74142ff944a539fa4a03cff452514788b5d7504b97e356ed85"
+        }
+      ]
+    },
+    {
+      "id": "pos-hardware-ko-manticore-cores",
+      "query": "Manticore의 연산 클러스터에서 정수 코어와 FPU는 어떻게 짝지어지고, 어떤 확장들이 연산 제어를 돕나?",
+      "category": "hardware_architecture",
+      "language": "ko",
+      "answerability": "answerable",
+      "expected_material_ids": [
+        "mat-2f2fec3a9b484c2b8eb4b07b"
+      ],
+      "expected_chunks": [
+        {
+          "material_id": "mat-2f2fec3a9b484c2b8eb4b07b",
+          "chunk_id": "chunk-bb00e295b0c37e0e32b315458600780e",
+          "quote_sha256": "95d1f38f87c46cba553decc6aa79d2edd10a1bc2da3eaaee05fad300899b5978"
+        }
+      ]
+    },
+    {
+      "id": "pos-dse-en-autohls",
+      "query": "In AutoHLS, what does the learned model estimate before spending time on HLS synthesis?",
+      "category": "dse_optimization",
+      "language": "en",
+      "answerability": "answerable",
+      "expected_material_ids": [
+        "mat-b0b06e714f4bb3084938ca9e"
+      ],
+      "expected_chunks": [
+        {
+          "material_id": "mat-b0b06e714f4bb3084938ca9e",
+          "chunk_id": "chunk-c22322300061593196c078e3ae6491ef",
+          "quote_sha256": "f083bfeeff279de19145a75d807a3ff38e99b77c0b913504bd9f7ab015aed06e"
+        }
+      ]
+    },
+    {
+      "id": "pos-dse-ko-energy-pareto",
+      "query": "에너지 인지형 강화학습의 가중치 선택에서 균일 격자 탐색 대신 어떤 최적화 문제를 풀어 Pareto front를 찾나?",
+      "category": "dse_optimization",
+      "language": "ko",
+      "answerability": "answerable",
+      "expected_material_ids": [
+        "mat-f15f1aea2b8c558df756712f"
+      ],
+      "expected_chunks": [
+        {
+          "material_id": "mat-f15f1aea2b8c558df756712f",
+          "chunk_id": "chunk-b1ab5fa934116a76d4d075b2d9311208",
+          "quote_sha256": "2d57e371eb749babdd11936e0452640adb5e023752c683f8ef76d89bb3d17a38"
+        }
+      ]
+    },
+    {
+      "id": "pos-memory-en-ramulator-standards",
+      "query": "Which recent and emerging memory standards does Ramulator 2.1 list as supported?",
+      "category": "memory_interconnect",
+      "language": "en",
+      "answerability": "answerable",
+      "expected_material_ids": [
+        "mat-7fb68ef6fc05ebf14ef8e5c3"
+      ],
+      "expected_chunks": [
+        {
+          "material_id": "mat-7fb68ef6fc05ebf14ef8e5c3",
+          "chunk_id": "chunk-f2472fa6cce8c26cc2998fccdd8fd749",
+          "quote_sha256": "4fc108d883db55fb23097a58b0473cfed213a2eae6bf127219fe9d8cbcce117e"
+        }
+      ]
+    },
+    {
+      "id": "pos-memory-ko-3d-thermal",
+      "query": "3D volumetric DRAM-on-GPU co-design에서 stack 높이와 controller/NoC tier는 열 가능성에 어떤 영향을 주나?",
+      "category": "memory_interconnect",
+      "language": "ko",
+      "answerability": "answerable",
+      "expected_material_ids": [
+        "mat-ea8acc5de77fc5b2add87bd1"
+      ],
+      "expected_chunks": [
+        {
+          "material_id": "mat-ea8acc5de77fc5b2add87bd1",
+          "chunk_id": "chunk-d8b6a079bcf25fd06ef37ab74eb22398",
+          "quote_sha256": "2cdce92de2bff909672daecee5308ec4721d49a472f9317b96bc57ad320fa841"
+        }
+      ]
+    },
+    {
+      "id": "pos-sim-en-accelsim-hopper",
+      "query": "What Hopper-era hardware features does Accel-Sim 2.0 say its GPU simulator supports?",
+      "category": "simulation_measurement",
+      "language": "en",
+      "answerability": "answerable",
+      "expected_material_ids": [
+        "mat-f0bf3b9e8fd3cfc4fb2ef4fa"
+      ],
+      "expected_chunks": [
+        {
+          "material_id": "mat-f0bf3b9e8fd3cfc4fb2ef4fa",
+          "chunk_id": "chunk-351a200f23a9df89ed92f8b2f61cad7a",
+          "quote_sha256": "75bc12b1e508ab19facfe53485bfeb9a1a6842842ca13bb60ef882054c308e96"
+        }
+      ]
+    },
+    {
+      "id": "pos-sim-ko-gem5-config",
+      "query": "gem5에서 서로 다른 CPU/GPU ISA를 모델링하고 시스템 구성을 지정하는 방식은?",
+      "category": "simulation_measurement",
+      "language": "ko",
+      "answerability": "answerable",
+      "expected_material_ids": [
+        "mat-07d132ff68bbfd9d6b498e50"
+      ],
+      "expected_chunks": [
+        {
+          "material_id": "mat-07d132ff68bbfd9d6b498e50",
+          "chunk_id": "chunk-0ec68d17522a3714a39baf3347b8c0ff",
+          "quote_sha256": "8faeb635733224777442428ef011cb21c671a7611559ba336dfb8bc858c2636b"
+        }
+      ]
+    },
+    {
+      "id": "pos-power-en-glacierware",
+      "query": "Why does Glacierware vary microchannel sizes across a chip rather than use one uniform cooling pattern?",
+      "category": "power_thermal_packaging",
+      "language": "en",
+      "answerability": "answerable",
+      "expected_material_ids": [
+        "mat-232327636407c4849d17988a"
+      ],
+      "expected_chunks": [
+        {
+          "material_id": "mat-232327636407c4849d17988a",
+          "chunk_id": "chunk-a83270f4a9a9e42fca7cfeec5538e81c",
+          "quote_sha256": "1edf1cfd06a1fc5708fb5690a5021a977a132321fee4a9a2375c9d5ffdf36d26"
+        }
+      ]
+    },
+    {
+      "id": "pos-power-ko-noc-hotspots",
+      "query": "전체 전력을 낮추는 방법만으로 해결되지 않는 NoC 국부 hotspot에 논문은 어떤 runtime 전략을 제안하나?",
+      "category": "power_thermal_packaging",
+      "language": "ko",
+      "answerability": "answerable",
+      "expected_material_ids": [
+        "mat-1cbced6ed8edf4ebd21e3ea0"
+      ],
+      "expected_chunks": [
+        {
+          "material_id": "mat-1cbced6ed8edf4ebd21e3ea0",
+          "chunk_id": "chunk-b33c7f1159a76f29f3c3c1590fdbdfc9",
+          "quote_sha256": "b6acebd38d590a69bc764133bf9072691e7deaec0a58d08dea1ea4f39be5818a"
+        }
+      ]
+    },
+    {
+      "id": "pos-serving-en-blockserve",
+      "query": "How does BlockServe keep diffusion-LLM batches productive when requests are at different block positions?",
+      "category": "serving_scheduling",
+      "language": "en",
+      "answerability": "answerable",
+      "expected_material_ids": [
+        "mat-5b0daef0009e72b2265b9aed"
+      ],
+      "expected_chunks": [
+        {
+          "material_id": "mat-5b0daef0009e72b2265b9aed",
+          "chunk_id": "chunk-e4f0333e9ac32621ae0b1d910c7af592",
+          "quote_sha256": "ed84cc758864c3341a9c6051d5005538e52c146ca3ecb787294958c0b5f7cb5e"
+        }
+      ]
+    },
+    {
+      "id": "pos-serving-ko-sglang-feature-map",
+      "query": "SGLang 고급 기능 문서에서 prefix 재사용, serving 튜닝, attention 구현 선택을 찾으려면 어떤 항목을 열어야 하나?",
+      "category": "serving_scheduling",
+      "language": "ko",
+      "answerability": "answerable",
+      "expected_material_ids": [
+        "mat-61b88c9b7f9c4815ce9ac315"
+      ],
+      "expected_chunks": [
+        {
+          "material_id": "mat-61b88c9b7f9c4815ce9ac315",
+          "chunk_id": "chunk-1400d82befac7e0279a9fab0601abc6c",
+          "quote_sha256": "a689a01713c69413bcf29795f35783146c19e33037071e47982f48bff8ba3b25"
+        }
+      ]
+    },
+    {
+      "id": "pos-provenance-en-mlflow-sqlite",
+      "query": "For a single researcher who wants queryable run metadata without a separate tracking server, what local MLflow backend does the guide describe?",
+      "category": "provenance_experiment",
+      "language": "en",
+      "answerability": "answerable",
+      "expected_material_ids": [
+        "mat-8630f8d64f9bf4a67ed64d40"
+      ],
+      "expected_chunks": [
+        {
+          "material_id": "mat-8630f8d64f9bf4a67ed64d40",
+          "chunk_id": "chunk-37c40f4ebe6d8f23b00669b62143fb02",
+          "quote_sha256": "8007b2b6ad9902e89eb6bc39b0eb9a1cde8cfa58da6d44db9bab1ad43c118b30"
+        }
+      ]
+    },
+    {
+      "id": "pos-provenance-ko-data-diff",
+      "query": "워크플로 중간 산출물을 모두 저장하지 않을 때, provenance 자료가 내부 결과 변화 여부를 어떻게 빠르게 검사한다고 설명하나?",
+      "category": "provenance_experiment",
+      "language": "ko",
+      "answerability": "answerable",
+      "expected_material_ids": [
+        "mat-0835b7bb6eac7de71fee2c8c"
+      ],
+      "expected_chunks": [
+        {
+          "material_id": "mat-0835b7bb6eac7de71fee2c8c",
+          "chunk_id": "chunk-8372e95b77f8b90f26af7f891c9ef9df",
+          "quote_sha256": "947039de6587dd2773afee2084a55a93e375c8dabd64f9997429a02ba8a5cc64"
+        }
+      ]
+    },
+    {
+      "id": "pos-cross-en-attention-and-package-thermal",
+      "query": "For a Hopper attention tile pipeline, what copy/compute mechanism is described, and does a separate 3D DRAM thermal study measure that kernel in its package?",
+      "category": "compiler_kernel",
+      "language": "en",
+      "answerability": "answerable",
+      "expected_material_ids": [
+        "mat-32494794ad99fab9a2f68fe4",
+        "mat-ea8acc5de77fc5b2add87bd1"
+      ],
+      "expected_chunks": [
+        {
+          "material_id": "mat-32494794ad99fab9a2f68fe4",
+          "chunk_id": "chunk-08939783f54de299d1efd70735456185",
+          "quote_sha256": "8bf7294111d343626ed295faf8a84ff0a4abcb18e359df169a5fc64d925d4668"
+        },
+        {
+          "material_id": "mat-ea8acc5de77fc5b2add87bd1",
+          "chunk_id": "chunk-d8b6a079bcf25fd06ef37ab74eb22398",
+          "quote_sha256": "73ebc4541547572a7a7ad0ee2a5f78117355535f0195fb1d8bc0cee1cf690aad"
+        }
+      ]
+    },
+    {
+      "id": "pos-cross-ko-kv-and-batching",
+      "query": "LLM serving에서 KV 메모리 낭비와 서로 다른 생성 진행률을 가진 diffusion 요청의 batch 활용을 각각 어떤 방법으로 다루나?",
+      "category": "llm_model_workload",
+      "language": "ko",
+      "answerability": "answerable",
+      "expected_material_ids": [
+        "mat-26c336c25455ffe59e3b36b8",
+        "mat-5b0daef0009e72b2265b9aed"
+      ],
+      "expected_chunks": [
+        {
+          "material_id": "mat-26c336c25455ffe59e3b36b8",
+          "chunk_id": "chunk-204bdb7fadff1b14cdd22a6c97ef584e",
+          "quote_sha256": "83ae4612a8f9dfa2defd37462cdcae6f80c1de2787bb99d52e71548b83da8fab"
+        },
+        {
+          "material_id": "mat-5b0daef0009e72b2265b9aed",
+          "chunk_id": "chunk-e4f0333e9ac32621ae0b1d910c7af592",
+          "quote_sha256": "ed84cc758864c3341a9c6051d5005538e52c146ca3ecb787294958c0b5f7cb5e"
+        }
+      ]
+    },
+    {
+      "id": "pos-cross-en-mi300-and-3d-thermal",
+      "query": "What memory/package stack does MI300 document, and what separate 3D DRAM study identifies as a thermal limiter?",
+      "category": "hardware_architecture",
+      "language": "en",
+      "answerability": "answerable",
+      "expected_material_ids": [
+        "mat-c1c103fddd2e509926baa48c",
+        "mat-ea8acc5de77fc5b2add87bd1"
+      ],
+      "expected_chunks": [
+        {
+          "material_id": "mat-c1c103fddd2e509926baa48c",
+          "chunk_id": "chunk-e730db3d1d9b1fb2121be948c9030b70",
+          "quote_sha256": "1df628fd774caa74142ff944a539fa4a03cff452514788b5d7504b97e356ed85"
+        },
+        {
+          "material_id": "mat-ea8acc5de77fc5b2add87bd1",
+          "chunk_id": "chunk-d8b6a079bcf25fd06ef37ab74eb22398",
+          "quote_sha256": "90a8112c9d6e639f0e1942fc68262a01d6152f139cee410405016f8bc404083f"
+        }
+      ]
+    },
+    {
+      "id": "pos-cross-ko-two-hotspot-methods",
+      "query": "국부 hotspot을 줄이기 위해 한 연구는 냉각 채널을, 다른 연구는 NoC 계산 배치를 어떻게 조정하나?",
+      "category": "power_thermal_packaging",
+      "language": "ko",
+      "answerability": "answerable",
+      "expected_material_ids": [
+        "mat-232327636407c4849d17988a",
+        "mat-1cbced6ed8edf4ebd21e3ea0"
+      ],
+      "expected_chunks": [
+        {
+          "material_id": "mat-232327636407c4849d17988a",
+          "chunk_id": "chunk-a83270f4a9a9e42fca7cfeec5538e81c",
+          "quote_sha256": "1edf1cfd06a1fc5708fb5690a5021a977a132321fee4a9a2375c9d5ffdf36d26"
+        },
+        {
+          "material_id": "mat-1cbced6ed8edf4ebd21e3ea0",
+          "chunk_id": "chunk-b33c7f1159a76f29f3c3c1590fdbdfc9",
+          "quote_sha256": "b6acebd38d590a69bc764133bf9072691e7deaec0a58d08dea1ea4f39be5818a"
+        }
+      ]
+    },
+    {
+      "id": "pos-cross-en-experiment-provenance",
+      "query": "How could a solo operator track run metadata locally and detect divergence in transient workflow outputs?",
+      "category": "provenance_experiment",
+      "language": "en",
+      "answerability": "answerable",
+      "expected_material_ids": [
+        "mat-8630f8d64f9bf4a67ed64d40",
+        "mat-0835b7bb6eac7de71fee2c8c"
+      ],
+      "expected_chunks": [
+        {
+          "material_id": "mat-8630f8d64f9bf4a67ed64d40",
+          "chunk_id": "chunk-37c40f4ebe6d8f23b00669b62143fb02",
+          "quote_sha256": "8007b2b6ad9902e89eb6bc39b0eb9a1cde8cfa58da6d44db9bab1ad43c118b30"
+        },
+        {
+          "material_id": "mat-0835b7bb6eac7de71fee2c8c",
+          "chunk_id": "chunk-8372e95b77f8b90f26af7f891c9ef9df",
+          "quote_sha256": "947039de6587dd2773afee2084a55a93e375c8dabd64f9997429a02ba8a5cc64"
+        }
+      ]
+    },
+    {
+      "id": "pos-cross-ko-hls-and-triton",
+      "query": "설계 탐색에서는 HLS 후보의 synthesizability를 어떻게 미리 걸러내고, 이미 생성된 Triton 커널의 성능 문제는 어느 compiler 단계에서 추적하나?",
+      "category": "dse_optimization",
+      "language": "ko",
+      "answerability": "answerable",
+      "expected_material_ids": [
+        "mat-b0b06e714f4bb3084938ca9e",
+        "mat-f19417e144f6f259b2088df0"
+      ],
+      "expected_chunks": [
+        {
+          "material_id": "mat-b0b06e714f4bb3084938ca9e",
+          "chunk_id": "chunk-c22322300061593196c078e3ae6491ef",
+          "quote_sha256": "f083bfeeff279de19145a75d807a3ff38e99b77c0b913504bd9f7ab015aed06e"
+        },
+        {
+          "material_id": "mat-f19417e144f6f259b2088df0",
+          "chunk_id": "chunk-ff09046c0187a62e41e0003745379c70",
+          "quote_sha256": "6c45f564930a718ca41bdf3eaa53a782c3fa90e82d973ee7591a68414b5f92eb"
+        }
+      ]
+    },
+    {
+      "id": "neg-ko-b300-serving-measurement",
+      "query": "B300에서 vLLM 장문 요청을 동시 100개 처리할 때의 p95 TTFT와 보드 전력 실측값은 얼마인가?",
+      "category": "llm_model_workload",
+      "language": "ko",
+      "answerability": "unsupported",
+      "expected_material_ids": [
+        "mat-960f2e7faf3fa97e1bdd66dd",
+        "mat-32494794ad99fab9a2f68fe4"
+      ],
+      "expected_chunks": [
+        {
+          "material_id": "mat-960f2e7faf3fa97e1bdd66dd",
+          "chunk_id": "chunk-01616edf7776194d3ac90d31a071c7dc",
+          "quote_sha256": "6bd435f79bfa3c247261a616c3b5c9e62f3220c6ec057a58cd2bae4e85dc6c97"
+        },
+        {
+          "material_id": "mat-32494794ad99fab9a2f68fe4",
+          "chunk_id": "chunk-08939783f54de299d1efd70735456185",
+          "quote_sha256": "ff991e47fcc523f9b8469a43d192b1032ead9ce9365beb05697dd92877e5193b"
+        }
+      ],
+      "expected_behavior": {
+        "final_answer_status": "unknown",
+        "related_search_results_may_be_nonempty": true,
+        "must_not": "Do not infer the requested target value, support, or buildability from adjacent-source hits; name the missing source/measurement and keep the claim unknown."
+      }
+    },
+    {
+      "id": "neg-en-sm100-isa-support",
+      "query": "Does the proposed SM100 ISA support the same TMA/WGMMA attention path without fallback, and is that verified by this corpus?",
+      "category": "hardware_architecture",
+      "language": "en",
+      "answerability": "unsupported",
+      "expected_material_ids": [
+        "mat-32494794ad99fab9a2f68fe4",
+        "mat-f0bf3b9e8fd3cfc4fb2ef4fa"
+      ],
+      "expected_chunks": [
+        {
+          "material_id": "mat-32494794ad99fab9a2f68fe4",
+          "chunk_id": "chunk-aa93f0bcdf2893098d410dd07dc45dc0",
+          "quote_sha256": "d70229c3ab0b01a591718e89ccddec530ff472aadb45cf37e2aa165d1bd8c4d0"
+        },
+        {
+          "material_id": "mat-f0bf3b9e8fd3cfc4fb2ef4fa",
+          "chunk_id": "chunk-351a200f23a9df89ed92f8b2f61cad7a",
+          "quote_sha256": "302f63b4276f2a3f9d2e04179a6cce15c1f4ba090f202ea182a9785ea6da3fee"
+        }
+      ],
+      "expected_behavior": {
+        "final_answer_status": "unknown",
+        "related_search_results_may_be_nonempty": true,
+        "must_not": "Do not infer the requested target value, support, or buildability from adjacent-source hits; name the missing source/measurement and keep the claim unknown."
+      }
+    },
+    {
+      "id": "neg-ko-cooler-physical-fit",
+      "query": "이 microfluidic cooler가 특정 MI300X OAM 카드에 물리적으로 장착되는지, 채널 치수와 펌프 압력까지 기준 적합성이 증명됐나?",
+      "category": "power_thermal_packaging",
+      "language": "ko",
+      "answerability": "unsupported",
+      "expected_material_ids": [
+        "mat-232327636407c4849d17988a",
+        "mat-c1c103fddd2e509926baa48c"
+      ],
+      "expected_chunks": [
+        {
+          "material_id": "mat-232327636407c4849d17988a",
+          "chunk_id": "chunk-a83270f4a9a9e42fca7cfeec5538e81c",
+          "quote_sha256": "1edf1cfd06a1fc5708fb5690a5021a977a132321fee4a9a2375c9d5ffdf36d26"
+        },
+        {
+          "material_id": "mat-c1c103fddd2e509926baa48c",
+          "chunk_id": "chunk-e730db3d1d9b1fb2121be948c9030b70",
+          "quote_sha256": "1df628fd774caa74142ff944a539fa4a03cff452514788b5d7504b97e356ed85"
+        }
+      ],
+      "expected_behavior": {
+        "final_answer_status": "unknown",
+        "related_search_results_may_be_nonempty": true,
+        "must_not": "Do not infer the requested target value, support, or buildability from adjacent-source hits; name the missing source/measurement and keep the claim unknown."
+      }
+    },
+    {
+      "id": "neg-en-mi300-hbm4-measurement",
+      "query": "What measured HBM4 bandwidth and power should I assign to the MI300X package from these sources?",
+      "category": "memory_interconnect",
+      "language": "en",
+      "answerability": "unsupported",
+      "expected_material_ids": [
+        "mat-c1c103fddd2e509926baa48c",
+        "mat-7fb68ef6fc05ebf14ef8e5c3"
+      ],
+      "expected_chunks": [
+        {
+          "material_id": "mat-c1c103fddd2e509926baa48c",
+          "chunk_id": "chunk-e730db3d1d9b1fb2121be948c9030b70",
+          "quote_sha256": "09e8a00854a0f05f5afaa654cd21ac910c89d4a3967faacfbeaf837cca6070f8"
+        },
+        {
+          "material_id": "mat-7fb68ef6fc05ebf14ef8e5c3",
+          "chunk_id": "chunk-f2472fa6cce8c26cc2998fccdd8fd749",
+          "quote_sha256": "4fc108d883db55fb23097a58b0473cfed213a2eae6bf127219fe9d8cbcce117e"
+        }
+      ],
+      "expected_behavior": {
+        "final_answer_status": "unknown",
+        "related_search_results_may_be_nonempty": true,
+        "must_not": "Do not infer the requested target value, support, or buildability from adjacent-source hits; name the missing source/measurement and keep the claim unknown."
+      }
+    },
+    {
+      "id": "neg-ko-b300-future-thermal-envelope",
+      "query": "B300 8-stack volumetric DRAM을 주변 35°C에서 1.5kW로 24시간 구동하면 최고 온도와 열 여유가 얼마인가?",
+      "category": "power_thermal_packaging",
+      "language": "ko",
+      "answerability": "unsupported",
+      "expected_material_ids": [
+        "mat-ea8acc5de77fc5b2add87bd1",
+        "mat-232327636407c4849d17988a"
+      ],
+      "expected_chunks": [
+        {
+          "material_id": "mat-ea8acc5de77fc5b2add87bd1",
+          "chunk_id": "chunk-d8b6a079bcf25fd06ef37ab74eb22398",
+          "quote_sha256": "73ebc4541547572a7a7ad0ee2a5f78117355535f0195fb1d8bc0cee1cf690aad"
+        },
+        {
+          "material_id": "mat-232327636407c4849d17988a",
+          "chunk_id": "chunk-a83270f4a9a9e42fca7cfeec5538e81c",
+          "quote_sha256": "2f03ab956f28c2aa1a53145837664a7ae2ffec66a36f991f6c27e999d0bbb761"
+        }
+      ],
+      "expected_behavior": {
+        "final_answer_status": "unknown",
+        "related_search_results_may_be_nonempty": true,
+        "must_not": "Do not infer the requested target value, support, or buildability from adjacent-source hits; name the missing source/measurement and keep the claim unknown."
+      }
+    },
+    {
+      "id": "neg-en-simulation-physical-reliability",
+      "query": "Do Accel-Sim Hopper correlations certify that a new SM100 board is physically buildable and will remain stable for 24 hours?",
+      "category": "simulation_measurement",
+      "language": "en",
+      "answerability": "unsupported",
+      "expected_material_ids": [
+        "mat-f0bf3b9e8fd3cfc4fb2ef4fa",
+        "mat-07d132ff68bbfd9d6b498e50"
+      ],
+      "expected_chunks": [
+        {
+          "material_id": "mat-f0bf3b9e8fd3cfc4fb2ef4fa",
+          "chunk_id": "chunk-351a200f23a9df89ed92f8b2f61cad7a",
+          "quote_sha256": "302f63b4276f2a3f9d2e04179a6cce15c1f4ba090f202ea182a9785ea6da3fee"
+        },
+        {
+          "material_id": "mat-07d132ff68bbfd9d6b498e50",
+          "chunk_id": "chunk-0ec68d17522a3714a39baf3347b8c0ff",
+          "quote_sha256": "3da89e83cbec169f97db83ac5bededd9fb7590ca586b1f706263fde32a4676b3"
+        }
+      ],
+      "expected_behavior": {
+        "final_answer_status": "unknown",
+        "related_search_results_may_be_nonempty": true,
+        "must_not": "Do not infer the requested target value, support, or buildability from adjacent-source hits; name the missing source/measurement and keep the claim unknown."
+      }
+    }
+  ]
+}
