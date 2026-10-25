@@ -26,6 +26,7 @@ EMBEDDING_ENDPOINT = 'https://api.deepinfra.com/v1/openai/embeddings'
 EMBEDDING_MODEL = 'google/embeddinggemma-2'
 EMBEDDING_DIMENSIONS = 768
 EMBEDDING_TIMEOUT_SECONDS = 25
+EMBEDDING_MAX_TIMEOUT_SECONDS = 120
 EMBEDDING_MAX_RESPONSE_BYTES = 2 * 1024 * 1024
 EMBEDDING_MAX_ITEMS = 64
 EMBEDDING_MAX_TEXT_CHARS = 16_384
@@ -334,6 +335,25 @@ class EmbeddingClient:
             raise ProviderError('embedding_api_key_missing')
         return key.strip()
 
+    def _timeout_seconds(self, task: str) -> int:
+        setting_name = (
+            'DSE_EMBEDDING_DOCUMENT_TIMEOUT_SECONDS'
+            if task == 'document' else 'DSE_EMBEDDING_QUERY_TIMEOUT_SECONDS'
+        )
+        value = self.settings.get(setting_name, str(EMBEDDING_TIMEOUT_SECONDS))
+        if type(value) is int:
+            timeout = value
+        elif isinstance(value, str) and re.fullmatch(r'\d+', value.strip()):
+            try:
+                timeout = int(value.strip())
+            except (ValueError, OverflowError):
+                raise ProviderError('embedding_timeout_configuration_invalid') from None
+        else:
+            raise ProviderError('embedding_timeout_configuration_invalid')
+        if not 1 <= timeout <= EMBEDDING_MAX_TIMEOUT_SECONDS:
+            raise ProviderError('embedding_timeout_configuration_invalid')
+        return timeout
+
     @staticmethod
     def _validate_vectors(payload: Any, expected_count: int) -> list[list[float]]:
         if not isinstance(payload, dict) or payload.get('model') != EMBEDDING_MODEL:
@@ -376,10 +396,17 @@ class EmbeddingClient:
     def _embed(self, texts: list[str], task: str) -> list[list[float]]:
         self.last_metadata = {
             'provider': 'deepinfra', 'model': EMBEDDING_MODEL, 'task': task,
-            'http_status': None, 'latency_seconds': None, 'usage': {}, 'vectors_observed': 0,
+            'http_status': None, 'latency_seconds': None, 'timeout_seconds': None,
+            'exception_class': None, 'error_kind': None, 'usage': {}, 'vectors_observed': 0,
         }
         if task not in ('document', 'search_query'):
             raise ProviderError('unsupported_embedding_task')
+        try:
+            timeout_seconds = self._timeout_seconds(task)
+        except ProviderError:
+            self.last_metadata['error_kind'] = 'configuration'
+            raise
+        self.last_metadata['timeout_seconds'] = timeout_seconds
         if not isinstance(texts, list) or not texts or len(texts) > EMBEDDING_MAX_ITEMS:
             raise ProviderError('embedding_input_count_out_of_range')
         if any(not isinstance(text, str) or not text.strip() or len(text) > EMBEDDING_MAX_TEXT_CHARS
@@ -413,23 +440,40 @@ class EmbeddingClient:
         started = time.monotonic()
         raw = b''
         try:
-            with self.opener.open(request, timeout=EMBEDDING_TIMEOUT_SECONDS) as response:
+            with self.opener.open(request, timeout=timeout_seconds) as response:
                 status = getattr(response, 'status', None)
                 self.last_metadata['http_status'] = status
                 if status != 200:
+                    self.last_metadata['exception_class'] = 'HTTPResponse'
+                    self.last_metadata['error_kind'] = 'http'
                     raise ProviderError('unexpected_embedding_http_status', status)
                 raw = response.read(EMBEDDING_MAX_RESPONSE_BYTES + 1)
                 if len(raw) > EMBEDDING_MAX_RESPONSE_BYTES:
+                    self.last_metadata['exception_class'] = 'HTTPResponse'
+                    self.last_metadata['error_kind'] = 'http'
                     raise ProviderError('embedding_response_too_large', status)
         except urllib.error.HTTPError as error:
             status = error.code
             error.close()
             self.last_metadata['http_status'] = status
+            self.last_metadata['exception_class'] = 'HTTPError'
+            self.last_metadata['error_kind'] = 'http'
             raise ProviderError('embedding_http_error', status) from None
         except ProviderError:
             raise
-        except (TimeoutError, ssl.SSLError, urllib.error.URLError, OSError):
-            raise ProviderError('embedding_transport_error') from None
+        except (TimeoutError, ssl.SSLError, urllib.error.URLError, OSError) as error:
+            cause = error.reason if isinstance(error, urllib.error.URLError) else error
+            if isinstance(cause, TimeoutError):
+                reason, exception_class, error_kind = 'embedding_timeout', 'TimeoutError', 'timeout'
+            elif isinstance(cause, ssl.SSLError):
+                reason, exception_class, error_kind = 'embedding_tls_error', type(cause).__name__, 'tls'
+            else:
+                reason = 'embedding_transport_error'
+                exception_class = type(cause).__name__ if isinstance(cause, OSError) else 'URLError'
+                error_kind = 'transport'
+            self.last_metadata['exception_class'] = exception_class
+            self.last_metadata['error_kind'] = error_kind
+            raise ProviderError(reason) from None
         finally:
             self.last_metadata['latency_seconds'] = round(time.monotonic() - started, 3)
         try:

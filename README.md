@@ -158,6 +158,10 @@ UV_PROJECT_ENVIRONMENT="$HOME/.local/share/dse-knowledge/app-venv" uv sync --fro
 
 실제 지원하는 설정 예시는 [config.env.example](https://github.com/jimmylegendary/dse-knowledge/blob/main/deploy/config.env.example)에 있다. 이 P1은 Codex CLI + DeepInfra adapter 조합을 실행한다. OpenRouter·다른 model/embedding/reranker는 architecture 후보이며 현재 adapter에서 검증하지 않은 설정은 거부한다.
 
+문서와 검색 embedding의 socket timeout은 `DSE_EMBEDDING_DOCUMENT_TIMEOUT_SECONDS`와 `DSE_EMBEDDING_QUERY_TIMEOUT_SECONDS`로 각각 설정한다(정수 1..120초, 기본 25초). 전체 wall-clock deadline과는 다르다. 실패 ledger에는 안전한 예외 class·error kind·제한 시간·소요 시간과 보고된 token usage를 남기며, invoice를 확인하지 않은 비용은 `unreported`로 유지한다. Q2의 운영 시험은 문서 60초/검색 25초이며 batch 크기 8과 index 병렬도 2는 유지한다. 반복 transport 오류의 근본 원인은 아직 확정하지 않았다.
+
+값·단위·인용 검증에 실패한 structured extraction은 최대 8개 field path와 reason code로 한 번만 repair한다. 총 모델 호출은 최대 2회이며 재실패는 `needs_review`다. 실패한 structured 응답은 별도 owner-only `quality-cache/failures`에 최대 1 MiB까지 남기고, 초과 응답은 hash·크기·생략 이유만 보존한다. 이 진단 파일은 검증된 응답 cache로 읽지 않는다.
+
 서비스 설치: `python scripts/install-user-service.py`. systemd user service가 HTTP process와 자식의 CPU 200%, RAM 4 GiB, stop timeout을 제한한다. 수집은 2개 fetch worker, 생성은 process별 1개 호출로 제한한다. 이번 일회성 100개 추출은 ID가 겹치지 않는 4개 application process로 분할했고, HTTP 판단 worker는 1개다. 로그는 `journalctl --user -u dse-knowledge.service -f`로 확인한다. 자동 로그인 없이 부팅 시 user manager를 유지하는 linger/OS 정책은 host 설정에 따른다.
 
 CLI 작업은 동일 venv의 `dse-knowledge`로 실행한다.

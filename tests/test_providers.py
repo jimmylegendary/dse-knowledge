@@ -226,6 +226,116 @@ def test_embedding_error_is_not_retried_or_echoed():
     assert 'private-key-sentinel' not in str(raised.value)
 
 
+@pytest.mark.parametrize(('task', 'setting_name'), [
+    ('document', 'DSE_EMBEDDING_DOCUMENT_TIMEOUT_SECONDS'),
+    ('search_query', 'DSE_EMBEDDING_QUERY_TIMEOUT_SECONDS'),
+])
+def test_embedding_timeout_defaults_are_25_seconds_for_each_task(task, setting_name):
+    opener = FakeOpener({'model': MODEL, 'data': [{'index': 0, 'embedding': unit_vector(0)}]})
+    client = EmbeddingClient(settings(), opener=opener)
+
+    client.embed(['x'], task=task)
+
+    assert opener.requests[0][1] == 25
+    assert client.last_metadata['timeout_seconds'] == 25
+
+
+def test_embedding_uses_independent_configured_task_timeouts():
+    opener = FakeOpener({'model': MODEL, 'data': [{'index': 0, 'embedding': unit_vector(0)}]})
+    client = EmbeddingClient(settings(
+        DSE_EMBEDDING_DOCUMENT_TIMEOUT_SECONDS='37',
+        DSE_EMBEDDING_QUERY_TIMEOUT_SECONDS='8',
+    ), opener=opener)
+
+    client.embed(['document'], task='document')
+    document_timeout = client.last_metadata['timeout_seconds']
+    client.embed(['query'], task='search_query')
+    query_timeout = client.last_metadata['timeout_seconds']
+
+    assert [timeout for _, timeout in opener.requests] == [37, 8]
+    assert document_timeout == 37
+    assert query_timeout == 8
+
+
+@pytest.mark.parametrize('timeout', ['1', '120'])
+def test_embedding_accepts_bounded_timeout_endpoints(timeout):
+    opener = FakeOpener({'model': MODEL, 'data': [{'index': 0, 'embedding': unit_vector(0)}]})
+    client = EmbeddingClient(settings(DSE_EMBEDDING_DOCUMENT_TIMEOUT_SECONDS=timeout), opener=opener)
+
+    client.embed(['x'], task='document')
+
+    assert opener.requests[0][1] == int(timeout)
+    assert client.last_metadata['timeout_seconds'] == int(timeout)
+
+
+@pytest.mark.parametrize('value', ['0', '121', '1.5', 'nope', True])
+@pytest.mark.parametrize('task,setting_name', [
+    ('document', 'DSE_EMBEDDING_DOCUMENT_TIMEOUT_SECONDS'),
+    ('search_query', 'DSE_EMBEDDING_QUERY_TIMEOUT_SECONDS'),
+])
+def test_embedding_timeout_configuration_is_bounded_before_http(value, task, setting_name):
+    opener = FakeOpener({'model': MODEL, 'data': [{'index': 0, 'embedding': unit_vector(0)}]})
+    client = EmbeddingClient(settings(**{setting_name: value}), opener=opener)
+
+    with pytest.raises(ProviderError, match='embedding_timeout_configuration_invalid'):
+        client.embed(['x'], task=task)
+
+    assert opener.requests == []
+
+
+@pytest.mark.parametrize(('failure', 'reason', 'error_class', 'error_kind'), [
+    (TimeoutError('private timeout detail'), 'embedding_timeout', 'TimeoutError', 'timeout'),
+    (ssl.SSLError('private tls detail'), 'embedding_tls_error', 'SSLError', 'tls'),
+    (urllib.error.URLError(TimeoutError('private wrapped timeout')),
+     'embedding_timeout', 'TimeoutError', 'timeout'),
+    (OSError('private transport detail'), 'embedding_transport_error', 'OSError', 'transport'),
+])
+def test_embedding_transport_failure_records_safe_class_and_kind(failure, reason, error_class, error_kind):
+    opener = FakeOpener(failure)
+    client = EmbeddingClient(settings(), opener=opener)
+
+    with pytest.raises(ProviderError) as raised:
+        client.embed(['x'], task='document')
+
+    assert raised.value.reason == reason
+    assert client.last_metadata['exception_class'] == error_class
+    assert client.last_metadata['error_kind'] == error_kind
+    assert client.last_metadata['http_status'] is None
+    assert isinstance(client.last_metadata['latency_seconds'], float)
+    assert client.last_metadata['timeout_seconds'] == 25
+    assert 'private' not in repr(client.last_metadata)
+    assert 'private' not in str(raised.value)
+
+
+def test_embedding_read_timeout_keeps_http_status_and_safe_transport_metadata():
+    class ReadTimeoutResponse(Response):
+        status = 200
+
+        def read(self, size=-1):
+            raise TimeoutError('private response-read timeout')
+
+    class ReadTimeoutOpener:
+        def __init__(self):
+            self.requests = []
+
+        def open(self, request, timeout):
+            self.requests.append((request, timeout))
+            return ReadTimeoutResponse({})
+
+    opener = ReadTimeoutOpener()
+    client = EmbeddingClient(settings(), opener=opener)
+
+    with pytest.raises(ProviderError) as raised:
+        client.embed(['x'], task='document')
+
+    assert raised.value.reason == 'embedding_timeout'
+    assert client.last_metadata['http_status'] == 200
+    assert client.last_metadata['exception_class'] == 'TimeoutError'
+    assert client.last_metadata['error_kind'] == 'timeout'
+    assert client.last_metadata['latency_seconds'] >= 0
+    assert 'private' not in repr(client.last_metadata)
+
+
 def test_default_embedding_opener_verifies_tls_and_has_no_redirect(monkeypatch):
     captured = []
     fake_opener = FakeOpener({'model': MODEL, 'data': [

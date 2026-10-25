@@ -10,6 +10,7 @@ from fastapi.responses import JSONResponse, FileResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, ConfigDict, Field
 from psycopg.types.json import Jsonb
+from . import __version__
 from .config import Settings
 from .db import Store
 from .decisions import DecisionEngine,JobLoop
@@ -47,7 +48,7 @@ def create_app(settings=None,store=None,embedding=None,chat=None,native=None,run
         yield
         jobs.close()
 
-    app=FastAPI(title='DSE Knowledge Workbench',version='0.2.0',lifespan=lifespan)
+    app=FastAPI(title='DSE Knowledge Workbench',version=__version__,lifespan=lifespan)
     app.state.store=store
     @app.middleware('http')
     async def guards(request:Request,call_next):
@@ -83,7 +84,7 @@ def create_app(settings=None,store=None,embedding=None,chat=None,native=None,run
         with store.connection() as c:
             c.execute('SELECT 1')
             tls=bool(c.pgconn.ssl_in_use)
-        return {'status':'ok','database':'connected','client_pooler_tls':tls,'version':'0.2.0'}
+        return {'status':'ok','database':'connected','client_pooler_tls':tls,'version':__version__}
 
     @app.get('/api/stats')
     def stats():

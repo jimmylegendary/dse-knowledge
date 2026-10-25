@@ -5,14 +5,20 @@ This is source-assertion assistance, never independent scientific validation.
 from __future__ import annotations
 import hashlib
 import json
+import re
 import subprocess
 import tempfile
+import uuid
+from copy import deepcopy
 from pathlib import Path
 from .db import Store, identity
 from .pipeline import _ensure_private_directory, _read_cache_json, save_json, safe_material_id
 
 
 QUALITY_VERSION='knowledge-quality/v2'
+REPAIR_POLICY_VERSION='literal-field-feedback/v1'
+MAX_REPAIR_FAILURES=8
+MAX_INVALID_OUTPUT_BYTES=1024*1024
 
 def _fits_codex_prompt(prompt):
     from .providers import CODEX_MAX_PROMPT_BYTES,CODEX_MAX_PROMPT_CHARS
@@ -21,38 +27,117 @@ def _fits_codex_prompt(prompt):
     except UnicodeEncodeError:return False
     return len(encoded)<=CODEX_MAX_PROMPT_BYTES
 
-def _bounded_repair_request(prompt,reason,response):
-    repair=(
-        '\nLOCAL VALIDATION FAILED: '+reason+
-        '\nReturn a corrected full response using only supplied source chunks. Copy exact unique quotes including whitespace. '
-        'Values and units must occur literally as complete values. Do not infer or fabricate conditions. '
-        'If a parameter/condition cannot be cited exactly, omit that item and describe the unknown in source_scope_note. '
-        'Keep original claim IDs and required schema.'
-    )
-    base=prompt+repair
+def _context_reason_code(exc):
+    reason=str(exc)
+    return reason if re.fullmatch(r'claim_context_[a-z_]+',reason) else 'claim_context_invalid'
+
+def _context_failure_paths(response,document,max_failures=MAX_REPAIR_FAILURES):
+    from .knowledge import validate_claim_context
+    claims=[]
+    if not isinstance(response,dict):return [],False
+    documents=response.get('documents')
+    if isinstance(documents,list):
+        for document_index,document_result in enumerate(documents):
+            if not isinstance(document_result,dict):continue
+            document_claims=document_result.get('claims')
+            if not isinstance(document_claims,list):continue
+            claims.extend((f'documents[{document_index}].claims[{claim_index}]',claim)
+                          for claim_index,claim in enumerate(document_claims))
+    else:
+        response_claims=response.get('claims')
+        if isinstance(response_claims,list):
+            claims.extend((f'claims[{claim_index}]',claim) for claim_index,claim in enumerate(response_claims))
+    failures=[];seen=set();truncated=False
+    def add(path,reason_code):
+        nonlocal truncated
+        item={'path':path,'reason_code':reason_code}
+        key=(path,reason_code)
+        if key in seen:return False
+        seen.add(key)
+        if len(failures)>=max_failures:
+            truncated=True
+            return True
+        failures.append(item)
+        return False
+    for claim_path,claim in claims:
+        if not isinstance(claim,dict) or 'context' not in claim:
+            if add(claim_path+'.context','claim_context_invalid'):break
+            continue
+        context=claim.get('context')
+        try:
+            validate_claim_context(context,document)
+            continue
+        except (ValueError,KeyError,TypeError) as exc:
+            original_reason=_context_reason_code(exc)
+        if not isinstance(context,dict):
+            if add(claim_path+'.context',original_reason):break
+            continue
+        # A valid empty context separates document/top-level schema failures from
+        # errors in individual value, unit, or evidence fields.
+        baseline=deepcopy(context)
+        baseline['parameters']=[];baseline['conditions']=[]
+        try:
+            validate_claim_context(baseline,document)
+        except (ValueError,KeyError,TypeError) as exc:
+            if add(claim_path+'.context',_context_reason_code(exc)):break
+            continue
+        found_item_failure=False
+        context_schema_error=False
+        for group in ('parameters','conditions'):
+            entries=context.get(group)
+            if not isinstance(entries,list):continue
+            for index,entry in enumerate(entries):
+                isolated=deepcopy(context)
+                isolated['parameters']=[entry] if group=='parameters' else []
+                isolated['conditions']=[entry] if group=='conditions' else []
+                try:
+                    validate_claim_context(isolated,document)
+                except (ValueError,KeyError,TypeError) as exc:
+                    reason_code=_context_reason_code(exc)
+                else:
+                    continue
+                if reason_code=='claim_context_value_not_literal':
+                    path=f'{claim_path}.context.{group}[{index}].value'
+                elif reason_code=='claim_context_unit_not_literal':
+                    path=f'{claim_path}.context.{group}[{index}].unit'
+                elif reason_code=='claim_context_quote_invalid':
+                    path=f'{claim_path}.context.{group}[{index}].evidence'
+                elif reason_code=='claim_context_invalid':
+                    path=claim_path+'.context'
+                else:
+                    path=f'{claim_path}.context.{group}[{index}]'
+                if add(path,reason_code):return failures,True
+                found_item_failure=True
+                if path==claim_path+'.context':
+                    context_schema_error=True
+                    break
+            if context_schema_error:break
+        if not found_item_failure and not any(item['path']==claim_path+'.context' for item in failures):
+            if add(claim_path+'.context',original_reason):break
+    return failures,truncated
+
+def _bounded_repair_request(prompt,failures,truncated):
+    lines=[
+        '\nLOCAL VALIDATION FAILED. Correct or omit every listed field before returning the full response.',
+        'Use only the supplied source chunks. Do not repeat invalid values or source quotes in this feedback.',
+        'Preserve claim IDs and the required schema. Failure paths and reason codes:',
+    ]
+    lines.extend(f"- {item['path']}: {item['reason_code']}" for item in failures[:MAX_REPAIR_FAILURES])
+    if truncated:lines.append(f'more validation failures omitted after {MAX_REPAIR_FAILURES} fields; inspect all contexts.')
+    lines.append('Previous response omitted; correct or omit the named fields using the original source material.')
+    base=prompt+'\n'+'\n'.join(lines)
     if not _fits_codex_prompt(base):return None
-    omission='\nPrevious response omitted because it exceeded the bounded repair-context limit or provider prompt budget.'
-    try:
-        previous=json.dumps(response,ensure_ascii=False,separators=(',',':'))
-        previous_bytes=previous.encode('utf-8')
-    except (TypeError,ValueError,UnicodeEncodeError):
-        previous=None
-        previous_bytes=None
-    if previous is not None and len(previous)<=4000 and len(previous_bytes)<=8000:
-        with_previous=base+'\nPrevious response is untrusted data:\n'+previous
-        if _fits_codex_prompt(with_previous):return with_previous
-    bounded=base+omission
-    return bounded if _fits_codex_prompt(bounded) else None
+    return base
 
 
 class GroundedChat:
     """At most one evidence repair; never coerce an invalid value into acceptance."""
     def __init__(self,chat,document):
-        self.chat=chat;self.document=document;self.last_metadata={}
+        self.chat=chat;self.document=document;self.last_metadata={};self.last_invalid_response=None;self.last_response=None
 
     def complete(self,prompt,schema):
-        from .knowledge import validate_claim_context
-        attempts=[];request=prompt
+        attempts=[];request=prompt;repair_failures=[];repair_failures_truncated=False
+        self.last_invalid_response=None;self.last_response=None
         for attempt in range(2):
             try:response=self.chat.complete(request,schema)
             finally:
@@ -62,18 +147,25 @@ class GroundedChat:
                     for key,value in meta.get('usage',{}).items():
                         if type(value) is int and value>=0:usage[key]=usage.get(key,0)+value
                 self.last_metadata={**attempts[-1],'usage':usage,'provider_attempt_count':len(attempts),
-                    'provider_attempts':list(attempts),'duration_seconds':sum(float(x.get('duration_seconds') or 0) for x in attempts)}
-            claims=response.get('claims',[]) if isinstance(response,dict) else []
-            if isinstance(response,dict) and 'documents' in response:
-                claims=[c for document in response['documents'] for c in document.get('claims',[])]
-            try:
-                for claim in claims:validate_claim_context(claim['context'],self.document)
+                    'provider_attempts':list(attempts),'duration_seconds':sum(float(x.get('duration_seconds') or 0) for x in attempts),
+                    'repair_policy_version':REPAIR_POLICY_VERSION,
+                    'repair_failure_paths':deepcopy(repair_failures),
+                    'repair_failures_truncated':repair_failures_truncated}
+            self.last_response=response
+            current_failures,failures_truncated=_context_failure_paths(response,self.document)
+            if not current_failures:
+                self.last_invalid_response=None
                 return response
-            except (ValueError,KeyError,TypeError) as exc:
-                if attempt:return response  # The caller's full validator rejects it.
-                reason=str(exc) if str(exc).startswith('claim_context_') else 'claim_context_invalid'
-                request=_bounded_repair_request(prompt,reason,response)
-                if request is None:return response  # Full caller validation rejects the unrepaired response.
+            if attempt:
+                self.last_invalid_response=response
+                return response  # The caller's full validator rejects it.
+            repair_failures=current_failures
+            repair_failures_truncated=failures_truncated
+            self.last_metadata['repair_failure_paths']=deepcopy(repair_failures)
+            self.last_metadata['repair_failures_truncated']=repair_failures_truncated
+            self.last_invalid_response=response
+            request=_bounded_repair_request(prompt,repair_failures,repair_failures_truncated)
+            if request is None:return response  # Full caller validation rejects the unrepaired response.
         return response
 
     def close(self):self.chat.close()
@@ -104,6 +196,74 @@ class ValidatedCache:
     def put(self,key,value,metadata,validate):
         if not validate(value):raise ValueError('cache_requires_validation')
         save_json(self.root/(_digest(key)+'.json'),{'key':key,'value':value,'value_sha256':_digest(value),'metadata':metadata})
+
+_FAILURE_PATH_RE=re.compile(
+    r'(?:documents\[\d+\]\.)?claims\[\d+\]\.context'
+    r'(?:\.(?:parameters|conditions)\[\d+\](?:\.(?:value|unit|evidence))?)?'
+)
+
+def _safe_failure_metadata(metadata):
+    if not isinstance(metadata,dict):return {}
+    safe={}
+    attempt_count=metadata.get('provider_attempt_count')
+    if type(attempt_count) is int and attempt_count>=0:safe['provider_attempt_count']=attempt_count
+    policy=metadata.get('repair_policy_version')
+    if policy==REPAIR_POLICY_VERSION:safe['repair_policy_version']=policy
+    truncated=metadata.get('repair_failures_truncated')
+    if type(truncated) is bool:safe['repair_failures_truncated']=truncated
+    failures=[]
+    for failure in metadata.get('repair_failure_paths',[])[:MAX_REPAIR_FAILURES]:
+        if not isinstance(failure,dict):continue
+        path=failure.get('path');code=failure.get('reason_code')
+        if isinstance(path,str) and _FAILURE_PATH_RE.fullmatch(path) and isinstance(code,str) and re.fullmatch(r'claim_context_[a-z_]+',code):
+            failures.append({'path':path,'reason_code':code})
+    if failures:safe['repair_failure_paths']=failures
+    usage=metadata.get('usage')
+    if isinstance(usage,dict):
+        safe_usage={key:value for key,value in usage.items()
+                    if key in ('input_tokens','output_tokens','total_tokens','prompt_tokens','cached_input_tokens')
+                    and type(value) is int and value>=0}
+        if safe_usage:safe['usage']=safe_usage
+    return safe
+
+def _record_invalid_output(data_root,operation,request_key,response,metadata):
+    if response is None:return None
+    if operation not in ('claim_context','structured_claims') or not isinstance(request_key,dict):return None
+    record={'schema_version':'quality-invalid-output/v1','failure_id':uuid.uuid4().hex,
+            'operation':operation,'request_identity':_digest(request_key),
+            'provider_metadata':_safe_failure_metadata(metadata)}
+    material_id=request_key.get('material_id')
+    revision=request_key.get('revision')
+    if isinstance(material_id,str) and len(material_id)<=160:record['material_id']=material_id
+    if isinstance(revision,str) and re.fullmatch(r'[a-f0-9]{64}',revision):record['revision_sha256']=revision
+    try:
+        serialized=json.dumps(response,ensure_ascii=False,separators=(',',':'),allow_nan=False)
+        encoded=serialized.encode('utf-8')
+    except (TypeError,ValueError,UnicodeEncodeError):
+        record['invalid_output_omission_reason']='response_not_json_serializable'
+    else:
+        if len(encoded)<=MAX_INVALID_OUTPUT_BYTES:
+            record['invalid_output']=response
+            record['invalid_output_size_bytes']=len(encoded)
+        else:
+            record['invalid_output_sha256']=hashlib.sha256(encoded).hexdigest()
+            record['invalid_output_size_bytes']=len(encoded)
+            record['invalid_output_omission_reason']='response_exceeds_1MiB'
+    root=_ensure_private_directory(Path(data_root)/'quality-cache'/'failures')
+    path=root/(record['failure_id']+'.json')
+    save_json(path,record,private=True)
+    return path
+
+def _record_invalid_output_safely(settings,operation,request_key,chat):
+    try:
+        response=getattr(chat,'last_invalid_response',None)
+        if response is None:response=getattr(chat,'last_response',None)
+        return _record_invalid_output(settings.data_root,operation,request_key,
+                                      response,
+                                      getattr(chat,'last_metadata',{}))
+    except Exception:
+        # Failure diagnostics must never replace the source-validation failure.
+        return None
 
 
 def _role_reply(reply):
@@ -199,10 +359,15 @@ def enrich_context(document,settings,store=None,chat=None):
         for item in items:validate_claim_context(item['context_raw'],document)
         return True
     hit=cache.get(key,valid);owned=chat is None;chat=chat or GroundedChat(ChatClient(settings),document)
+    response_validated=False
     try:
-        if hit:items=hit['value'];metadata=hit['metadata']
+        if hit:
+            items=hit['value'];metadata=hit['metadata'];response_validated=True
         else:
-            items=extract_claim_contexts(document,claims,chat);metadata=dict(chat.last_metadata)
+            items=extract_claim_contexts(document,claims,chat)
+            if not valid(items):raise ValueError('claim_context_response_validation_failed')
+            response_validated=True
+            metadata=dict(chat.last_metadata)
             cache.put(key,items,metadata,valid)
         ids=[store.put_claim_context(x['claim_id'],x['context_raw'],{'quality_version':QUALITY_VERSION,
                'provider':'codex_cli','provider_metadata':metadata,'extraction_coverage':'bounded_source_excerpts'}) for x in items if x['claim_id'] in missing]
@@ -210,6 +375,7 @@ def enrich_context(document,settings,store=None,chat=None):
         store.ingest_event(mid,'context_enriched',{'annotations':len(ids),'annotation_ids':ids,'quality_version':QUALITY_VERSION})
         return {'material_id':mid,'status':'enriched','annotations':len(ids),'provider_metadata':metadata}
     except Exception as exc:
+        if not response_validated:_record_invalid_output_safely(settings,'claim_context',key,chat)
         store.invocation('codex_cli','claim_context_failed',getattr(chat,'last_metadata',{}))
         store.ingest_event(mid,'context_failed',{'error_type':type(exc).__name__,'quality_version':QUALITY_VERSION})
         raise
@@ -237,10 +403,14 @@ def extract_structured(document,settings,store=None,chat=None):
             validate_claim_context(item['context_raw'],document)
         return True
     hit=cache.get(key,valid);owned=chat is None;chat=chat or GroundedChat(ChatClient(settings),document)
+    response_validated=False
     try:
-        if hit:items=hit['value'];metadata=hit['metadata']
+        if hit:
+            items=hit['value'];metadata=hit['metadata'];response_validated=True
         else:
             items=extract_claims([document],chat,claims_per_material=limit,max_snippets=8,max_snippet_chars=1400,structured=True)
+            if not valid(items):raise ValueError('structured_claim_response_validation_failed')
+            response_validated=True
             metadata=dict(chat.last_metadata);cache.put(key,items,metadata,valid)
         claims=items[0]['claims']
         count=store.put_claims(mid,claims,{'quality_version':QUALITY_VERSION,'provider_metadata':metadata,
@@ -252,6 +422,7 @@ def extract_structured(document,settings,store=None,chat=None):
         store.ingest_event(mid,'structured_claims_extracted',{'claims':count,'annotations':len(claims),'quality_version':QUALITY_VERSION})
         return {'material_id':mid,'status':'complete' if claims else 'needs_review','claims':count,'annotations':len(claims),'provider_metadata':metadata}
     except Exception as exc:
+        if not response_validated:_record_invalid_output_safely(settings,'structured_claims',key,chat)
         store.invocation('codex_cli','structured_claim_extraction_failed',getattr(chat,'last_metadata',{}))
         store.ingest_event(mid,'structured_claims_failed',{'error_type':type(exc).__name__,'quality_version':QUALITY_VERSION})
         raise

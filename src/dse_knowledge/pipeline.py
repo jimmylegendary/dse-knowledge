@@ -4,6 +4,7 @@ from collections import Counter
 from concurrent.futures import ThreadPoolExecutor,wait,FIRST_COMPLETED
 import hashlib
 import json
+import math
 import os
 import re
 from pathlib import Path
@@ -307,8 +308,60 @@ def load_prepared(settings):
     return [json.loads((root/'prepared'/(safe_material_id(mid)+'.json')).read_text()) for mid in ids]
 
 
+def _safe_embedding_failure_metadata(metadata, error):
+    from .providers import EMBEDDING_MODEL
+
+    metadata = metadata if isinstance(metadata, dict) else {}
+    safe = {}
+    if metadata.get('provider') == 'deepinfra':
+        safe['provider'] = 'deepinfra'
+    if metadata.get('model') == EMBEDDING_MODEL:
+        safe['model'] = EMBEDDING_MODEL
+    if metadata.get('task') in ('document', 'search_query'):
+        safe['task'] = metadata['task']
+    http_status = metadata.get('http_status')
+    if type(http_status) is int and 100 <= http_status <= 599:
+        safe['http_status'] = http_status
+    latency = metadata.get('latency_seconds')
+    if type(latency) in (int, float) and latency >= 0:
+        try:
+            if math.isfinite(latency):
+                safe['latency_seconds'] = latency
+        except (OverflowError, ValueError):
+            pass
+    timeout = metadata.get('timeout_seconds')
+    if type(timeout) is int and 1 <= timeout <= 120:
+        safe['timeout_seconds'] = timeout
+    vectors_observed = metadata.get('vectors_observed')
+    if type(vectors_observed) is int and 0 <= vectors_observed <= 64:
+        safe['vectors_observed'] = vectors_observed
+    exception_class = metadata.get('exception_class')
+    if isinstance(exception_class, str) and re.fullmatch(r'[A-Za-z][A-Za-z0-9_]{0,63}', exception_class):
+        safe['exception_class'] = exception_class
+    error_kind = metadata.get('error_kind')
+    if error_kind in ('timeout', 'tls', 'transport', 'http', 'configuration'):
+        safe['error_kind'] = error_kind
+    usage = metadata.get('usage')
+    if isinstance(usage, dict):
+        safe['usage'] = {
+            key: usage[key] for key in ('prompt_tokens', 'input_tokens', 'total_tokens')
+            if type(usage.get(key)) is int and usage[key] >= 0
+        }
+    else:
+        safe['usage'] = {}
+    safe['usage_status'] = 'reported' if safe['usage'] else 'unreported'
+    safe['billing_status'] = 'unreported'
+    reason = getattr(error, 'reason', None)
+    safe['error_code'] = (
+        reason if isinstance(reason, str) and re.fullmatch(r'[A-Za-z0-9_.-]{1,120}', reason)
+        else 'embedding_provider_error'
+    )
+    safe['status'] = 'failed'
+    return safe
+
+
 def index_materials(settings,documents,store=None):
-    from .providers import EmbeddingClient
+    from .providers import EmbeddingClient,ProviderError
     store=store or Store(settings);embedding=EmbeddingClient(settings);written=0
     for d in documents:
         mid=d['material']['id']
@@ -316,7 +369,16 @@ def index_materials(settings,documents,store=None):
         vectors=[]
         for start in range(0,len(d['chunks']),8):
             texts=[d['material']['title']+'\n'+x['text'] for x in d['chunks'][start:start+8]]
-            vectors.extend(embedding.embed(texts,task='document'))
+            try:
+                batch_vectors=embedding.embed(texts,task='document')
+            except ProviderError as error:
+                metadata=_safe_embedding_failure_metadata(getattr(embedding,'last_metadata',{}),error)
+                try:
+                    store.invocation('deepinfra','ingest_embedding_failed',metadata)
+                except Exception:
+                    pass
+                raise
+            vectors.extend(batch_vectors)
             store.invocation('deepinfra','ingest_embedding',getattr(embedding,'last_metadata',{}))
         store.put_material(d,vectors);written+=1
         store.ingest_event(mid,'indexed',{'chunks':len(d['chunks']),'scope':d['revision']['scope'],'sha256':d['revision']['sha256']})
