@@ -299,6 +299,19 @@ def claim(chunk_id='chunk-1', quote='reuses prefix blocks to reduce request late
             'summary': 'Prefix reuse lowers request latency.', 'scope': 'LLM inference'}
 
 
+def assert_context_prompt_contract(prompt):
+    for phrase in (
+        'complete string value or complete numeric literal',
+        'never take a substring from an identifier or model/part name',
+        'never compute or infer a numeric value',
+        'copied verbatim from the original source',
+        'unique across the entire source revision and its cited chunk',
+        'omit only that optional context entry',
+        'broaden the claim or its scope',
+    ):
+        assert phrase in prompt.lower()
+
+
 def test_extract_claims_exposes_structured_opt_in_without_changing_default():
     assert inspect.signature(extract_claims).parameters['structured'].default is False
 
@@ -336,6 +349,7 @@ def test_extract_claims_structured_mode_validates_and_returns_normalized_context
         'value': 0.0064, 'unit': 's', 'status': 'normalized',
     }
     assert normalized['conditions'][0]['value_raw'] == 'V100'
+    assert_context_prompt_contract(chat.calls[0][0])
     claim_schema = chat.calls[0][1]['properties']['documents']['items']['properties']['claims']['items']
     assert 'context' in claim_schema['required']
     provider_context_schema = claim_schema['properties']['context']
@@ -420,6 +434,7 @@ def test_extract_claim_contexts_backfills_existing_claim_ids_without_rewriting_c
     assert result[0]['context']['parameters'][0]['normalized']['value'] == 0.0064
     assert result[0]['context']['conditions'][0]['value_raw'] == 'V100'
     assert existing[0]['summary'] == 'Existing summary'
+    assert_context_prompt_contract(chat.calls[0][0])
     assert chat.calls[0][1]['additionalProperties'] is False
 
 

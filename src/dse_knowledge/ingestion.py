@@ -35,6 +35,14 @@ MAX_SNIPPETS_PER_DOCUMENT = 8
 MAX_SNIPPET_CHARS = 1400
 MAX_PROMPT_CHARS_PER_DOCUMENT = 12_000
 MAX_CLAIMS_PER_DOCUMENT = 3
+_CONTEXT_LITERAL_GUIDANCE = (
+    'For every parameter or condition, the complete string value or complete numeric literal must occur verbatim '
+    'in its exact evidence quote. Never take a substring from an identifier or model/part name. Never compute '
+    'or infer a numeric value, or convert/reformat a source value. Claim and context quotes must be copied '
+    'verbatim from the original source. Each quote must be unique across the entire source revision and its cited chunk. '
+    'If an optional value, unit, or condition is not directly supported, omit only that optional context entry. '
+    'Never remove or weaken existing claim conditions or broaden the claim or its scope to accommodate an omitted entry.'
+)
 PAPER_MATERIAL_TYPES = frozenset({
     'research_paper', 'scholarly_work', 'preprint', 'thesis', 'book_chapter', 'conference_abstract',
 })
@@ -682,7 +690,8 @@ def extract_claims(documents: list[dict], chat, *, claims_per_material: int = MA
                 'parameters and conditions. Evidence must cite an exact unique quote in the same '
                 'source revision and a supplied chunk. Return empty parameter or condition arrays '
                 'when the source does not state them. Do not infer metric association, scientific '
-                'correctness, physical feasibility, or applicability beyond the cited source scope.'
+                'correctness, physical feasibility, or applicability beyond the cited source scope.\n'
+                + _CONTEXT_LITERAL_GUIDANCE
             )
         try:
             response = chat.complete(prompt, schema)
@@ -808,6 +817,7 @@ def extract_claim_contexts(document: dict, existing_claims: list[dict], chat) ->
             'for every value and unit. Empty arrays are correct when no values or conditions are '
             'explicit. Do not infer metric association, scientific correctness, physical feasibility, '
             'or broader applicability. Keep source_scope_note specific and state unknowns.\n'
+            + _CONTEXT_LITERAL_GUIDANCE + '\n'
             'UNTRUSTED SOURCE DATA JSON:\n'
             + json.dumps({'material_id': material_id, 'claims': prompt_claims},
                          ensure_ascii=False, separators=(',', ':'))

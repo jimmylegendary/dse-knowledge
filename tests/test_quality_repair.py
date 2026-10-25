@@ -9,8 +9,13 @@ def test_one_bounded_repair_keeps_actual_attempt_usage_and_requires_literal_evid
     doc={'material':{'id':'m'},'revision':{'sha256':'a'*64},'text':'Measured latency is 6.4 ms on the selected test.',
          'chunks':[{'id':'c','text':'Measured latency is 6.4 ms on the selected test.','start':0,'end':46}]}
     doc['chunks'][0]['end']=len(doc['text'])
-    context={'schema_version':'claim-context/v1','parameters':[{'name':'latency','value':99,'unit':'ms','evidence':{'chunk_id':'c','quote':doc['text']}}],'conditions':[],'source_scope_note':'Only this test.'}
-    bad={'claims':[{'claim_id':'a','context':context}]};good=deepcopy(bad);good['claims'][0]['context']['parameters'][0]['value']=6.4
+    valid_parameter={'name':'latency','value':6.4,'unit':'ms','evidence':{'chunk_id':'c','quote':doc['text']}}
+    invalid_parameter={'name':'unsupported-latency','value':99,'unit':'ms','evidence':{'chunk_id':'c','quote':doc['text']}}
+    context={'schema_version':'claim-context/v1','parameters':[valid_parameter,invalid_parameter],
+             'conditions':[],'source_scope_note':'Only this test.'}
+    bad={'claims':[{'claim_id':'a','context':context}]}
+    good={'claims':[{'claim_id':'a','context':{'schema_version':'claim-context/v1',
+        'parameters':[deepcopy(valid_parameter)],'conditions':[],'source_scope_note':'Only this test.'}}]}
     class Chat:
         last_metadata={}
         def __init__(self):self.calls=[]
@@ -21,14 +26,21 @@ def test_one_bounded_repair_keeps_actual_attempt_usage_and_requires_literal_evid
     raw=Chat();chat=GroundedChat(raw,doc)
     assert chat.complete('Untrusted source',{})==good
     assert len(raw.calls)==2
-    assert 'claim_context_value_not_literal' in raw.calls[1]
+    candidate=json.dumps(bad,ensure_ascii=False,separators=(',',':'))
+    assert 'UNTRUSTED PRIOR TYPED RESPONSE CANDIDATE' in raw.calls[1]
+    assert candidate in raw.calls[1]
     assert raw.calls[1].startswith('Untrusted source')
-    assert 'claims[0].context.parameters[0].value: claim_context_value_not_literal' in raw.calls[1]
-    assert '"value":99' not in raw.calls[1]
-    assert doc['text'] not in raw.calls[1]
+    assert 'claims[0].context.parameters[1].value: claim_context_value_not_literal' in raw.calls[1]
+    assert 'keep already-valid fields unchanged' in raw.calls[1].lower()
+    assert 'do not treat prior values or quotes as evidence' in raw.calls[1].lower()
+    assert 'complete numeric literal' in raw.calls[1].lower()
+    assert 'do not compute or infer numeric values' in raw.calls[1].lower()
     assert chat.last_metadata['usage']['input_tokens']==20
     assert chat.last_metadata['provider_attempt_count']==2
-    assert chat.last_metadata['repair_policy_version']=='literal-field-feedback/v1'
+    assert chat.last_metadata['repair_policy_version']=='literal-field-feedback/v2'
+    assert chat.last_metadata['repair_context_mode']=='full_response_candidate'
+    assert '"value":99' not in json.dumps(chat.last_metadata)
+    assert doc['text'] not in json.dumps(chat.last_metadata)
 
 
 def test_failed_repair_is_returned_to_strict_caller_validation_without_silent_emptying():
@@ -42,7 +54,7 @@ def test_failed_repair_is_returned_to_strict_caller_validation_without_silent_em
     assert wrapped.last_metadata['repair_failure_paths']==[
         {'path':'claims[0].context','reason_code':'claim_context_invalid'}]
 
-def test_large_invalid_context_is_omitted_from_bounded_repair_and_usage_counts_both_attempts():
+def test_large_prior_response_is_used_when_full_candidate_fits_prompt_budget():
     quote='The source gives a technical observation without numeric values. '*18
     doc={'material':{'id':'m'},'revision':{'sha256':'a'*64},'text':quote,
          'chunks':[{'id':'c','text':quote,'start':0,'end':len(quote)}]}
@@ -64,13 +76,86 @@ def test_large_invalid_context_is_omitted_from_bounded_repair_and_usage_counts_b
     assert wrapped.complete('Source chunks were supplied above.',{})==good
     assert len(raw.calls)==2
     repair=raw.calls[1]
-    assert 'Previous response omitted' in repair
-    assert quote not in repair
+    assert 'UNTRUSTED PRIOR TYPED RESPONSE CANDIDATE' in repair
+    assert json.dumps(bad,ensure_ascii=False,separators=(',',':')) in repair
+    assert wrapped.last_metadata['repair_context_mode']=='full_response_candidate'
+    assert wrapped.last_metadata['repair_failures_truncated'] is True
     assert len(repair)<=CODEX_MAX_PROMPT_CHARS
     assert len(repair.encode('utf-8'))<=CODEX_MAX_PROMPT_BYTES
     assert wrapped.last_metadata['usage']=={'input_tokens':30,'output_tokens':4}
     assert wrapped.last_metadata['provider_attempt_count']==2
     assert len(wrapped.last_metadata['provider_attempts'])==2
+    assert '"value":99' not in json.dumps(wrapped.last_metadata)
+    assert quote not in json.dumps(wrapped.last_metadata)
+
+
+def test_oversized_prior_response_falls_back_to_whole_failed_entries_without_truncating_them():
+    quote='SOURCE_MARKER_FOR_COMPLETE_FAILED_ENTRY ' + ('q'*1050) + ' reports latency 6.4 ms.'
+    assert len(quote)<=1200
+    doc={'material':{'id':'bounded-entry'},'revision':{'sha256':'d'*64},'text':quote,
+         'chunks':[{'id':'c','text':quote,'start':0,'end':len(quote)}]}
+    valid={'name':'valid','value':6.4,'unit':'ms','evidence':{'chunk_id':'c','quote':quote}}
+    invalid={'name':'unsupported','value':99,'unit':'ms','evidence':{'chunk_id':'c','quote':quote}}
+    response={'claims':[]}
+    for claim_index in range(3):
+        parameters=[deepcopy(valid) for _ in range(32)]
+        if claim_index==0:parameters[0]=deepcopy(invalid)
+        response['claims'].append({'claim_id':f'claim-{claim_index}','context':_context(parameters=parameters)})
+    assert len(json.dumps(response,ensure_ascii=False,separators=(',',':')).encode('utf-8'))>CODEX_MAX_PROMPT_BYTES
+    repaired=deepcopy(response)
+    repaired['claims'][0]['context']['parameters'][0]=deepcopy(valid)
+    class Chat:
+        def __init__(self):self.calls=[];self.last_metadata={}
+        def complete(self,prompt,schema):
+            self.calls.append(prompt)
+            self.last_metadata={'usage':{'input_tokens':11*len(self.calls),'output_tokens':3}}
+            return response if len(self.calls)==1 else repaired
+    raw=Chat();wrapped=GroundedChat(raw,doc)
+
+    assert wrapped.complete('Synthetic source prompt.',{})==repaired
+
+    assert len(raw.calls)==2
+    repair=raw.calls[1]
+    assert wrapped.last_metadata['repair_context_mode']=='bounded_failed_entries'
+    assert json.dumps(invalid,ensure_ascii=False,separators=(',',':')) in repair
+    assert json.dumps(response,ensure_ascii=False,separators=(',',':')) not in repair
+    assert 'valid-2-31' not in repair
+    assert 'SOURCE_MARKER_FOR_COMPLETE_FAILED_ENTRY' in repair
+    assert 'do not treat prior values or quotes as evidence' in repair.lower()
+    assert len(repair)<=CODEX_MAX_PROMPT_CHARS
+    assert len(repair.encode('utf-8'))<=CODEX_MAX_PROMPT_BYTES
+    metadata=json.dumps(wrapped.last_metadata,ensure_ascii=False)
+    assert 'SOURCE_MARKER_FOR_COMPLETE_FAILED_ENTRY' not in metadata
+    assert '"value":99' not in metadata
+
+
+def test_repair_falls_back_to_paths_only_when_complete_failed_entry_does_not_fit():
+    quote='PATH_ONLY_SOURCE_MARKER ' + ('z'*950) + ' latency 6.4 ms.'
+    doc={'material':{'id':'path-only'},'revision':{'sha256':'e'*64},'text':quote,
+         'chunks':[{'id':'c','text':quote,'start':0,'end':len(quote)}]}
+    invalid={'claims':[{'claim_id':'a','context':_context(parameters=[{
+        'name':'latency','value':99,'unit':'ms','evidence':{'chunk_id':'c','quote':quote}}])}]}
+    valid={'claims':[{'claim_id':'a','context':_context()}]}
+    class Chat:
+        last_metadata={}
+        def __init__(self):self.calls=[]
+        def complete(self,prompt,schema):
+            self.calls.append(prompt);self.last_metadata={'usage':{'input_tokens':7}}
+            return invalid if len(self.calls)==1 else valid
+    raw=Chat();wrapped=GroundedChat(raw,doc)
+    prompt='P'*(CODEX_MAX_PROMPT_CHARS-1500)
+
+    assert wrapped.complete(prompt,{})==valid
+
+    assert len(raw.calls)==2
+    repair=raw.calls[1]
+    assert wrapped.last_metadata['repair_context_mode']=='paths_only_oversize'
+    assert 'claims[0].context.parameters[0].value: claim_context_value_not_literal' in repair
+    assert 'previous candidate omitted because complete failed entries exceed the provider prompt budget' in repair.lower()
+    assert 'PATH_ONLY_SOURCE_MARKER' not in repair
+    assert '"value":99' not in repair
+    assert len(repair)<=CODEX_MAX_PROMPT_CHARS
+    assert len(repair.encode('utf-8'))<=CODEX_MAX_PROMPT_BYTES
 
 @pytest.mark.parametrize('prompt_kind',['character_limit','utf8_byte_limit'])
 def test_repair_is_skipped_when_original_prompt_plus_instruction_would_exceed_provider_limit(prompt_kind):
@@ -93,6 +178,7 @@ def test_repair_is_skipped_when_original_prompt_plus_instruction_would_exceed_pr
     assert raw.calls==[prompt]
     assert wrapped.last_metadata['usage']=={'input_tokens':7}
     assert wrapped.last_metadata['provider_attempt_count']==1
+    assert wrapped.last_metadata['repair_context_mode']=='skipped_prompt_budget'
     from dse_knowledge.knowledge import validate_claim_context
     with pytest.raises(ValueError):
         validate_claim_context(invalid['claims'][0]['context'],{'material':{'id':'m'}})
@@ -143,12 +229,17 @@ def test_repair_feedback_reports_each_document_claim_value_and_unit_path_without
     raw=Chat();wrapped=GroundedChat(raw,doc)
     assert wrapped.complete('Synthetic source request.',{})==response2
     assert len(raw.calls)==2
-    feedback=raw.calls[1].split('LOCAL VALIDATION FAILED',1)[1]
+    candidate_marker='UNTRUSTED PRIOR TYPED RESPONSE CANDIDATE'
+    assert json.dumps(response1,ensure_ascii=False,separators=(',',':')) in raw.calls[1]
+    feedback=raw.calls[1].split(candidate_marker,1)[0].split('LOCAL VALIDATION FAILED',1)[1]
     for failure in expected:
         assert f"{failure['path']}: {failure['reason_code']}" in feedback
     assert all(quote not in feedback for quote in quotes)
     assert '"value":99' not in feedback and '"value":"100"' not in feedback and 'H1000' not in feedback
     assert wrapped.last_metadata['repair_failure_paths']==expected
+    metadata=json.dumps(wrapped.last_metadata,ensure_ascii=False)
+    assert all(quote not in metadata for quote in quotes)
+    assert '"value":99' not in metadata and '"value":"100"' not in metadata and 'H1000' not in metadata
     assert wrapped.last_metadata['repair_failures_truncated'] is False
     assert wrapped.last_metadata['usage']=={'input_tokens':30,'output_tokens':4}
     with pytest.raises(ValueError,match='claim_context_value_not_literal'):
@@ -191,9 +282,14 @@ def test_full_value_token_embedded_in_word_remains_invalid_after_one_repair():
     raw=Chat();wrapped=GroundedChat(raw,doc)
     assert wrapped.complete('Synthetic request.',{})==invalid
     assert len(raw.calls)==2
-    feedback=raw.calls[1].split('LOCAL VALIDATION FAILED',1)[1]
+    repair=raw.calls[1]
+    feedback=repair.split('UNTRUSTED PRIOR TYPED RESPONSE CANDIDATE',1)[0].split('LOCAL VALIDATION FAILED',1)[1]
     assert 'claims[0].context.parameters[0].value: claim_context_value_not_literal' in feedback
-    assert 'H1000' not in feedback and '"value":"100"' not in feedback
+    assert 'complete string value or complete numeric literal' in feedback.lower()
+    assert 'never take a substring from an identifier' in feedback.lower()
+    assert json.dumps(invalid,ensure_ascii=False,separators=(',',':')) in repair
+    metadata=json.dumps(wrapped.last_metadata,ensure_ascii=False)
+    assert 'H1000' not in metadata and '"value":"100"' not in metadata
     with pytest.raises(ValueError,match='claim_context_value_not_literal'):
         validate_claim_context(invalid['claims'][0]['context'],doc)
 
@@ -202,7 +298,8 @@ def test_invalid_output_recorder_stores_small_output_and_hashes_large_private_ou
     import stat
     from dse_knowledge.quality import _record_invalid_output
     key={'operation':'claim_context','material_id':'material-test','revision':'d'*64,'claim_ids':['claim-1']}
-    metadata={'provider_attempt_count':2,'repair_policy_version':'literal-field-feedback/v1',
+    metadata={'provider_attempt_count':2,'repair_policy_version':'literal-field-feedback/v2',
+              'repair_context_mode':'full_response_candidate',
               'repair_failure_paths':[{'path':'claims[0].context.parameters[0].value',
                                        'reason_code':'claim_context_value_not_literal'}],
               'usage':{'input_tokens':12,'output_tokens':4},'authorization':'PRIVATE_CREDENTIAL_SENTINEL'}
@@ -217,6 +314,7 @@ def test_invalid_output_recorder_stores_small_output_and_hashes_large_private_ou
     assert len(first['request_identity'])==64
     assert first['invalid_output']==small
     assert first['provider_metadata']['usage']=={'input_tokens':12,'output_tokens':4}
+    assert first['provider_metadata']['repair_context_mode']=='full_response_candidate'
     assert 'authorization' not in first['provider_metadata']
     assert 'PRIVATE_CREDENTIAL_SENTINEL' not in json.dumps(first)
 
@@ -356,6 +454,9 @@ def test_outer_extraction_contract_failures_record_last_response_not_success_cac
     artifact=json.loads(failures[0].read_text())
     assert artifact['invalid_output']==response
     assert artifact['operation']==('claim_context' if operation=='enrich_context' else 'structured_claims')
+    assert artifact['provider_metadata']['repair_context_mode']=='not_needed'
+    assert '"value":99' not in json.dumps(store.invocations)
+    assert doc['text'] not in json.dumps(store.invocations)
 
 
 @pytest.mark.parametrize('operation',['enrich_context','extract_structured'])
@@ -379,6 +480,7 @@ def test_fully_valid_quality_response_is_cached_without_failure_artifact(tmp_pat
     function=quality.enrich_context if operation=='enrich_context' else quality.extract_structured
     result=function(doc,settings,store=store)
     assert result['status'] in ('enriched','complete')
+    assert result['provider_metadata']['repair_context_mode']=='not_needed'
     assert len(clients)==1 and clients[0].calls==1
     cache_root=tmp_path/'quality-cache'
     assert len(list(cache_root.glob('*.json')))==1

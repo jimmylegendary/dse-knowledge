@@ -84,7 +84,7 @@ wheels = [
 
 [[package]]
 name = "dse-knowledge"
-version = "0.2.1"
+version = "0.2.2"
 source = { editable = "." }
 dependencies = [
     { name = "beautifulsoup4" },
