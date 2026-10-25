@@ -79,10 +79,30 @@ class MemoryRepository:
                 row["next_stage"] = "acquire"
                 remaining -= 1
 
-    def claim_next(self, batch_id, worker_id, owner, now, lease_seconds, stage_caps, max_workers):
+    def claim_next(self, batch_id, worker_id, owner, now, lease_seconds, stage_caps, max_workers, retry_max_attempts=3):
         batch = self.batches[batch_id]
         if batch["state"] == "blocked" or batch["state"] in {"complete", "incomplete"}:
             return None
+        for row in self.items[batch_id].values():
+            lease_expired = row.get("lease_owner") is None or row.get("lease_until") is None or row["lease_until"] <= now
+            if (row.get("next_stage") is None or row["state"] in {"complete", "reference_only", "excluded", "needs_review", "failed"}
+                    or row.get("attempts", 0) < retry_max_attempts or not lease_expired):
+                continue
+            previous_error = row.get("last_error") or {}
+            stage = row["next_stage"]
+            provider_outcome_unknown = previous_error.get("kind") == "provider_retry" and previous_error.get("stage") == stage
+            row["state"] = "failed"
+            row["next_stage"] = None
+            row["next_attempt_at"] = None
+            row["last_error"] = {
+                "code": "provider_retry_exhausted" if provider_outcome_unknown else "retry_exhausted",
+                "kind": "permanent",
+                "stage": stage,
+                "cause_code": "provider_attempt_outcome_unknown" if provider_outcome_unknown else "attempt_outcome_unknown",
+            }
+            row["lease_owner"] = None
+            row["lease_until"] = None
+            row["updated_at"] = now
         live = [
             row for rows in self.items.values() for row in rows.values()
             if row.get("lease_until") and row["lease_until"] > now
@@ -559,6 +579,285 @@ def test_provider_failure_streak_is_scoped_to_extract_provider_and_stage():
     assert calls == {"acquire": 3, "assess": 3, "index": 3, "extract": 3}
     assert repository.batches["batch-1"]["provider_failures"] == {"extract:codex": 3}
     assert manager.summary("batch-1")["batch_state"] == "blocked"
+
+
+def _ready_for_extract(repository, batch_id, *material_ids):
+    for material_id in material_ids:
+        row = repository.items[batch_id][material_id]
+        row["state"] = "indexed"
+        row["next_stage"] = "extract"
+        row["metadata"]["indexed"] = True
+
+
+class RecordingMemoryRepository(MemoryRepository):
+    def __init__(self):
+        super().__init__()
+        self.events = []
+
+    def ingest_event(self, material_id, status, detail):
+        self.events.append((material_id, status, deepcopy(detail)))
+
+
+def test_provider_retry_cap_exhausts_item_even_when_other_successes_reset_streak():
+    calls = []
+
+    def extract(record, _metadata):
+        material_id = record["material_id"]
+        calls.append(material_id)
+        if material_id == "retrying-source":
+            raise RetryableCollectionError("codex_timeout", provider="codex_cli")
+        return {
+            "next_state": "complete",
+            "metadata": {"claim_count": 1, "annotation_count": 1},
+            "usage": {"provider": "codex_cli"},
+        }
+
+    ids = ("retrying-source", "success-one", "success-two", "success-three")
+    manager, repository, clock = _manager(
+        _handlers(extract=extract), records=_records(*ids), target=len(ids),
+        policy={"retry_max_attempts": 3},
+    )
+    _ready_for_extract(repository, "batch-1", *ids)
+
+    for worker_id in ("worker-one", "worker-two", "worker-three"):
+        manager.run_worker("batch-1", worker_id, max_steps=2)
+        clock.advance(2)
+
+    item = repository.items["batch-1"]["retrying-source"]
+    summary = manager.summary("batch-1")
+    assert calls.count("retrying-source") == 3
+    assert item["attempts"] == 3
+    assert item["state"] == "failed"
+    assert item["next_stage"] is None
+    assert item["last_error"] == {
+        "code": "provider_retry_exhausted",
+        "kind": "permanent",
+        "stage": "extract",
+        "cause_code": "codex_timeout",
+    }
+    assert summary["last_error"]["cause_code"] == "codex_timeout"
+    assert repository.batches["batch-1"]["provider_failures"] == {}
+
+    manager.run_worker("batch-1", "worker-four", max_steps=1)
+    assert calls.count("retrying-source") == 3
+
+
+def test_third_provider_retry_exhaustion_still_records_and_trips_circuit():
+    calls = []
+
+    def extract(_record, _metadata):
+        calls.append(1)
+        raise RetryableCollectionError("codex_timeout", provider="codex_cli")
+
+    manager, repository, clock = _manager(
+        _handlers(extract=extract), records=_records("source-1"), target=1,
+        policy={"retry_max_attempts": 3}, repository=RecordingMemoryRepository(),
+    )
+    _ready_for_extract(repository, "batch-1", "source-1")
+
+    for worker_id in ("worker-one", "worker-two", "worker-three"):
+        manager.run_worker("batch-1", worker_id, max_steps=1)
+        clock.advance(2)
+
+    item = repository.items["batch-1"]["source-1"]
+    assert calls == [1, 1, 1]
+    assert item["state"] == "failed"
+    assert item["last_error"]["code"] == "provider_retry_exhausted"
+    assert item["last_error"]["cause_code"] == "codex_timeout"
+    assert repository.batches["batch-1"]["provider_failures"] == {"extract:codex_cli": 3}
+    assert manager.summary("batch-1")["batch_state"] == "blocked"
+    assert ("source-1", "collection_failed", {
+        "batch_id": "batch-1", "stage": "extract", "state": "failed",
+        "code": "provider_retry_exhausted", "cause_code": "codex_timeout", "worker_id": "worker-three",
+    }) in repository.events
+
+    manager.run_worker("batch-1", "worker-four", max_steps=1)
+    assert calls == [1, 1, 1]
+
+
+def test_provider_exhaustion_is_not_resurrected_by_explicit_batch_resume():
+    calls = []
+
+    def extract(_record, _metadata):
+        calls.append(1)
+        raise RetryableCollectionError("codex_timeout", provider="codex_cli")
+
+    manager, repository, clock = _manager(
+        _handlers(extract=extract), records=_records("source-1"), target=1,
+        policy={"retry_max_attempts": 3, "provider_cooldown_seconds": 30},
+    )
+    _ready_for_extract(repository, "batch-1", "source-1")
+    for worker_id in ("worker-one", "worker-two", "worker-three"):
+        manager.run_worker("batch-1", worker_id, max_steps=1)
+        clock.advance(2)
+    clock.advance(31)
+
+    assert manager.resume_batch("batch-1", "operator reviewed retry policy") is True
+    assert repository.batches["batch-1"]["provider_failures"] == {}
+    manager.run_worker("batch-1", "worker-after-resume", max_steps=1)
+
+    item = repository.items["batch-1"]["source-1"]
+    assert calls == [1, 1, 1]
+    assert item["state"] == "failed"
+    assert item["next_stage"] is None
+    assert item["last_error"]["code"] == "provider_retry_exhausted"
+
+
+def test_stale_owner_cannot_commit_provider_retry_exhaustion_or_circuit_count():
+    calls = []
+    clock = Clock()
+
+    def extract(_record, _metadata):
+        calls.append(1)
+        clock.advance(61)
+        raise RetryableCollectionError("codex_timeout", provider="codex_cli")
+
+    manager, repository, _ = _manager(
+        _handlers(extract=extract), records=_records("source-1"), target=1,
+        clock=clock, policy={"retry_max_attempts": 3, "lease_seconds": 60},
+    )
+    _ready_for_extract(repository, "batch-1", "source-1")
+    repository.items["batch-1"]["source-1"]["attempts"] = 2
+
+    manager.run_worker("batch-1", "worker-stale", max_steps=1)
+
+    item = repository.items["batch-1"]["source-1"]
+    assert calls == [1]
+    assert item["state"] == "indexed"
+    assert item["last_error"] is None
+    assert item["lease_owner"].startswith("worker-stale:")
+    assert repository.batches["batch-1"]["provider_failures"] == {}
+
+    manager.run_worker("batch-1", "worker-after-expiry", max_steps=1)
+
+    item = repository.items["batch-1"]["source-1"]
+    assert calls == [1]
+    assert item["attempts"] == 3
+    assert item["state"] == "failed"
+    assert item["next_stage"] is None
+    assert item["last_error"] == {
+        "code": "retry_exhausted",
+        "kind": "permanent",
+        "stage": "extract",
+        "cause_code": "attempt_outcome_unknown",
+    }
+    assert repository.batches["batch-1"]["provider_failures"] == {}
+
+
+def test_expired_third_provider_lease_is_terminalized_before_fourth_handler_attempt():
+    calls = []
+    clock = Clock()
+
+    def extract(_record, _metadata):
+        calls.append(1)
+        if len(calls) == 3:
+            clock.advance(61)
+        raise RetryableCollectionError("codex_timeout", provider="codex_cli")
+
+    manager, repository, _ = _manager(
+        _handlers(extract=extract), records=_records("source-1"), target=1,
+        clock=clock, policy={"retry_max_attempts": 3, "lease_seconds": 60},
+    )
+    _ready_for_extract(repository, "batch-1", "source-1")
+
+    for worker_id in ("worker-one", "worker-two"):
+        manager.run_worker("batch-1", worker_id, max_steps=1)
+        clock.advance(2)
+    assert repository.items["batch-1"]["source-1"]["attempts"] == 2
+    assert repository.batches["batch-1"]["provider_failures"] == {"extract:codex_cli": 2}
+
+    manager.run_worker("batch-1", "worker-stale-third", max_steps=1)
+    stale_row = repository.items["batch-1"]["source-1"]
+    assert calls == [1, 1, 1]
+    assert stale_row["attempts"] == 3
+    assert stale_row["state"] == "retry_wait"
+    assert stale_row["lease_until"] <= clock()
+    assert repository.batches["batch-1"]["provider_failures"] == {"extract:codex_cli": 2}
+
+    manager.run_worker("batch-1", "worker-after-expiry", max_steps=1)
+
+    item = repository.items["batch-1"]["source-1"]
+    assert calls == [1, 1, 1]
+    assert item["attempts"] == 3
+    assert item["state"] == "failed"
+    assert item["next_stage"] is None
+    assert item["lease_owner"] is None
+    assert item["last_error"] == {
+        "code": "provider_retry_exhausted",
+        "kind": "permanent",
+        "stage": "extract",
+        "cause_code": "provider_attempt_outcome_unknown",
+    }
+    assert repository.batches["batch-1"]["provider_failures"] == {"extract:codex_cli": 2}
+
+
+def test_active_attempt_at_retry_cap_is_not_terminalized_before_owner_finishes():
+    started = Event()
+    finish = Event()
+    calls = []
+
+    def extract(_record, _metadata):
+        calls.append(1)
+        started.set()
+        assert finish.wait(2)
+        raise RetryableCollectionError("codex_timeout", provider="codex_cli")
+
+    manager, repository, clock = _manager(
+        _handlers(extract=extract), records=_records("source-1"), target=1,
+        policy={"retry_max_attempts": 3, "lease_seconds": 60},
+    )
+    _ready_for_extract(repository, "batch-1", "source-1")
+    repository.items["batch-1"]["source-1"]["attempts"] = 2
+    worker = Thread(target=lambda: manager.run_worker("batch-1", "worker-active", max_steps=1))
+    worker.start()
+    assert started.wait(1)
+
+    manager.run_worker("batch-1", "worker-observer", max_steps=1)
+
+    active_item = repository.items["batch-1"]["source-1"]
+    assert calls == [1]
+    assert active_item["attempts"] == 3
+    assert active_item["state"] == "indexed"
+    assert active_item["lease_until"] > clock()
+    assert active_item["lease_owner"].startswith("worker-active:")
+
+    finish.set()
+    worker.join(2)
+    assert not worker.is_alive()
+    item = repository.items["batch-1"]["source-1"]
+    assert item["state"] == "failed"
+    assert item["last_error"]["code"] == "provider_retry_exhausted"
+    assert item["last_error"]["cause_code"] == "codex_timeout"
+
+
+@pytest.mark.parametrize("retry_cap", [1, 2])
+def test_expired_lease_at_nondefault_retry_cap_never_starts_an_extra_handler(retry_cap):
+    calls = []
+    clock = Clock()
+
+    def extract(_record, _metadata):
+        calls.append(1)
+        clock.advance(61)
+        raise RetryableCollectionError("codex_timeout", provider="codex_cli")
+
+    manager, repository, _ = _manager(
+        _handlers(extract=extract), records=_records("source-1"), target=1,
+        clock=clock, policy={"retry_max_attempts": retry_cap, "lease_seconds": 60},
+    )
+    _ready_for_extract(repository, "batch-1", "source-1")
+    repository.items["batch-1"]["source-1"]["attempts"] = retry_cap - 1
+
+    manager.run_worker("batch-1", "worker-first", max_steps=1)
+    manager.run_worker("batch-1", "worker-after-expiry", max_steps=1)
+
+    item = repository.items["batch-1"]["source-1"]
+    assert calls == [1]
+    assert item["attempts"] == retry_cap
+    assert item["state"] == "failed"
+    assert item["next_stage"] is None
+    assert item["last_error"]["code"] == "retry_exhausted"
+    assert item["last_error"]["cause_code"] == "attempt_outcome_unknown"
+    assert repository.batches["batch-1"]["provider_failures"] == {}
 
 
 def test_non_provider_transient_retries_have_a_finite_attempt_limit():

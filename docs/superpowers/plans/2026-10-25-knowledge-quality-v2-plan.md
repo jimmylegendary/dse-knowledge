@@ -31,6 +31,7 @@
 - [x] 6. Root UI/CLI에서role/typedcontext/topic 표시와purpose선택, DSEsnapshot refs/Melete환류·metric·HAT구조검증회귀. 별도workerreview와root실제E2E후Q1deploy.
 - [x] 7. 고정30regression와결과독립새질의/pairedlanguage로Q1평가. 실제3blindmodelprobe·feedback/native역할상한, 재시작/리트라이검증. Q1전체제품gate와정직한한계를공개한다.
 - [ ] 8. Root rawregistry에서1000용candidate준비, DB/host/공간/quota budget실측. 실제acquire→assess→index→structuredclaim lease workers를안전하게실행. 부분완료를전체완료로세지않는다.
+- Task8 recovery: ruling12의 provider stage attempt 상한을 C가 TDD로 보완하고 D가 독립 리뷰한다. Root는 실제 PG rollback에서 소진·circuit·resume·stale owner를 확인하고 전체 회귀 후 v0.2.3을 배포한다. 600초 단일 진단의 품질 실패는 유지하며 같은 batch의 collection unit만 600초로 재개한다. 완료된 438개 정본은 보존하고 이후 500개 지점의 상태·사용량·DB/host 공간을 확인한다.
 - [ ] 9. 실제1000의source/Claim/조건/graph/sourceRole와다른material새질의·같은UI/LLM/nativefeedback/metric/HAT회귀검증. Tokens/time/실패·재개·원문공간·DBindex/throughput평가.
 - [ ] 10. 별도최종review→root원자료·test·secret검증→README/metadata-only report→authorizedGitHub게시. Runtimeworktree는서비스경로여서삭제하지않는다.
 

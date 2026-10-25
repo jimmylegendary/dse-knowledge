@@ -237,7 +237,7 @@ class _PostgresRepository:
         with self.store.connection() as connection:
             self._promote_in_connection(connection, batch_id, None)
 
-    def claim_next(self, batch_id, worker_id, owner, now, lease_seconds, stage_caps, max_workers):
+    def claim_next(self, batch_id, worker_id, owner, now, lease_seconds, stage_caps, max_workers, retry_max_attempts=3):
         with self.store.connection() as connection:
             # Serialize capacity checks so concurrent workers cannot overbook global stage caps.
             connection.execute("SELECT pg_advisory_xact_lock(%s)", (self._CLAIM_LOCK_KEY,))
@@ -247,6 +247,35 @@ class _PostgresRepository:
             ).fetchone()
             if not batch or batch["state"] in {"blocked", "complete", "incomplete"}:
                 return None
+            exhausted = connection.execute(
+                """UPDATE dse_knowledge.collection_items
+                   SET state='failed',next_stage=NULL,next_attempt_at=NULL,
+                       last_error=CASE
+                         WHEN last_error->>'kind'='provider_retry' AND last_error->>'stage'=next_stage
+                           THEN jsonb_build_object('code','provider_retry_exhausted','kind','permanent',
+                             'stage',next_stage,'cause_code','provider_attempt_outcome_unknown')
+                         ELSE jsonb_build_object('code','retry_exhausted','kind','permanent',
+                             'stage',next_stage,'cause_code','attempt_outcome_unknown')
+                       END,
+                       lease_owner=NULL,lease_until=NULL,updated_at=%s
+                   WHERE batch_id=%s AND attempts >= %s AND next_stage IS NOT NULL
+                     AND state NOT IN ('complete','reference_only','excluded','needs_review','failed')
+                     AND (lease_owner IS NULL OR lease_until IS NULL OR lease_until<=%s)
+                   RETURNING material_id,last_error->>'stage' AS stage,
+                             last_error->>'code' AS error_code,last_error->>'cause_code' AS cause_code""",
+                (now, batch_id, retry_max_attempts, now),
+            ).fetchall()
+            for row in exhausted:
+                detail = {
+                    "batch_id": batch_id, "stage": row["stage"], "state": "failed",
+                    "code": row["error_code"], "cause_code": row["cause_code"],
+                }
+                connection.execute(
+                    """INSERT INTO dse_knowledge.ingest_events(id,material_id,status,detail,created_at)
+                       VALUES(%s,%s,'collection_failed',%s,%s) ON CONFLICT(id) DO NOTHING""",
+                    (self._event_id("collection-expired-stage-attempt", batch_id, row["material_id"], row["stage"]),
+                     row["material_id"], Jsonb(detail), now),
+                )
             self._promote_in_connection(connection, batch_id, int(batch["target"]))
             live_workers = connection.execute(
                 """SELECT count(DISTINCT split_part(lease_owner,':',1)) AS n
@@ -792,7 +821,7 @@ class CollectionManager:
     def _event(self, item, status, detail):
         writer = getattr(self.store, "ingest_event", None)
         if callable(writer):
-            safe = {key: value for key, value in detail.items() if key in {"batch_id", "stage", "state", "code", "usage", "worker_id"}}
+            safe = {key: value for key, value in detail.items() if key in {"batch_id", "stage", "state", "code", "cause_code", "usage", "worker_id"}}
             try:
                 writer(item["material_id"], status, safe)
             except Exception:
@@ -841,7 +870,27 @@ class CollectionManager:
 
     def _record_retry(self, batch_id, item, owner, stage, exc, worker_id):
         provider_key = self._provider_key(stage, exc.provider)
-        if provider_key is None and int(item.get("attempts", 1)) >= self.retry_max_attempts:
+        if int(item.get("attempts", 1)) >= self.retry_max_attempts:
+            if provider_key is not None:
+                cause_code = _safe_code(exc.code, "provider_error")
+                error = {
+                    "code": "provider_retry_exhausted",
+                    "kind": "permanent",
+                    "stage": stage,
+                    "cause_code": cause_code,
+                }
+                accepted = self.repository.fail(
+                    batch_id, item["material_id"], owner, self.clock(),
+                    state="failed", next_stage=None, next_attempt_at=None, error=error,
+                    provider_key=provider_key, cooldown=PROVIDER_FAILURE_LIMIT,
+                )
+                if accepted:
+                    self.repository.promote(batch_id)
+                    self._event(item, "collection_failed", {
+                        "batch_id": batch_id, "stage": stage, "state": "failed",
+                        "code": error["code"], "cause_code": cause_code, "worker_id": worker_id,
+                    })
+                return
             self._record_permanent(
                 batch_id, item, owner, stage,
                 PermanentCollectionError("retry_exhausted", state="failed"), worker_id,
@@ -963,6 +1012,7 @@ class CollectionManager:
             owner = f"{worker_id}:{uuid.uuid4().hex}"
             item = self.repository.claim_next(
                 batch_id, worker_id, owner, now, self.lease_seconds, self.stage_caps, self.max_workers,
+                self.retry_max_attempts,
             )
             if item is None:
                 self._maybe_finalize(batch_id)
@@ -1068,7 +1118,7 @@ class CollectionManager:
             raw_last_error = _as_mapping(raw_last_error)
             last_error = {
                 key: raw_last_error[key]
-                for key in ("code", "kind", "stage")
+                for key in ("code", "kind", "stage", "cause_code")
                 if isinstance(raw_last_error.get(key), str)
             }
         else:
