@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from copy import deepcopy
 import hashlib
 import importlib.util
 import json
@@ -57,6 +58,42 @@ def _fixture_snapshot():
     }
 
 
+def _expanded_snapshot(material_count, claim_material_count, annotated_material_count):
+    snapshot = _fixture_snapshot()
+    base_material = snapshot["materials"][0]
+    base_revision = snapshot["revisions"][0]
+    base_chunk = snapshot["chunks"][0]
+    base_claim = snapshot["claims"][0]
+    base_annotation = snapshot["annotations"][0]
+    for index in range(2, material_count + 1):
+        material_id = f"material-private-{index}"
+        snapshot["materials"].append({**deepcopy(base_material), "id": material_id})
+        if index > claim_material_count:
+            continue
+        revision_id = f"revision-{index}"
+        chunk_id = f"chunk-{index}"
+        claim_id = f"claim-private-{index}"
+        snapshot["revisions"].append({**deepcopy(base_revision), "id": revision_id, "material_id": material_id})
+        snapshot["chunks"].append({
+            **deepcopy(base_chunk), "id": chunk_id, "revision_id": revision_id, "material_id": material_id,
+        })
+        snapshot["claims"].append({
+            **deepcopy(base_claim), "id": claim_id, "material_id": material_id,
+            "revision_id": revision_id, "chunk_id": chunk_id,
+        })
+        if index <= annotated_material_count:
+            annotation = {
+                **deepcopy(base_annotation), "id": f"annotation-private-{index}",
+                "claim_id": claim_id, "revision_id": revision_id,
+            }
+            for group in ("parameters", "conditions"):
+                for item in annotation["context"][group]:
+                    item["evidence"]["chunk_id"] = chunk_id
+                    item["evidence"]["material_id"] = material_id
+            snapshot["annotations"].append(annotation)
+    return snapshot
+
+
 def test_reconstruct_raw_context_preserves_raw_value_unit_and_evidence_id():
     snapshot = _fixture_snapshot()
     normalized = snapshot["annotations"][0]["context"]
@@ -95,6 +132,44 @@ def test_valid_current_revision_claim_and_annotation_count_as_quality_complete()
     assert report["technical_eligible"]["claim_material_coverage_rate"] == 1.0
     assert report["technical_eligible"]["fully_annotated_material_rate"] == 1.0
     assert report["technical_eligible"]["claim_coverage_target_met"] is True
+    assert report["technical_eligible"]["kg_complete_material_rate"] == 1.0
+    assert report["technical_eligible"]["kg_coverage_target_met"] is True
+    assert report["roles"]["core_technical"]["kg_complete_material_rate"] == 1.0
+    assert report["roles"]["core_technical"]["kg_coverage_target_met"] is True
+
+
+def test_conditional_annotation_rate_is_distinct_from_all_eligible_kg_coverage():
+    report = audit.build_audit_report(_expanded_snapshot(104, 102, 97))
+    technical = report["technical_eligible"]
+
+    assert technical["fully_annotated_material_count"] == 97
+    assert technical["current_claim_material_count"] == 102
+    assert technical["material_count"] == 104
+    assert technical["fully_annotated_material_rate"] == 97 / 102
+    assert technical["fully_annotated_among_claim_materials_rate"] == 97 / 102
+    assert technical["fully_annotated_material_rate_basis"] == "eligible_materials_with_current_revision_claims"
+    assert technical["kg_complete_count"] == 97
+    assert technical["kg_complete_material_rate"] == 97 / 104
+    assert technical["kg_complete_material_rate_basis"] == "kg_eligible_materials"
+    assert technical["claim_coverage_target_met"] is True
+    assert technical["kg_coverage_target_met"] is True
+    role = report["roles"]["core_technical"]
+    assert role["fully_annotated_material_rate"] == 97 / 102
+    assert role["kg_complete_material_rate"] == 97 / 104
+
+
+def test_few_annotated_materials_do_not_pass_all_eligible_kg_coverage_gate():
+    report = audit.build_audit_report(_expanded_snapshot(104, 104, 80))
+    technical = report["technical_eligible"]
+
+    assert technical["materials_with_source_valid_claims"] == 104
+    assert technical["current_claim_material_count"] == 104
+    assert technical["fully_annotated_material_count"] == 80
+    assert technical["fully_annotated_material_rate"] == 80 / 104
+    assert technical["kg_complete_material_rate"] == 80 / 104
+    assert technical["kg_coverage_target_met"] is False
+    assert report["roles"]["core_technical"]["kg_complete_material_rate"] == 80 / 104
+    assert report["roles"]["core_technical"]["kg_coverage_target_met"] is False
 
 
 def test_canonical_audit_can_validate_chunk_text_against_revision_without_retaining_duplicate_body():
@@ -144,6 +219,10 @@ def test_empty_technical_cohort_is_not_evaluated_and_rate_is_null():
     assert technical["claim_material_coverage_rate"] is None
     assert technical["fully_annotated_material_rate"] is None
     assert report["roles"]["source_navigation"]["kg_complete_count"] == 0
+    assert technical["kg_complete_material_rate"] is None
+    assert technical["kg_coverage_target_met"] is None
+    assert report["roles"]["source_navigation"]["kg_complete_material_rate"] is None
+    assert report["roles"]["source_navigation"]["kg_coverage_target_met"] is None
 
 
 def test_artifact_verification_checks_content_addressed_path_before_read_and_caches_digest(tmp_path):

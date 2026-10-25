@@ -22,6 +22,8 @@ from dse_knowledge.knowledge import SOURCE_ROLES, validate_claim_context
 
 TECHNICAL_ROLES = ("core_technical", "supporting_method", "integration_operations")
 REFERENCE_ROLES = ("source_navigation", "out_of_scope")
+CLAIM_COVERAGE_THRESHOLD = 0.90
+KG_COVERAGE_THRESHOLD = 0.90
 KNOWN_CATEGORIES = {
     "llm_model_workload", "dse_optimization", "hardware_architecture",
     "simulation_measurement", "compiler_kernel", "memory_interconnect",
@@ -389,16 +391,18 @@ def build_audit_report(snapshot, *, generated_at=None, baseline_report=None, art
         role_fully_annotated[role] = fully_annotated_count
         is_reference = role in REFERENCE_ROLES
         is_unknown = role == "unclassified"
+        kg_eligible = not is_reference and not is_unknown
         role_status = (
             "not_applicable" if is_reference else
             ("needs_review" if denominator else "not_evaluated") if is_unknown else
             "evaluated" if denominator else "not_evaluated"
         )
-        coverage_rate = None if is_reference or is_unknown else _ratio(evidence_material_count, denominator)
-        annotation_rate = None if is_reference or is_unknown else _ratio(fully_annotated_count, current_claim_material_count)
+        coverage_rate = None if not kg_eligible else _ratio(evidence_material_count, denominator)
+        annotation_rate = None if not kg_eligible else _ratio(fully_annotated_count, current_claim_material_count)
+        kg_complete_rate = None if not kg_eligible else _ratio(fully_annotated_count, denominator)
         role_report[role] = {
             "status": role_status,
-            "kg_eligible": not is_reference and not is_unknown,
+            "kg_eligible": kg_eligible,
             "material_count": denominator,
             "claim_count_all_revisions": role_claim_count,
             "current_revision_claim_count": current_claim_count,
@@ -408,7 +412,18 @@ def build_audit_report(snapshot, *, generated_at=None, baseline_report=None, art
             "fully_annotated_material_count": fully_annotated_count,
             "claim_material_coverage_rate": coverage_rate,
             "fully_annotated_material_rate": annotation_rate,
-            "kg_complete_count": 0 if is_reference or is_unknown else fully_annotated_count,
+            "fully_annotated_among_claim_materials_rate": annotation_rate,
+            "fully_annotated_material_rate_basis": (
+                "materials_with_current_revision_claims" if kg_eligible else None
+            ),
+            "kg_complete_count": 0 if not kg_eligible else fully_annotated_count,
+            "kg_complete_material_rate": kg_complete_rate,
+            "kg_complete_material_rate_basis": "kg_eligible_materials" if kg_eligible else None,
+            "kg_coverage_threshold": KG_COVERAGE_THRESHOLD,
+            "kg_coverage_target_met": (
+                kg_complete_rate >= KG_COVERAGE_THRESHOLD
+                if kg_eligible and kg_complete_rate is not None else None
+            ),
         }
 
     eligible_material_count = sum(len(by_role_materials[role]) for role in TECHNICAL_ROLES)
@@ -419,7 +434,11 @@ def build_audit_report(snapshot, *, generated_at=None, baseline_report=None, art
     eligible_fully_annotated = sum(role_fully_annotated[role] for role in TECHNICAL_ROLES)
     eligible_claim_rate = _ratio(eligible_evidence_material_count, eligible_material_count)
     eligible_annotation_rate = _ratio(eligible_fully_annotated, eligible_claim_material_count)
-    role_claim_complete = eligible_claim_rate is not None and eligible_claim_rate >= 0.90
+    eligible_kg_rate = _ratio(eligible_fully_annotated, eligible_material_count)
+    role_claim_complete = eligible_claim_rate is not None and eligible_claim_rate >= CLAIM_COVERAGE_THRESHOLD
+    kg_coverage_target_met = (
+        eligible_kg_rate >= KG_COVERAGE_THRESHOLD if eligible_kg_rate is not None else None
+    )
 
     current_content_chars = sum(
         len(revision.get("content")) for revision in current_revisions.values()
@@ -464,11 +483,17 @@ def build_audit_report(snapshot, *, generated_at=None, baseline_report=None, art
             "material_count": eligible_material_count,
             "materials_with_source_valid_claims": eligible_evidence_material_count,
             "current_claim_material_count": eligible_claim_material_count,
-        "fully_annotated_material_count": eligible_fully_annotated,
+            "fully_annotated_material_count": eligible_fully_annotated,
             "claim_material_coverage_rate": eligible_claim_rate,
             "fully_annotated_material_rate": eligible_annotation_rate,
-        "kg_complete_count": eligible_fully_annotated,
-            "claim_coverage_threshold": 0.90,
+            "fully_annotated_among_claim_materials_rate": eligible_annotation_rate,
+            "fully_annotated_material_rate_basis": "eligible_materials_with_current_revision_claims",
+            "kg_complete_count": eligible_fully_annotated,
+            "kg_complete_material_rate": eligible_kg_rate,
+            "kg_complete_material_rate_basis": "kg_eligible_materials",
+            "kg_coverage_threshold": KG_COVERAGE_THRESHOLD,
+            "kg_coverage_target_met": kg_coverage_target_met,
+            "claim_coverage_threshold": CLAIM_COVERAGE_THRESHOLD,
             "claim_coverage_target_met": role_claim_complete if eligible_material_count else None,
         },
         "claims": {

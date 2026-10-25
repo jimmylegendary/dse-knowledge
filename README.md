@@ -30,7 +30,7 @@
 
 공개 회귀의 최초 v2는 source Hit@5 22/24로 실패했다. 기존 hybrid 채널 순위가 의미상 적절한 source를 밀어내고 locator를 별도 분리한 결과를 평가에서 누락한 것을 확인했다. source 선택과 source 내 passage 선택을 구분하고, 실제 UI 검색과 기술근거 스트림을 나눠 위 결과를 얻었다. 이 정책과 새 한·영 14개 번역쌍(정상 12쌍·미지원 2쌍)을 먼저 고정했으며, 새 결과로 정책을 튜닝하지 않는다. Graph 유무만 바꾼 통제 실험이 아니므로 개선을 graph의 단독 효과로 주장하지 않는다.
 
-1,000개 단계는 **기존 100개 포함** 실제 ingested fulltext 1,000개와 기술 역할 자료의 grounded Claim/annotation coverage 90% 이상을 목표로 한다. 정상·미지원 판단, HAT 구조검증, metric 비교, Melete 환류, 재개와 같은 전체 제품 경로를 다시 확인해야 종료한다. metadata 1,000개나 provider 실패를 성공으로 세지 않는다. 145,748개 전체 실행은 이 작업 범위가 아니다.
+1,000개 단계는 **기존 100개 포함** 실제 ingested fulltext 1,000개와 기술 역할 자료의 grounded Claim/annotation coverage 90% 이상을 목표로 한다. KG coverage의 분모는 Claim이 없는 자료도 포함한 전체 기술 역할 자료이며, Claim 자료만을 분모로 한 조건부 annotation 비율은 별도 표시한다. 빈 분모는 `null`이다. 정상·미지원 판단, HAT 구조검증, metric 비교, Melete 환류, 재개와 같은 전체 제품 경로를 다시 확인해야 종료한다. metadata 1,000개나 provider 실패를 성공으로 세지 않는다. 145,748개 전체 실행은 이 작업 범위가 아니다.
 
 공개 재현 자료: [quality-v2-2026-10-25.json](https://github.com/jimmylegendary/dse-knowledge/blob/main/research/pilot100/quality-v2-2026-10-25.json), [retrieval-paired-2026-10-25.json](https://github.com/jimmylegendary/dse-knowledge/blob/main/research/pilot100/retrieval-paired-2026-10-25.json). 새 질문셋도 결과를 공개한 이후에는 regression이며 다시 blind holdout으로 사용하지 않는다. 본문 quote는 hash로 대체했고 모델 답변·vector·private 설정은 게시하지 않는다.
 
