@@ -1,0 +1,78 @@
+{
+  "schema_version": "retrieval-evaluation-report/v1",
+  "test_sha256": "d4bc5ea35e7128d1a72ccafbf72ea1b5e36fb428cbf3a7c395db9059de5655a9",
+  "case_count": 500,
+  "selected_run": "rerank-8b",
+  "runs": [
+    {
+      "id": "baseline",
+      "label": "Baseline · RRF",
+      "model": "none",
+      "journal_payload_sha256": "ee1c98a27b7cb3a4f385eb89477c7f2a93299dd9be135304d7dd9116c1774665",
+      "journal_gzip_sha256": "e761f7caaae8abdb4b6f20a0e394113352361171654b5be53591dfd14762c0bd"
+    },
+    {
+      "id": "rerank-8b",
+      "label": "Rerank · Qwen 8B",
+      "model": "Qwen/Qwen3-Reranker-8B",
+      "journal_payload_sha256": "73c5ee3cc36688a1f135d5ccd3b595292f35925d8729b5d5afdcc13db5b0f361",
+      "journal_gzip_sha256": "9a0a1d52d5af0c63bf7d7874598be56035e200d89c5e711406b685a90f3f5cf4"
+    }
+  ],
+  "report_sha256": "f29a6bb1e19be723da7f5a05b878d1af6d7c2e7cd427c23f1465f0b36bd07f53",
+  "notes": [
+    "이 판본은 동일한 frozen test 500건의 baseline과 선택된 Qwen 8B reranker 결과를 보고한다. Contextual-only와 combined는 전체 문맥 인덱스 구축 후 같은 입력으로 평가한다.",
+    "모델 선택은 별도 calibration 100건에서만 수행했다. Test 결과를 보고 질문·정답·모델·threshold를 바꾸지 않았다.",
+    "처음 baseline calibration의 optional graph_rank=null 변환 오류, 처음 rerank calibration의 미평가 보충 항목 변환 오류는 무효 attempt로 따로 보존했고 품질 점수 비교에 넣지 않았다.",
+    "API 지연은 cache·외부 provider·동시 요청 경합을 포함한 관측값이며 latency SLA나 독립된 처리 용량 측정이 아니다.",
+    "공개 run_id·trace_id·hash·loopback URL은 재현을 위한 비밀이 아닌 provenance다. 원문 본문·생성 문맥·벡터·credential은 공개하지 않는다."
+  ],
+  "model_selection": {
+    "schema_version": "calibration-model-selection/v1",
+    "uses_test_results": false,
+    "calibration_cases": 100,
+    "rule": "max all-chunk-groups@5; then max chunk MRR@5; then min near-boundary FPR; final tie 4B",
+    "explanation": "동일 calibration 100건에서 모든 chunk 근거 그룹@5 → chunk MRR@5 → 낮은 near-boundary FPR → 최종 동률 4B 순으로 선택했습니다. test 결과는 사용하지 않았습니다.",
+    "selected": {
+      "model": "8b",
+      "run_id": "rerank-8b",
+      "quality_tuple": [
+        0.95,
+        0.9116666666666667,
+        -0.25,
+        0
+      ],
+      "chunk_all_groups_hit_at_5": 0.95,
+      "chunk_mrr_at_5": 0.9116666666666667,
+      "near_boundary_fpr": 0.25
+    },
+    "candidates": [
+      {
+        "model": "4b",
+        "run_id": "rerank-4b-v2",
+        "quality_tuple": [
+          0.9,
+          0.8861111111111111,
+          -0.45,
+          1
+        ],
+        "chunk_all_groups_hit_at_5": 0.9,
+        "chunk_mrr_at_5": 0.8861111111111111,
+        "near_boundary_fpr": 0.45
+      },
+      {
+        "model": "8b",
+        "run_id": "rerank-8b",
+        "quality_tuple": [
+          0.95,
+          0.9116666666666667,
+          -0.25,
+          0
+        ],
+        "chunk_all_groups_hit_at_5": 0.95,
+        "chunk_mrr_at_5": 0.9116666666666667,
+        "near_boundary_fpr": 0.25
+      }
+    ]
+  }
+}
