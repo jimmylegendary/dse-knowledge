@@ -334,6 +334,12 @@ def _project_item(item: object, *, slot: int) -> dict:
     projected_trace = {}
     for key in numeric:
         if key in trace:
+            # A result without a graph-derived rank carries null. Preserve
+            # that optional-channel state; it is distinct from rank_score,
+            # which remains required and finite.
+            if key == "graph_rank" and trace[key] is None:
+                projected_trace[key] = None
+                continue
             projected_trace[key] = _finite_scalar(trace[key], field=f"trace.{key}")
     for key in booleans:
         if key in trace:

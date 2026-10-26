@@ -124,6 +124,56 @@ def response(score, *, items=None, source_results=None):
     }
 
 
+def captured_canary_metadata_result(*, graph_rank=None):
+    """Metadata-only fixture matching the captured v2.2 response shape."""
+    item = {
+        'chunk_id': 'chunk-canary',
+        'material_id': 'material-canary',
+        'revision_id': 'revision-canary',
+        'start_offset': 0,
+        'end_offset': 128,
+        'scope': 'source',
+        'role': 'core_technical',
+        'role_metadata': {'applicability_limit': None},
+        'role_policy': {
+            'role': 'core_technical', 'purpose': 'design', 'weight': 1.0,
+            'needs_review': False, 'is_locator': False,
+            'evidence_authority': None, 'evidence_ceiling': None,
+            'use_ceiling': 'bounded', 'auto_uncertain': False,
+            'policy_version': POLICY,
+        },
+        'scores': {'dense': 0.016, 'lexical': 0.0, 'exact': 0.0},
+        'trace': {
+            'channel_ranks': {'dense': 1, 'lexical': 0},
+            'dense_candidate_limit': 40, 'dense_candidate_method': 'exact_dense_scan',
+            'dense_candidate_policy_version': 'dse-evidence-v2.2',
+            'dense_scope_cap': 50000, 'dense_scope_count': 1000,
+            'graph_boost': 0.0, 'graph_candidate_limit': 30,
+            'graph_discarded_link_count': 0, 'graph_proof_count': 0,
+            'graph_rank': graph_rank, 'graph_topic_idf': 0.0,
+            'graph_truncated': False, 'purpose_rule': 'metadata-fixture',
+            'purpose_uncertain': False, 'query_embedding_cache_hit': False,
+            'query_embedding_task': 'retrieval_query', 'query_relevance': 2,
+            'rank_score': 0.021898263027295285, 'role_weight': 1.0,
+            'semantic_anchors': {},
+        },
+        'rank': 0.021898263027295285,
+        'result_kind': 'evidence',
+        'retrieval_policy': POLICY,
+    }
+    return {
+        'policy_version': POLICY,
+        'purpose': 'design',
+        'purpose_trace': {'requested': 'auto', 'resolved': 'design', 'rule': 'metadata-fixture', 'uncertain': False, 'version': 'v2.2'},
+        'items': [item],
+        'source_results': [item],
+        'locators': [],
+        'dense_candidate_trace': {'method': 'exact_dense_scan', 'scope_count': 1000, 'scope_cap': 50000, 'candidate_limit': 40, 'policy_version': 'dse-evidence-v2.2'},
+        'channels': {'dense': 40, 'lexical': 40, 'exact': 20, 'graph': 0},
+        'graph_trace': {'candidate_limit': 30, 'fetch_limit': 31, 'fetched_unique_candidates': 0, 'returned_candidates': 0, 'truncated': False},
+    }
+
+
 def test_case_contract_enforces_frozen_calibration_and_test_distribution():
     calibration = cases_for('calibration')
     test = cases_for('test')
@@ -230,6 +280,39 @@ def test_primary_score_uses_max_items_rank_score_not_response_order():
 def test_primary_score_fails_on_missing_or_malformed_nonempty_items(items):
     with pytest.raises(metrics.EvalScoreError):
         metrics.primary_score(response(0.1, items=items))
+
+
+def test_captured_canary_metadata_with_null_graph_rank_reaches_case_record_projection():
+    case = next(case for case in cases_for('calibration') if case['answerability'] == 'supported')
+    raw = json.dumps(captured_canary_metadata_result()).encode('utf-8')
+    fake_response = FakeResponse(raw, headers={'Content-Length': str(len(raw))})
+    transport = runner.HTTPTransport(
+        'http://127.0.0.1:8080',
+        urlopen=lambda _request, timeout: fake_response,
+        sleep_fn=lambda _delay: None,
+    )
+    search_response = transport.post_search({
+        'query': case['query'], 'category': '', 'limit': 12, 'purpose': 'auto',
+    })
+    response_body, http_status, attempts, response_bytes = runner._response_parts(search_response)
+    record = runner._case_result_record(
+        case, index=0, response_body=response_body, error=None, latency=0.01,
+    )
+    assert record['status'] == 'ok'
+    assert record['error_type'] is None
+    assert http_status == record['http_status'] == 200
+    assert attempts == 1 and response_bytes == len(raw) == fake_response.read_bytes
+    assert record['score'] == pytest.approx(0.021898263027295285)
+    assert record['result']['channels'] == {'dense': 40, 'lexical': 40, 'exact': 20, 'graph': 0}
+    assert record['result']['items'][0]['trace']['graph_rank'] is None
+    serialized = json.dumps(record)
+    for forbidden in ('source text', 'claim_contexts', 'neighbor_evidence', 'query_embedding_usage', 'retrieval_policy'):
+        assert forbidden not in serialized
+
+
+def test_captured_canary_metadata_still_rejects_malformed_non_null_graph_rank():
+    with pytest.raises(metrics.EvalScoreError, match='trace.graph_rank'):
+        metrics.project_search_result(captured_canary_metadata_result(graph_rank='not-a-number'))
 
 
 def test_threshold_uses_largest_calibration_cutoff_meeting_tpr_with_ties_included():
