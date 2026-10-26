@@ -33,6 +33,8 @@
 - [x] Implement above files, focused tests and self-review, then independent code review. Runtime suite 581 passed; meaningful provider/receipt/engine mismatch cases included.
 - [x] Root real provider preflight; build complete contextual index with checkpoint/cache and usage accounting. Eligible999/18512, canonical1000/18518; SQLite3.54 profile and strict integrity verified.
 - [x] Root compare same frozen dataset across baseline/context/rerank/combined, calibration-only model selection; report failures and latency as observed. Each test500/cal100 completed without execution errors; grey-zone quality gate remains FAIL.
-- [ ] Activate reviewed implementation for actual UI/API; verify baseline regression+new real E2E; publish tests/results/code/HTML to GitHub.
+- [x] Activate reviewed implementation for actual UI/API; verify baseline regression+new real E2E; publish tests/results/code/HTML to GitHub. Publication `afec863` verified against remote main; live HTML matches the published artifact bytes. Rerank and combined each real E2E18/18, restart retains3 snapshots without Codex reruns; desktop1280/mobile390 have no page overflow.
+
+Completion evidence: runtime core `2a662a8`; frozen test500/calibration100 unchanged; four test runs total2,000 successful cases and five calibration runs total500 successful cases, zero execution errors. Independent public artifact recomputation passed. Combined Chunk Hit@5 95.7%, MRR@5 0.880, OOD FPR0%, grey-zone FPR39%: the declared grey-zone target20% remains FAIL. This phase completes the implemented retrieval upgrade and reproducible experiment, not general answerability or native HAT simulation verification.
 
 This is one complete product upgrade phase, ending with the whole application and actual dependencies, not an index-only demo. Corpus authoring/evaluation continues in the sibling worktree and is not replaced by this task.
