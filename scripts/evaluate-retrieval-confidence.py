@@ -2,8 +2,9 @@
 """Run the frozen eval500 calibration/test sets through POST /api/search.
 
 This tool records a rank-derived retrieval score proxy, not calibrated answer
-confidence. It sends query/category/limit/purpose only; case labels and qrels
-never enter the request body. The JSONL journal is owner-only and resumable.
+confidence. It sends query/category/limit/purpose/retrieval_mode only; score
+selection, case labels, and qrels never enter the request body. The JSONL
+journal is owner-only and resumable.
 """
 from __future__ import annotations
 
@@ -84,6 +85,33 @@ def _validated_base_url(base_url: str) -> str:
     return base_url.rstrip("/")
 
 
+def _validated_retrieval_mode(value: str) -> str:
+    if value not in metrics.RETRIEVAL_MODES:
+        raise EvaluationRunError("invalid_retrieval_mode")
+    return value
+
+
+def _validated_score_name(value: str) -> str:
+    if value not in metrics.SCORE_NAMES:
+        raise EvaluationRunError("invalid_score_name")
+    return value
+
+
+def _request_body(retrieval_mode: str) -> dict:
+    return {**REQUEST_BODY, "retrieval_mode": _validated_retrieval_mode(retrieval_mode)}
+
+
+def _score_definition(score_name: str) -> str:
+    score_name = _validated_score_name(score_name)
+    if score_name == metrics.SCORE_NAME:
+        return "maximum finite item.trace.rank_score; empty items score 0; malformed scores are errors"
+    return (
+        "maximum item.trace.reranker_relevance_score in [0,1] among scored items; empty items score 0; "
+        "unclassified backfill without a candidate rank is skipped; missing or malformed candidate scores "
+        "and no scored candidates are errors; relevance is not answerability"
+    )
+
+
 class HTTPTransport:
     """Bounded urllib client with two transient retries and a 2.5 MB response cap."""
 
@@ -117,12 +145,16 @@ class HTTPTransport:
         return min(MAX_RETRY_SLEEP_SECONDS, float(2 ** (attempt - 1)))
 
     def post_search(self, payload: dict) -> SearchResponse:
-        if not isinstance(payload, dict) or set(payload) != {"query", "category", "limit", "purpose"}:
+        legacy_fields = {"query", "category", "limit", "purpose"}
+        mode_fields = legacy_fields | {"retrieval_mode"}
+        if not isinstance(payload, dict) or set(payload) not in (legacy_fields, mode_fields):
             raise SearchRequestError("invalid_request_shape")
         if not isinstance(payload.get("query"), str) or not payload["query"].strip() or len(payload["query"]) > 2000:
             raise SearchRequestError("invalid_request_query")
         if payload.get("category") != "" or payload.get("limit") != 12 or payload.get("purpose") != "auto":
             raise SearchRequestError("request_policy_mismatch")
+        if "retrieval_mode" in payload and payload.get("retrieval_mode") not in metrics.RETRIEVAL_MODES:
+            raise SearchRequestError("invalid_request_retrieval_mode")
         encoded = json.dumps(payload, ensure_ascii=False, separators=(",", ":")).encode("utf-8")
         request = urllib.request.Request(
             self.base_url + "/api/search", data=encoded,
@@ -205,11 +237,19 @@ def _read_case_file(path: Path, stage: str) -> tuple[list[dict], str, dict]:
 
 
 def _case_contract_sha256() -> str:
-    contract_path = Path(__file__).resolve().parents[1] / ".superpowers" / "sdd" / "eval500" / "case-contract.json"
-    try:
-        return hashlib.sha256(contract_path.read_bytes()).hexdigest()
-    except OSError:
-        raise EvaluationRunError("case_contract_unavailable") from None
+    repo_root = Path(__file__).resolve().parents[1]
+    contract_paths = (
+        repo_root / "research" / "eval500" / "case-contract-v1.json",
+        repo_root / ".superpowers" / "sdd" / "eval500" / "case-contract.json",
+    )
+    for contract_path in contract_paths:
+        try:
+            return hashlib.sha256(contract_path.read_bytes()).hexdigest()
+        except FileNotFoundError:
+            continue
+        except OSError:
+            raise EvaluationRunError("case_contract_unavailable") from None
+    raise EvaluationRunError("case_contract_unavailable")
 
 
 def _validate_sha256(value: str, code: str) -> str:
@@ -426,7 +466,10 @@ def _write_private_json_no_overwrite(path: Path, value: dict) -> str:
                 pass
 
 
-def _threshold_policy(path: Path, corpus_manifest_sha256: str, case_contract_sha256: str) -> tuple[dict, str]:
+def _threshold_policy(path: Path, corpus_manifest_sha256: str, case_contract_sha256: str, *,
+                      retrieval_mode: str = "baseline", score_name: str = metrics.SCORE_NAME) -> tuple[dict, str]:
+    retrieval_mode = _validated_retrieval_mode(retrieval_mode)
+    score_name = _validated_score_name(score_name)
     value, digest = _load_private_json(path)
     if (value.get("schema_version") != THRESHOLD_SCHEMA_VERSION
             or value.get("runner_version") != RUNNER_VERSION
@@ -435,14 +478,18 @@ def _threshold_policy(path: Path, corpus_manifest_sha256: str, case_contract_sha
         raise EvaluationRunError("threshold_identity_mismatch")
     if (value.get("policy_version") != EXPECTED_POLICY_VERSION
             or value.get("corpus_manifest_sha256") != corpus_manifest_sha256
-            or value.get("case_contract_sha256") != case_contract_sha256):
+            or value.get("case_contract_sha256") != case_contract_sha256
+            or value.get("retrieval_mode") != retrieval_mode):
         raise EvaluationRunError("threshold_identity_mismatch")
-    if value.get("score_name") != metrics.SCORE_NAME or value.get("comparison") != ">=":
+    if value.get("score_name") != score_name or value.get("comparison") != ">=":
         raise EvaluationRunError("threshold_identity_mismatch")
     threshold = value.get("threshold")
-    if isinstance(threshold, bool) or not isinstance(threshold, (int, float)) or not math.isfinite(threshold) or threshold < 0:
+    if (isinstance(threshold, bool) or not isinstance(threshold, (int, float))
+            or not math.isfinite(threshold)
+            or (score_name == metrics.SCORE_NAME and threshold < 0)
+            or (score_name == metrics.RERANKER_SCORE_NAME and not 0 <= threshold <= 1)):
         raise EvaluationRunError("threshold_identity_mismatch")
-    if value.get("request") != REQUEST_BODY:
+    if value.get("request") != _request_body(retrieval_mode):
         raise EvaluationRunError("threshold_identity_mismatch")
     if value.get("target_supported_tpr") != 0.90 or value.get("probability") is not False:
         raise EvaluationRunError("threshold_identity_mismatch")
@@ -457,10 +504,15 @@ def _threshold_policy(path: Path, corpus_manifest_sha256: str, case_contract_sha
     return value, digest
 
 
-def _case_result_record(case: dict, *, index: int, response_body: dict | None, error: SearchRequestError | None, latency: float) -> dict:
+def _case_result_record(case: dict, *, index: int, response_body: dict | None, error: SearchRequestError | None,
+                        latency: float, retrieval_mode: str = "baseline",
+                        score_name: str = metrics.SCORE_NAME) -> dict:
+    retrieval_mode = _validated_retrieval_mode(retrieval_mode)
+    score_name = _validated_score_name(score_name)
     metadata = {
         "event": "case_result", "case_index": index, "case_id": case["id"],
         "split": case["split"], "query": case["query"], "language": case["language"],
+        "retrieval_mode": retrieval_mode, "score_name": score_name,
         "category": case["category"], "difficulty": case["difficulty"],
         "intent_group": case["intent_group"], "answerability": case["answerability"],
         "expected_action": case["expected_action"], "boundary_type": case["boundary_type"],
@@ -478,7 +530,9 @@ def _case_result_record(case: dict, *, index: int, response_body: dict | None, e
             }
         return metadata
     try:
-        score = metrics.primary_score(response_body)
+        if response_body.get("retrieval_mode") != retrieval_mode:
+            raise metrics.EvalScoreError("retrieval_mode_mismatch")
+        score = metrics.primary_score(response_body, score_name=score_name)
         projection = metrics.project_search_result(response_body, limit=12)
     except metrics.EvalScoreError:
         metadata.update({"status": "error", "error_type": "response_schema_error", "score": None, "result": None, "http_status": 200})
@@ -505,7 +559,9 @@ def _response_parts(value) -> tuple[dict, int, int, int]:
     raise SearchRequestError("invalid_transport_result")
 
 
-def _summary_from_records(stage: str, cases: list[dict], records: list[dict], threshold: dict | None, *, bootstrap_replicates: int) -> dict:
+def _summary_from_records(stage: str, cases: list[dict], records: list[dict], threshold: dict | None, *,
+                          bootstrap_replicates: int, retrieval_mode: str = "baseline",
+                          score_name: str = metrics.SCORE_NAME) -> dict:
     by_id = {record["case_id"]: record for record in records if record.get("event") == "case_result"}
     ordered = [by_id[case["id"]] for case in cases if case["id"] in by_id]
     errors = [record for record in ordered if record.get("status") != "ok"]
@@ -527,7 +583,8 @@ def _summary_from_records(stage: str, cases: list[dict], records: list[dict], th
         "policy_version": EXPECTED_POLICY_VERSION,
         "runner_version": RUNNER_VERSION,
         "runtime_version_status": RUNTIME_VERSION_STATUS,
-        "score_name": metrics.SCORE_NAME,
+        "retrieval_mode": _validated_retrieval_mode(retrieval_mode),
+        "score_name": _validated_score_name(score_name),
         "probability": False,
         "actual_confidence": "not_provided",
         "actual_action": "not_evaluated",
@@ -574,11 +631,16 @@ def _summary_from_records(stage: str, cases: list[dict], records: list[dict], th
 
 def run_stage(*, stage: str, cases_path: Path, journal_path: Path, corpus_manifest_sha256: str,
               base_url: str = DEFAULT_BASE_URL, threshold_path: Path, transport=None,
-              resume: bool = False, bootstrap_replicates: int = BOOTSTRAP_REPLICATES) -> dict:
+              resume: bool = False, bootstrap_replicates: int = BOOTSTRAP_REPLICATES,
+              retrieval_mode: str = "baseline", score_name: str = metrics.SCORE_NAME) -> dict:
     if stage not in {"calibration", "test"}:
         raise EvaluationRunError("invalid_stage")
     if bootstrap_replicates < 1:
         raise EvaluationRunError("invalid_bootstrap_replicates")
+    retrieval_mode = _validated_retrieval_mode(retrieval_mode)
+    score_name = _validated_score_name(score_name)
+    if score_name == metrics.RERANKER_SCORE_NAME and retrieval_mode not in {"rerank", "contextual_rerank"}:
+        raise EvaluationRunError("score_requires_reranker_mode")
     cases_path = Path(cases_path)
     journal_path = Path(journal_path)
     threshold_path = Path(threshold_path)
@@ -591,7 +653,10 @@ def run_stage(*, stage: str, cases_path: Path, journal_path: Path, corpus_manife
     threshold_file_sha = None
     threshold_group_hashes = []
     if stage == "test":
-        threshold_value, threshold_file_sha = _threshold_policy(threshold_path, corpus_manifest_sha256, contract_sha)
+        threshold_value, threshold_file_sha = _threshold_policy(
+            threshold_path, corpus_manifest_sha256, contract_sha,
+            retrieval_mode=retrieval_mode, score_name=score_name,
+        )
         threshold_case_hashes = threshold_value.get("calibration_case_id_sha256", [])
         if set(metrics.case_id_hashes(cases)).intersection(threshold_case_hashes):
             raise EvaluationRunError("calibration_test_case_overlap")
@@ -615,9 +680,10 @@ def run_stage(*, stage: str, cases_path: Path, journal_path: Path, corpus_manife
         "case_contract_sha256": contract_sha,
         "corpus_manifest_sha256": corpus_manifest_sha256,
         "policy_version": EXPECTED_POLICY_VERSION,
-        "score_name": metrics.SCORE_NAME,
+        "retrieval_mode": retrieval_mode,
+        "score_name": score_name,
         "base_url": base_url,
-        "request": REQUEST_BODY,
+        "request": _request_body(retrieval_mode),
         "threshold_file_sha256": threshold_file_sha,
     }
     http = transport or HTTPTransport(base_url)
@@ -631,7 +697,7 @@ def run_stage(*, stage: str, cases_path: Path, journal_path: Path, corpus_manife
 
         def execute_case(index_case):
             index, case = index_case
-            payload = {"query": case["query"], **REQUEST_BODY}
+            payload = {"query": case["query"], **_request_body(retrieval_mode)}
             started = time.monotonic()
             try:
                 value = http.post_search(payload)
@@ -640,16 +706,28 @@ def run_stage(*, stage: str, cases_path: Path, journal_path: Path, corpus_manife
                     raise SearchRequestError(f"http_{status}", http_status=status, attempts=attempts)
                 if body.get("policy_version") != EXPECTED_POLICY_VERSION:
                     raise SearchRequestError("retrieval_policy_mismatch", http_status=status, attempts=attempts)
-                record = _case_result_record(case, index=index, response_body=body, error=None, latency=time.monotonic() - started)
+                record = _case_result_record(
+                    case, index=index, response_body=body, error=None,
+                    latency=time.monotonic() - started, retrieval_mode=retrieval_mode,
+                    score_name=score_name,
+                )
                 record["http_status"] = status
                 record["http_attempts"] = attempts
                 record["response_bytes"] = response_bytes
                 return record
             except SearchRequestError as error:
-                return _case_result_record(case, index=index, response_body=None, error=error, latency=time.monotonic() - started)
+                return _case_result_record(
+                    case, index=index, response_body=None, error=error,
+                    latency=time.monotonic() - started, retrieval_mode=retrieval_mode,
+                    score_name=score_name,
+                )
             except Exception:
                 safe_error = SearchRequestError("internal_evaluation_error")
-                return _case_result_record(case, index=index, response_body=None, error=safe_error, latency=time.monotonic() - started)
+                return _case_result_record(
+                    case, index=index, response_body=None, error=safe_error,
+                    latency=time.monotonic() - started, retrieval_mode=retrieval_mode,
+                    score_name=score_name,
+                )
 
         if pending:
             with ThreadPoolExecutor(max_workers=MAX_WORKERS) as executor:
@@ -671,40 +749,48 @@ def run_stage(*, stage: str, cases_path: Path, journal_path: Path, corpus_manife
                     "stage": "calibration_frozen_threshold",
                     "runner_version": RUNNER_VERSION,
                     "runtime_version_status": RUNTIME_VERSION_STATUS,
-                    "score_name": metrics.SCORE_NAME,
+                    "retrieval_mode": retrieval_mode,
+                    "score_name": score_name,
                     "probability": False,
                     "threshold": selected["threshold"],
                     "target_supported_tpr": selected["target_tpr"],
                     "calibration_supported_tpr": selected["supported_tpr"],
                     "comparison": ">=",
                     "policy_version": EXPECTED_POLICY_VERSION,
-                    "request": REQUEST_BODY,
+                    "request": _request_body(retrieval_mode),
                     "corpus_manifest_sha256": corpus_manifest_sha256,
                     "case_contract_sha256": contract_sha,
                     "calibration_case_manifest_sha256": case_sha,
                     "calibration_case_id_sha256": metrics.case_id_hashes(cases),
                     "calibration_intent_group_sha256": metrics.intent_group_hashes(cases),
                     "calibration_source_material_sha256": source_hashes,
-                    "score_definition": "maximum finite trace.rank_score across items; empty items score 0; malformed scores are errors",
+                    "score_definition": _score_definition(score_name),
                 }
                 _write_private_json_no_overwrite(threshold_path, policy)
                 frozen_hash = hashlib.sha256(threshold_path.read_bytes()).hexdigest()
                 if not any(record.get("event") == "threshold_frozen" for record in journal.records):
-                    journal.append({"event": "threshold_frozen", "threshold_file_sha256": frozen_hash, "threshold": policy["threshold"], "score_name": metrics.SCORE_NAME, "policy_version": EXPECTED_POLICY_VERSION})
+                    journal.append({"event": "threshold_frozen", "threshold_file_sha256": frozen_hash, "threshold": policy["threshold"], "retrieval_mode": retrieval_mode, "score_name": score_name, "policy_version": EXPECTED_POLICY_VERSION})
                 threshold_value = policy
             elif threshold_path.exists() and resume:
                 frozen, _digest = _load_private_json(threshold_path)
                 if (frozen.get("calibration_case_manifest_sha256") != case_sha
                         or frozen.get("corpus_manifest_sha256") != corpus_manifest_sha256
                         or frozen.get("case_contract_sha256") != contract_sha
+                        or frozen.get("retrieval_mode") != retrieval_mode
+                        or frozen.get("score_name") != score_name
+                        or frozen.get("request") != _request_body(retrieval_mode)
                         or frozen.get("calibration_case_id_sha256") != metrics.case_id_hashes(cases)):
                     raise EvaluationRunError("threshold_identity_mismatch")
                 threshold_value = frozen
-        report = _summary_from_records(stage, cases, journal.records, threshold_value, bootstrap_replicates=bootstrap_replicates)
+        report = _summary_from_records(
+            stage, cases, journal.records, threshold_value,
+            bootstrap_replicates=bootstrap_replicates,
+            retrieval_mode=retrieval_mode, score_name=score_name,
+        )
         report["case_manifest_sha256"] = case_sha
         report["case_contract_sha256"] = contract_sha
         report["corpus_manifest_sha256"] = corpus_manifest_sha256
-        report["request"] = REQUEST_BODY
+        report["request"] = _request_body(retrieval_mode)
         report["case_distribution"] = distributions
         report["run_id"] = journal.run_id
         report["journal_sha256"] = hashlib.sha256(journal_path.read_bytes()).hexdigest()
@@ -724,15 +810,18 @@ def build_parser() -> argparse.ArgumentParser:
             "Examples (run calibration first, then freeze its threshold for test):\n"
             "  python scripts/evaluate-retrieval-confidence.py --stage calibration --cases calibration.jsonl --journal calibration.journal.jsonl --threshold-output calibration-threshold.json --corpus-manifest-sha256 <sha256>\n"
             "  python scripts/evaluate-retrieval-confidence.py --stage test --cases test.jsonl --journal test.journal.jsonl --threshold-input calibration-threshold.json --corpus-manifest-sha256 <same-sha256>\n"
-            "  Add --resume only for the exact same stage, case file, corpus, API base URL, policy, request, and threshold identity."
+            "  Add --retrieval-mode and --score-name identically to calibration and test to compare a frozen mode/score pair.\n"
+            "  Add --resume only for the exact same stage, case file, corpus, API base URL, policy, mode, score, request, and threshold identity."
         ),
         formatter_class=argparse.RawDescriptionHelpFormatter,
     )
     parser.add_argument("--stage", choices=("calibration", "test"), required=True)
-    parser.add_argument("--cases", type=Path, required=True, help="Owner-held JSONL file using case-contract.json.")
+    parser.add_argument("--cases", type=Path, required=True, help="Owner-held JSONL file using the published eval500 case contract.")
     parser.add_argument("--journal", type=Path, required=True, help="Owner-only resumable JSONL result journal; fresh paths are never overwritten.")
     parser.add_argument("--corpus-manifest-sha256", required=True, help="Frozen source/chunk snapshot manifest SHA-256.")
     parser.add_argument("--base-url", default=DEFAULT_BASE_URL)
+    parser.add_argument("--retrieval-mode", choices=sorted(metrics.RETRIEVAL_MODES), default="baseline", help="API retrieval mode; calibration and test thresholds are isolated per mode.")
+    parser.add_argument("--score-name", choices=sorted(metrics.SCORE_NAMES), default=metrics.SCORE_NAME, help="Rank-derived proxy selected for calibration and test; reranker relevance is not answerability.")
     parser.add_argument("--resume", action="store_true", help="Resume missing case rows from a journal with identical manifest/policy identity.")
     parser.add_argument("--threshold-output", type=Path, help="Calibration stage: create frozen owner-only threshold JSON without overwriting.")
     parser.add_argument("--threshold-input", type=Path, help="Test stage: require a frozen calibration threshold JSON.")
@@ -757,6 +846,7 @@ def main(argv=None) -> int:
             corpus_manifest_sha256=args.corpus_manifest_sha256,
             base_url=args.base_url, threshold_path=threshold_path,
             resume=args.resume, bootstrap_replicates=args.bootstrap_replicates,
+            retrieval_mode=args.retrieval_mode, score_name=args.score_name,
         )
     except EvaluationRunError as error:
         print(json.dumps({"status": "failed", "error_type": error.code}, separators=(",", ":")))
@@ -764,7 +854,7 @@ def main(argv=None) -> int:
     summary = {key: report.get(key) for key in (
         "stage", "status", "execution_gate_passed", "case_count", "recorded_case_count",
         "success_count", "error_count", "case_distribution", "group_counts",
-        "score_name", "probability", "actual_confidence", "actual_action",
+        "retrieval_mode", "score_name", "probability", "actual_confidence", "actual_action",
         "actual_abstention", "threshold_is_proxy_only", "threshold_proxy_enforcement",
         "score_metrics", "development_metrics", "test_metrics", "rankings", "bootstrap",
         "threshold", "quality_gates", "policy_version", "runner_version",

@@ -28,6 +28,11 @@ CONTEXT_MAX_TIMEOUT_SECONDS = 600
 CONTEXT_MIN_WORDS = 5
 CONTEXT_MAX_WORDS = 120
 CONTEXT_MAX_CHARS = 800
+CONTEXT_MIN_FALLBACK_BATCH = 8
+_SPLITTABLE_RESPONSE_ERRORS = frozenset({
+    "context_response_truncated", "context_response_invalid_json",
+    "context_response_schema_invalid", "context_chunk_coverage_invalid",
+})
 
 _SYSTEM_PROMPT = """Create one short retrieval context for each exact chunk.
 Use the whole source document only to explain the chunk's local subject, named
@@ -114,6 +119,25 @@ def _validate_result(payload: Any, expected_ids: list[str]) -> list[dict[str, st
     return [{"chunk_id": chunk_id, "context": indexed[chunk_id]} for chunk_id in expected_ids]
 
 
+def _clean_usage(usage: Any) -> dict[str, int | float]:
+    if not isinstance(usage, dict):
+        raise ProviderError("context_usage_invalid")
+    result = {}
+    for key in ("prompt_tokens", "completion_tokens", "total_tokens"):
+        value = usage.get(key)
+        if value is not None:
+            if type(value) is not int or value < 0:
+                raise ProviderError("context_usage_invalid")
+            result[key] = value
+    cost = usage.get("estimated_cost")
+    if cost is not None:
+        if (isinstance(cost, bool) or not isinstance(cost, (int, float))
+                or not math.isfinite(float(cost)) or cost < 0):
+            raise ProviderError("context_usage_invalid")
+        result["estimated_cost"] = float(cost)
+    return result
+
+
 class ContextGenerator:
     """Call an OpenAI-compatible chat endpoint with whole-source context."""
 
@@ -138,7 +162,7 @@ class ContextGenerator:
             "provider": "deepinfra_openai_compatible", "model": model,
             "prompt_version": self.prompt_version, "http_status": None,
             "latency_seconds": None, "usage": {}, "chunks_observed": 0,
-            "context_lengths": [],
+            "context_lengths": [], "batch_fallbacks": [],
         }
         try:
             return self._generate(document, chunks, model)
@@ -170,21 +194,45 @@ class ContextGenerator:
         endpoint = _endpoint(base_url)
         timeout = _timeout(self.settings)
         results = []
-        total_usage: dict[str, int] = {}
         for offset in range(0, len(chunks), CONTEXT_MAX_CHUNKS_PER_REQUEST):
             batch = chunks[offset:offset + CONTEXT_MAX_CHUNKS_PER_REQUEST]
             batch_ids = ids[offset:offset + len(batch)]
-            generated = self._generate_batch(endpoint, model, api_key.strip(), timeout, document, batch, batch_ids)
+            generated = self._generate_adaptive(endpoint, model, api_key.strip(), timeout, document, batch, batch_ids)
             results.extend(generated)
             self.last_metadata["chunks_observed"] += len(generated)
             self.last_metadata["context_lengths"].extend({
                 "chunk_id": item["chunk_id"], "word_count": len(item["context"].split()),
                 "char_count": len(item["context"]),
             } for item in generated)
-            for name, value in self.last_metadata.pop("_batch_usage", {}).items():
-                total_usage[name] = total_usage.get(name, 0) + value
-        self.last_metadata["usage"] = total_usage
         return results
+
+    def _record_batch_usage(self):
+        total = self.last_metadata["usage"]
+        for name, value in self.last_metadata.pop("_batch_usage", {}).items():
+            total[name] = total.get(name, 0) + value
+
+    def _generate_adaptive(self, endpoint, model, api_key, timeout, document, chunks, expected_ids):
+        try:
+            result = self._generate_batch(endpoint, model, api_key, timeout, document, chunks, expected_ids)
+        except ProviderError as exc:
+            self._record_batch_usage()
+            if exc.reason not in _SPLITTABLE_RESPONSE_ERRORS or len(chunks) <= CONTEXT_MIN_FALLBACK_BATCH:
+                raise
+            midpoint = len(chunks) // 2
+            self.last_metadata["batch_fallbacks"].append({
+                "reason": exc.reason, "requested_chunk_count": len(chunks),
+                "sub_batch_counts": [midpoint, len(chunks)-midpoint],
+            })
+            # Every chunk is re-requested with the same whole document. An
+            # invalid response is never repaired, truncated, or partly accepted.
+            return (
+                self._generate_adaptive(endpoint, model, api_key, timeout, document,
+                                        chunks[:midpoint], expected_ids[:midpoint])
+                + self._generate_adaptive(endpoint, model, api_key, timeout, document,
+                                          chunks[midpoint:], expected_ids[midpoint:])
+            )
+        self._record_batch_usage()
+        return result
 
     def _generate_batch(self, endpoint, model, api_key, timeout, document, chunks, expected_ids):
         user_payload = {
@@ -204,7 +252,7 @@ class ContextGenerator:
             ],
             "temperature": 0,
             "reasoning_effort": "none",
-            "max_tokens": max(512, 128 * len(chunks)),
+            "max_tokens": max(512, 256 * len(chunks)),
             "response_format": {"type": "json_object"},
         }
         try:
@@ -240,6 +288,7 @@ class ContextGenerator:
             raise ProviderError("context_response_invalid_json", self.last_metadata.get("http_status")) from None
         if not isinstance(response_payload, dict) or response_payload.get("model") != model:
             raise ProviderError("context_model_mismatch", self.last_metadata.get("http_status"))
+        self.last_metadata["_batch_usage"] = _clean_usage(response_payload.get("usage", {}))
         choices = response_payload.get("choices")
         if not isinstance(choices, list) or len(choices) != 1 or not isinstance(choices[0], dict):
             raise ProviderError("context_response_schema_invalid")
@@ -255,22 +304,5 @@ class ContextGenerator:
             content_payload = json.loads(content)
         except json.JSONDecodeError:
             raise ProviderError("context_response_invalid_json") from None
-        usage = response_payload.get("usage", {})
-        if not isinstance(usage, dict):
-            raise ProviderError("context_usage_invalid")
-        clean_usage = {}
-        for key in ("prompt_tokens", "completion_tokens", "total_tokens"):
-            value = usage.get(key)
-            if value is not None:
-                if type(value) is not int or value < 0:
-                    raise ProviderError("context_usage_invalid")
-                clean_usage[key] = value
-        estimated_cost = usage.get("estimated_cost")
-        if estimated_cost is not None:
-            if (isinstance(estimated_cost, bool) or not isinstance(estimated_cost, (int, float))
-                    or not math.isfinite(float(estimated_cost)) or estimated_cost < 0):
-                raise ProviderError("context_usage_invalid")
-            clean_usage["estimated_cost"] = float(estimated_cost)
-        self.last_metadata["_batch_usage"] = clean_usage
         self.last_metadata["finish_reason"] = "stop"
         return _validate_result(content_payload, expected_ids)

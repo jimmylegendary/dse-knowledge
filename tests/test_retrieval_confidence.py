@@ -111,11 +111,13 @@ def response(score, *, items=None, source_results=None):
     return {
         'query': 'must not be copied from API response',
         'policy_version': POLICY,
+        'retrieval_mode': 'baseline',
         'purpose': 'design',
         'purpose_trace': {'requested': 'auto', 'resolved': 'design', 'rule': 'test', 'uncertain': False, 'version': 'v1'},
         'items': [main_item] if items is None else items,
         'locators': [],
         'source_results': [main_item] if source_results is None else source_results,
+        'reranker_trace': None,
         'dense_candidate_trace': {'method': 'exact_dense_scan', 'scope_count': 1000, 'scope_cap': 50000, 'candidate_limit': 40, 'policy_version': POLICY},
         'channels': {'dense': 1, 'lexical': 1, 'exact': 0, 'graph': 0},
         'graph_trace': {'candidate_limit': 30, 'fetch_limit': 31, 'fetched_unique_candidates': 0, 'returned_candidates': 0, 'truncated': False},
@@ -163,6 +165,7 @@ def captured_canary_metadata_result(*, graph_rank=None):
     }
     return {
         'policy_version': POLICY,
+        'retrieval_mode': 'baseline',
         'purpose': 'design',
         'purpose_trace': {'requested': 'auto', 'resolved': 'design', 'rule': 'metadata-fixture', 'uncertain': False, 'version': 'v2.2'},
         'items': [item],
@@ -171,6 +174,7 @@ def captured_canary_metadata_result(*, graph_rank=None):
         'dense_candidate_trace': {'method': 'exact_dense_scan', 'scope_count': 1000, 'scope_cap': 50000, 'candidate_limit': 40, 'policy_version': 'dse-evidence-v2.2'},
         'channels': {'dense': 40, 'lexical': 40, 'exact': 20, 'graph': 0},
         'graph_trace': {'candidate_limit': 30, 'fetch_limit': 31, 'fetched_unique_candidates': 0, 'returned_candidates': 0, 'truncated': False},
+        'reranker_trace': None,
     }
 
 
@@ -268,6 +272,201 @@ def test_primary_score_uses_max_items_rank_score_not_response_order():
     ])
     assert metrics.primary_score(result) == pytest.approx(0.7)
     assert metrics.primary_score(response(0.0, items=[])) == 0.0
+
+
+def test_primary_score_selects_reranker_proxy_without_rrf_fallback():
+    result = response(0.7, items=[
+        {'trace': {'rank_score': 0.7, 'reranker_relevance_score': 0.2}},
+        {'trace': {'rank_score': 0.4, 'reranker_relevance_score': 0.9}},
+    ])
+    assert metrics.primary_score(result, score_name='max_reranker_relevance_proxy') == pytest.approx(0.9)
+    assert metrics.primary_score(response(0.0, items=[]), score_name='max_reranker_relevance_proxy') == 0.0
+    with pytest.raises(metrics.EvalScoreError, match='reranker_relevance_score'):
+        metrics.primary_score(response(0.7), score_name='max_reranker_relevance_proxy')
+    for value in (-0.25, 1.01, float('nan'), float('inf'), True):
+        with pytest.raises(metrics.EvalScoreError, match=r'\[0,1\]'):
+            metrics.primary_score(
+                response(0.7, items=[{'trace': {'rank_score': 0.7, 'reranker_relevance_score': value}}]),
+                score_name='max_reranker_relevance_proxy',
+            )
+
+
+def test_reranker_proxy_uses_scored_subset_and_skips_only_unmarked_unclassified_backfill():
+    result = response(0.7, items=[
+        {'role': 'unclassified', 'trace': {'rank_score': 0.9}},
+        {'role': 'core_technical', 'trace': {'rank_score': 0.7, 'reranker_candidate_rank': 1, 'reranker_relevance_score': 0.63}},
+        {'role': 'supporting_method', 'trace': {'rank_score': 0.6, 'reranker_candidate_rank': 2, 'reranker_relevance_score': 0.88}},
+    ])
+    assert metrics.primary_score(result, score_name='max_reranker_relevance_proxy') == pytest.approx(0.88)
+
+
+def test_reranker_proxy_errors_when_nonempty_items_have_no_scored_candidate():
+    result = response(0.7, items=[
+        {'role': 'unclassified', 'trace': {'rank_score': 0.9}},
+    ])
+    with pytest.raises(metrics.EvalScoreError, match='no scored reranker candidates'):
+        metrics.primary_score(result, score_name='max_reranker_relevance_proxy')
+
+
+@pytest.mark.parametrize('items', [
+    [{'role': 'core_technical', 'trace': {'rank_score': 0.7}}],
+    [{'role': 'unclassified', 'trace': {'rank_score': 0.7, 'reranker_candidate_rank': 3}}],
+    [
+        {'role': 'core_technical', 'trace': {'rank_score': 0.7, 'reranker_candidate_rank': 1, 'reranker_relevance_score': 0.6}},
+        {'role': 'unclassified', 'trace': {'rank_score': 0.8, 'reranker_candidate_rank': 2}},
+    ],
+])
+def test_reranker_proxy_errors_on_missing_declared_candidate_score_or_no_scored_candidate(items):
+    with pytest.raises(metrics.EvalScoreError, match='reranker_relevance_score'):
+        metrics.primary_score(response(0.7, items=items), score_name='max_reranker_relevance_proxy')
+
+
+def test_projection_keeps_rerank_provenance_but_strips_private_metadata():
+    raw = response(0.7)
+    raw['retrieval_mode'] = 'contextual_rerank'
+    raw['reranker_trace'] = {
+        'provider': 'deepinfra', 'model': 'Qwen/Qwen3-Reranker-4B', 'http_status': 200,
+        'latency_seconds': 2.922, 'input_tokens': 36206,
+        'inference_status': {
+            'runtime_ms': 1802, 'tokens_input': 36206, 'cost': 0.0009051500000000001,
+            'raw_response': 'must not appear', 'api_key': 'must not appear',
+        },
+        'cost_is_estimate': True,
+        'score_semantics': 'relevance_not_answerability', 'candidate_count': 40,
+        'api_key': 'must not appear', 'raw_request': 'must not appear',
+    }
+    raw['items'][0]['trace'].update({
+        'original_rrf_score': 0.7, 'reranker_relevance_score': 0.93,
+        'reranker_candidate_rank': 1,
+        'channel_ranks': {'context_dense': 1, 'context_bm25': 2, 'graph': 3, 'secret_channel': 4},
+    })
+    raw['items'][0]['scores'].update({'context_dense': 0.02, 'context_bm25': 0.01, 'secret_score': 9.0})
+    raw['channels'] = {'context_dense': 40, 'context_bm25': 40, 'exact': 20, 'graph': 0, 'secret_channel': 99}
+    projected = metrics.project_search_result(raw)
+    assert projected['retrieval_mode'] == 'contextual_rerank'
+    assert projected['items'][0]['trace']['original_rrf_score'] == pytest.approx(0.7)
+    assert projected['items'][0]['trace']['reranker_relevance_score'] == pytest.approx(0.93)
+    assert projected['items'][0]['trace']['reranker_candidate_rank'] == 1
+    assert projected['reranker_trace'] == {
+        'provider': 'deepinfra', 'model': 'Qwen/Qwen3-Reranker-4B', 'http_status': 200,
+        'latency_seconds': 2.922, 'input_tokens': 36206,
+        'inference_status': {'runtime_ms': 1802, 'tokens_input': 36206, 'cost': 0.0009051500000000001},
+        'cost_is_estimate': True,
+        'score_semantics': 'relevance_not_answerability', 'candidate_count': 40,
+    }
+    assert projected['channels'] == {'context_dense': 40, 'context_bm25': 40, 'exact': 20, 'graph': 0}
+    assert projected['items'][0]['scores'] == {'dense': 1 / 61, 'lexical': 1 / 62, 'context_dense': 0.02, 'context_bm25': 0.01}
+    assert projected['items'][0]['trace']['channel_ranks'] == {'context_dense': 1, 'context_bm25': 2, 'graph': 3}
+    serialized = json.dumps(projected)
+    assert 'api_key' not in serialized and 'raw_request' not in serialized
+    assert 'raw_response' not in serialized and 'secret_channel' not in serialized and 'secret_score' not in serialized
+    assert 'must not appear' not in serialized
+
+
+@pytest.mark.parametrize('status', [
+    'ok',
+    {'runtime_ms': -1, 'tokens_input': 4, 'cost': 0.1},
+    {'runtime_ms': 1, 'tokens_input': -4, 'cost': 0.1},
+    {'runtime_ms': 1, 'tokens_input': 4, 'cost': float('nan')},
+    {'runtime_ms': 1, 'tokens_input': 4, 'cost': True},
+    {'runtime_ms': True, 'tokens_input': 4, 'cost': 0.1},
+    {'runtime_ms': 1, 'tokens_input': 4.5, 'cost': 0.1},
+])
+def test_projection_rejects_malformed_nested_reranker_inference_status(status):
+    raw = response(0.7)
+    raw['reranker_trace'] = {'inference_status': status}
+    with pytest.raises(metrics.EvalScoreError, match='inference_status'):
+        metrics.project_search_result(raw)
+
+
+def test_public_case_contract_is_preferred_and_private_legacy_is_fallback(tmp_path, monkeypatch):
+    root = tmp_path / 'fixture-repo'
+    script_dir = root / 'scripts'
+    public_contract = root / 'research' / 'eval500' / 'case-contract-v1.json'
+    legacy_contract = root / '.superpowers' / 'sdd' / 'eval500' / 'case-contract.json'
+    script_dir.mkdir(parents=True)
+    public_contract.parent.mkdir(parents=True)
+    legacy_contract.parent.mkdir(parents=True)
+    public_contract.write_bytes(b'{"contract":"public"}\n')
+    legacy_contract.write_bytes(b'{"contract":"private-legacy"}\n')
+    monkeypatch.setattr(runner, '__file__', str(script_dir / 'evaluate-retrieval-confidence.py'))
+    assert runner._case_contract_sha256() == hashlib.sha256(public_contract.read_bytes()).hexdigest()
+    public_contract.unlink()
+    assert runner._case_contract_sha256() == hashlib.sha256(legacy_contract.read_bytes()).hexdigest()
+
+
+def test_reranker_proxy_calibration_identity_includes_mode_and_score_name(tmp_path):
+    cases = cases_for('calibration')
+    cases_path = tmp_path / 'calibration.jsonl'
+    write_cases(cases_path, cases)
+    threshold_path = tmp_path / 'threshold.json'
+    journal_path = tmp_path / 'journal.jsonl'
+    score_by_query = {
+        case['query']: (0.8 if case['answerability'] == 'supported' else 0.2)
+        for case in cases
+    }
+
+    class RerankTransport:
+        def __init__(self):
+            self.requests = []
+
+        def post_search(self, payload):
+            self.requests.append(dict(payload))
+            result = response(0.1)
+            result['retrieval_mode'] = payload['retrieval_mode']
+            result['items'][0]['trace']['reranker_relevance_score'] = score_by_query[payload['query']]
+            result['items'][0]['trace']['original_rrf_score'] = result['items'][0]['trace']['rank_score']
+            result['reranker_trace'] = {
+                'score_semantics': 'relevance_not_answerability', 'candidate_count': 1,
+            }
+            return result
+
+    transport = RerankTransport()
+    report = runner.run_stage(
+        stage='calibration', cases_path=cases_path, journal_path=journal_path,
+        corpus_manifest_sha256='a' * 64, threshold_path=threshold_path,
+        transport=transport, retrieval_mode='contextual_rerank',
+        score_name='max_reranker_relevance_proxy',
+    )
+    header = json.loads(journal_path.read_text().splitlines()[0])
+    threshold = json.loads(threshold_path.read_text())
+    assert report['retrieval_mode'] == header['retrieval_mode'] == threshold['retrieval_mode'] == 'contextual_rerank'
+    assert report['score_name'] == header['score_name'] == threshold['score_name'] == 'max_reranker_relevance_proxy'
+    assert transport.requests[0]['retrieval_mode'] == 'contextual_rerank'
+    assert report['threshold']['threshold'] == pytest.approx(0.8)
+    assert '[0,1]' in threshold['score_definition']
+    assert all(row['score'] in {0.2, 0.8} for row in report['case_results'])
+
+    request_count = len(transport.requests)
+    with pytest.raises(runner.EvaluationRunError, match='journal_identity_mismatch'):
+        runner.run_stage(
+            stage='calibration', cases_path=cases_path, journal_path=journal_path,
+            corpus_manifest_sha256='a' * 64, threshold_path=threshold_path,
+            transport=transport, retrieval_mode='rerank',
+            score_name='max_reranker_relevance_proxy', resume=True,
+        )
+    assert len(transport.requests) == request_count
+
+    with pytest.raises(runner.EvaluationRunError, match='threshold_identity_mismatch'):
+        runner._threshold_policy(
+            threshold_path, 'a' * 64, runner._case_contract_sha256(),
+            retrieval_mode='rerank', score_name='max_reranker_relevance_proxy',
+        )
+    with pytest.raises(runner.EvaluationRunError, match='threshold_identity_mismatch'):
+        runner._threshold_policy(
+            threshold_path, 'a' * 64, runner._case_contract_sha256(),
+            retrieval_mode='contextual_rerank', score_name='max_technical_rrf_proxy',
+        )
+    for invalid_threshold in (-0.01, 1.01):
+        invalid_path = tmp_path / f'invalid-threshold-{invalid_threshold}.json'
+        runner._write_private_json_no_overwrite(
+            invalid_path, {**threshold, 'threshold': invalid_threshold},
+        )
+        with pytest.raises(runner.EvaluationRunError, match='threshold_identity_mismatch'):
+            runner._threshold_policy(
+                invalid_path, 'a' * 64, runner._case_contract_sha256(),
+                retrieval_mode='contextual_rerank', score_name='max_reranker_relevance_proxy',
+            )
 
 
 @pytest.mark.parametrize('items', [
@@ -468,6 +667,28 @@ def test_http_transport_timeout_bounded_retry_and_clipped_retry_after():
     assert runner.MAX_RESPONSE_BYTES + 1 <= 3_000_000
 
 
+def test_http_transport_sends_explicit_retrieval_mode_and_rejects_unknown_mode():
+    calls = []
+    payload_bytes = json.dumps(response(0.5)).encode()
+    fake_response = FakeResponse(payload_bytes, headers={'Content-Length': str(len(payload_bytes))})
+    transport = runner.HTTPTransport(
+        'http://127.0.0.1:8080',
+        urlopen=lambda request, timeout: calls.append((request, timeout)) or fake_response,
+        sleep_fn=lambda _delay: None,
+    )
+    transport.post_search({
+        'query': 'synthetic', 'category': '', 'limit': 12, 'purpose': 'auto',
+        'retrieval_mode': 'contextual_rerank',
+    })
+    assert json.loads(calls[0][0].data)['retrieval_mode'] == 'contextual_rerank'
+    assert calls[0][1] == runner.HTTP_TIMEOUT_SECONDS
+    with pytest.raises(runner.SearchRequestError, match='invalid_request_retrieval_mode'):
+        transport.post_search({
+            'query': 'synthetic', 'category': '', 'limit': 12, 'purpose': 'auto',
+            'retrieval_mode': 'unvalidated-mode',
+        })
+
+
 def test_http_transport_fails_without_reading_oversize_body_or_leaking_it():
     huge = FakeResponse(b'x' * (runner.MAX_RESPONSE_BYTES + 1), headers={})
     sleeps = []
@@ -494,8 +715,9 @@ class FakeTransport:
         self.max_active = 0
 
     def post_search(self, payload):
-        assert set(payload) == {'query', 'category', 'limit', 'purpose'}
+        assert set(payload) == {'query', 'category', 'limit', 'purpose', 'retrieval_mode'}
         assert payload['category'] == '' and payload['limit'] == 12 and payload['purpose'] == 'auto'
+        assert payload['retrieval_mode'] in metrics.RETRIEVAL_MODES
         with self.lock:
             self.requests.append(dict(payload))
             self.active += 1
@@ -507,7 +729,9 @@ class FakeTransport:
             if query in self.errors:
                 raise runner.SearchRequestError(self.errors[query], http_status=503)
             score = self.scores.get(query, 0.1)
-            return response(score)
+            result = response(score)
+            result['retrieval_mode'] = payload['retrieval_mode']
+            return result
         finally:
             with self.lock:
                 self.active -= 1
@@ -540,7 +764,7 @@ def test_calibration_then_test_is_resumable_threshold_frozen_and_group_disjoint(
     assert calibration_transport.max_active == 2
     assert calibration['threshold']['threshold'] == pytest.approx(0.9)
     assert calibration['threshold']['calibration_case_id_sha256'] == metrics.case_id_hashes(calibration_cases)
-    assert set(calibration_transport.requests[0]) == {'query', 'category', 'limit', 'purpose'}
+    assert set(calibration_transport.requests[0]) == {'query', 'category', 'limit', 'purpose', 'retrieval_mode'}
     assert all((path.stat().st_mode & 0o777) == 0o600 for path in (calibration_journal, threshold_path))
 
     request_count = len(calibration_transport.requests)
@@ -844,3 +1068,35 @@ def test_cli_help_documents_calibration_then_test_commands():
     assert '--resume' in help_text
     assert 'calibration' in help_text and 'test' in help_text
     assert 'corpus-manifest-sha256' in help_text
+
+
+def test_cli_defaults_to_baseline_rrf_and_exposes_four_modes_and_two_scores():
+    args = runner.build_parser().parse_args([
+        '--stage', 'calibration', '--cases', 'cal.jsonl', '--journal', 'run.jsonl',
+        '--corpus-manifest-sha256', 'a' * 64, '--threshold-output', 'threshold.json',
+    ])
+    assert args.retrieval_mode == 'baseline'
+    assert args.score_name == 'max_technical_rrf_proxy'
+    assert runner.build_parser().parse_args([
+        '--stage', 'test', '--cases', 'test.jsonl', '--journal', 'run.jsonl',
+        '--corpus-manifest-sha256', 'a' * 64, '--threshold-input', 'threshold.json',
+        '--retrieval-mode', 'contextual_rerank',
+        '--score-name', 'max_reranker_relevance_proxy',
+    ]).retrieval_mode == 'contextual_rerank'
+
+
+def test_reranker_score_requires_a_rerank_mode_before_http(tmp_path):
+    cases_path = tmp_path / 'calibration.jsonl'
+    write_cases(cases_path, cases_for('calibration'))
+
+    class NoCallTransport:
+        def post_search(self, _payload):
+            raise AssertionError('mode validation must precede HTTP')
+
+    with pytest.raises(runner.EvaluationRunError, match='score_requires_reranker_mode'):
+        runner.run_stage(
+            stage='calibration', cases_path=cases_path,
+            journal_path=tmp_path / 'run.jsonl', corpus_manifest_sha256='a' * 64,
+            threshold_path=tmp_path / 'threshold.json', transport=NoCallTransport(),
+            retrieval_mode='contextual', score_name='max_reranker_relevance_proxy',
+        )

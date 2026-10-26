@@ -167,7 +167,42 @@ def test_generator_bounds_each_request_to_64_chunks_while_repeating_the_whole_do
     assert [item["chunk_id"] for item in result] == [f"chunk-{i}" for i in range(65)]
     assert len(opener.requests) == 2
     assert all(document in json.dumps(json.loads(request.data)["messages"]) for request, _ in opener.requests)
-    assert [json.loads(request.data)["max_tokens"] for request, _ in opener.requests] == [8192, 512]
+    assert [json.loads(request.data)["max_tokens"] for request, _ in opener.requests] == [16384, 512]
+
+
+def test_generator_resubmits_truncated_batch_as_smaller_exact_id_batches():
+    chunks = [{"id": f"chunk-{i}", "text": f"source passage {i}"} for i in range(16)]
+    opener = FakeOpener([
+        completion({"contexts": []}, finish_reason="length"),
+        completion({"contexts": [{"chunk_id": f"chunk-{i}", "context": context_text()} for i in range(8)]}),
+        completion({"contexts": [{"chunk_id": f"chunk-{i}", "context": context_text()} for i in range(8, 16)]}),
+    ])
+    generator = ContextGenerator(settings(), opener=opener)
+    document = "Whole source document retained across every retry."
+
+    result = generator.generate(document, chunks)
+
+    assert [row["chunk_id"] for row in result] == [c["id"] for c in chunks]
+    sent = [json.loads(json.loads(request.data)["messages"][1]["content"])
+            for request, _ in opener.requests]
+    assert [len(payload["chunks"]) for payload in sent] == [16, 8, 8]
+    assert all(payload["document"] == document for payload in sent)
+    assert generator.last_metadata["chunks_observed"] == 16
+    assert generator.last_metadata["usage"]["total_tokens"] == 255
+    assert generator.last_metadata["batch_fallbacks"][0]["reason"] == "context_response_truncated"
+
+
+def test_generator_never_repairs_or_drops_ids_when_smaller_batch_still_invalid():
+    chunks = [{"id": f"chunk-{i}", "text": f"source passage {i}"} for i in range(16)]
+    wrong = completion({"contexts": [{"chunk_id": "invented", "context": context_text()}]})
+    opener = FakeOpener([wrong, wrong])
+    generator = ContextGenerator(settings(), opener=opener)
+
+    with pytest.raises(ProviderError, match="context_chunk_coverage_invalid"):
+        generator.generate("Whole source document", chunks)
+
+    assert len(opener.requests) == 2
+    assert generator.last_metadata["chunks_observed"] == 0
 
 
 def test_generator_does_not_put_secret_in_error_metadata_or_repr():

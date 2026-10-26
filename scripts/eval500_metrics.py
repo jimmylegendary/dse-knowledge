@@ -10,6 +10,10 @@ from collections import Counter, defaultdict
 
 POLICY_VERSION = "retrieval-policy/v2.2"
 SCORE_NAME = "max_technical_rrf_proxy"
+RERANKER_SCORE_NAME = "max_reranker_relevance_proxy"
+SCORE_NAMES = frozenset({SCORE_NAME, RERANKER_SCORE_NAME})
+RETRIEVAL_MODES = frozenset({"baseline", "contextual", "rerank", "contextual_rerank"})
+RESULT_CHANNELS = frozenset({"dense", "lexical", "context_dense", "context_bm25", "exact", "graph"})
 SUPPORTED = "supported"
 INSUFFICIENT = "insufficient"
 AMBIGUOUS = "ambiguous"
@@ -256,8 +260,10 @@ def source_material_hashes(cases: list[dict]) -> list[str]:
     return sorted(hashlib.sha256(material_id.encode("utf-8")).hexdigest() for material_id in _case_material_ids(cases))
 
 
-def primary_score(search_result: object) -> float:
-    """Return max finite item.trace.rank_score, with the contract's empty/error distinction."""
+def primary_score(search_result: object, *, score_name: str = SCORE_NAME) -> float:
+    """Return the selected finite item-level proxy; never substitute another score."""
+    if score_name not in SCORE_NAMES:
+        raise EvalScoreError("unsupported score_name")
     if not isinstance(search_result, dict):
         raise EvalScoreError("search result must be an object")
     items = search_result.get("items")
@@ -265,13 +271,40 @@ def primary_score(search_result: object) -> float:
         raise EvalScoreError("search result items must be an array")
     if not items:
         return 0.0
+    if score_name == RERANKER_SCORE_NAME:
+        scores = []
+        for item in items:
+            if not isinstance(item, dict) or not isinstance(item.get("trace"), dict):
+                raise EvalScoreError("nonempty items must have trace.reranker_relevance_score")
+            trace = item["trace"]
+            candidate_declared = "reranker_candidate_rank" in trace
+            if candidate_declared:
+                candidate_rank = trace["reranker_candidate_rank"]
+                if (isinstance(candidate_rank, bool) or not isinstance(candidate_rank, int)
+                        or candidate_rank < 1):
+                    raise EvalScoreError("reranker_candidate_rank must be a positive integer")
+            if "reranker_relevance_score" not in trace:
+                if item.get("role") == "unclassified" and not candidate_declared:
+                    continue
+                raise EvalScoreError("reranker_relevance_score missing for a reranker candidate")
+            value = trace["reranker_relevance_score"]
+            if (isinstance(value, bool) or not isinstance(value, (int, float))
+                    or value < 0 or value > 1 or not math.isfinite(value)):
+                raise EvalScoreError("reranker_relevance_score must be finite and within [0,1]")
+            scores.append(float(value))
+        if not scores:
+            raise EvalScoreError("no scored reranker candidates")
+        return max(scores)
+
     scores = []
     for item in items:
         if not isinstance(item, dict) or not isinstance(item.get("trace"), dict):
             raise EvalScoreError("nonempty items must have trace.rank_score")
         value = item["trace"].get("rank_score")
-        if isinstance(value, bool) or not isinstance(value, (int, float)) or not math.isfinite(value) or value < 0:
-            raise EvalScoreError("rank_score must be finite and nonnegative")
+        if isinstance(value, bool) or not isinstance(value, (int, float)) or not math.isfinite(value):
+            raise EvalScoreError("rank_score must be finite")
+        if value < 0:
+            raise EvalScoreError("rank_score must be nonnegative")
         scores.append(float(value))
     return max(scores)
 
@@ -309,7 +342,7 @@ def _project_item(item: object, *, slot: int) -> dict:
     scores = item.get("scores")
     if not isinstance(scores, dict):
         raise EvalScoreError("scores must be an object")
-    output["scores"] = {str(k): _finite_scalar(v, field=f"scores.{k}") for k, v in scores.items() if k in {"dense", "lexical", "exact", "graph"}}
+    output["scores"] = {str(k): _finite_scalar(v, field=f"scores.{k}") for k, v in scores.items() if k in RESULT_CHANNELS}
     role_policy = item.get("role_policy")
     if isinstance(role_policy, dict):
         allowed_policy = ("role", "purpose", "weight", "needs_review", "is_locator", "evidence_authority", "evidence_ceiling", "use_ceiling", "auto_uncertain", "policy_version")
@@ -328,7 +361,7 @@ def _project_item(item: object, *, slot: int) -> dict:
         raise EvalScoreError("trace must be an object")
     if "rank_score" not in trace:
         raise EvalScoreError("trace.rank_score is required")
-    numeric = ("role_weight", "query_relevance", "graph_rank", "graph_boost", "graph_topic_idf", "graph_proof_count", "graph_discarded_link_count", "rank_score", "dense_scope_count", "dense_scope_cap", "dense_candidate_limit", "graph_candidate_limit")
+    numeric = ("role_weight", "query_relevance", "graph_rank", "graph_boost", "graph_topic_idf", "graph_proof_count", "graph_discarded_link_count", "rank_score", "dense_scope_count", "dense_scope_cap", "dense_candidate_limit", "graph_candidate_limit", "original_rrf_score", "reranker_relevance_score", "reranker_candidate_rank")
     booleans = ("query_embedding_cache_hit", "purpose_uncertain", "graph_truncated")
     strings = ("purpose_rule", "query_embedding_task", "dense_candidate_method", "dense_candidate_policy_version")
     projected_trace = {}
@@ -351,7 +384,7 @@ def _project_item(item: object, *, slot: int) -> dict:
     if isinstance(channel_ranks, dict):
         projected_trace["channel_ranks"] = {
             channel: rank for channel, rank in channel_ranks.items()
-            if channel in {"dense", "lexical", "exact", "graph"}
+            if channel in RESULT_CHANNELS
             and isinstance(rank, int) and not isinstance(rank, bool)
         }
     anchors = trace.get("semantic_anchors")
@@ -384,6 +417,10 @@ def project_search_result(search_result: object, *, limit: int = 12) -> dict:
     for key in ("purpose", "trace_id"):
         if key in search_result and isinstance(search_result[key], str):
             projected[key] = search_result[key]
+    retrieval_mode = search_result.get("retrieval_mode")
+    if retrieval_mode not in RETRIEVAL_MODES:
+        raise EvalScoreError("missing or invalid retrieval_mode")
+    projected["retrieval_mode"] = retrieval_mode
     purpose_trace = search_result.get("purpose_trace")
     if isinstance(purpose_trace, dict):
         allowed = ("requested", "resolved", "rule", "uncertain", "version")
@@ -404,9 +441,66 @@ def project_search_result(search_result: object, *, limit: int = 12) -> dict:
         value = search_result.get(source)
         if isinstance(value, dict):
             projected[target] = {key: value[key] for key in keys if key in value and isinstance(value[key], (str, int, bool))}
+    reranker_trace = search_result.get("reranker_trace")
+    if reranker_trace is not None:
+        if not isinstance(reranker_trace, dict):
+            raise EvalScoreError("reranker_trace must be an object or null")
+        string_fields = ("provider", "model", "score_semantics")
+        int_fields = ("http_status", "input_tokens", "candidate_count")
+        number_fields = ("latency_seconds", "estimated_cost")
+        boolean_fields = ("cost_is_estimate",)
+        safe_trace = {}
+        for key in string_fields:
+            if key in reranker_trace:
+                _copy_if_type(reranker_trace, key, safe_trace, types=(str,))
+        if "inference_status" in reranker_trace:
+            inference_status = reranker_trace["inference_status"]
+            if not isinstance(inference_status, dict):
+                raise EvalScoreError("reranker_trace.inference_status must be an object")
+            projected_status = {}
+            for key in ("runtime_ms", "tokens_input", "cost"):
+                if key not in inference_status:
+                    continue
+                value = inference_status[key]
+                if key == "tokens_input":
+                    valid_type = isinstance(value, int) and not isinstance(value, bool)
+                else:
+                    valid_type = isinstance(value, (int, float)) and not isinstance(value, bool)
+                finite = False
+                if valid_type:
+                    try:
+                        finite = math.isfinite(float(value))
+                    except (OverflowError, TypeError, ValueError):
+                        finite = False
+                if not valid_type or not finite or value < 0:
+                    raise EvalScoreError(
+                        f"reranker_trace.inference_status.{key} must be finite, nonnegative, and correctly typed"
+                    )
+                projected_status[key] = value
+            safe_trace["inference_status"] = projected_status
+        for key in int_fields:
+            if key in reranker_trace:
+                value = reranker_trace[key]
+                if value is None:
+                    safe_trace[key] = None
+                else:
+                    _copy_if_type(reranker_trace, key, safe_trace, types=(int,))
+        for key in number_fields:
+            if key in reranker_trace:
+                value = reranker_trace[key]
+                if value is None:
+                    safe_trace[key] = None
+                else:
+                    safe_trace[key] = _finite_scalar(value, field=f"reranker_trace.{key}")
+        for key in boolean_fields:
+            if key in reranker_trace:
+                _copy_if_type(reranker_trace, key, safe_trace, types=(bool,))
+        projected["reranker_trace"] = safe_trace
+    elif "reranker_trace" in search_result:
+        projected["reranker_trace"] = None
     channels = search_result.get("channels")
     if isinstance(channels, dict):
-        projected["channels"] = {str(k): v for k, v in channels.items() if k in {"dense", "lexical", "exact", "graph"} and isinstance(v, int) and not isinstance(v, bool)}
+        projected["channels"] = {str(k): v for k, v in channels.items() if k in RESULT_CHANNELS and isinstance(v, int) and not isinstance(v, bool)}
     for key in ("graph_truncated", "query_embedding_cache_hit"):
         if key in search_result and isinstance(search_result[key], bool):
             projected[key] = search_result[key]

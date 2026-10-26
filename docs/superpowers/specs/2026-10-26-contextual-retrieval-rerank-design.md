@@ -21,10 +21,24 @@
 
 Qwen3 Reranker는 다국어·code 검색과 instruction-aware ranking을 지원한다. API가 주는 relevance/logit·yes-score는 calibrated answerability가 아니다. 4B와 8B를 calibration으로 비교하고 선택 이유·지연·usage를 기록한다. [Qwen model card](https://huggingface.co/Qwen/Qwen3-Reranker-4B), [4B API](https://deepinfra.com/Qwen/Qwen3-Reranker-4B/api), [8B API](https://deepinfra.com/Qwen/Qwen3-Reranker-8B/api), [Context model API](https://deepinfra.com/deepseek-ai/DeepSeek-V4.1-Flash-1017/api)
 
-Secret 값은 root만 owner-only env에 연결한다. Runtime env keys는 `DSE_CONTEXTUAL_ENABLED`, `DSE_CONTEXT_INDEX_PATH`, `DSE_CONTEXT_CHAT_BASE_URL`, `DSE_CONTEXT_CHAT_MODEL`, `DSE_CONTEXT_CHAT_API_KEY`, `DSE_RERANK_ENABLED`, `DSE_RERANK_PROVIDER`, `DSE_RERANK_MODEL`, `DSE_RERANK_ENDPOINT`, `DSE_RERANK_API_KEY`, `DSE_RERANK_CANDIDATES`를 사용한다. 환경 파일은 기존 app.env 또는 추가 contextual.env/rerank.env 중 Settings에서 명시적으로 읽고 owner-only를 강제한다. 다른 provider에 credential을 자동 전송하는 fallback은 없다.
+Secret 값은 root만 owner-only env에 연결한다. Runtime env keys는 `DSE_CONTEXTUAL_ENABLED`, `DSE_CONTEXT_INDEX_PATH`, `DSE_CONTEXT_CHAT_BASE_URL`, `DSE_CONTEXT_CHAT_MODEL`, `DSE_CONTEXT_CHAT_API_KEY`, `DSE_RERANK_ENABLED`, `DSE_RERANK_PROVIDER`, `DSE_RERANK_MODEL`, `DSE_RERANK_ENDPOINT`, `DSE_RERANK_API_KEY`, `DSE_RERANK_CANDIDATES`, `DSE_RERANK_ALLOW_HTTP`를 사용한다. HTTP opt-in은 cohere-compatible endpoint에만 적용하고 DeepInfra는 HTTPS endpoint를 고정한다. 환경 파일은 기존 app.env 또는 추가 contextual.env/rerank.env 중 Settings에서 명시적으로 읽고 owner-only를 강제한다. 다른 provider에 credential을 자동 전송하는 fallback은 없다.
 
 ## 실제 평가와 적용
 
 기존 API·source corpus baseline을 먼저 기록한다. Frozen 500 test와 별도100 calibration으로 baseline/contextual-only/rerank-only/combined를 비교한다. Reranker 4B/8B 선택과 threshold는 calibration으로만 정한다. Test 결과를 보고 query·label·prompt·ranking을 조정하지 않는다. 신규 index와 full integration을 root가 실제 API로 검증하고 UI에 적용한다. 결과·test set·새 code와 HTML 보고서를 GitHub에 게시한다.
 
 공개 report에는 원문·generated context·vectors·credentials를 넣지 않고 metadata·hash·점수·비용 범위만 넣는다. Reranker high relevance를 HW 타당성·답변 충분성·세계 사실 검증으로 변환하지 않는다.
+
+### Calibration으로만 고정하는 선택 규칙
+
+첫 reranker calibration 결과를 열기 전에 다음 순서를 고정한다. 동일한 rerank-only calibration 100건에서 4B/8B를 비교한다: 정상 질문의 `chunk_all_groups_hit_at_5`가 높은 모델 → 동률이면 `chunk_mrr_at_5`가 높은 모델 → 다시 동률이면 고정 TPR≥0.90 threshold에서 near-boundary FPR이 낮은 모델 → 완전 동률이면 4B. 지연·usage는 별도로 보고하며 품질을 속도·가격과 임의의 단일 점수로 합치지 않는다. 선택한 동일 모델로 rerank-only와 combined의 test를 수행한다. 운영 기본 모드도 각 모드의 calibration에 같은 품질 우선순위를 적용해 정하고 test로 재선정하지 않는다.
+
+`max_reranker_relevance_proxy`의 지원 domain은 normalized relevance `[0,1]`다. 실제 rerank를 받은 후보 subset의 최대값을 쓰며, 점수를 받지 않은 unclassified backfill은 제외한다. 기술 candidate의 누락·비유한 값·범위 밖 값은 오류다. 비어 있는 items는 0이지만 nonempty에 scored 후보가 전혀 없는 경우는 미측정 오류다. Signed logits를 이 proxy에 그대로 넣거나 임의 sigmoid·clipping으로 변환하지 않는다. `[0,1]`은 표현 범위이며 답변 가능성의 확률을 뜻하지 않는다.
+
+Runner의 mode/score/request/corpus/case identity 외에 root matrix workflow가 model을 고정한다. 각 run 시작·종료의 `/api/capabilities`에서 provider/model/config를 확인하고 모든 row의 returned mode·`reranker_trace.model`을 검증한다. calibration과 test의 provider/model/index profile이 같은지 확인한 뒤만 비교한다. Generic CLI만 별도로 호출하면 model pin이 자동 보장되지 않는 상한을 명시한다. 새 identity 필드가 없는 기존 journal의 암묵적 resume는 허용하지 않는다.
+
+### 실제 연결에서 발견한 형식·운영 보완
+
+Raw artifact SHA와 normalized-content SHA를 구분하고 양쪽 source manifest/cache binding을 보존한다. `out_of_scope`는 baseline과 동일하게 top-k와 capacity 제한 전에 제외한다. Canonical corpus 수와 eligible index 수는 별도로 보고한다. Reranker receipt는 thread-local로 격리한다.
+
+실제 64-chunk 응답의 truncation·ID 누락은 strict validation으로 거부한다. 출력 예산은 chunk당 최대 256 tokens, 요청당 최대64다. 잘림·잘못된 JSON·ID coverage 오류에 한해 같은 whole-document를 유지해 64→32→16→8로 나눠 재요청하며, 실패한 smallest batch는 그대로 오류다. 잘못된 응답을 잘라 쓰거나 ID를 채워 넣지 않는다. 수신한 실패 응답의 usage도 보존한다. 전송 중단·응답을 받지 못한 호출 비용은 provider 청구와 일치함을 보장하지 않는다.
