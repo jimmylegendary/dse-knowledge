@@ -1,3 +1,4 @@
+import copy
 import hashlib
 import importlib.util
 import json
@@ -152,6 +153,36 @@ def test_case_contract_enforces_each_positive_tier_language_quota(stage):
 def test_case_contract_reports_frozen_positive_tier_language_quotas(stage):
     result = metrics.validate_cases(cases_for(stage), stage)
     assert result['positive_tier_languages'] == metrics.POSITIVE_TIER_LANGUAGE_COUNTS[stage]
+
+
+def test_missing_information_accepts_canonical_string_lists_without_mutation(tmp_path):
+    cases = cases_for('calibration')
+    supported = next(case for case in cases if case['answerability'] == 'supported')
+    insufficient = next(case for case in cases if case['answerability'] == 'insufficient')
+    supported['missing_information'] = []
+    insufficient['missing_information'] = ['the requested release-specific measurement']
+    original = copy.deepcopy(cases)
+
+    summary = metrics.validate_cases(cases, 'calibration')
+    assert summary['count'] == 100
+    assert cases == original
+
+    path = tmp_path / 'calibration-cases.jsonl'
+    raw = b''.join(json.dumps(case, ensure_ascii=False).encode('utf-8') + b'\n' for case in cases)
+    path.write_bytes(raw)
+    parsed, digest, parsed_summary = runner._read_case_file(path, 'calibration')
+    assert digest == hashlib.sha256(raw).hexdigest()
+    assert parsed_summary == summary
+    assert parsed == original
+    assert isinstance(parsed[0]['missing_information'], list)
+    assert path.read_bytes() == raw
+
+
+def test_missing_information_rejects_non_string_list_members():
+    cases = cases_for('calibration')
+    cases[0]['missing_information'] = ['valid entry', 17]
+    with pytest.raises(metrics.EvalContractError, match='missing_information'):
+        metrics.validate_cases(cases, 'calibration')
 
 
 def test_case_contract_rejects_cross_stage_intent_overlap():
