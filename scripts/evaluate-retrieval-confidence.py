@@ -205,7 +205,10 @@ def _read_case_file(path: Path, stage: str) -> tuple[list[dict], str, dict]:
 
 
 def _case_contract_sha256() -> str:
-    contract_path = Path(__file__).resolve().parents[1] / ".superpowers" / "sdd" / "eval500" / "case-contract.json"
+    root = Path(__file__).resolve().parents[1]
+    contract_path = root / "research" / "eval500" / "case-contract-v1.json"
+    if not contract_path.exists():
+        contract_path = root / ".superpowers" / "sdd" / "eval500" / "case-contract.json"
     try:
         return hashlib.sha256(contract_path.read_bytes()).hexdigest()
     except OSError:

@@ -1,10 +1,30 @@
 # DSE Knowledge Workbench — 지식·설계 판단·경험 환류
 
-상태: **실제 1,000개 Workbench의 품질 보완 Q2 검증 통과 · runtime v0.2.5** · 기준일: 2026-10-26 KST. 145,748건은 수집 대상 목록이며 전체 본문 분석·KG 등록은 실행하지 않았다. 현재 Q2 결과와 과거 Q1·v0.1 기록을 아래에서 구분한다.
+상태: **실제 1,000개 Workbench · 500건 retrieval challenge 평가 완료 · contextual retrieval/rerank 적용 검증 진행 중** · runtime v0.2.5 · 기준일: 2026-10-26 KST. 145,748건은 수집 대상 목록이며 전체 본문 분석·KG 등록은 실행하지 않았다. 아래의 기존 Q2 소규모 결과와 이번 500건 결과를 구분한다.
 
 이 README는 DSE 결정별 지식 요구를 만들고, 허가된 source에서 evidence를 취득·구조화하며, hardware/kernel/experiment 결정에 쓰고 부족한 지식을 다시 수집하는 전체 구조를 설명한다. 2026-10-18 사용자 정정에 맞춘 상위 기준은 [2026-10-21-dse-knowledge-architecture.md](https://github.com/jimmylegendary/dse-knowledge/blob/docs/p0-episode-contracts/docs/superpowers/specs/2026-10-21-dse-knowledge-architecture.md)와 [2026-10-21-knowledge-architecture-plan.md](https://github.com/jimmylegendary/dse-knowledge/blob/docs/p0-episode-contracts/docs/superpowers/plans/2026-10-21-knowledge-architecture-plan.md)다. 이전 HAT native episode/adapter 계약은 세부 참고이며 이 architecture의 중심 gate가 아니다.
 
-## 현재 Q2 — 실제 1,000개 전체 제품, v0.2.5
+## 고정 500건 검색 평가 — baseline
+
+test **500건(정상 300 · 근거 부족 180 · 모호 20)**과 별도 calibration **100건**을 원문 검토 후 고정했다. test는 한국어 250/영어 250, 정상 질문은 난이도 4개×75건이다. 모델·threshold 선택에는 calibration만 사용한다. 모든 실제 검색 호출 **600/600 HTTP 성공, 오류 0**이며, 실행 성공과 품질 진단 gate는 구분한다.
+
+| 측정 항목 | Baseline 결과 | 분모·의미 |
+|---|---:|---|
+| Source Hit@1 / Hit@5 | **87.0% / 95.0%** | 정상 300건, items stream, 지정한 근거 중 하나 |
+| Chunk Hit@1 / Hit@5 | **43.3% / 66.7%** | 원문 근거 chunk를 정확히 찾았는지 |
+| Chunk MRR@5 | **0.533** | 첫 지정 chunk의 reciprocal rank 평균 |
+| 모든 chunk 근거 그룹 Hit@5 | **63.3%** | 질문에 필요한 AND 그룹 모두 충족 |
+| AUROC / Average Precision | **0.693 / 0.765** | 정상 300 + 근거 부족 180; 모호 20건 제외 |
+| 고정 threshold에서 정상 TPR | **83.7% (251/300)** | calibration에서 TPR≥90%로 정한 RRF proxy threshold |
+| OOD / Grey-zone FPR | **16.0% (8/50) / 71.0% (71/100)** | 근거 부족인데 threshold 이상인 질문 비율 |
+| In-domain missing FPR | **63.3% (19/30)** | 같은 분야지만 필요한 자료가 없는 질문 |
+| 사전 진단 gate | **FAIL: 3개 목표 모두 미달** | 보고 가능한 실험 결과이며 실행 실패가 아님 |
+
+Source relevance만으로 전체 질문의 답변 가능성을 판단하기 어렵다는 결과다. Score는 확률이 아니며 실제 답변·abstention 정책, HAT committee/B300 simulation을 평가하지 않았다. qrels는 지정한 근거 일부이며 완전한 corpus relevance 판정이 아니다. intent 398개·관련 material 120개의 상관관계를 고려해 intent-cluster bootstrap을 기록한다.
+
+공개 파일: [test 500건](https://github.com/jimmylegendary/dse-knowledge/blob/main/research/eval500/test-v1.jsonl), [calibration 100건](https://github.com/jimmylegendary/dse-knowledge/blob/main/research/eval500/calibration-v1.jsonl), [protocol](https://github.com/jimmylegendary/dse-knowledge/blob/main/research/eval500/protocol-v1.json), [freeze](https://github.com/jimmylegendary/dse-knowledge/blob/main/research/eval500/freeze-v1.json), [결과·metadata journal](https://github.com/jimmylegendary/dse-knowledge/tree/main/research/eval500/results), [재현 안내](https://github.com/jimmylegendary/dse-knowledge/blob/main/research/eval500/README.md). 원문 본문·생성 문맥·벡터·credential은 포함하지 않는다.
+
+## 기존 Q2 — 실제 1,000개 전체 제품, v0.2.5
 
 Linux HTTP UI·기존 Supabase PostgreSQL·host Codex CLI `gpt-6.1-sol/max`·외부 `google/embeddinggemma-2`를 연결한 실제 제품이다. 원문 취득 → chunk/vector/FTS/KG → 출처 검색 → 하드웨어·커널 검토/실험 제안 → 판단 snapshot → feedback·Melete 조회를 실제 의존성으로 확인했다. UI에서도 질문을 직접 제출해 모델 응답과 이력의 원문 인용 링크까지 확인했다.
 
