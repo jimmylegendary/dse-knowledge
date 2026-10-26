@@ -163,6 +163,7 @@ class ContextGenerator:
             "prompt_version": self.prompt_version, "http_status": None,
             "latency_seconds": None, "usage": {}, "chunks_observed": 0,
             "context_lengths": [], "batch_fallbacks": [],
+            "wire_id_format": "request_local_ordinal/v1",
         }
         try:
             return self._generate(document, chunks, model)
@@ -235,13 +236,19 @@ class ContextGenerator:
         return result
 
     def _generate_batch(self, endpoint, model, api_key, timeout, document, chunks, expected_ids):
+        identities = [_chunk_identity(chunk) for chunk in chunks]
+        canonical_ids = [chunk_id for chunk_id, _ in identities]
+        if canonical_ids != expected_ids:
+            raise ProviderError("context_chunk_coverage_invalid")
+        wire_ids = [f"c{index}" for index in range(len(identities))]
+        canonical_by_wire_id = dict(zip(wire_ids, canonical_ids, strict=True))
         user_payload = {
             "document": document,
             "chunks": [
-                {"chunk_id": chunk_id, "text": text,
+                {"chunk_id": wire_id, "text": text,
                  **({"start_offset": chunk["start_offset"]} if "start_offset" in chunk else {}),
                  **({"end_offset": chunk["end_offset"]} if "end_offset" in chunk else {})}
-                for chunk, (chunk_id, text) in zip(chunks, [_chunk_identity(chunk) for chunk in chunks], strict=True)
+                for chunk, (_, text), wire_id in zip(chunks, identities, wire_ids, strict=True)
             ],
         }
         payload = {
@@ -305,4 +312,8 @@ class ContextGenerator:
         except json.JSONDecodeError:
             raise ProviderError("context_response_invalid_json") from None
         self.last_metadata["finish_reason"] = "stop"
-        return _validate_result(content_payload, expected_ids)
+        wire_contexts = _validate_result(content_payload, wire_ids)
+        return [
+            {"chunk_id": canonical_by_wire_id[item["chunk_id"]], "context": item["context"]}
+            for item in wire_contexts
+        ]

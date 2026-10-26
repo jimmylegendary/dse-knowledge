@@ -65,7 +65,7 @@ def context_text(count=50):
 
 
 def test_generator_sends_whole_document_and_chunk_without_query_then_returns_chunk_bound_context():
-    opener = FakeOpener(completion({"contexts": [{"chunk_id": "chunk-7", "context": context_text()}]}))
+    opener = FakeOpener(completion({"contexts": [{"chunk_id": "c0", "context": context_text()}]}))
     generator = ContextGenerator(settings(), opener=opener)
     document = "Complete source document with its earlier and later sections."
     chunks = [{"id": "chunk-7", "start_offset": 12, "end_offset": 29, "text": "specific chunk"}]
@@ -88,6 +88,9 @@ def test_generator_sends_whole_document_and_chunk_without_query_then_returns_chu
     assert "specific chunk" in messages
     assert "query" not in messages.lower()
     assert "test label" not in messages.lower()
+    sent_chunks = json.loads(payload["messages"][1]["content"])["chunks"]
+    assert sent_chunks == [{"chunk_id": "c0", "text": "specific chunk", "start_offset": 12, "end_offset": 29}]
+    assert generator.last_metadata["wire_id_format"] == "request_local_ordinal/v1"
     assert generator.last_metadata["usage"] == {
         "prompt_tokens": 30, "completion_tokens": 55, "total_tokens": 85,
         "estimated_cost": 0.00002695,
@@ -99,7 +102,7 @@ def test_generator_sends_whole_document_and_chunk_without_query_then_returns_chu
 
 def test_generator_rejects_truncated_completion_even_when_json_is_valid():
     opener = FakeOpener(completion(
-        {"contexts": [{"chunk_id": "chunk-7", "context": context_text()}]},
+        {"contexts": [{"chunk_id": "c0", "context": context_text()}]},
         finish_reason="length",
     ))
 
@@ -111,8 +114,8 @@ def test_generator_rejects_truncated_completion_even_when_json_is_valid():
 
 def test_generator_rejects_missing_or_duplicate_chunk_ids():
     duplicate = {"contexts": [
-        {"chunk_id": "chunk-7", "context": context_text()},
-        {"chunk_id": "chunk-7", "context": context_text()},
+        {"chunk_id": "c0", "context": context_text()},
+        {"chunk_id": "c0", "context": context_text()},
     ]}
     opener = FakeOpener(completion(duplicate))
 
@@ -124,7 +127,7 @@ def test_generator_rejects_missing_or_duplicate_chunk_ids():
 
 def test_generator_accepts_short_source_bound_context_below_general_token_target():
     short_context = "This chunk describes API stubs."
-    opener = FakeOpener(completion({"contexts": [{"chunk_id": "chunk-7", "context": short_context}]}))
+    opener = FakeOpener(completion({"contexts": [{"chunk_id": "c0", "context": short_context}]}))
 
     result = ContextGenerator(settings(), opener=opener).generate(
         "Whole document", [{"id": "chunk-7", "text": "chunk"}],
@@ -135,7 +138,7 @@ def test_generator_accepts_short_source_bound_context_below_general_token_target
 
 def test_generator_rejects_context_above_bounded_word_or_character_limit():
     too_many_words = " ".join(f"token{i}" for i in range(121))
-    opener = FakeOpener(completion({"contexts": [{"chunk_id": "chunk-7", "context": too_many_words}]}))
+    opener = FakeOpener(completion({"contexts": [{"chunk_id": "c0", "context": too_many_words}]}))
 
     with pytest.raises(ProviderError, match="context_length_invalid"):
         ContextGenerator(settings(), opener=opener).generate(
@@ -145,7 +148,7 @@ def test_generator_rejects_context_above_bounded_word_or_character_limit():
 
 def test_generator_rejects_context_above_character_limit_with_few_words():
     oversized_context = " ".join(["x" * 160] * 5)
-    opener = FakeOpener(completion({"contexts": [{"chunk_id": "chunk-7", "context": oversized_context}]}))
+    opener = FakeOpener(completion({"contexts": [{"chunk_id": "c0", "context": oversized_context}]}))
 
     with pytest.raises(ProviderError, match="context_length_invalid"):
         ContextGenerator(settings(), opener=opener).generate(
@@ -156,8 +159,8 @@ def test_generator_rejects_context_above_character_limit_with_few_words():
 def test_generator_bounds_each_request_to_64_chunks_while_repeating_the_whole_document():
     chunks = [{"id": f"chunk-{i}", "text": f"source passage {i}"} for i in range(65)]
     payloads = [
-        completion({"contexts": [{"chunk_id": f"chunk-{i}", "context": context_text()} for i in range(64)]}),
-        completion({"contexts": [{"chunk_id": "chunk-64", "context": context_text()}]}),
+        completion({"contexts": [{"chunk_id": f"c{i}", "context": context_text()} for i in range(64)]}),
+        completion({"contexts": [{"chunk_id": "c0", "context": context_text()}]}),
     ]
     opener = FakeOpener(payloads)
     document = "Whole document needed to disambiguate this chunk."
@@ -168,14 +171,19 @@ def test_generator_bounds_each_request_to_64_chunks_while_repeating_the_whole_do
     assert len(opener.requests) == 2
     assert all(document in json.dumps(json.loads(request.data)["messages"]) for request, _ in opener.requests)
     assert [json.loads(request.data)["max_tokens"] for request, _ in opener.requests] == [16384, 512]
+    wire_chunks = [json.loads(json.loads(request.data)["messages"][1]["content"])["chunks"]
+                   for request, _ in opener.requests]
+    assert [[chunk["chunk_id"] for chunk in batch] for batch in wire_chunks] == [
+        [f"c{i}" for i in range(64)], ["c0"],
+    ]
 
 
 def test_generator_resubmits_truncated_batch_as_smaller_exact_id_batches():
     chunks = [{"id": f"chunk-{i}", "text": f"source passage {i}"} for i in range(16)]
     opener = FakeOpener([
         completion({"contexts": []}, finish_reason="length"),
-        completion({"contexts": [{"chunk_id": f"chunk-{i}", "context": context_text()} for i in range(8)]}),
-        completion({"contexts": [{"chunk_id": f"chunk-{i}", "context": context_text()} for i in range(8, 16)]}),
+        completion({"contexts": [{"chunk_id": f"c{i}", "context": context_text()} for i in range(8)]}),
+        completion({"contexts": [{"chunk_id": f"c{i}", "context": context_text()} for i in range(8)]}),
     ])
     generator = ContextGenerator(settings(), opener=opener)
     document = "Whole source document retained across every retry."
@@ -186,6 +194,9 @@ def test_generator_resubmits_truncated_batch_as_smaller_exact_id_batches():
     sent = [json.loads(json.loads(request.data)["messages"][1]["content"])
             for request, _ in opener.requests]
     assert [len(payload["chunks"]) for payload in sent] == [16, 8, 8]
+    assert [[chunk["chunk_id"] for chunk in payload["chunks"]] for payload in sent] == [
+        [f"c{i}" for i in range(16)], [f"c{i}" for i in range(8)], [f"c{i}" for i in range(8)],
+    ]
     assert all(payload["document"] == document for payload in sent)
     assert generator.last_metadata["chunks_observed"] == 16
     assert generator.last_metadata["usage"]["total_tokens"] == 255
@@ -203,6 +214,49 @@ def test_generator_never_repairs_or_drops_ids_when_smaller_batch_still_invalid()
 
     assert len(opener.requests) == 2
     assert generator.last_metadata["chunks_observed"] == 0
+
+
+def test_generator_rebinds_reversed_alias_responses_to_original_uuid_chunk_ids():
+    first_id = "chunk-ed1dcd3ba9ee6456d71646b495c86b0a"
+    second_id = "chunk-8d7cefae03f04f2b8c5b551ddc2d9c11"
+    first_context = context_text() + " first-context"
+    second_context = context_text() + " second-context"
+    opener = FakeOpener(completion({"contexts": [
+        {"chunk_id": "c1", "context": second_context},
+        {"chunk_id": "c0", "context": first_context},
+    ]}))
+    generator = ContextGenerator(settings(), opener=opener)
+    chunks = [
+        {"id": first_id, "start_offset": 0, "end_offset": 10, "text": "first source"},
+        {"id": second_id, "start_offset": 11, "end_offset": 23, "text": "second source"},
+    ]
+
+    result = generator.generate("Complete UUID source", chunks)
+
+    assert result == [
+        {"chunk_id": first_id, "context": first_context},
+        {"chunk_id": second_id, "context": second_context},
+    ]
+    wire = json.loads(json.loads(opener.requests[0][0].data)["messages"][1]["content"])
+    assert wire == {
+        "document": "Complete UUID source",
+        "chunks": [
+            {"chunk_id": "c0", "text": "first source", "start_offset": 0, "end_offset": 10},
+            {"chunk_id": "c1", "text": "second source", "start_offset": 11, "end_offset": 23},
+        ],
+    }
+
+
+@pytest.mark.parametrize("wire_ids", [["c0", "unknown"], ["c0", "c0"]])
+def test_generator_rejects_unknown_or_duplicate_request_local_aliases(wire_ids):
+    opener = FakeOpener(completion({"contexts": [
+        {"chunk_id": wire_ids[0], "context": context_text()},
+        {"chunk_id": wire_ids[1], "context": context_text()},
+    ]}))
+    chunks = [{"id": "chunk-uuid-a", "text": "first"}, {"id": "chunk-uuid-b", "text": "second"}]
+
+    with pytest.raises(ProviderError, match="context_chunk_coverage_invalid"):
+        ContextGenerator(settings(), opener=opener).generate("Whole document", chunks)
 
 
 def test_generator_does_not_put_secret_in_error_metadata_or_repr():
