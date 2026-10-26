@@ -41,4 +41,10 @@ Runner의 mode/score/request/corpus/case identity 외에 root matrix workflow가
 
 Raw artifact SHA와 normalized-content SHA를 구분하고 양쪽 source manifest/cache binding을 보존한다. `out_of_scope`는 baseline과 동일하게 top-k와 capacity 제한 전에 제외한다. Canonical corpus 수와 eligible index 수는 별도로 보고한다. Reranker receipt는 thread-local로 격리한다.
 
+### 실제 provider·transport 선택 기록
+
+실제 context 구축에는 env에 명시한 `deepseek-ai/DeepSeek-V4.1-Flash` 기본 endpoint를 사용한다. 1017 endpoint의 반복 지연은 보존하고 새 model profile로 다시 구축했으며, 서로 다른 모델의 context cache를 섞지 않는다. 전체 source를 제공하므로 가장 큰 자료를 잘라서 모델 한도에 맞추지 않는다.
+
+긴 canonical chunk ID를 모델이 한 글자 틀리게 반환한 응답은 거부했다. 요청마다 `c0…cN-1` transport alias를 만들고 exact coverage·중복·미지 alias를 검증한 뒤 사전에 만든 일대일 매핑으로 canonical ID를 복원한다. Adaptive subbatch는 alias를 새로 시작한다. 이는 ID의 직렬화 변경이며 system prompt 의미·source text·offset·canonical cache key는 유지한다. 이미 검증된 canonical-ID 응답 cache와 이후 alias 응답 cache를 보존하지만, 이전 응답이 새 transport를 사용했다고 기록하지 않는다. 잘못된 ID의 유사도 복구나 누락 context의 생략은 하지 않는다.
+
 실제 64-chunk 응답의 truncation·ID 누락은 strict validation으로 거부한다. 출력 예산은 chunk당 최대 256 tokens, 요청당 최대64다. 잘림·잘못된 JSON·ID coverage 오류에 한해 같은 whole-document를 유지해 64→32→16→8로 나눠 재요청하며, 실패한 smallest batch는 그대로 오류다. 잘못된 응답을 잘라 쓰거나 ID를 채워 넣지 않는다. 수신한 실패 응답의 usage도 보존한다. 전송 중단·응답을 받지 못한 호출 비용은 provider 청구와 일치함을 보장하지 않는다.

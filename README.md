@@ -4,7 +4,27 @@
 
 이 README는 DSE 결정별 지식 요구를 만들고, 허가된 source에서 evidence를 취득·구조화하며, hardware/kernel/experiment 결정에 쓰고 부족한 지식을 다시 수집하는 전체 구조를 설명한다. 2026-10-18 사용자 정정에 맞춘 상위 기준은 [2026-10-21-dse-knowledge-architecture.md](https://github.com/jimmylegendary/dse-knowledge/blob/docs/p0-episode-contracts/docs/superpowers/specs/2026-10-21-dse-knowledge-architecture.md)와 [2026-10-21-knowledge-architecture-plan.md](https://github.com/jimmylegendary/dse-knowledge/blob/docs/p0-episode-contracts/docs/superpowers/plans/2026-10-21-knowledge-architecture-plan.md)다. 이전 HAT native episode/adapter 계약은 세부 참고이며 이 architecture의 중심 gate가 아니다.
 
-## 고정 500건 검색 평가 — baseline
+## 고정 500건 검색 평가 — Qwen reranker 비교
+
+동일한 질문과 정답으로 Qwen3-Reranker-4B/8B를 calibration 100건에서 비교했다. 모든 근거 그룹 Hit@5 → Chunk MRR@5 → 낮은 grey-zone FPR 순으로 **8B를 선택**했고, 선택한 8B만 test 500건을 실행했다. 두 크기의 calibration은 각각 100/100, 선택한 8B test는 500/500 성공·오류 0이다.
+
+| 항목 | Baseline | Qwen 8B rerank |
+|---|---:|---:|
+| Source Hit@5 | 95.0% | **97.7%** |
+| Chunk Hit@5 | 66.7% | **93.7%** |
+| Chunk MRR@5 | 0.533 | **0.859** |
+| 모든 chunk 근거 그룹 Hit@5 | 63.3% | **89.3%** |
+| AUROC | 0.693 | **0.922** |
+| 정상 TPR | 83.7% | **94.3%** |
+| OOD FPR | 16.0% | **0.0%** |
+| Grey-zone FPR | 71.0% | **40.0%** |
+| 진단 gate | FAIL | **FAIL: grey-zone 목표 20% 초과** |
+
+LLM Contextual Retrieval도 구현했고 현재 전체 문맥 인덱스를 구축 중이다. Whole document와 각 chunk로 만든 짧은 문맥을 원문에 붙여 embedding 및 실제 FTS5 BM25를 구성한다. 문맥은 검색 힌트이며, PostgreSQL 원문·Claim·인용을 대체하지 않는다. 완성 후 contextual-only와 combined도 같은 frozen 데이터로 평가한다. 검색 점수가 높아져도 질문의 모든 조건을 충족했다는 뜻은 아니다.
+
+Standalone HTML: [retrieval-evaluation-2026-10-26.html](https://github.com/jimmylegendary/dse-knowledge/blob/main/web/reports/retrieval-evaluation-2026-10-26.html). 실행 중인 Workbench의 **500건 검색 평가** 메뉴에서도 열 수 있다. 질문별 검색 순위·정답·FP/FN, 난이도·언어·경계 유형을 필터로 검토한다.
+
+### Baseline 세부 결과와 평가 범위
 
 test **500건(정상 300 · 근거 부족 180 · 모호 20)**과 별도 calibration **100건**을 원문 검토 후 고정했다. test는 한국어 250/영어 250, 정상 질문은 난이도 4개×75건이다. 모델·threshold 선택에는 calibration만 사용한다. 모든 실제 검색 호출 **600/600 HTTP 성공, 오류 0**이며, 실행 성공과 품질 진단 gate는 구분한다.
 
