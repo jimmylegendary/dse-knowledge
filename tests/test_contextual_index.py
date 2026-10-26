@@ -1,12 +1,15 @@
 import hashlib
 import importlib.util
+import json
 from pathlib import Path
+import sqlite3
 import stat
 from types import SimpleNamespace
 
 import pytest
 
 from dse_knowledge.contextual_index import ContextualIndex, ContextualIndexBuilder, ContextualIndexError, corpus_hash
+import dse_knowledge.contextual_index as contextual_index_module
 
 
 def unit_vector(position):
@@ -247,6 +250,136 @@ def test_manifest_reports_eligible_index_cohort_and_canonical_corpus_counts(tmp_
     assert manifest["eligible_chunk_count"] == 1
     assert manifest["canonical_source_count"] == 2
     assert manifest["canonical_chunk_count"] == 4
+    assert manifest["fts_sqlite_version"] == sqlite3.sqlite_version
+
+
+def test_active_reader_rejects_index_created_by_another_sqlite_engine(tmp_path, monkeypatch):
+    docs = [document("material-a", "revision-a", "Source passage.", [chunk("chunk-a", "Source passage.")])]
+    contextualizer = FakeContextualizer()
+    manifest = build_index(tmp_path / "index", docs, contextualizer, FakeEmbedding())
+    assert manifest["fts_sqlite_version"] == sqlite3.sqlite_version
+    monkeypatch.setattr(contextual_index_module.sqlite3, "sqlite_version", "different-engine-version")
+
+    with pytest.raises(ContextualIndexError, match="contextual_index_fts_version_mismatch"):
+        ContextualIndex(tmp_path / "index").search(
+            "passage", unit_vector(0), "", 5,
+            expected_corpus_hash=manifest["corpus_hash"],
+            embedding_fingerprint="deepinfra:google/embeddinggemma-2:768",
+            context_model=contextualizer.model,
+            prompt_version=contextualizer.prompt_version,
+        )
+
+
+def test_engine_version_change_uses_new_generation_and_preserves_old_complete_file(tmp_path, monkeypatch):
+    docs = [document("material-a", "revision-a", "Source passage.", [chunk("chunk-a", "Source passage.")])]
+    contextualizer = FakeContextualizer()
+    index_dir = tmp_path / "index"
+    old_manifest = build_index(index_dir, docs, contextualizer, FakeEmbedding())
+    old_final = index_dir / f"generation-{old_manifest['generation_id']}.sqlite3"
+    monkeypatch.setattr(contextual_index_module.sqlite3, "sqlite_version", "different-engine-version")
+
+    new_builder = ContextualIndexBuilder(
+        index_dir, expected_corpus_hash=reference_corpus_hash(docs),
+        expected_source_count=1, expected_chunk_count=1,
+        expected_source_revision_manifest_sha256=reference_source_revision_manifest_hash(docs),
+        expected_normalized_content_manifest_sha256=reference_normalized_content_manifest_hash(docs),
+        embedding_fingerprint="deepinfra:google/embeddinggemma-2:768",
+        context_model=contextualizer.model, prompt_version=contextualizer.prompt_version,
+    )
+
+    assert new_builder.generation_id != old_manifest["generation_id"]
+    assert new_builder.final_path != old_final
+    assert new_builder.staging_path.exists()
+    assert old_final.exists()
+    assert ContextualIndexBuilder._load_db_manifest(old_final)["fts_sqlite_version"] == old_manifest["fts_sqlite_version"]
+    pointer = json.loads((index_dir / "active.json").read_text(encoding="utf-8"))
+    assert pointer["generation_id"] == old_manifest["generation_id"]
+
+
+def test_engine_version_change_does_not_reuse_partial_stage(tmp_path, monkeypatch):
+    docs = [document("material-a", "revision-a", "Source passage.", [chunk("chunk-a", "Source passage.")])]
+    contextualizer = FakeContextualizer()
+    path = tmp_path / "index"
+    old_builder = ContextualIndexBuilder(
+        path, expected_corpus_hash=reference_corpus_hash(docs),
+        expected_source_count=1, expected_chunk_count=1,
+        expected_source_revision_manifest_sha256=reference_source_revision_manifest_hash(docs),
+        expected_normalized_content_manifest_sha256=reference_normalized_content_manifest_hash(docs),
+        embedding_fingerprint="deepinfra:google/embeddinggemma-2:768",
+        context_model=contextualizer.model, prompt_version=contextualizer.prompt_version,
+    )
+    old_builder.add_document(docs[0], contextualizer, FakeEmbedding())
+    old_stage = old_builder.staging_path
+    old_digest = hashlib.sha256(old_stage.read_bytes()).hexdigest()
+    original_sqlite_version = sqlite3.sqlite_version
+    monkeypatch.setattr(contextual_index_module.sqlite3, "sqlite_version", "different-engine-version")
+
+    new_builder = ContextualIndexBuilder(
+        path, expected_corpus_hash=reference_corpus_hash(docs),
+        expected_source_count=1, expected_chunk_count=1,
+        expected_source_revision_manifest_sha256=reference_source_revision_manifest_hash(docs),
+        expected_normalized_content_manifest_sha256=reference_normalized_content_manifest_hash(docs),
+        embedding_fingerprint="deepinfra:google/embeddinggemma-2:768",
+        context_model=contextualizer.model, prompt_version=contextualizer.prompt_version,
+    )
+
+    assert new_builder.generation_id != old_builder.generation_id
+    assert new_builder.staging_path != old_stage
+    assert old_stage.exists() and new_builder.staging_path.exists()
+    assert hashlib.sha256(old_stage.read_bytes()).hexdigest() == old_digest
+
+    def read_identity(stage_path):
+        connection = sqlite3.connect(stage_path)
+        try:
+            return json.loads(connection.execute(
+                "SELECT value FROM index_meta WHERE key='identity'",
+            ).fetchone()[0])
+        finally:
+            connection.close()
+
+    old_identity = read_identity(old_stage)
+    new_identity = read_identity(new_builder.staging_path)
+    assert old_identity["fts_sqlite_version"] == original_sqlite_version
+    assert new_identity["fts_sqlite_version"] == "different-engine-version"
+
+
+def test_legacy_partial_stage_gets_engine_version_only_when_strict_activation_completes(tmp_path):
+    docs = [document("material-a", "revision-a", "Source passage.", [chunk("chunk-a", "Source passage.")])]
+    contextualizer = FakeContextualizer()
+    embedding = FakeEmbedding()
+    path = tmp_path / "index"
+    expected_hash = reference_corpus_hash(docs)
+    builder = ContextualIndexBuilder(
+        path, expected_corpus_hash=expected_hash, expected_source_count=1, expected_chunk_count=1,
+        expected_source_revision_manifest_sha256=reference_source_revision_manifest_hash(docs),
+        expected_normalized_content_manifest_sha256=reference_normalized_content_manifest_hash(docs),
+        embedding_fingerprint="deepinfra:google/embeddinggemma-2:768",
+        context_model=contextualizer.model, prompt_version=contextualizer.prompt_version,
+    )
+    builder.add_document(docs[0], contextualizer, embedding)
+
+    connection = sqlite3.connect(builder.staging_path)
+    stored_identity = connection.execute("SELECT value FROM index_meta WHERE key='identity'").fetchone()
+    assert json.loads(stored_identity[0])["fts_sqlite_version"] == sqlite3.sqlite_version
+    stored = connection.execute("SELECT value FROM index_meta WHERE key='manifest'").fetchone()
+    staged_manifest = json.loads(stored[0])
+    staged_manifest.pop("fts_sqlite_version", None)
+    connection.execute("UPDATE index_meta SET value=? WHERE key='manifest'", (json.dumps(staged_manifest, sort_keys=True, separators=(",", ":")),))
+    connection.commit()
+    connection.close()
+
+    resumed = ContextualIndexBuilder(
+        path, expected_corpus_hash=expected_hash, expected_source_count=1, expected_chunk_count=1,
+        expected_source_revision_manifest_sha256=reference_source_revision_manifest_hash(docs),
+        expected_normalized_content_manifest_sha256=reference_normalized_content_manifest_hash(docs),
+        embedding_fingerprint="deepinfra:google/embeddinggemma-2:768",
+        context_model=contextualizer.model, prompt_version=contextualizer.prompt_version,
+    )
+    resumed.add_document(docs[0], contextualizer, embedding)
+    manifest = resumed.activate()
+
+    assert manifest["complete"] is True
+    assert manifest["fts_sqlite_version"] == sqlite3.sqlite_version
 
 
 def test_builder_rejects_unsafe_directory_without_changing_its_permissions(tmp_path):

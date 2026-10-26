@@ -224,10 +224,11 @@ def normalized_content_manifest_hash(sources: Iterable[dict[str, Any]]) -> str:
 def _profile_generation_id(corpus: str, source_count: int, chunk_count: int,
                            source_revision_manifest_sha256: str,
                            normalized_content_manifest_sha256: str,
-                           embedding_fingerprint: str, context_model: str, prompt_version: str) -> str:
+                           fts_sqlite_version: str, embedding_fingerprint: str,
+                           context_model: str, prompt_version: str) -> str:
     key = _json([INDEX_SCHEMA_VERSION, corpus, source_count, chunk_count,
                  source_revision_manifest_sha256, normalized_content_manifest_sha256,
-                 embedding_fingerprint, context_model, prompt_version])
+                 fts_sqlite_version, embedding_fingerprint, context_model, prompt_version])
     return hashlib.sha256(key.encode("utf-8")).hexdigest()[:32]
 
 
@@ -302,7 +303,7 @@ class ContextualIndexBuilder:
         self.generation_id = _profile_generation_id(
             expected_corpus_hash, expected_source_count, expected_chunk_count,
             expected_source_revision_manifest_sha256, expected_normalized_content_manifest_sha256,
-            embedding_fingerprint, context_model, prompt_version,
+            sqlite3.sqlite_version, embedding_fingerprint, context_model, prompt_version,
         )
         self.staging_path = self.directory / f"staging-{self.generation_id}.sqlite3"
         self.final_path = self.directory / f"generation-{self.generation_id}.sqlite3"
@@ -328,6 +329,7 @@ class ContextualIndexBuilder:
             "normalized_content_manifest_sha256": self.expected_normalized_content_manifest_sha256,
             "embedding_fingerprint": self.embedding_fingerprint,
             "embedding_dimensions": EMBEDDING_DIMENSIONS,
+            "fts_sqlite_version": sqlite3.sqlite_version,
             "context_model": self.context_model, "prompt_version": self.prompt_version,
             "complete": False, "usage": {},
         }
@@ -389,7 +391,8 @@ class ContextualIndexBuilder:
             identity = {key: self._manifest[key] for key in (
                 "schema_version", "generation_id", "corpus_hash", "source_count", "chunk_count",
                 "source_revision_manifest_sha256", "normalized_content_manifest_sha256",
-                "embedding_fingerprint", "embedding_dimensions", "context_model", "prompt_version",
+                "embedding_fingerprint", "embedding_dimensions", "fts_sqlite_version",
+                "context_model", "prompt_version",
             )}
             if stored is None:
                 connection.execute("INSERT INTO index_meta(key,value) VALUES('identity',?)", (_json(identity),))
@@ -645,6 +648,7 @@ class ContextualIndexBuilder:
             manifest = json.loads(row["value"])
             manifest.update(complete=True, corpus_hash=actual_hash,
                             source_count=complete_sources, chunk_count=complete_chunks,
+                            fts_sqlite_version=sqlite3.sqlite_version,
                             eligible_source_count=complete_sources, eligible_chunk_count=complete_chunks,
                             source_hashes={
                                 "revision_manifest_sha256": source_revision_hash,
@@ -729,6 +733,8 @@ class ContextualIndex:
                 or manifest.get("generation_id") != generation_id
                 or hashlib.sha256(_json(manifest).encode("utf-8")).hexdigest() != pointer.get("manifest_sha256")):
             raise ContextualIndexError("contextual_index_manifest_invalid")
+        if manifest.get("fts_sqlite_version") != sqlite3.sqlite_version:
+            raise ContextualIndexError("contextual_index_fts_version_mismatch")
         if self._verified_generation != generation_id:
             digest = hashlib.sha256()
             try:
