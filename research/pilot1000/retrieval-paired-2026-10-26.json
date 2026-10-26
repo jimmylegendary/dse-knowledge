@@ -1,0 +1,3308 @@
+{
+  "absolute_all_agent_source_blindness_claimed": false,
+  "case_rows": [
+    {
+      "anchor_role": "direct_source_support",
+      "answerability": "answerable",
+      "category": "compiler_kernel",
+      "error_type": null,
+      "expected_chunks": [
+        {
+          "chunk_id": "chunk-65cd3b39530354b07a9373094620e221",
+          "material_id": "mat-6fe4c3d217e7f4566171cc11",
+          "quote_characters": 54,
+          "quote_sha256": "5a0a4d1f5c015b985a5f6e6f876eaa16d2758234bf879779cb33fe2dbd1bb7a8"
+        }
+      ],
+      "expected_material_ids": [
+        "mat-6fe4c3d217e7f4566171cc11"
+      ],
+      "id": "66f0ed7f566b568b837c879c23cd3a0e",
+      "language": "ko",
+      "latency_seconds": 2.6229431107640266,
+      "paired_id": "65e21085fcf84c318dc24784203ddacf",
+      "query": "cuda::barrier 문서에서 Scope로 사용할 수 없다고 명시된 cuda::thread_scope 값은 무엇인가요?",
+      "scores": {
+        "hybrid": {
+          "all_expected_sources_at_5": 1,
+          "known_chunk_hit_at_10": 1,
+          "known_chunk_hit_at_5": 1,
+          "known_source_hit_at_1": 1,
+          "known_source_hit_at_10": 1,
+          "known_source_hit_at_5": 1,
+          "reciprocal_rank": 1.0
+        },
+        "hybrid_evidence": {
+          "all_expected_sources_at_5": 1,
+          "known_chunk_hit_at_10": 1,
+          "known_chunk_hit_at_5": 1,
+          "known_source_hit_at_1": 1,
+          "known_source_hit_at_10": 1,
+          "known_source_hit_at_5": 1,
+          "reciprocal_rank": 1.0
+        }
+      },
+      "top5": {
+        "hybrid": [
+          {
+            "chunk_id": "chunk-b168d1d3881564e3a491cec0898dab41",
+            "material_id": "mat-6fe4c3d217e7f4566171cc11",
+            "result_kind": "evidence",
+            "revision_id": "c57acf9d90d69deec3359370eb74d53a",
+            "role": "core_technical"
+          },
+          {
+            "chunk_id": "chunk-65cd3b39530354b07a9373094620e221",
+            "material_id": "mat-6fe4c3d217e7f4566171cc11",
+            "result_kind": "evidence",
+            "revision_id": "c57acf9d90d69deec3359370eb74d53a",
+            "role": "core_technical"
+          },
+          {
+            "chunk_id": "chunk-ea89574c9266faea0b3f351d43ebebdc",
+            "material_id": "mat-531804c0b7912019b3f3bba5",
+            "result_kind": "evidence",
+            "revision_id": "caeb509bdcbd6a296408404312655761",
+            "role": "core_technical"
+          },
+          {
+            "chunk_id": "chunk-f2a75f26db02b23f810b65758ca809e9",
+            "material_id": "mat-0a53e49a412708b618ab39bb",
+            "result_kind": "evidence",
+            "revision_id": "6f62531f035f2559914dd2326176ec7d",
+            "role": "core_technical"
+          },
+          {
+            "chunk_id": "chunk-5294fe90901e7845878a5f4364a6a757",
+            "material_id": "mat-c3015f9e8e028d214a1f45d1",
+            "result_kind": "evidence",
+            "revision_id": "3a72bc5ce71b565486f5a6fee2b1cdfc",
+            "role": "core_technical"
+          }
+        ],
+        "hybrid_evidence": [
+          {
+            "chunk_id": "chunk-b168d1d3881564e3a491cec0898dab41",
+            "material_id": "mat-6fe4c3d217e7f4566171cc11",
+            "result_kind": "evidence",
+            "revision_id": "c57acf9d90d69deec3359370eb74d53a",
+            "role": "core_technical"
+          },
+          {
+            "chunk_id": "chunk-65cd3b39530354b07a9373094620e221",
+            "material_id": "mat-6fe4c3d217e7f4566171cc11",
+            "result_kind": "evidence",
+            "revision_id": "c57acf9d90d69deec3359370eb74d53a",
+            "role": "core_technical"
+          },
+          {
+            "chunk_id": "chunk-ea89574c9266faea0b3f351d43ebebdc",
+            "material_id": "mat-531804c0b7912019b3f3bba5",
+            "result_kind": "evidence",
+            "revision_id": "caeb509bdcbd6a296408404312655761",
+            "role": "core_technical"
+          },
+          {
+            "chunk_id": "chunk-f2a75f26db02b23f810b65758ca809e9",
+            "material_id": "mat-0a53e49a412708b618ab39bb",
+            "result_kind": "evidence",
+            "revision_id": "6f62531f035f2559914dd2326176ec7d",
+            "role": "core_technical"
+          },
+          {
+            "chunk_id": "chunk-5294fe90901e7845878a5f4364a6a757",
+            "material_id": "mat-c3015f9e8e028d214a1f45d1",
+            "result_kind": "evidence",
+            "revision_id": "3a72bc5ce71b565486f5a6fee2b1cdfc",
+            "role": "core_technical"
+          }
+        ]
+      }
+    },
+    {
+      "anchor_role": "direct_source_support",
+      "answerability": "answerable",
+      "category": "compiler_kernel",
+      "error_type": null,
+      "expected_chunks": [
+        {
+          "chunk_id": "chunk-65cd3b39530354b07a9373094620e221",
+          "material_id": "mat-6fe4c3d217e7f4566171cc11",
+          "quote_characters": 54,
+          "quote_sha256": "5a0a4d1f5c015b985a5f6e6f876eaa16d2758234bf879779cb33fe2dbd1bb7a8"
+        }
+      ],
+      "expected_material_ids": [
+        "mat-6fe4c3d217e7f4566171cc11"
+      ],
+      "id": "e2d3e740c04671014e544712ebe44c25",
+      "language": "en",
+      "latency_seconds": 2.7351677548140287,
+      "paired_id": "65e21085fcf84c318dc24784203ddacf",
+      "query": "Which Scope value does the cuda::barrier documentation explicitly say must not be used?",
+      "scores": {
+        "hybrid": {
+          "all_expected_sources_at_5": 1,
+          "known_chunk_hit_at_10": 1,
+          "known_chunk_hit_at_5": 1,
+          "known_source_hit_at_1": 0,
+          "known_source_hit_at_10": 1,
+          "known_source_hit_at_5": 1,
+          "reciprocal_rank": 0.5
+        },
+        "hybrid_evidence": {
+          "all_expected_sources_at_5": 1,
+          "known_chunk_hit_at_10": 1,
+          "known_chunk_hit_at_5": 1,
+          "known_source_hit_at_1": 0,
+          "known_source_hit_at_10": 1,
+          "known_source_hit_at_5": 1,
+          "reciprocal_rank": 0.5
+        }
+      },
+      "top5": {
+        "hybrid": [
+          {
+            "chunk_id": "chunk-ea89574c9266faea0b3f351d43ebebdc",
+            "material_id": "mat-531804c0b7912019b3f3bba5",
+            "result_kind": "evidence",
+            "revision_id": "caeb509bdcbd6a296408404312655761",
+            "role": "core_technical"
+          },
+          {
+            "chunk_id": "chunk-b168d1d3881564e3a491cec0898dab41",
+            "material_id": "mat-6fe4c3d217e7f4566171cc11",
+            "result_kind": "evidence",
+            "revision_id": "c57acf9d90d69deec3359370eb74d53a",
+            "role": "core_technical"
+          },
+          {
+            "chunk_id": "chunk-65cd3b39530354b07a9373094620e221",
+            "material_id": "mat-6fe4c3d217e7f4566171cc11",
+            "result_kind": "evidence",
+            "revision_id": "c57acf9d90d69deec3359370eb74d53a",
+            "role": "core_technical"
+          },
+          {
+            "chunk_id": "chunk-f2a75f26db02b23f810b65758ca809e9",
+            "material_id": "mat-0a53e49a412708b618ab39bb",
+            "result_kind": "evidence",
+            "revision_id": "6f62531f035f2559914dd2326176ec7d",
+            "role": "core_technical"
+          },
+          {
+            "chunk_id": "chunk-2067de4433038370ec75d7869973052b",
+            "material_id": "mat-6fe4c3d217e7f4566171cc11",
+            "result_kind": "evidence",
+            "revision_id": "c57acf9d90d69deec3359370eb74d53a",
+            "role": "core_technical"
+          }
+        ],
+        "hybrid_evidence": [
+          {
+            "chunk_id": "chunk-ea89574c9266faea0b3f351d43ebebdc",
+            "material_id": "mat-531804c0b7912019b3f3bba5",
+            "result_kind": "evidence",
+            "revision_id": "caeb509bdcbd6a296408404312655761",
+            "role": "core_technical"
+          },
+          {
+            "chunk_id": "chunk-b168d1d3881564e3a491cec0898dab41",
+            "material_id": "mat-6fe4c3d217e7f4566171cc11",
+            "result_kind": "evidence",
+            "revision_id": "c57acf9d90d69deec3359370eb74d53a",
+            "role": "core_technical"
+          },
+          {
+            "chunk_id": "chunk-65cd3b39530354b07a9373094620e221",
+            "material_id": "mat-6fe4c3d217e7f4566171cc11",
+            "result_kind": "evidence",
+            "revision_id": "c57acf9d90d69deec3359370eb74d53a",
+            "role": "core_technical"
+          },
+          {
+            "chunk_id": "chunk-f2a75f26db02b23f810b65758ca809e9",
+            "material_id": "mat-0a53e49a412708b618ab39bb",
+            "result_kind": "evidence",
+            "revision_id": "6f62531f035f2559914dd2326176ec7d",
+            "role": "core_technical"
+          },
+          {
+            "chunk_id": "chunk-2067de4433038370ec75d7869973052b",
+            "material_id": "mat-6fe4c3d217e7f4566171cc11",
+            "result_kind": "evidence",
+            "revision_id": "c57acf9d90d69deec3359370eb74d53a",
+            "role": "core_technical"
+          }
+        ]
+      }
+    },
+    {
+      "anchor_role": "direct_source_support",
+      "answerability": "answerable",
+      "category": "dse_optimization",
+      "error_type": null,
+      "expected_chunks": [
+        {
+          "chunk_id": "chunk-1f9e0ccbbc331c6bd24f43c3747d4724",
+          "material_id": "mat-eb14e3dafe3602f43edd0385",
+          "quote_characters": 38,
+          "quote_sha256": "b6140c1a14619ce0c1f1fee52035c4c44d9c41b5b249dad1eb52d671d8a941bb"
+        }
+      ],
+      "expected_material_ids": [
+        "mat-eb14e3dafe3602f43edd0385"
+      ],
+      "id": "0008c21d0e509239cc21cfaf97c8d25b",
+      "language": "ko",
+      "latency_seconds": 2.1131593585014343,
+      "paired_id": "5620ceb7cea21a68972eaf07d01b02a3",
+      "query": "FlowCutter 논문이 핵심 알고리즘에 대해 제시한 시간 복잡도 표현은 무엇인가요?",
+      "scores": {
+        "hybrid": {
+          "all_expected_sources_at_5": 1,
+          "known_chunk_hit_at_10": 1,
+          "known_chunk_hit_at_5": 1,
+          "known_source_hit_at_1": 1,
+          "known_source_hit_at_10": 1,
+          "known_source_hit_at_5": 1,
+          "reciprocal_rank": 1.0
+        },
+        "hybrid_evidence": {
+          "all_expected_sources_at_5": 1,
+          "known_chunk_hit_at_10": 1,
+          "known_chunk_hit_at_5": 1,
+          "known_source_hit_at_1": 1,
+          "known_source_hit_at_10": 1,
+          "known_source_hit_at_5": 1,
+          "reciprocal_rank": 1.0
+        }
+      },
+      "top5": {
+        "hybrid": [
+          {
+            "chunk_id": "chunk-922e89601b8b78ee5f38ee4ea1d77fdc",
+            "material_id": "mat-eb14e3dafe3602f43edd0385",
+            "result_kind": "evidence",
+            "revision_id": "6021819d8420a52bb934509960ecbaa7",
+            "role": "supporting_method"
+          },
+          {
+            "chunk_id": "chunk-20e7a18257cb44e1d512c3d16d3118ea",
+            "material_id": "mat-eb14e3dafe3602f43edd0385",
+            "result_kind": "evidence",
+            "revision_id": "6021819d8420a52bb934509960ecbaa7",
+            "role": "supporting_method"
+          },
+          {
+            "chunk_id": "chunk-1f9e0ccbbc331c6bd24f43c3747d4724",
+            "material_id": "mat-eb14e3dafe3602f43edd0385",
+            "result_kind": "evidence",
+            "revision_id": "6021819d8420a52bb934509960ecbaa7",
+            "role": "supporting_method"
+          },
+          {
+            "chunk_id": "chunk-01350190e38def76acd4f48c4e1592de",
+            "material_id": "mat-54556ea3a196601e1d760bca",
+            "result_kind": "evidence",
+            "revision_id": "db17534888cd338590dab11ab3383c49",
+            "role": "core_technical"
+          },
+          {
+            "chunk_id": "chunk-c3ece9829e77892eadb61e8fc114a536",
+            "material_id": "mat-a77cd01636a3793527becf17",
+            "result_kind": "evidence",
+            "revision_id": "bc43718c111f4c53845a02383216ea89",
+            "role": "core_technical"
+          }
+        ],
+        "hybrid_evidence": [
+          {
+            "chunk_id": "chunk-922e89601b8b78ee5f38ee4ea1d77fdc",
+            "material_id": "mat-eb14e3dafe3602f43edd0385",
+            "result_kind": "evidence",
+            "revision_id": "6021819d8420a52bb934509960ecbaa7",
+            "role": "supporting_method"
+          },
+          {
+            "chunk_id": "chunk-20e7a18257cb44e1d512c3d16d3118ea",
+            "material_id": "mat-eb14e3dafe3602f43edd0385",
+            "result_kind": "evidence",
+            "revision_id": "6021819d8420a52bb934509960ecbaa7",
+            "role": "supporting_method"
+          },
+          {
+            "chunk_id": "chunk-1f9e0ccbbc331c6bd24f43c3747d4724",
+            "material_id": "mat-eb14e3dafe3602f43edd0385",
+            "result_kind": "evidence",
+            "revision_id": "6021819d8420a52bb934509960ecbaa7",
+            "role": "supporting_method"
+          },
+          {
+            "chunk_id": "chunk-01350190e38def76acd4f48c4e1592de",
+            "material_id": "mat-54556ea3a196601e1d760bca",
+            "result_kind": "evidence",
+            "revision_id": "db17534888cd338590dab11ab3383c49",
+            "role": "core_technical"
+          },
+          {
+            "chunk_id": "chunk-c3ece9829e77892eadb61e8fc114a536",
+            "material_id": "mat-a77cd01636a3793527becf17",
+            "result_kind": "evidence",
+            "revision_id": "bc43718c111f4c53845a02383216ea89",
+            "role": "core_technical"
+          }
+        ]
+      }
+    },
+    {
+      "anchor_role": "direct_source_support",
+      "answerability": "answerable",
+      "category": "dse_optimization",
+      "error_type": null,
+      "expected_chunks": [
+        {
+          "chunk_id": "chunk-1f9e0ccbbc331c6bd24f43c3747d4724",
+          "material_id": "mat-eb14e3dafe3602f43edd0385",
+          "quote_characters": 38,
+          "quote_sha256": "b6140c1a14619ce0c1f1fee52035c4c44d9c41b5b249dad1eb52d671d8a941bb"
+        }
+      ],
+      "expected_material_ids": [
+        "mat-eb14e3dafe3602f43edd0385"
+      ],
+      "id": "f28b6d342c7e6e1803365b90f8806d36",
+      "language": "en",
+      "latency_seconds": 5.13337664026767,
+      "paired_id": "5620ceb7cea21a68972eaf07d01b02a3",
+      "query": "What time-complexity expression does the paper give for FlowCutter's core algorithm?",
+      "scores": {
+        "hybrid": {
+          "all_expected_sources_at_5": 1,
+          "known_chunk_hit_at_10": 1,
+          "known_chunk_hit_at_5": 1,
+          "known_source_hit_at_1": 1,
+          "known_source_hit_at_10": 1,
+          "known_source_hit_at_5": 1,
+          "reciprocal_rank": 1.0
+        },
+        "hybrid_evidence": {
+          "all_expected_sources_at_5": 1,
+          "known_chunk_hit_at_10": 1,
+          "known_chunk_hit_at_5": 1,
+          "known_source_hit_at_1": 1,
+          "known_source_hit_at_10": 1,
+          "known_source_hit_at_5": 1,
+          "reciprocal_rank": 1.0
+        }
+      },
+      "top5": {
+        "hybrid": [
+          {
+            "chunk_id": "chunk-78d05345745fd6fbb5a0a44ac5e087f0",
+            "material_id": "mat-eb14e3dafe3602f43edd0385",
+            "result_kind": "evidence",
+            "revision_id": "6021819d8420a52bb934509960ecbaa7",
+            "role": "supporting_method"
+          },
+          {
+            "chunk_id": "chunk-ccc7cce60907cf360dd0a8ae96061430",
+            "material_id": "mat-eb14e3dafe3602f43edd0385",
+            "result_kind": "evidence",
+            "revision_id": "6021819d8420a52bb934509960ecbaa7",
+            "role": "supporting_method"
+          },
+          {
+            "chunk_id": "chunk-c3ece9829e77892eadb61e8fc114a536",
+            "material_id": "mat-a77cd01636a3793527becf17",
+            "result_kind": "evidence",
+            "revision_id": "bc43718c111f4c53845a02383216ea89",
+            "role": "core_technical"
+          },
+          {
+            "chunk_id": "chunk-1f9e0ccbbc331c6bd24f43c3747d4724",
+            "material_id": "mat-eb14e3dafe3602f43edd0385",
+            "result_kind": "evidence",
+            "revision_id": "6021819d8420a52bb934509960ecbaa7",
+            "role": "supporting_method"
+          },
+          {
+            "chunk_id": "chunk-f4d05797d61b7ceec0cc44d856fb2e3f",
+            "material_id": "mat-54556ea3a196601e1d760bca",
+            "result_kind": "evidence",
+            "revision_id": "db17534888cd338590dab11ab3383c49",
+            "role": "core_technical"
+          }
+        ],
+        "hybrid_evidence": [
+          {
+            "chunk_id": "chunk-78d05345745fd6fbb5a0a44ac5e087f0",
+            "material_id": "mat-eb14e3dafe3602f43edd0385",
+            "result_kind": "evidence",
+            "revision_id": "6021819d8420a52bb934509960ecbaa7",
+            "role": "supporting_method"
+          },
+          {
+            "chunk_id": "chunk-ccc7cce60907cf360dd0a8ae96061430",
+            "material_id": "mat-eb14e3dafe3602f43edd0385",
+            "result_kind": "evidence",
+            "revision_id": "6021819d8420a52bb934509960ecbaa7",
+            "role": "supporting_method"
+          },
+          {
+            "chunk_id": "chunk-c3ece9829e77892eadb61e8fc114a536",
+            "material_id": "mat-a77cd01636a3793527becf17",
+            "result_kind": "evidence",
+            "revision_id": "bc43718c111f4c53845a02383216ea89",
+            "role": "core_technical"
+          },
+          {
+            "chunk_id": "chunk-1f9e0ccbbc331c6bd24f43c3747d4724",
+            "material_id": "mat-eb14e3dafe3602f43edd0385",
+            "result_kind": "evidence",
+            "revision_id": "6021819d8420a52bb934509960ecbaa7",
+            "role": "supporting_method"
+          },
+          {
+            "chunk_id": "chunk-f4d05797d61b7ceec0cc44d856fb2e3f",
+            "material_id": "mat-54556ea3a196601e1d760bca",
+            "result_kind": "evidence",
+            "revision_id": "db17534888cd338590dab11ab3383c49",
+            "role": "core_technical"
+          }
+        ]
+      }
+    },
+    {
+      "anchor_role": "direct_source_support",
+      "answerability": "answerable",
+      "category": "hardware_architecture",
+      "error_type": null,
+      "expected_chunks": [
+        {
+          "chunk_id": "chunk-ce8fc196c54be4ef1fc52039a4b61494",
+          "material_id": "mat-9a6cf4da457de75ed37679b6",
+          "quote_characters": 36,
+          "quote_sha256": "ea531e0272bdd42c8f2d872e57d51394d5c9e82c9e7d3bf8417df31d456e2c25"
+        }
+      ],
+      "expected_material_ids": [
+        "mat-9a6cf4da457de75ed37679b6"
+      ],
+      "id": "aec179b9254c17a455b439607510f90d",
+      "language": "ko",
+      "latency_seconds": 2.0273763658478856,
+      "paired_id": "4c8993d244fca21578ad5d71dac12af5",
+      "query": "CLIPGen이 고수준 시뮬레이션·추정, RTL 시뮬레이션, place-and-route 구현용으로 생성하는 표준 산출물은 무엇인가요?",
+      "scores": {
+        "hybrid": {
+          "all_expected_sources_at_5": 1,
+          "known_chunk_hit_at_10": 1,
+          "known_chunk_hit_at_5": 1,
+          "known_source_hit_at_1": 1,
+          "known_source_hit_at_10": 1,
+          "known_source_hit_at_5": 1,
+          "reciprocal_rank": 1.0
+        },
+        "hybrid_evidence": {
+          "all_expected_sources_at_5": 1,
+          "known_chunk_hit_at_10": 1,
+          "known_chunk_hit_at_5": 1,
+          "known_source_hit_at_1": 1,
+          "known_source_hit_at_10": 1,
+          "known_source_hit_at_5": 1,
+          "reciprocal_rank": 1.0
+        }
+      },
+      "top5": {
+        "hybrid": [
+          {
+            "chunk_id": "chunk-2ed5a9cc1fd61a9f8d2127456b328798",
+            "material_id": "mat-9a6cf4da457de75ed37679b6",
+            "result_kind": "evidence",
+            "revision_id": "c3f97fb17508fc13444eda5a3531a058",
+            "role": "core_technical"
+          },
+          {
+            "chunk_id": "chunk-ce8fc196c54be4ef1fc52039a4b61494",
+            "material_id": "mat-9a6cf4da457de75ed37679b6",
+            "result_kind": "evidence",
+            "revision_id": "c3f97fb17508fc13444eda5a3531a058",
+            "role": "core_technical"
+          },
+          {
+            "chunk_id": "chunk-340d9e2e5474e8066ef3ae546227f617",
+            "material_id": "mat-9a6cf4da457de75ed37679b6",
+            "result_kind": "evidence",
+            "revision_id": "c3f97fb17508fc13444eda5a3531a058",
+            "role": "core_technical"
+          },
+          {
+            "chunk_id": "chunk-1a6734ed00f20514c8e30a65f0524072",
+            "material_id": "mat-3cf27a987a24e5ad725f9a2e",
+            "result_kind": "evidence",
+            "revision_id": "729900be3f5d63d6e738ee84295c4279",
+            "role": "core_technical"
+          },
+          {
+            "chunk_id": "chunk-038ec90e334a14c20a02cb5fb45f4d5a",
+            "material_id": "mat-3cf27a987a24e5ad725f9a2e",
+            "result_kind": "evidence",
+            "revision_id": "729900be3f5d63d6e738ee84295c4279",
+            "role": "core_technical"
+          }
+        ],
+        "hybrid_evidence": [
+          {
+            "chunk_id": "chunk-2ed5a9cc1fd61a9f8d2127456b328798",
+            "material_id": "mat-9a6cf4da457de75ed37679b6",
+            "result_kind": "evidence",
+            "revision_id": "c3f97fb17508fc13444eda5a3531a058",
+            "role": "core_technical"
+          },
+          {
+            "chunk_id": "chunk-ce8fc196c54be4ef1fc52039a4b61494",
+            "material_id": "mat-9a6cf4da457de75ed37679b6",
+            "result_kind": "evidence",
+            "revision_id": "c3f97fb17508fc13444eda5a3531a058",
+            "role": "core_technical"
+          },
+          {
+            "chunk_id": "chunk-340d9e2e5474e8066ef3ae546227f617",
+            "material_id": "mat-9a6cf4da457de75ed37679b6",
+            "result_kind": "evidence",
+            "revision_id": "c3f97fb17508fc13444eda5a3531a058",
+            "role": "core_technical"
+          },
+          {
+            "chunk_id": "chunk-1a6734ed00f20514c8e30a65f0524072",
+            "material_id": "mat-3cf27a987a24e5ad725f9a2e",
+            "result_kind": "evidence",
+            "revision_id": "729900be3f5d63d6e738ee84295c4279",
+            "role": "core_technical"
+          },
+          {
+            "chunk_id": "chunk-038ec90e334a14c20a02cb5fb45f4d5a",
+            "material_id": "mat-3cf27a987a24e5ad725f9a2e",
+            "result_kind": "evidence",
+            "revision_id": "729900be3f5d63d6e738ee84295c4279",
+            "role": "core_technical"
+          }
+        ]
+      }
+    },
+    {
+      "anchor_role": "direct_source_support",
+      "answerability": "answerable",
+      "category": "hardware_architecture",
+      "error_type": null,
+      "expected_chunks": [
+        {
+          "chunk_id": "chunk-ce8fc196c54be4ef1fc52039a4b61494",
+          "material_id": "mat-9a6cf4da457de75ed37679b6",
+          "quote_characters": 36,
+          "quote_sha256": "ea531e0272bdd42c8f2d872e57d51394d5c9e82c9e7d3bf8417df31d456e2c25"
+        }
+      ],
+      "expected_material_ids": [
+        "mat-9a6cf4da457de75ed37679b6"
+      ],
+      "id": "af4cf6cc2bc3d0b80b80eff2ae18f941",
+      "language": "en",
+      "latency_seconds": 2.4534212443977594,
+      "paired_id": "4c8993d244fca21578ad5d71dac12af5",
+      "query": "Which standard artifacts does CLIPGen produce for high-level simulation/estimation, RTL simulation, and place-and-route implementation?",
+      "scores": {
+        "hybrid": {
+          "all_expected_sources_at_5": 1,
+          "known_chunk_hit_at_10": 0,
+          "known_chunk_hit_at_5": 0,
+          "known_source_hit_at_1": 1,
+          "known_source_hit_at_10": 1,
+          "known_source_hit_at_5": 1,
+          "reciprocal_rank": 1.0
+        },
+        "hybrid_evidence": {
+          "all_expected_sources_at_5": 1,
+          "known_chunk_hit_at_10": 0,
+          "known_chunk_hit_at_5": 0,
+          "known_source_hit_at_1": 1,
+          "known_source_hit_at_10": 1,
+          "known_source_hit_at_5": 1,
+          "reciprocal_rank": 1.0
+        }
+      },
+      "top5": {
+        "hybrid": [
+          {
+            "chunk_id": "chunk-2ed5a9cc1fd61a9f8d2127456b328798",
+            "material_id": "mat-9a6cf4da457de75ed37679b6",
+            "result_kind": "evidence",
+            "revision_id": "c3f97fb17508fc13444eda5a3531a058",
+            "role": "core_technical"
+          },
+          {
+            "chunk_id": "chunk-4d750bca9a7bd9dc44b0c983483a9590",
+            "material_id": "mat-8762c50b07cf437b71a80d8b",
+            "result_kind": "evidence",
+            "revision_id": "bb8bdcf5214214b0734fdbf01b46f85f",
+            "role": "core_technical"
+          },
+          {
+            "chunk_id": "chunk-536929d122f053b2a60961b913a9ae05",
+            "material_id": "mat-8762c50b07cf437b71a80d8b",
+            "result_kind": "evidence",
+            "revision_id": "bb8bdcf5214214b0734fdbf01b46f85f",
+            "role": "core_technical"
+          },
+          {
+            "chunk_id": "chunk-de526ace9a2208789fb03ab755029e73",
+            "material_id": "mat-9a6cf4da457de75ed37679b6",
+            "result_kind": "evidence",
+            "revision_id": "c3f97fb17508fc13444eda5a3531a058",
+            "role": "core_technical"
+          },
+          {
+            "chunk_id": "chunk-f4b42a2b5703c663b88918951e8b8bec",
+            "material_id": "mat-9a6cf4da457de75ed37679b6",
+            "result_kind": "evidence",
+            "revision_id": "c3f97fb17508fc13444eda5a3531a058",
+            "role": "core_technical"
+          }
+        ],
+        "hybrid_evidence": [
+          {
+            "chunk_id": "chunk-2ed5a9cc1fd61a9f8d2127456b328798",
+            "material_id": "mat-9a6cf4da457de75ed37679b6",
+            "result_kind": "evidence",
+            "revision_id": "c3f97fb17508fc13444eda5a3531a058",
+            "role": "core_technical"
+          },
+          {
+            "chunk_id": "chunk-4d750bca9a7bd9dc44b0c983483a9590",
+            "material_id": "mat-8762c50b07cf437b71a80d8b",
+            "result_kind": "evidence",
+            "revision_id": "bb8bdcf5214214b0734fdbf01b46f85f",
+            "role": "core_technical"
+          },
+          {
+            "chunk_id": "chunk-536929d122f053b2a60961b913a9ae05",
+            "material_id": "mat-8762c50b07cf437b71a80d8b",
+            "result_kind": "evidence",
+            "revision_id": "bb8bdcf5214214b0734fdbf01b46f85f",
+            "role": "core_technical"
+          },
+          {
+            "chunk_id": "chunk-de526ace9a2208789fb03ab755029e73",
+            "material_id": "mat-9a6cf4da457de75ed37679b6",
+            "result_kind": "evidence",
+            "revision_id": "c3f97fb17508fc13444eda5a3531a058",
+            "role": "core_technical"
+          },
+          {
+            "chunk_id": "chunk-f4b42a2b5703c663b88918951e8b8bec",
+            "material_id": "mat-9a6cf4da457de75ed37679b6",
+            "result_kind": "evidence",
+            "revision_id": "c3f97fb17508fc13444eda5a3531a058",
+            "role": "core_technical"
+          }
+        ]
+      }
+    },
+    {
+      "anchor_role": "direct_source_support",
+      "answerability": "answerable",
+      "category": "llm_model_workload",
+      "error_type": null,
+      "expected_chunks": [
+        {
+          "chunk_id": "chunk-615846a9ee2d02e9ace3572f17d32ad0",
+          "material_id": "mat-3a2154cfcbfebbf84c8f3094",
+          "quote_characters": 100,
+          "quote_sha256": "518a6af12f2ddc490b7a151d2773ca077ce01213094363be53bceb2a45b27dcf"
+        }
+      ],
+      "expected_material_ids": [
+        "mat-3a2154cfcbfebbf84c8f3094"
+      ],
+      "id": "4bdcd0214da30b72b17bdd249c77e727",
+      "language": "ko",
+      "latency_seconds": 2.2329202853143215,
+      "paired_id": "03870572c46734a29ff997e7ac08a684",
+      "query": "DeFT는 공유 prefix가 있는 tree 기반 추론에서 기존 시스템이 놓치는 두 가지 문제를 무엇이라고 설명하나요?",
+      "scores": {
+        "hybrid": {
+          "all_expected_sources_at_5": 1,
+          "known_chunk_hit_at_10": 0,
+          "known_chunk_hit_at_5": 0,
+          "known_source_hit_at_1": 1,
+          "known_source_hit_at_10": 1,
+          "known_source_hit_at_5": 1,
+          "reciprocal_rank": 1.0
+        },
+        "hybrid_evidence": {
+          "all_expected_sources_at_5": 1,
+          "known_chunk_hit_at_10": 0,
+          "known_chunk_hit_at_5": 0,
+          "known_source_hit_at_1": 1,
+          "known_source_hit_at_10": 1,
+          "known_source_hit_at_5": 1,
+          "reciprocal_rank": 1.0
+        }
+      },
+      "top5": {
+        "hybrid": [
+          {
+            "chunk_id": "chunk-eff1e5a9f94db107bf289895b045d02d",
+            "material_id": "mat-3a2154cfcbfebbf84c8f3094",
+            "result_kind": "evidence",
+            "revision_id": "830fa0907cdf01b6387bb968e8424a46",
+            "role": "core_technical"
+          },
+          {
+            "chunk_id": "chunk-aff008d35eafec9b1abd2025ffdbf3b4",
+            "material_id": "mat-3a2154cfcbfebbf84c8f3094",
+            "result_kind": "evidence",
+            "revision_id": "830fa0907cdf01b6387bb968e8424a46",
+            "role": "core_technical"
+          },
+          {
+            "chunk_id": "chunk-a5260dda971ffc37adb0d78470392198",
+            "material_id": "mat-3a2154cfcbfebbf84c8f3094",
+            "result_kind": "evidence",
+            "revision_id": "830fa0907cdf01b6387bb968e8424a46",
+            "role": "core_technical"
+          },
+          {
+            "chunk_id": "chunk-f901cc1c109c6b5ce9efa8abb1b6d621",
+            "material_id": "mat-44a00de98494cf0f0bf9d969",
+            "result_kind": "evidence",
+            "revision_id": "27329beb7f865dacc467ddfd2d1475a9",
+            "role": "core_technical"
+          },
+          {
+            "chunk_id": "chunk-f262da8c4276ad332bfee3094037bf82",
+            "material_id": "mat-5668cadd1c9e9ab8daa9c58c",
+            "result_kind": "evidence",
+            "revision_id": "fc34bc2f07c29e3298526b172944f0cd",
+            "role": "core_technical"
+          }
+        ],
+        "hybrid_evidence": [
+          {
+            "chunk_id": "chunk-eff1e5a9f94db107bf289895b045d02d",
+            "material_id": "mat-3a2154cfcbfebbf84c8f3094",
+            "result_kind": "evidence",
+            "revision_id": "830fa0907cdf01b6387bb968e8424a46",
+            "role": "core_technical"
+          },
+          {
+            "chunk_id": "chunk-aff008d35eafec9b1abd2025ffdbf3b4",
+            "material_id": "mat-3a2154cfcbfebbf84c8f3094",
+            "result_kind": "evidence",
+            "revision_id": "830fa0907cdf01b6387bb968e8424a46",
+            "role": "core_technical"
+          },
+          {
+            "chunk_id": "chunk-a5260dda971ffc37adb0d78470392198",
+            "material_id": "mat-3a2154cfcbfebbf84c8f3094",
+            "result_kind": "evidence",
+            "revision_id": "830fa0907cdf01b6387bb968e8424a46",
+            "role": "core_technical"
+          },
+          {
+            "chunk_id": "chunk-f901cc1c109c6b5ce9efa8abb1b6d621",
+            "material_id": "mat-44a00de98494cf0f0bf9d969",
+            "result_kind": "evidence",
+            "revision_id": "27329beb7f865dacc467ddfd2d1475a9",
+            "role": "core_technical"
+          },
+          {
+            "chunk_id": "chunk-f262da8c4276ad332bfee3094037bf82",
+            "material_id": "mat-5668cadd1c9e9ab8daa9c58c",
+            "result_kind": "evidence",
+            "revision_id": "fc34bc2f07c29e3298526b172944f0cd",
+            "role": "core_technical"
+          }
+        ]
+      }
+    },
+    {
+      "anchor_role": "direct_source_support",
+      "answerability": "answerable",
+      "category": "llm_model_workload",
+      "error_type": null,
+      "expected_chunks": [
+        {
+          "chunk_id": "chunk-615846a9ee2d02e9ace3572f17d32ad0",
+          "material_id": "mat-3a2154cfcbfebbf84c8f3094",
+          "quote_characters": 100,
+          "quote_sha256": "518a6af12f2ddc490b7a151d2773ca077ce01213094363be53bceb2a45b27dcf"
+        }
+      ],
+      "expected_material_ids": [
+        "mat-3a2154cfcbfebbf84c8f3094"
+      ],
+      "id": "20d0bdf6a2cdf2386cdc19c78281c55d",
+      "language": "en",
+      "latency_seconds": 2.3534909281879663,
+      "paired_id": "03870572c46734a29ff997e7ac08a684",
+      "query": "What two problems does DeFT say existing tree-based inference systems have for shared prefixes?",
+      "scores": {
+        "hybrid": {
+          "all_expected_sources_at_5": 1,
+          "known_chunk_hit_at_10": 0,
+          "known_chunk_hit_at_5": 0,
+          "known_source_hit_at_1": 1,
+          "known_source_hit_at_10": 1,
+          "known_source_hit_at_5": 1,
+          "reciprocal_rank": 1.0
+        },
+        "hybrid_evidence": {
+          "all_expected_sources_at_5": 1,
+          "known_chunk_hit_at_10": 0,
+          "known_chunk_hit_at_5": 0,
+          "known_source_hit_at_1": 1,
+          "known_source_hit_at_10": 1,
+          "known_source_hit_at_5": 1,
+          "reciprocal_rank": 1.0
+        }
+      },
+      "top5": {
+        "hybrid": [
+          {
+            "chunk_id": "chunk-aff008d35eafec9b1abd2025ffdbf3b4",
+            "material_id": "mat-3a2154cfcbfebbf84c8f3094",
+            "result_kind": "evidence",
+            "revision_id": "830fa0907cdf01b6387bb968e8424a46",
+            "role": "core_technical"
+          },
+          {
+            "chunk_id": "chunk-a5260dda971ffc37adb0d78470392198",
+            "material_id": "mat-3a2154cfcbfebbf84c8f3094",
+            "result_kind": "evidence",
+            "revision_id": "830fa0907cdf01b6387bb968e8424a46",
+            "role": "core_technical"
+          },
+          {
+            "chunk_id": "chunk-eff1e5a9f94db107bf289895b045d02d",
+            "material_id": "mat-3a2154cfcbfebbf84c8f3094",
+            "result_kind": "evidence",
+            "revision_id": "830fa0907cdf01b6387bb968e8424a46",
+            "role": "core_technical"
+          },
+          {
+            "chunk_id": "chunk-f262da8c4276ad332bfee3094037bf82",
+            "material_id": "mat-5668cadd1c9e9ab8daa9c58c",
+            "result_kind": "evidence",
+            "revision_id": "fc34bc2f07c29e3298526b172944f0cd",
+            "role": "core_technical"
+          },
+          {
+            "chunk_id": "chunk-a425977284d0a66579699b153512c6f4",
+            "material_id": "mat-8af4f702071a329ddc969de4",
+            "result_kind": "evidence",
+            "revision_id": "4758d62759ec7aed52f3a13c122574e2",
+            "role": "core_technical"
+          }
+        ],
+        "hybrid_evidence": [
+          {
+            "chunk_id": "chunk-aff008d35eafec9b1abd2025ffdbf3b4",
+            "material_id": "mat-3a2154cfcbfebbf84c8f3094",
+            "result_kind": "evidence",
+            "revision_id": "830fa0907cdf01b6387bb968e8424a46",
+            "role": "core_technical"
+          },
+          {
+            "chunk_id": "chunk-a5260dda971ffc37adb0d78470392198",
+            "material_id": "mat-3a2154cfcbfebbf84c8f3094",
+            "result_kind": "evidence",
+            "revision_id": "830fa0907cdf01b6387bb968e8424a46",
+            "role": "core_technical"
+          },
+          {
+            "chunk_id": "chunk-eff1e5a9f94db107bf289895b045d02d",
+            "material_id": "mat-3a2154cfcbfebbf84c8f3094",
+            "result_kind": "evidence",
+            "revision_id": "830fa0907cdf01b6387bb968e8424a46",
+            "role": "core_technical"
+          },
+          {
+            "chunk_id": "chunk-f262da8c4276ad332bfee3094037bf82",
+            "material_id": "mat-5668cadd1c9e9ab8daa9c58c",
+            "result_kind": "evidence",
+            "revision_id": "fc34bc2f07c29e3298526b172944f0cd",
+            "role": "core_technical"
+          },
+          {
+            "chunk_id": "chunk-a425977284d0a66579699b153512c6f4",
+            "material_id": "mat-8af4f702071a329ddc969de4",
+            "result_kind": "evidence",
+            "revision_id": "4758d62759ec7aed52f3a13c122574e2",
+            "role": "core_technical"
+          }
+        ]
+      }
+    },
+    {
+      "anchor_role": "direct_source_support",
+      "answerability": "answerable",
+      "category": "memory_interconnect",
+      "error_type": null,
+      "expected_chunks": [
+        {
+          "chunk_id": "chunk-386f9a2e2b595570c58c3e129d8efeed",
+          "material_id": "mat-02606136a8847da13ae77851",
+          "quote_characters": 73,
+          "quote_sha256": "3a47157ff6c056889ea6ea74c041ceb5d3b24ff2abdfc9d05e7d45795a85d0a8"
+        }
+      ],
+      "expected_material_ids": [
+        "mat-02606136a8847da13ae77851"
+      ],
+      "id": "d836016dd93dccc1febeafbe5838edec",
+      "language": "ko",
+      "latency_seconds": 2.8408604403957725,
+      "paired_id": "a86458c043b002a409824882736e3a8b",
+      "query": "Aurora compute blade에서 CPU socket 하나의 peak HBM 및 DDR5 대역폭은 각각 얼마인가요?",
+      "scores": {
+        "hybrid": {
+          "all_expected_sources_at_5": 1,
+          "known_chunk_hit_at_10": 1,
+          "known_chunk_hit_at_5": 1,
+          "known_source_hit_at_1": 1,
+          "known_source_hit_at_10": 1,
+          "known_source_hit_at_5": 1,
+          "reciprocal_rank": 1.0
+        },
+        "hybrid_evidence": {
+          "all_expected_sources_at_5": 1,
+          "known_chunk_hit_at_10": 1,
+          "known_chunk_hit_at_5": 1,
+          "known_source_hit_at_1": 1,
+          "known_source_hit_at_10": 1,
+          "known_source_hit_at_5": 1,
+          "reciprocal_rank": 1.0
+        }
+      },
+      "top5": {
+        "hybrid": [
+          {
+            "chunk_id": "chunk-386f9a2e2b595570c58c3e129d8efeed",
+            "material_id": "mat-02606136a8847da13ae77851",
+            "result_kind": "evidence",
+            "revision_id": "c8bdf17131e06c5342ca60a66a437670",
+            "role": "core_technical"
+          },
+          {
+            "chunk_id": "chunk-d61ead6edc7f379d22de4218a4a5a369",
+            "material_id": "mat-02606136a8847da13ae77851",
+            "result_kind": "evidence",
+            "revision_id": "c8bdf17131e06c5342ca60a66a437670",
+            "role": "core_technical"
+          },
+          {
+            "chunk_id": "chunk-5c9575787ef30c2d1425cdd945a8ef0f",
+            "material_id": "mat-02606136a8847da13ae77851",
+            "result_kind": "evidence",
+            "revision_id": "c8bdf17131e06c5342ca60a66a437670",
+            "role": "core_technical"
+          },
+          {
+            "chunk_id": "chunk-a7c032beba4965569b150b9d4654cc84",
+            "material_id": "mat-3925ec0f76903f7e19eb4968",
+            "result_kind": "evidence",
+            "revision_id": "d7f82919589cfa5da61f5e4df52083de",
+            "role": "core_technical"
+          },
+          {
+            "chunk_id": "chunk-578a4bbac69541db9833e2de54ffd777",
+            "material_id": "mat-3925ec0f76903f7e19eb4968",
+            "result_kind": "evidence",
+            "revision_id": "d7f82919589cfa5da61f5e4df52083de",
+            "role": "core_technical"
+          }
+        ],
+        "hybrid_evidence": [
+          {
+            "chunk_id": "chunk-386f9a2e2b595570c58c3e129d8efeed",
+            "material_id": "mat-02606136a8847da13ae77851",
+            "result_kind": "evidence",
+            "revision_id": "c8bdf17131e06c5342ca60a66a437670",
+            "role": "core_technical"
+          },
+          {
+            "chunk_id": "chunk-d61ead6edc7f379d22de4218a4a5a369",
+            "material_id": "mat-02606136a8847da13ae77851",
+            "result_kind": "evidence",
+            "revision_id": "c8bdf17131e06c5342ca60a66a437670",
+            "role": "core_technical"
+          },
+          {
+            "chunk_id": "chunk-5c9575787ef30c2d1425cdd945a8ef0f",
+            "material_id": "mat-02606136a8847da13ae77851",
+            "result_kind": "evidence",
+            "revision_id": "c8bdf17131e06c5342ca60a66a437670",
+            "role": "core_technical"
+          },
+          {
+            "chunk_id": "chunk-a7c032beba4965569b150b9d4654cc84",
+            "material_id": "mat-3925ec0f76903f7e19eb4968",
+            "result_kind": "evidence",
+            "revision_id": "d7f82919589cfa5da61f5e4df52083de",
+            "role": "core_technical"
+          },
+          {
+            "chunk_id": "chunk-578a4bbac69541db9833e2de54ffd777",
+            "material_id": "mat-3925ec0f76903f7e19eb4968",
+            "result_kind": "evidence",
+            "revision_id": "d7f82919589cfa5da61f5e4df52083de",
+            "role": "core_technical"
+          }
+        ]
+      }
+    },
+    {
+      "anchor_role": "direct_source_support",
+      "answerability": "answerable",
+      "category": "memory_interconnect",
+      "error_type": null,
+      "expected_chunks": [
+        {
+          "chunk_id": "chunk-386f9a2e2b595570c58c3e129d8efeed",
+          "material_id": "mat-02606136a8847da13ae77851",
+          "quote_characters": 73,
+          "quote_sha256": "3a47157ff6c056889ea6ea74c041ceb5d3b24ff2abdfc9d05e7d45795a85d0a8"
+        }
+      ],
+      "expected_material_ids": [
+        "mat-02606136a8847da13ae77851"
+      ],
+      "id": "f33f2edaa8ec9f12d43c81ce5ba469d8",
+      "language": "en",
+      "latency_seconds": 2.848767570219934,
+      "paired_id": "a86458c043b002a409824882736e3a8b",
+      "query": "What peak HBM and DDR5 bandwidths does the paper report per Aurora compute-blade CPU socket?",
+      "scores": {
+        "hybrid": {
+          "all_expected_sources_at_5": 1,
+          "known_chunk_hit_at_10": 1,
+          "known_chunk_hit_at_5": 1,
+          "known_source_hit_at_1": 1,
+          "known_source_hit_at_10": 1,
+          "known_source_hit_at_5": 1,
+          "reciprocal_rank": 1.0
+        },
+        "hybrid_evidence": {
+          "all_expected_sources_at_5": 1,
+          "known_chunk_hit_at_10": 1,
+          "known_chunk_hit_at_5": 1,
+          "known_source_hit_at_1": 1,
+          "known_source_hit_at_10": 1,
+          "known_source_hit_at_5": 1,
+          "reciprocal_rank": 1.0
+        }
+      },
+      "top5": {
+        "hybrid": [
+          {
+            "chunk_id": "chunk-56ed5374f6607a102b694136256862c6",
+            "material_id": "mat-02606136a8847da13ae77851",
+            "result_kind": "evidence",
+            "revision_id": "c8bdf17131e06c5342ca60a66a437670",
+            "role": "core_technical"
+          },
+          {
+            "chunk_id": "chunk-386f9a2e2b595570c58c3e129d8efeed",
+            "material_id": "mat-02606136a8847da13ae77851",
+            "result_kind": "evidence",
+            "revision_id": "c8bdf17131e06c5342ca60a66a437670",
+            "role": "core_technical"
+          },
+          {
+            "chunk_id": "chunk-5c9575787ef30c2d1425cdd945a8ef0f",
+            "material_id": "mat-02606136a8847da13ae77851",
+            "result_kind": "evidence",
+            "revision_id": "c8bdf17131e06c5342ca60a66a437670",
+            "role": "core_technical"
+          },
+          {
+            "chunk_id": "chunk-7185ca8360fa50838b01a7b27c54cbe0",
+            "material_id": "mat-40cfb92e47d5345a4cf2b138",
+            "result_kind": "evidence",
+            "revision_id": "44bb8b13e1ee139314a567085d6ebd37",
+            "role": "core_technical"
+          },
+          {
+            "chunk_id": "chunk-5b007ca62b357530d6dbd3d5efcf7cd4",
+            "material_id": "mat-40cfb92e47d5345a4cf2b138",
+            "result_kind": "evidence",
+            "revision_id": "44bb8b13e1ee139314a567085d6ebd37",
+            "role": "core_technical"
+          }
+        ],
+        "hybrid_evidence": [
+          {
+            "chunk_id": "chunk-56ed5374f6607a102b694136256862c6",
+            "material_id": "mat-02606136a8847da13ae77851",
+            "result_kind": "evidence",
+            "revision_id": "c8bdf17131e06c5342ca60a66a437670",
+            "role": "core_technical"
+          },
+          {
+            "chunk_id": "chunk-386f9a2e2b595570c58c3e129d8efeed",
+            "material_id": "mat-02606136a8847da13ae77851",
+            "result_kind": "evidence",
+            "revision_id": "c8bdf17131e06c5342ca60a66a437670",
+            "role": "core_technical"
+          },
+          {
+            "chunk_id": "chunk-5c9575787ef30c2d1425cdd945a8ef0f",
+            "material_id": "mat-02606136a8847da13ae77851",
+            "result_kind": "evidence",
+            "revision_id": "c8bdf17131e06c5342ca60a66a437670",
+            "role": "core_technical"
+          },
+          {
+            "chunk_id": "chunk-7185ca8360fa50838b01a7b27c54cbe0",
+            "material_id": "mat-40cfb92e47d5345a4cf2b138",
+            "result_kind": "evidence",
+            "revision_id": "44bb8b13e1ee139314a567085d6ebd37",
+            "role": "core_technical"
+          },
+          {
+            "chunk_id": "chunk-5b007ca62b357530d6dbd3d5efcf7cd4",
+            "material_id": "mat-40cfb92e47d5345a4cf2b138",
+            "result_kind": "evidence",
+            "revision_id": "44bb8b13e1ee139314a567085d6ebd37",
+            "role": "core_technical"
+          }
+        ]
+      }
+    },
+    {
+      "anchor_role": "direct_source_support",
+      "answerability": "answerable",
+      "category": "power_thermal_packaging",
+      "error_type": null,
+      "expected_chunks": [
+        {
+          "chunk_id": "chunk-78c3fa7ef9b0b6f0e6c9ea044fd5c3b0",
+          "material_id": "mat-0211f8d5ea2efe0b149714a4",
+          "quote_characters": 81,
+          "quote_sha256": "546ab18f5cef11ef8ff9172563d6c90a96a27818af2519bd73ee7ba0dcbdadb9"
+        }
+      ],
+      "expected_material_ids": [
+        "mat-0211f8d5ea2efe0b149714a4"
+      ],
+      "id": "8a77a25132b0278c26779bc81be4e811",
+      "language": "ko",
+      "latency_seconds": 2.2484342604875565,
+      "paired_id": "272ae61643cf01a631417034fe9c169f",
+      "query": "이전 compartment thermal model의 식별 절차는 active element 온도 측정에 어떤 요구를 남겼나요?",
+      "scores": {
+        "hybrid": {
+          "all_expected_sources_at_5": 1,
+          "known_chunk_hit_at_10": 1,
+          "known_chunk_hit_at_5": 1,
+          "known_source_hit_at_1": 1,
+          "known_source_hit_at_10": 1,
+          "known_source_hit_at_5": 1,
+          "reciprocal_rank": 1.0
+        },
+        "hybrid_evidence": {
+          "all_expected_sources_at_5": 1,
+          "known_chunk_hit_at_10": 1,
+          "known_chunk_hit_at_5": 1,
+          "known_source_hit_at_1": 1,
+          "known_source_hit_at_10": 1,
+          "known_source_hit_at_5": 1,
+          "reciprocal_rank": 1.0
+        }
+      },
+      "top5": {
+        "hybrid": [
+          {
+            "chunk_id": "chunk-91bdf6346326c7041feb143e71734119",
+            "material_id": "mat-0211f8d5ea2efe0b149714a4",
+            "result_kind": "evidence",
+            "revision_id": "0d3f2de0f111374bb65ef061fd911740",
+            "role": "supporting_method"
+          },
+          {
+            "chunk_id": "chunk-dfb56ffd72c444eddcf07284d6b50790",
+            "material_id": "mat-0211f8d5ea2efe0b149714a4",
+            "result_kind": "evidence",
+            "revision_id": "0d3f2de0f111374bb65ef061fd911740",
+            "role": "supporting_method"
+          },
+          {
+            "chunk_id": "chunk-78c3fa7ef9b0b6f0e6c9ea044fd5c3b0",
+            "material_id": "mat-0211f8d5ea2efe0b149714a4",
+            "result_kind": "evidence",
+            "revision_id": "0d3f2de0f111374bb65ef061fd911740",
+            "role": "supporting_method"
+          },
+          {
+            "chunk_id": "chunk-aca389bd247054b1c2698d98eabce001",
+            "material_id": "mat-4342acbffb07a2a951187015",
+            "result_kind": "evidence",
+            "revision_id": "072874665d21e2fd5167a185287cd212",
+            "role": "core_technical"
+          },
+          {
+            "chunk_id": "chunk-9a288e3f12060db0ab3de0d7fe5bef1b",
+            "material_id": "mat-948442f87ae6e8bc1b5e3e2c",
+            "result_kind": "evidence",
+            "revision_id": "695f7ece565f4485a485b23bf5433a1a",
+            "role": "core_technical"
+          }
+        ],
+        "hybrid_evidence": [
+          {
+            "chunk_id": "chunk-91bdf6346326c7041feb143e71734119",
+            "material_id": "mat-0211f8d5ea2efe0b149714a4",
+            "result_kind": "evidence",
+            "revision_id": "0d3f2de0f111374bb65ef061fd911740",
+            "role": "supporting_method"
+          },
+          {
+            "chunk_id": "chunk-dfb56ffd72c444eddcf07284d6b50790",
+            "material_id": "mat-0211f8d5ea2efe0b149714a4",
+            "result_kind": "evidence",
+            "revision_id": "0d3f2de0f111374bb65ef061fd911740",
+            "role": "supporting_method"
+          },
+          {
+            "chunk_id": "chunk-78c3fa7ef9b0b6f0e6c9ea044fd5c3b0",
+            "material_id": "mat-0211f8d5ea2efe0b149714a4",
+            "result_kind": "evidence",
+            "revision_id": "0d3f2de0f111374bb65ef061fd911740",
+            "role": "supporting_method"
+          },
+          {
+            "chunk_id": "chunk-aca389bd247054b1c2698d98eabce001",
+            "material_id": "mat-4342acbffb07a2a951187015",
+            "result_kind": "evidence",
+            "revision_id": "072874665d21e2fd5167a185287cd212",
+            "role": "core_technical"
+          },
+          {
+            "chunk_id": "chunk-9a288e3f12060db0ab3de0d7fe5bef1b",
+            "material_id": "mat-948442f87ae6e8bc1b5e3e2c",
+            "result_kind": "evidence",
+            "revision_id": "695f7ece565f4485a485b23bf5433a1a",
+            "role": "core_technical"
+          }
+        ]
+      }
+    },
+    {
+      "anchor_role": "direct_source_support",
+      "answerability": "answerable",
+      "category": "power_thermal_packaging",
+      "error_type": null,
+      "expected_chunks": [
+        {
+          "chunk_id": "chunk-78c3fa7ef9b0b6f0e6c9ea044fd5c3b0",
+          "material_id": "mat-0211f8d5ea2efe0b149714a4",
+          "quote_characters": 81,
+          "quote_sha256": "546ab18f5cef11ef8ff9172563d6c90a96a27818af2519bd73ee7ba0dcbdadb9"
+        }
+      ],
+      "expected_material_ids": [
+        "mat-0211f8d5ea2efe0b149714a4"
+      ],
+      "id": "acda0381d21f0a728f8e80536e42d334",
+      "language": "en",
+      "latency_seconds": 2.1425454849377275,
+      "paired_id": "272ae61643cf01a631417034fe9c169f",
+      "query": "What temperature-measurement requirement did the earlier compartment thermal-model identification procedure still impose?",
+      "scores": {
+        "hybrid": {
+          "all_expected_sources_at_5": 1,
+          "known_chunk_hit_at_10": 0,
+          "known_chunk_hit_at_5": 0,
+          "known_source_hit_at_1": 1,
+          "known_source_hit_at_10": 1,
+          "known_source_hit_at_5": 1,
+          "reciprocal_rank": 1.0
+        },
+        "hybrid_evidence": {
+          "all_expected_sources_at_5": 1,
+          "known_chunk_hit_at_10": 0,
+          "known_chunk_hit_at_5": 0,
+          "known_source_hit_at_1": 1,
+          "known_source_hit_at_10": 1,
+          "known_source_hit_at_5": 1,
+          "reciprocal_rank": 1.0
+        }
+      },
+      "top5": {
+        "hybrid": [
+          {
+            "chunk_id": "chunk-f0ef502ec72f10db15676e9ef02cece7",
+            "material_id": "mat-0211f8d5ea2efe0b149714a4",
+            "result_kind": "evidence",
+            "revision_id": "0d3f2de0f111374bb65ef061fd911740",
+            "role": "supporting_method"
+          },
+          {
+            "chunk_id": "chunk-91bdf6346326c7041feb143e71734119",
+            "material_id": "mat-0211f8d5ea2efe0b149714a4",
+            "result_kind": "evidence",
+            "revision_id": "0d3f2de0f111374bb65ef061fd911740",
+            "role": "supporting_method"
+          },
+          {
+            "chunk_id": "chunk-7647a1fe4ca5a4c3688108f199e93f9e",
+            "material_id": "mat-0211f8d5ea2efe0b149714a4",
+            "result_kind": "evidence",
+            "revision_id": "0d3f2de0f111374bb65ef061fd911740",
+            "role": "supporting_method"
+          },
+          {
+            "chunk_id": "chunk-9f3016ddf3ced7c9bea27870497676fa",
+            "material_id": "mat-948442f87ae6e8bc1b5e3e2c",
+            "result_kind": "evidence",
+            "revision_id": "695f7ece565f4485a485b23bf5433a1a",
+            "role": "core_technical"
+          },
+          {
+            "chunk_id": "chunk-33d29e5303aae597fbdbbc7013965c32",
+            "material_id": "mat-948442f87ae6e8bc1b5e3e2c",
+            "result_kind": "evidence",
+            "revision_id": "695f7ece565f4485a485b23bf5433a1a",
+            "role": "core_technical"
+          }
+        ],
+        "hybrid_evidence": [
+          {
+            "chunk_id": "chunk-f0ef502ec72f10db15676e9ef02cece7",
+            "material_id": "mat-0211f8d5ea2efe0b149714a4",
+            "result_kind": "evidence",
+            "revision_id": "0d3f2de0f111374bb65ef061fd911740",
+            "role": "supporting_method"
+          },
+          {
+            "chunk_id": "chunk-91bdf6346326c7041feb143e71734119",
+            "material_id": "mat-0211f8d5ea2efe0b149714a4",
+            "result_kind": "evidence",
+            "revision_id": "0d3f2de0f111374bb65ef061fd911740",
+            "role": "supporting_method"
+          },
+          {
+            "chunk_id": "chunk-7647a1fe4ca5a4c3688108f199e93f9e",
+            "material_id": "mat-0211f8d5ea2efe0b149714a4",
+            "result_kind": "evidence",
+            "revision_id": "0d3f2de0f111374bb65ef061fd911740",
+            "role": "supporting_method"
+          },
+          {
+            "chunk_id": "chunk-9f3016ddf3ced7c9bea27870497676fa",
+            "material_id": "mat-948442f87ae6e8bc1b5e3e2c",
+            "result_kind": "evidence",
+            "revision_id": "695f7ece565f4485a485b23bf5433a1a",
+            "role": "core_technical"
+          },
+          {
+            "chunk_id": "chunk-33d29e5303aae597fbdbbc7013965c32",
+            "material_id": "mat-948442f87ae6e8bc1b5e3e2c",
+            "result_kind": "evidence",
+            "revision_id": "695f7ece565f4485a485b23bf5433a1a",
+            "role": "core_technical"
+          }
+        ]
+      }
+    },
+    {
+      "anchor_role": "direct_source_support",
+      "answerability": "answerable",
+      "category": "provenance_experiment",
+      "error_type": null,
+      "expected_chunks": [
+        {
+          "chunk_id": "chunk-44aba76ad64122c2e04c4a57e5978c6c",
+          "material_id": "mat-7b83d6ce5df133e772b32fa2",
+          "quote_characters": 138,
+          "quote_sha256": "fc2ec591685d30a2d8bbc8447cda34db73382009665be997d3051c6c17ff196d"
+        }
+      ],
+      "expected_material_ids": [
+        "mat-7b83d6ce5df133e772b32fa2"
+      ],
+      "id": "a5fef5b980dfb428c428cd3d98ad16d5",
+      "language": "ko",
+      "latency_seconds": 2.1243591606616974,
+      "paired_id": "85d3dc8d31464267e3f1b6b994837e58",
+      "query": "ProvLight의 대규모 검증은 어떤 workload를 몇 대의 IoT 장치에서 수행했고, 어떤 테스트베드를 사용했나요?",
+      "scores": {
+        "hybrid": {
+          "all_expected_sources_at_5": 1,
+          "known_chunk_hit_at_10": 0,
+          "known_chunk_hit_at_5": 0,
+          "known_source_hit_at_1": 1,
+          "known_source_hit_at_10": 1,
+          "known_source_hit_at_5": 1,
+          "reciprocal_rank": 1.0
+        },
+        "hybrid_evidence": {
+          "all_expected_sources_at_5": 1,
+          "known_chunk_hit_at_10": 0,
+          "known_chunk_hit_at_5": 0,
+          "known_source_hit_at_1": 1,
+          "known_source_hit_at_10": 1,
+          "known_source_hit_at_5": 1,
+          "reciprocal_rank": 1.0
+        }
+      },
+      "top5": {
+        "hybrid": [
+          {
+            "chunk_id": "chunk-f1fb78ba903ce7384b72a4bd249cae0e",
+            "material_id": "mat-7b83d6ce5df133e772b32fa2",
+            "result_kind": "evidence",
+            "revision_id": "5b8de85591384c563057c6eb99c32036",
+            "role": "supporting_method"
+          },
+          {
+            "chunk_id": "chunk-90394b775bf3514f79844feaa69a9373",
+            "material_id": "mat-7b83d6ce5df133e772b32fa2",
+            "result_kind": "evidence",
+            "revision_id": "5b8de85591384c563057c6eb99c32036",
+            "role": "supporting_method"
+          },
+          {
+            "chunk_id": "chunk-2f8a8917043db5445e7d98f046d2ea2d",
+            "material_id": "mat-7b83d6ce5df133e772b32fa2",
+            "result_kind": "evidence",
+            "revision_id": "5b8de85591384c563057c6eb99c32036",
+            "role": "supporting_method"
+          },
+          {
+            "chunk_id": "chunk-580c31f7a8dd909f05fd8ce82971e3d8",
+            "material_id": "mat-2c7d690e498db8f80ad607ba",
+            "result_kind": "evidence",
+            "revision_id": "42e6cb6f212f25fec85b2aa819c022a7",
+            "role": "core_technical"
+          },
+          {
+            "chunk_id": "chunk-2b72dec07e1ef089e6c97d2139cd0137",
+            "material_id": "mat-cd6ca751698f3cab100476da",
+            "result_kind": "evidence",
+            "revision_id": "7be39470dfa98982e5e9037c12939c30",
+            "role": "core_technical"
+          }
+        ],
+        "hybrid_evidence": [
+          {
+            "chunk_id": "chunk-f1fb78ba903ce7384b72a4bd249cae0e",
+            "material_id": "mat-7b83d6ce5df133e772b32fa2",
+            "result_kind": "evidence",
+            "revision_id": "5b8de85591384c563057c6eb99c32036",
+            "role": "supporting_method"
+          },
+          {
+            "chunk_id": "chunk-90394b775bf3514f79844feaa69a9373",
+            "material_id": "mat-7b83d6ce5df133e772b32fa2",
+            "result_kind": "evidence",
+            "revision_id": "5b8de85591384c563057c6eb99c32036",
+            "role": "supporting_method"
+          },
+          {
+            "chunk_id": "chunk-2f8a8917043db5445e7d98f046d2ea2d",
+            "material_id": "mat-7b83d6ce5df133e772b32fa2",
+            "result_kind": "evidence",
+            "revision_id": "5b8de85591384c563057c6eb99c32036",
+            "role": "supporting_method"
+          },
+          {
+            "chunk_id": "chunk-580c31f7a8dd909f05fd8ce82971e3d8",
+            "material_id": "mat-2c7d690e498db8f80ad607ba",
+            "result_kind": "evidence",
+            "revision_id": "42e6cb6f212f25fec85b2aa819c022a7",
+            "role": "core_technical"
+          },
+          {
+            "chunk_id": "chunk-2b72dec07e1ef089e6c97d2139cd0137",
+            "material_id": "mat-cd6ca751698f3cab100476da",
+            "result_kind": "evidence",
+            "revision_id": "7be39470dfa98982e5e9037c12939c30",
+            "role": "core_technical"
+          }
+        ]
+      }
+    },
+    {
+      "anchor_role": "direct_source_support",
+      "answerability": "answerable",
+      "category": "provenance_experiment",
+      "error_type": null,
+      "expected_chunks": [
+        {
+          "chunk_id": "chunk-44aba76ad64122c2e04c4a57e5978c6c",
+          "material_id": "mat-7b83d6ce5df133e772b32fa2",
+          "quote_characters": 138,
+          "quote_sha256": "fc2ec591685d30a2d8bbc8447cda34db73382009665be997d3051c6c17ff196d"
+        }
+      ],
+      "expected_material_ids": [
+        "mat-7b83d6ce5df133e772b32fa2"
+      ],
+      "id": "fc1cd1080114051d6f15c4b7c1eb6351",
+      "language": "en",
+      "latency_seconds": 2.773794688284397,
+      "paired_id": "85d3dc8d31464267e3f1b6b994837e58",
+      "query": "In ProvLight's large-scale validation, which workload ran on how many IoT devices, and which testbeds were used?",
+      "scores": {
+        "hybrid": {
+          "all_expected_sources_at_5": 1,
+          "known_chunk_hit_at_10": 0,
+          "known_chunk_hit_at_5": 0,
+          "known_source_hit_at_1": 1,
+          "known_source_hit_at_10": 1,
+          "known_source_hit_at_5": 1,
+          "reciprocal_rank": 1.0
+        },
+        "hybrid_evidence": {
+          "all_expected_sources_at_5": 1,
+          "known_chunk_hit_at_10": 0,
+          "known_chunk_hit_at_5": 0,
+          "known_source_hit_at_1": 1,
+          "known_source_hit_at_10": 1,
+          "known_source_hit_at_5": 1,
+          "reciprocal_rank": 1.0
+        }
+      },
+      "top5": {
+        "hybrid": [
+          {
+            "chunk_id": "chunk-90394b775bf3514f79844feaa69a9373",
+            "material_id": "mat-7b83d6ce5df133e772b32fa2",
+            "result_kind": "evidence",
+            "revision_id": "5b8de85591384c563057c6eb99c32036",
+            "role": "supporting_method"
+          },
+          {
+            "chunk_id": "chunk-f1fb78ba903ce7384b72a4bd249cae0e",
+            "material_id": "mat-7b83d6ce5df133e772b32fa2",
+            "result_kind": "evidence",
+            "revision_id": "5b8de85591384c563057c6eb99c32036",
+            "role": "supporting_method"
+          },
+          {
+            "chunk_id": "chunk-613116f3d0239cb42921797838c857d3",
+            "material_id": "mat-7b83d6ce5df133e772b32fa2",
+            "result_kind": "evidence",
+            "revision_id": "5b8de85591384c563057c6eb99c32036",
+            "role": "supporting_method"
+          },
+          {
+            "chunk_id": "chunk-580c31f7a8dd909f05fd8ce82971e3d8",
+            "material_id": "mat-2c7d690e498db8f80ad607ba",
+            "result_kind": "evidence",
+            "revision_id": "42e6cb6f212f25fec85b2aa819c022a7",
+            "role": "core_technical"
+          },
+          {
+            "chunk_id": "chunk-7cfc8862709e7b91d46a74eb0c044cd4",
+            "material_id": "mat-5e84f61c9ade76f54a40ccfb",
+            "result_kind": "evidence",
+            "revision_id": "9d7f8bcce79a78f24fc66ef42662528c",
+            "role": "core_technical"
+          }
+        ],
+        "hybrid_evidence": [
+          {
+            "chunk_id": "chunk-90394b775bf3514f79844feaa69a9373",
+            "material_id": "mat-7b83d6ce5df133e772b32fa2",
+            "result_kind": "evidence",
+            "revision_id": "5b8de85591384c563057c6eb99c32036",
+            "role": "supporting_method"
+          },
+          {
+            "chunk_id": "chunk-f1fb78ba903ce7384b72a4bd249cae0e",
+            "material_id": "mat-7b83d6ce5df133e772b32fa2",
+            "result_kind": "evidence",
+            "revision_id": "5b8de85591384c563057c6eb99c32036",
+            "role": "supporting_method"
+          },
+          {
+            "chunk_id": "chunk-613116f3d0239cb42921797838c857d3",
+            "material_id": "mat-7b83d6ce5df133e772b32fa2",
+            "result_kind": "evidence",
+            "revision_id": "5b8de85591384c563057c6eb99c32036",
+            "role": "supporting_method"
+          },
+          {
+            "chunk_id": "chunk-580c31f7a8dd909f05fd8ce82971e3d8",
+            "material_id": "mat-2c7d690e498db8f80ad607ba",
+            "result_kind": "evidence",
+            "revision_id": "42e6cb6f212f25fec85b2aa819c022a7",
+            "role": "core_technical"
+          },
+          {
+            "chunk_id": "chunk-7cfc8862709e7b91d46a74eb0c044cd4",
+            "material_id": "mat-5e84f61c9ade76f54a40ccfb",
+            "result_kind": "evidence",
+            "revision_id": "9d7f8bcce79a78f24fc66ef42662528c",
+            "role": "core_technical"
+          }
+        ]
+      }
+    },
+    {
+      "anchor_role": "direct_source_support",
+      "answerability": "answerable",
+      "category": "serving_scheduling",
+      "error_type": null,
+      "expected_chunks": [
+        {
+          "chunk_id": "chunk-34ae8d337dfe0bf0b6d31e984ea9c015",
+          "material_id": "mat-a190f4e7421fc3f824dc9991",
+          "quote_characters": 101,
+          "quote_sha256": "42fa9ff0cb4162d01523b42745d32adca65792bf9ed764191d5346f358eee1f4"
+        }
+      ],
+      "expected_material_ids": [
+        "mat-a190f4e7421fc3f824dc9991"
+      ],
+      "id": "5b137ea176db5a94800cf1511384783a",
+      "language": "ko",
+      "latency_seconds": 2.575492019765079,
+      "paired_id": "6931a60a962a7fb703289cb887da5eb8",
+      "query": "OSERVE는 spatial heterogeneity를 다루기 위한 첫 번째 혁신으로 어떤 접근을 제시하나요?",
+      "scores": {
+        "hybrid": {
+          "all_expected_sources_at_5": 1,
+          "known_chunk_hit_at_10": 1,
+          "known_chunk_hit_at_5": 1,
+          "known_source_hit_at_1": 1,
+          "known_source_hit_at_10": 1,
+          "known_source_hit_at_5": 1,
+          "reciprocal_rank": 1.0
+        },
+        "hybrid_evidence": {
+          "all_expected_sources_at_5": 1,
+          "known_chunk_hit_at_10": 1,
+          "known_chunk_hit_at_5": 1,
+          "known_source_hit_at_1": 1,
+          "known_source_hit_at_10": 1,
+          "known_source_hit_at_5": 1,
+          "reciprocal_rank": 1.0
+        }
+      },
+      "top5": {
+        "hybrid": [
+          {
+            "chunk_id": "chunk-6df51bd777d8f415ff55fa5a60907516",
+            "material_id": "mat-a190f4e7421fc3f824dc9991",
+            "result_kind": "evidence",
+            "revision_id": "6a1941d4eff0f3907753200f881eb698",
+            "role": "core_technical"
+          },
+          {
+            "chunk_id": "chunk-34ae8d337dfe0bf0b6d31e984ea9c015",
+            "material_id": "mat-a190f4e7421fc3f824dc9991",
+            "result_kind": "evidence",
+            "revision_id": "6a1941d4eff0f3907753200f881eb698",
+            "role": "core_technical"
+          },
+          {
+            "chunk_id": "chunk-2ae12b795bd44311f37106bc3efdb3c9",
+            "material_id": "mat-a190f4e7421fc3f824dc9991",
+            "result_kind": "evidence",
+            "revision_id": "6a1941d4eff0f3907753200f881eb698",
+            "role": "core_technical"
+          },
+          {
+            "chunk_id": "chunk-c41b66074f7abe41f9d2b285e2ec5860",
+            "material_id": "mat-416ddd34c479894e78ecedf2",
+            "result_kind": "evidence",
+            "revision_id": "f38412d60ea5692cacfa5a95b9dfe5dd",
+            "role": "core_technical"
+          },
+          {
+            "chunk_id": "chunk-c2a476eda51d3b4b9c7e1784c3692524",
+            "material_id": "mat-5d5c3f434a9366388754c428",
+            "result_kind": "evidence",
+            "revision_id": "3fb30cd5e74929a357e272ecdf0a1b91",
+            "role": "core_technical"
+          }
+        ],
+        "hybrid_evidence": [
+          {
+            "chunk_id": "chunk-6df51bd777d8f415ff55fa5a60907516",
+            "material_id": "mat-a190f4e7421fc3f824dc9991",
+            "result_kind": "evidence",
+            "revision_id": "6a1941d4eff0f3907753200f881eb698",
+            "role": "core_technical"
+          },
+          {
+            "chunk_id": "chunk-34ae8d337dfe0bf0b6d31e984ea9c015",
+            "material_id": "mat-a190f4e7421fc3f824dc9991",
+            "result_kind": "evidence",
+            "revision_id": "6a1941d4eff0f3907753200f881eb698",
+            "role": "core_technical"
+          },
+          {
+            "chunk_id": "chunk-2ae12b795bd44311f37106bc3efdb3c9",
+            "material_id": "mat-a190f4e7421fc3f824dc9991",
+            "result_kind": "evidence",
+            "revision_id": "6a1941d4eff0f3907753200f881eb698",
+            "role": "core_technical"
+          },
+          {
+            "chunk_id": "chunk-c41b66074f7abe41f9d2b285e2ec5860",
+            "material_id": "mat-416ddd34c479894e78ecedf2",
+            "result_kind": "evidence",
+            "revision_id": "f38412d60ea5692cacfa5a95b9dfe5dd",
+            "role": "core_technical"
+          },
+          {
+            "chunk_id": "chunk-c2a476eda51d3b4b9c7e1784c3692524",
+            "material_id": "mat-5d5c3f434a9366388754c428",
+            "result_kind": "evidence",
+            "revision_id": "3fb30cd5e74929a357e272ecdf0a1b91",
+            "role": "core_technical"
+          }
+        ]
+      }
+    },
+    {
+      "anchor_role": "direct_source_support",
+      "answerability": "answerable",
+      "category": "serving_scheduling",
+      "error_type": null,
+      "expected_chunks": [
+        {
+          "chunk_id": "chunk-34ae8d337dfe0bf0b6d31e984ea9c015",
+          "material_id": "mat-a190f4e7421fc3f824dc9991",
+          "quote_characters": 101,
+          "quote_sha256": "42fa9ff0cb4162d01523b42745d32adca65792bf9ed764191d5346f358eee1f4"
+        }
+      ],
+      "expected_material_ids": [
+        "mat-a190f4e7421fc3f824dc9991"
+      ],
+      "id": "53ebb81e1f545c1593c9b077b2ed3aaa",
+      "language": "en",
+      "latency_seconds": 2.54353881906718,
+      "paired_id": "6931a60a962a7fb703289cb887da5eb8",
+      "query": "What approach does OServe give as its first innovation for addressing spatial heterogeneity?",
+      "scores": {
+        "hybrid": {
+          "all_expected_sources_at_5": 1,
+          "known_chunk_hit_at_10": 1,
+          "known_chunk_hit_at_5": 1,
+          "known_source_hit_at_1": 1,
+          "known_source_hit_at_10": 1,
+          "known_source_hit_at_5": 1,
+          "reciprocal_rank": 1.0
+        },
+        "hybrid_evidence": {
+          "all_expected_sources_at_5": 1,
+          "known_chunk_hit_at_10": 1,
+          "known_chunk_hit_at_5": 1,
+          "known_source_hit_at_1": 1,
+          "known_source_hit_at_10": 1,
+          "known_source_hit_at_5": 1,
+          "reciprocal_rank": 1.0
+        }
+      },
+      "top5": {
+        "hybrid": [
+          {
+            "chunk_id": "chunk-34ae8d337dfe0bf0b6d31e984ea9c015",
+            "material_id": "mat-a190f4e7421fc3f824dc9991",
+            "result_kind": "evidence",
+            "revision_id": "6a1941d4eff0f3907753200f881eb698",
+            "role": "core_technical"
+          },
+          {
+            "chunk_id": "chunk-3cf0d141b81c482500b275b6923b536c",
+            "material_id": "mat-a190f4e7421fc3f824dc9991",
+            "result_kind": "evidence",
+            "revision_id": "6a1941d4eff0f3907753200f881eb698",
+            "role": "core_technical"
+          },
+          {
+            "chunk_id": "chunk-6df51bd777d8f415ff55fa5a60907516",
+            "material_id": "mat-a190f4e7421fc3f824dc9991",
+            "result_kind": "evidence",
+            "revision_id": "6a1941d4eff0f3907753200f881eb698",
+            "role": "core_technical"
+          },
+          {
+            "chunk_id": "chunk-c41b66074f7abe41f9d2b285e2ec5860",
+            "material_id": "mat-416ddd34c479894e78ecedf2",
+            "result_kind": "evidence",
+            "revision_id": "f38412d60ea5692cacfa5a95b9dfe5dd",
+            "role": "core_technical"
+          },
+          {
+            "chunk_id": "chunk-9b9a90bad25a5b7d6126191f863802b0",
+            "material_id": "mat-416ddd34c479894e78ecedf2",
+            "result_kind": "evidence",
+            "revision_id": "f38412d60ea5692cacfa5a95b9dfe5dd",
+            "role": "core_technical"
+          }
+        ],
+        "hybrid_evidence": [
+          {
+            "chunk_id": "chunk-34ae8d337dfe0bf0b6d31e984ea9c015",
+            "material_id": "mat-a190f4e7421fc3f824dc9991",
+            "result_kind": "evidence",
+            "revision_id": "6a1941d4eff0f3907753200f881eb698",
+            "role": "core_technical"
+          },
+          {
+            "chunk_id": "chunk-3cf0d141b81c482500b275b6923b536c",
+            "material_id": "mat-a190f4e7421fc3f824dc9991",
+            "result_kind": "evidence",
+            "revision_id": "6a1941d4eff0f3907753200f881eb698",
+            "role": "core_technical"
+          },
+          {
+            "chunk_id": "chunk-6df51bd777d8f415ff55fa5a60907516",
+            "material_id": "mat-a190f4e7421fc3f824dc9991",
+            "result_kind": "evidence",
+            "revision_id": "6a1941d4eff0f3907753200f881eb698",
+            "role": "core_technical"
+          },
+          {
+            "chunk_id": "chunk-c41b66074f7abe41f9d2b285e2ec5860",
+            "material_id": "mat-416ddd34c479894e78ecedf2",
+            "result_kind": "evidence",
+            "revision_id": "f38412d60ea5692cacfa5a95b9dfe5dd",
+            "role": "core_technical"
+          },
+          {
+            "chunk_id": "chunk-9b9a90bad25a5b7d6126191f863802b0",
+            "material_id": "mat-416ddd34c479894e78ecedf2",
+            "result_kind": "evidence",
+            "revision_id": "f38412d60ea5692cacfa5a95b9dfe5dd",
+            "role": "core_technical"
+          }
+        ]
+      }
+    },
+    {
+      "anchor_role": "direct_source_support",
+      "answerability": "answerable",
+      "category": "simulation_measurement",
+      "error_type": null,
+      "expected_chunks": [
+        {
+          "chunk_id": "chunk-ca849c86b76c6fa15304c1cafd33f6d1",
+          "material_id": "mat-01c8b167d2551cc1941d10e1",
+          "quote_characters": 90,
+          "quote_sha256": "36aca420a308de100105c7dd3fce6df963b3bc8dbb07caa26d74a55e4e6d59cc"
+        }
+      ],
+      "expected_material_ids": [
+        "mat-01c8b167d2551cc1941d10e1"
+      ],
+      "id": "6b0e9df33ece64e06b84e520a0c30874",
+      "language": "ko",
+      "latency_seconds": 2.290508004836738,
+      "paired_id": "68f8e733d8bbbde80d59338d605f5b2e",
+      "query": "SimpleNetwork::send가 false를 반환하면 endpoint는 무엇을 해야 하나요?",
+      "scores": {
+        "hybrid": {
+          "all_expected_sources_at_5": 1,
+          "known_chunk_hit_at_10": 1,
+          "known_chunk_hit_at_5": 1,
+          "known_source_hit_at_1": 1,
+          "known_source_hit_at_10": 1,
+          "known_source_hit_at_5": 1,
+          "reciprocal_rank": 1.0
+        },
+        "hybrid_evidence": {
+          "all_expected_sources_at_5": 1,
+          "known_chunk_hit_at_10": 1,
+          "known_chunk_hit_at_5": 1,
+          "known_source_hit_at_1": 1,
+          "known_source_hit_at_10": 1,
+          "known_source_hit_at_5": 1,
+          "reciprocal_rank": 1.0
+        }
+      },
+      "top5": {
+        "hybrid": [
+          {
+            "chunk_id": "chunk-ca849c86b76c6fa15304c1cafd33f6d1",
+            "material_id": "mat-01c8b167d2551cc1941d10e1",
+            "result_kind": "evidence",
+            "revision_id": "811acf7ee6db270bdf4f9e3f677f345a",
+            "role": "core_technical"
+          },
+          {
+            "chunk_id": "chunk-abbf5ec3aad820b02a609601ea0d61b3",
+            "material_id": "mat-62c86c03bf51ded55de97ec3",
+            "result_kind": "evidence",
+            "revision_id": "cc0c280410ba7fd7e93756b1b771515f",
+            "role": "core_technical"
+          },
+          {
+            "chunk_id": "chunk-90a7288966900d8fae9ee883135d0a3f",
+            "material_id": "mat-07e7cdb28d47e47acc8c826f",
+            "result_kind": "evidence",
+            "revision_id": "9eb0019ab1c89f6dd0391f00b6b9bd23",
+            "role": "core_technical"
+          },
+          {
+            "chunk_id": "chunk-ee0459845de60570127080027e12fc92",
+            "material_id": "mat-63ba850ba64cebf4cb446942",
+            "result_kind": "locator",
+            "revision_id": "77b933bb679ffd4cbd4b53009cdc688c",
+            "role": "source_navigation"
+          },
+          {
+            "chunk_id": "chunk-cdb91f4b3377abf2e562ffaa6b3d398d",
+            "material_id": "mat-6e9c053e05d2d51d0e34e1b4",
+            "result_kind": "evidence",
+            "revision_id": "88f170bd9675fc39692d40defba789e6",
+            "role": "core_technical"
+          }
+        ],
+        "hybrid_evidence": [
+          {
+            "chunk_id": "chunk-ca849c86b76c6fa15304c1cafd33f6d1",
+            "material_id": "mat-01c8b167d2551cc1941d10e1",
+            "result_kind": "evidence",
+            "revision_id": "811acf7ee6db270bdf4f9e3f677f345a",
+            "role": "core_technical"
+          },
+          {
+            "chunk_id": "chunk-abbf5ec3aad820b02a609601ea0d61b3",
+            "material_id": "mat-62c86c03bf51ded55de97ec3",
+            "result_kind": "evidence",
+            "revision_id": "cc0c280410ba7fd7e93756b1b771515f",
+            "role": "core_technical"
+          },
+          {
+            "chunk_id": "chunk-90a7288966900d8fae9ee883135d0a3f",
+            "material_id": "mat-07e7cdb28d47e47acc8c826f",
+            "result_kind": "evidence",
+            "revision_id": "9eb0019ab1c89f6dd0391f00b6b9bd23",
+            "role": "core_technical"
+          },
+          {
+            "chunk_id": "chunk-cdb91f4b3377abf2e562ffaa6b3d398d",
+            "material_id": "mat-6e9c053e05d2d51d0e34e1b4",
+            "result_kind": "evidence",
+            "revision_id": "88f170bd9675fc39692d40defba789e6",
+            "role": "core_technical"
+          },
+          {
+            "chunk_id": "chunk-0f33947b66dde6f428f20490a3627184",
+            "material_id": "mat-0369f9efdb605f0a4a4ef258",
+            "result_kind": "evidence",
+            "revision_id": "c3b2a7d49ff8b7c0e31c20917febb0ae",
+            "role": "core_technical"
+          }
+        ]
+      }
+    },
+    {
+      "anchor_role": "direct_source_support",
+      "answerability": "answerable",
+      "category": "simulation_measurement",
+      "error_type": null,
+      "expected_chunks": [
+        {
+          "chunk_id": "chunk-ca849c86b76c6fa15304c1cafd33f6d1",
+          "material_id": "mat-01c8b167d2551cc1941d10e1",
+          "quote_characters": 90,
+          "quote_sha256": "36aca420a308de100105c7dd3fce6df963b3bc8dbb07caa26d74a55e4e6d59cc"
+        }
+      ],
+      "expected_material_ids": [
+        "mat-01c8b167d2551cc1941d10e1"
+      ],
+      "id": "75f4e3addf804d49ff77fe50af4fe410",
+      "language": "en",
+      "latency_seconds": 2.3060984518378973,
+      "paired_id": "68f8e733d8bbbde80d59338d605f5b2e",
+      "query": "What should an endpoint do when SimpleNetwork::send returns false?",
+      "scores": {
+        "hybrid": {
+          "all_expected_sources_at_5": 1,
+          "known_chunk_hit_at_10": 1,
+          "known_chunk_hit_at_5": 1,
+          "known_source_hit_at_1": 1,
+          "known_source_hit_at_10": 1,
+          "known_source_hit_at_5": 1,
+          "reciprocal_rank": 1.0
+        },
+        "hybrid_evidence": {
+          "all_expected_sources_at_5": 1,
+          "known_chunk_hit_at_10": 1,
+          "known_chunk_hit_at_5": 1,
+          "known_source_hit_at_1": 1,
+          "known_source_hit_at_10": 1,
+          "known_source_hit_at_5": 1,
+          "reciprocal_rank": 1.0
+        }
+      },
+      "top5": {
+        "hybrid": [
+          {
+            "chunk_id": "chunk-ca849c86b76c6fa15304c1cafd33f6d1",
+            "material_id": "mat-01c8b167d2551cc1941d10e1",
+            "result_kind": "evidence",
+            "revision_id": "811acf7ee6db270bdf4f9e3f677f345a",
+            "role": "core_technical"
+          },
+          {
+            "chunk_id": "chunk-dae8a16a67abd44a977e6a1a8f933018",
+            "material_id": "mat-43864dc88b8694a4076c55b9",
+            "result_kind": "evidence",
+            "revision_id": "3921572115b9f4fa8507ac0974d04c45",
+            "role": "core_technical"
+          },
+          {
+            "chunk_id": "chunk-0f33947b66dde6f428f20490a3627184",
+            "material_id": "mat-0369f9efdb605f0a4a4ef258",
+            "result_kind": "evidence",
+            "revision_id": "c3b2a7d49ff8b7c0e31c20917febb0ae",
+            "role": "core_technical"
+          },
+          {
+            "chunk_id": "chunk-ee0459845de60570127080027e12fc92",
+            "material_id": "mat-63ba850ba64cebf4cb446942",
+            "result_kind": "locator",
+            "revision_id": "77b933bb679ffd4cbd4b53009cdc688c",
+            "role": "source_navigation"
+          },
+          {
+            "chunk_id": "chunk-abbf5ec3aad820b02a609601ea0d61b3",
+            "material_id": "mat-62c86c03bf51ded55de97ec3",
+            "result_kind": "evidence",
+            "revision_id": "cc0c280410ba7fd7e93756b1b771515f",
+            "role": "core_technical"
+          }
+        ],
+        "hybrid_evidence": [
+          {
+            "chunk_id": "chunk-ca849c86b76c6fa15304c1cafd33f6d1",
+            "material_id": "mat-01c8b167d2551cc1941d10e1",
+            "result_kind": "evidence",
+            "revision_id": "811acf7ee6db270bdf4f9e3f677f345a",
+            "role": "core_technical"
+          },
+          {
+            "chunk_id": "chunk-dae8a16a67abd44a977e6a1a8f933018",
+            "material_id": "mat-43864dc88b8694a4076c55b9",
+            "result_kind": "evidence",
+            "revision_id": "3921572115b9f4fa8507ac0974d04c45",
+            "role": "core_technical"
+          },
+          {
+            "chunk_id": "chunk-0f33947b66dde6f428f20490a3627184",
+            "material_id": "mat-0369f9efdb605f0a4a4ef258",
+            "result_kind": "evidence",
+            "revision_id": "c3b2a7d49ff8b7c0e31c20917febb0ae",
+            "role": "core_technical"
+          },
+          {
+            "chunk_id": "chunk-abbf5ec3aad820b02a609601ea0d61b3",
+            "material_id": "mat-62c86c03bf51ded55de97ec3",
+            "result_kind": "evidence",
+            "revision_id": "cc0c280410ba7fd7e93756b1b771515f",
+            "role": "core_technical"
+          },
+          {
+            "chunk_id": "chunk-cdb91f4b3377abf2e562ffaa6b3d398d",
+            "material_id": "mat-6e9c053e05d2d51d0e34e1b4",
+            "result_kind": "evidence",
+            "revision_id": "88f170bd9675fc39692d40defba789e6",
+            "role": "core_technical"
+          }
+        ]
+      }
+    },
+    {
+      "anchor_role": "direct_source_support",
+      "answerability": "answerable",
+      "category": "compiler_kernel",
+      "error_type": null,
+      "expected_chunks": [
+        {
+          "chunk_id": "chunk-b16f1c8e19359010d9eaa875cf1c6b3d",
+          "material_id": "mat-155f3ab9d8cb1707d9f9901c",
+          "quote_characters": 61,
+          "quote_sha256": "56488ec8cae71a701349de2ec1a033feea0047f262c61d288ff40dbaded50260"
+        }
+      ],
+      "expected_material_ids": [
+        "mat-155f3ab9d8cb1707d9f9901c"
+      ],
+      "id": "bc616dadfa8dc261ac82e2b3799c85ce",
+      "language": "ko",
+      "latency_seconds": 2.277434468269348,
+      "paired_id": "9713952fc28932dd53ba10226a209ab3",
+      "query": "FlashInfer routing kernel에서 routing_replay_out이 None이면 replay-buffer 쓰기를 어떻게 처리하나요?",
+      "scores": {
+        "hybrid": {
+          "all_expected_sources_at_5": 1,
+          "known_chunk_hit_at_10": 1,
+          "known_chunk_hit_at_5": 1,
+          "known_source_hit_at_1": 1,
+          "known_source_hit_at_10": 1,
+          "known_source_hit_at_5": 1,
+          "reciprocal_rank": 1.0
+        },
+        "hybrid_evidence": {
+          "all_expected_sources_at_5": 1,
+          "known_chunk_hit_at_10": 1,
+          "known_chunk_hit_at_5": 1,
+          "known_source_hit_at_1": 1,
+          "known_source_hit_at_10": 1,
+          "known_source_hit_at_5": 1,
+          "reciprocal_rank": 1.0
+        }
+      },
+      "top5": {
+        "hybrid": [
+          {
+            "chunk_id": "chunk-b16f1c8e19359010d9eaa875cf1c6b3d",
+            "material_id": "mat-155f3ab9d8cb1707d9f9901c",
+            "result_kind": "evidence",
+            "revision_id": "81f841df5c43fddbddc9fcef7729371c",
+            "role": "core_technical"
+          },
+          {
+            "chunk_id": "chunk-57cf790259bea12f2442443fafe77450",
+            "material_id": "mat-5be9bf34668cc5ee6e20f759",
+            "result_kind": "evidence",
+            "revision_id": "be1fa40ac21e40661cc077b9acd0f931",
+            "role": "core_technical"
+          },
+          {
+            "chunk_id": "chunk-1ce414ffaba6dd5a261dc1c9cf77714c",
+            "material_id": "mat-5be9bf34668cc5ee6e20f759",
+            "result_kind": "evidence",
+            "revision_id": "be1fa40ac21e40661cc077b9acd0f931",
+            "role": "core_technical"
+          },
+          {
+            "chunk_id": "chunk-6195d26069a687690a24c47784f6b128",
+            "material_id": "mat-5be9bf34668cc5ee6e20f759",
+            "result_kind": "evidence",
+            "revision_id": "be1fa40ac21e40661cc077b9acd0f931",
+            "role": "core_technical"
+          },
+          {
+            "chunk_id": "chunk-1088cda0dcdc613aa72b9f8cef9369ef",
+            "material_id": "mat-6c9a58b33fdb5d893e6e9a3b",
+            "result_kind": "evidence",
+            "revision_id": "dc87ad9bdc233e4b1241f5732fcad426",
+            "role": "core_technical"
+          }
+        ],
+        "hybrid_evidence": [
+          {
+            "chunk_id": "chunk-b16f1c8e19359010d9eaa875cf1c6b3d",
+            "material_id": "mat-155f3ab9d8cb1707d9f9901c",
+            "result_kind": "evidence",
+            "revision_id": "81f841df5c43fddbddc9fcef7729371c",
+            "role": "core_technical"
+          },
+          {
+            "chunk_id": "chunk-57cf790259bea12f2442443fafe77450",
+            "material_id": "mat-5be9bf34668cc5ee6e20f759",
+            "result_kind": "evidence",
+            "revision_id": "be1fa40ac21e40661cc077b9acd0f931",
+            "role": "core_technical"
+          },
+          {
+            "chunk_id": "chunk-1ce414ffaba6dd5a261dc1c9cf77714c",
+            "material_id": "mat-5be9bf34668cc5ee6e20f759",
+            "result_kind": "evidence",
+            "revision_id": "be1fa40ac21e40661cc077b9acd0f931",
+            "role": "core_technical"
+          },
+          {
+            "chunk_id": "chunk-6195d26069a687690a24c47784f6b128",
+            "material_id": "mat-5be9bf34668cc5ee6e20f759",
+            "result_kind": "evidence",
+            "revision_id": "be1fa40ac21e40661cc077b9acd0f931",
+            "role": "core_technical"
+          },
+          {
+            "chunk_id": "chunk-1088cda0dcdc613aa72b9f8cef9369ef",
+            "material_id": "mat-6c9a58b33fdb5d893e6e9a3b",
+            "result_kind": "evidence",
+            "revision_id": "dc87ad9bdc233e4b1241f5732fcad426",
+            "role": "core_technical"
+          }
+        ]
+      }
+    },
+    {
+      "anchor_role": "direct_source_support",
+      "answerability": "answerable",
+      "category": "compiler_kernel",
+      "error_type": null,
+      "expected_chunks": [
+        {
+          "chunk_id": "chunk-b16f1c8e19359010d9eaa875cf1c6b3d",
+          "material_id": "mat-155f3ab9d8cb1707d9f9901c",
+          "quote_characters": 61,
+          "quote_sha256": "56488ec8cae71a701349de2ec1a033feea0047f262c61d288ff40dbaded50260"
+        }
+      ],
+      "expected_material_ids": [
+        "mat-155f3ab9d8cb1707d9f9901c"
+      ],
+      "id": "0d852a3ea595a456d3619a4de7df4f05",
+      "language": "en",
+      "latency_seconds": 2.494854603894055,
+      "paired_id": "9713952fc28932dd53ba10226a209ab3",
+      "query": "When routing_replay_out is None, how does the FlashInfer routing kernel handle replay-buffer writes?",
+      "scores": {
+        "hybrid": {
+          "all_expected_sources_at_5": 1,
+          "known_chunk_hit_at_10": 1,
+          "known_chunk_hit_at_5": 1,
+          "known_source_hit_at_1": 1,
+          "known_source_hit_at_10": 1,
+          "known_source_hit_at_5": 1,
+          "reciprocal_rank": 1.0
+        },
+        "hybrid_evidence": {
+          "all_expected_sources_at_5": 1,
+          "known_chunk_hit_at_10": 1,
+          "known_chunk_hit_at_5": 1,
+          "known_source_hit_at_1": 1,
+          "known_source_hit_at_10": 1,
+          "known_source_hit_at_5": 1,
+          "reciprocal_rank": 1.0
+        }
+      },
+      "top5": {
+        "hybrid": [
+          {
+            "chunk_id": "chunk-b16f1c8e19359010d9eaa875cf1c6b3d",
+            "material_id": "mat-155f3ab9d8cb1707d9f9901c",
+            "result_kind": "evidence",
+            "revision_id": "81f841df5c43fddbddc9fcef7729371c",
+            "role": "core_technical"
+          },
+          {
+            "chunk_id": "chunk-57cf790259bea12f2442443fafe77450",
+            "material_id": "mat-5be9bf34668cc5ee6e20f759",
+            "result_kind": "evidence",
+            "revision_id": "be1fa40ac21e40661cc077b9acd0f931",
+            "role": "core_technical"
+          },
+          {
+            "chunk_id": "chunk-1ce414ffaba6dd5a261dc1c9cf77714c",
+            "material_id": "mat-5be9bf34668cc5ee6e20f759",
+            "result_kind": "evidence",
+            "revision_id": "be1fa40ac21e40661cc077b9acd0f931",
+            "role": "core_technical"
+          },
+          {
+            "chunk_id": "chunk-1088cda0dcdc613aa72b9f8cef9369ef",
+            "material_id": "mat-6c9a58b33fdb5d893e6e9a3b",
+            "result_kind": "evidence",
+            "revision_id": "dc87ad9bdc233e4b1241f5732fcad426",
+            "role": "core_technical"
+          },
+          {
+            "chunk_id": "chunk-156586bcb51e6ce06f4368d445bb846e",
+            "material_id": "mat-91834e5e564062c980ac038e",
+            "result_kind": "evidence",
+            "revision_id": "eaa7ab44135407d2db91272f5ae69323",
+            "role": "core_technical"
+          }
+        ],
+        "hybrid_evidence": [
+          {
+            "chunk_id": "chunk-b16f1c8e19359010d9eaa875cf1c6b3d",
+            "material_id": "mat-155f3ab9d8cb1707d9f9901c",
+            "result_kind": "evidence",
+            "revision_id": "81f841df5c43fddbddc9fcef7729371c",
+            "role": "core_technical"
+          },
+          {
+            "chunk_id": "chunk-57cf790259bea12f2442443fafe77450",
+            "material_id": "mat-5be9bf34668cc5ee6e20f759",
+            "result_kind": "evidence",
+            "revision_id": "be1fa40ac21e40661cc077b9acd0f931",
+            "role": "core_technical"
+          },
+          {
+            "chunk_id": "chunk-1ce414ffaba6dd5a261dc1c9cf77714c",
+            "material_id": "mat-5be9bf34668cc5ee6e20f759",
+            "result_kind": "evidence",
+            "revision_id": "be1fa40ac21e40661cc077b9acd0f931",
+            "role": "core_technical"
+          },
+          {
+            "chunk_id": "chunk-1088cda0dcdc613aa72b9f8cef9369ef",
+            "material_id": "mat-6c9a58b33fdb5d893e6e9a3b",
+            "result_kind": "evidence",
+            "revision_id": "dc87ad9bdc233e4b1241f5732fcad426",
+            "role": "core_technical"
+          },
+          {
+            "chunk_id": "chunk-156586bcb51e6ce06f4368d445bb846e",
+            "material_id": "mat-91834e5e564062c980ac038e",
+            "result_kind": "evidence",
+            "revision_id": "eaa7ab44135407d2db91272f5ae69323",
+            "role": "core_technical"
+          }
+        ]
+      }
+    },
+    {
+      "anchor_role": "direct_source_support",
+      "answerability": "answerable",
+      "category": "llm_model_workload",
+      "error_type": null,
+      "expected_chunks": [
+        {
+          "chunk_id": "chunk-4032bfe7801d57953a8ec52196dd5a73",
+          "material_id": "mat-c3bff9a33ed687da53c8574d",
+          "quote_characters": 44,
+          "quote_sha256": "5267303f6330d0a7c35400bcdae664bc9b6506ddf1784c0dfa5a98be03865100"
+        }
+      ],
+      "expected_material_ids": [
+        "mat-c3bff9a33ed687da53c8574d"
+      ],
+      "id": "75d7a90fbae25dc822e88c1d8ede471a",
+      "language": "ko",
+      "latency_seconds": 2.202849928289652,
+      "paired_id": "ccd9329938f37ec19bdc0d7c7972fee6",
+      "query": "PipeSpec는 speculative decoding을 어떤 다중 모델 구성으로 일반화하나요?",
+      "scores": {
+        "hybrid": {
+          "all_expected_sources_at_5": 1,
+          "known_chunk_hit_at_10": 1,
+          "known_chunk_hit_at_5": 1,
+          "known_source_hit_at_1": 1,
+          "known_source_hit_at_10": 1,
+          "known_source_hit_at_5": 1,
+          "reciprocal_rank": 1.0
+        },
+        "hybrid_evidence": {
+          "all_expected_sources_at_5": 1,
+          "known_chunk_hit_at_10": 1,
+          "known_chunk_hit_at_5": 1,
+          "known_source_hit_at_1": 1,
+          "known_source_hit_at_10": 1,
+          "known_source_hit_at_5": 1,
+          "reciprocal_rank": 1.0
+        }
+      },
+      "top5": {
+        "hybrid": [
+          {
+            "chunk_id": "chunk-a743853fb99c77cc28167ca324bc991d",
+            "material_id": "mat-c3bff9a33ed687da53c8574d",
+            "result_kind": "evidence",
+            "revision_id": "c89ec01fecaa14dd39a4e9f74ef6fae8",
+            "role": "core_technical"
+          },
+          {
+            "chunk_id": "chunk-8854c10e303086e8282943d100c50595",
+            "material_id": "mat-c3bff9a33ed687da53c8574d",
+            "result_kind": "evidence",
+            "revision_id": "c89ec01fecaa14dd39a4e9f74ef6fae8",
+            "role": "core_technical"
+          },
+          {
+            "chunk_id": "chunk-4032bfe7801d57953a8ec52196dd5a73",
+            "material_id": "mat-c3bff9a33ed687da53c8574d",
+            "result_kind": "evidence",
+            "revision_id": "c89ec01fecaa14dd39a4e9f74ef6fae8",
+            "role": "core_technical"
+          },
+          {
+            "chunk_id": "chunk-2809e15361ce1df88d001692d7516671",
+            "material_id": "mat-c2ae91e7ef53c740204d50b0",
+            "result_kind": "evidence",
+            "revision_id": "0481f68b8fe6cb2337c6ce0384f76659",
+            "role": "core_technical"
+          },
+          {
+            "chunk_id": "chunk-2199ae94715d09c214bb5d4a9a535526",
+            "material_id": "mat-8af4f702071a329ddc969de4",
+            "result_kind": "evidence",
+            "revision_id": "4758d62759ec7aed52f3a13c122574e2",
+            "role": "core_technical"
+          }
+        ],
+        "hybrid_evidence": [
+          {
+            "chunk_id": "chunk-a743853fb99c77cc28167ca324bc991d",
+            "material_id": "mat-c3bff9a33ed687da53c8574d",
+            "result_kind": "evidence",
+            "revision_id": "c89ec01fecaa14dd39a4e9f74ef6fae8",
+            "role": "core_technical"
+          },
+          {
+            "chunk_id": "chunk-8854c10e303086e8282943d100c50595",
+            "material_id": "mat-c3bff9a33ed687da53c8574d",
+            "result_kind": "evidence",
+            "revision_id": "c89ec01fecaa14dd39a4e9f74ef6fae8",
+            "role": "core_technical"
+          },
+          {
+            "chunk_id": "chunk-4032bfe7801d57953a8ec52196dd5a73",
+            "material_id": "mat-c3bff9a33ed687da53c8574d",
+            "result_kind": "evidence",
+            "revision_id": "c89ec01fecaa14dd39a4e9f74ef6fae8",
+            "role": "core_technical"
+          },
+          {
+            "chunk_id": "chunk-2809e15361ce1df88d001692d7516671",
+            "material_id": "mat-c2ae91e7ef53c740204d50b0",
+            "result_kind": "evidence",
+            "revision_id": "0481f68b8fe6cb2337c6ce0384f76659",
+            "role": "core_technical"
+          },
+          {
+            "chunk_id": "chunk-2199ae94715d09c214bb5d4a9a535526",
+            "material_id": "mat-8af4f702071a329ddc969de4",
+            "result_kind": "evidence",
+            "revision_id": "4758d62759ec7aed52f3a13c122574e2",
+            "role": "core_technical"
+          }
+        ]
+      }
+    },
+    {
+      "anchor_role": "direct_source_support",
+      "answerability": "answerable",
+      "category": "llm_model_workload",
+      "error_type": null,
+      "expected_chunks": [
+        {
+          "chunk_id": "chunk-4032bfe7801d57953a8ec52196dd5a73",
+          "material_id": "mat-c3bff9a33ed687da53c8574d",
+          "quote_characters": 44,
+          "quote_sha256": "5267303f6330d0a7c35400bcdae664bc9b6506ddf1784c0dfa5a98be03865100"
+        }
+      ],
+      "expected_material_ids": [
+        "mat-c3bff9a33ed687da53c8574d"
+      ],
+      "id": "7b7400352ad5cfc9586578e3ca796180",
+      "language": "en",
+      "latency_seconds": 2.916831989772618,
+      "paired_id": "ccd9329938f37ec19bdc0d7c7972fee6",
+      "query": "What multi-model arrangement does PipeSpec generalize speculative decoding to?",
+      "scores": {
+        "hybrid": {
+          "all_expected_sources_at_5": 1,
+          "known_chunk_hit_at_10": 1,
+          "known_chunk_hit_at_5": 1,
+          "known_source_hit_at_1": 1,
+          "known_source_hit_at_10": 1,
+          "known_source_hit_at_5": 1,
+          "reciprocal_rank": 1.0
+        },
+        "hybrid_evidence": {
+          "all_expected_sources_at_5": 1,
+          "known_chunk_hit_at_10": 1,
+          "known_chunk_hit_at_5": 1,
+          "known_source_hit_at_1": 1,
+          "known_source_hit_at_10": 1,
+          "known_source_hit_at_5": 1,
+          "reciprocal_rank": 1.0
+        }
+      },
+      "top5": {
+        "hybrid": [
+          {
+            "chunk_id": "chunk-4032bfe7801d57953a8ec52196dd5a73",
+            "material_id": "mat-c3bff9a33ed687da53c8574d",
+            "result_kind": "evidence",
+            "revision_id": "c89ec01fecaa14dd39a4e9f74ef6fae8",
+            "role": "core_technical"
+          },
+          {
+            "chunk_id": "chunk-a743853fb99c77cc28167ca324bc991d",
+            "material_id": "mat-c3bff9a33ed687da53c8574d",
+            "result_kind": "evidence",
+            "revision_id": "c89ec01fecaa14dd39a4e9f74ef6fae8",
+            "role": "core_technical"
+          },
+          {
+            "chunk_id": "chunk-8854c10e303086e8282943d100c50595",
+            "material_id": "mat-c3bff9a33ed687da53c8574d",
+            "result_kind": "evidence",
+            "revision_id": "c89ec01fecaa14dd39a4e9f74ef6fae8",
+            "role": "core_technical"
+          },
+          {
+            "chunk_id": "chunk-2809e15361ce1df88d001692d7516671",
+            "material_id": "mat-c2ae91e7ef53c740204d50b0",
+            "result_kind": "evidence",
+            "revision_id": "0481f68b8fe6cb2337c6ce0384f76659",
+            "role": "core_technical"
+          },
+          {
+            "chunk_id": "chunk-2ce0fb55869bcd3d081309a8a2139bfc",
+            "material_id": "mat-151c518eb139cc51bd143d31",
+            "result_kind": "evidence",
+            "revision_id": "ebcfedc9e5cfaa0ecc26c4e27c34fa4b",
+            "role": "core_technical"
+          }
+        ],
+        "hybrid_evidence": [
+          {
+            "chunk_id": "chunk-4032bfe7801d57953a8ec52196dd5a73",
+            "material_id": "mat-c3bff9a33ed687da53c8574d",
+            "result_kind": "evidence",
+            "revision_id": "c89ec01fecaa14dd39a4e9f74ef6fae8",
+            "role": "core_technical"
+          },
+          {
+            "chunk_id": "chunk-a743853fb99c77cc28167ca324bc991d",
+            "material_id": "mat-c3bff9a33ed687da53c8574d",
+            "result_kind": "evidence",
+            "revision_id": "c89ec01fecaa14dd39a4e9f74ef6fae8",
+            "role": "core_technical"
+          },
+          {
+            "chunk_id": "chunk-8854c10e303086e8282943d100c50595",
+            "material_id": "mat-c3bff9a33ed687da53c8574d",
+            "result_kind": "evidence",
+            "revision_id": "c89ec01fecaa14dd39a4e9f74ef6fae8",
+            "role": "core_technical"
+          },
+          {
+            "chunk_id": "chunk-2809e15361ce1df88d001692d7516671",
+            "material_id": "mat-c2ae91e7ef53c740204d50b0",
+            "result_kind": "evidence",
+            "revision_id": "0481f68b8fe6cb2337c6ce0384f76659",
+            "role": "core_technical"
+          },
+          {
+            "chunk_id": "chunk-2ce0fb55869bcd3d081309a8a2139bfc",
+            "material_id": "mat-151c518eb139cc51bd143d31",
+            "result_kind": "evidence",
+            "revision_id": "ebcfedc9e5cfaa0ecc26c4e27c34fa4b",
+            "role": "core_technical"
+          }
+        ]
+      }
+    },
+    {
+      "anchor_role": "direct_source_support",
+      "answerability": "answerable",
+      "category": "serving_scheduling",
+      "error_type": null,
+      "expected_chunks": [
+        {
+          "chunk_id": "chunk-4b5b844374a3584f6c9e649523c15499",
+          "material_id": "mat-497a39b1461022f8a8a0efca",
+          "quote_characters": 47,
+          "quote_sha256": "6d28451c912342dcc4258ee8f07b145856d63bce7cb99771fb7ad5ffb1b37ddc"
+        }
+      ],
+      "expected_material_ids": [
+        "mat-497a39b1461022f8a8a0efca"
+      ],
+      "id": "caa6d6d96a8ac6c1a62817fe21baac57",
+      "language": "ko",
+      "latency_seconds": 2.2004497461020947,
+      "paired_id": "27f3a102d3339c33185c30c1ac733042",
+      "query": "ADOR가 균형을 맞춘다고 설명하는 두 성능 목표는 무엇인가요?",
+      "scores": {
+        "hybrid": {
+          "all_expected_sources_at_5": 1,
+          "known_chunk_hit_at_10": 0,
+          "known_chunk_hit_at_5": 0,
+          "known_source_hit_at_1": 1,
+          "known_source_hit_at_10": 1,
+          "known_source_hit_at_5": 1,
+          "reciprocal_rank": 1.0
+        },
+        "hybrid_evidence": {
+          "all_expected_sources_at_5": 1,
+          "known_chunk_hit_at_10": 0,
+          "known_chunk_hit_at_5": 0,
+          "known_source_hit_at_1": 1,
+          "known_source_hit_at_10": 1,
+          "known_source_hit_at_5": 1,
+          "reciprocal_rank": 1.0
+        }
+      },
+      "top5": {
+        "hybrid": [
+          {
+            "chunk_id": "chunk-b4d17e89f8612c6cc17889c8649970b7",
+            "material_id": "mat-497a39b1461022f8a8a0efca",
+            "result_kind": "evidence",
+            "revision_id": "ba190ff871d03c5228223335eb53a84a",
+            "role": "core_technical"
+          },
+          {
+            "chunk_id": "chunk-2558570c49a1e31e244276bde6d8ce62",
+            "material_id": "mat-497a39b1461022f8a8a0efca",
+            "result_kind": "evidence",
+            "revision_id": "ba190ff871d03c5228223335eb53a84a",
+            "role": "core_technical"
+          },
+          {
+            "chunk_id": "chunk-8e97f0de538e3c968d94a00d47d0aea8",
+            "material_id": "mat-497a39b1461022f8a8a0efca",
+            "result_kind": "evidence",
+            "revision_id": "ba190ff871d03c5228223335eb53a84a",
+            "role": "core_technical"
+          },
+          {
+            "chunk_id": "chunk-ec74bd5c1ebc243979c0eef5d0897a7c",
+            "material_id": "mat-2ff487f1491198a201050e9b",
+            "result_kind": "evidence",
+            "revision_id": "85001128ddf4686a076791cfd77ae1a1",
+            "role": "core_technical"
+          },
+          {
+            "chunk_id": "chunk-c1fff5d72e553dcfe177896837022bd7",
+            "material_id": "mat-1d73888cc5387e18c609491f",
+            "result_kind": "evidence",
+            "revision_id": "da7433b9a6492d93abc1bdbc70b59354",
+            "role": "core_technical"
+          }
+        ],
+        "hybrid_evidence": [
+          {
+            "chunk_id": "chunk-b4d17e89f8612c6cc17889c8649970b7",
+            "material_id": "mat-497a39b1461022f8a8a0efca",
+            "result_kind": "evidence",
+            "revision_id": "ba190ff871d03c5228223335eb53a84a",
+            "role": "core_technical"
+          },
+          {
+            "chunk_id": "chunk-2558570c49a1e31e244276bde6d8ce62",
+            "material_id": "mat-497a39b1461022f8a8a0efca",
+            "result_kind": "evidence",
+            "revision_id": "ba190ff871d03c5228223335eb53a84a",
+            "role": "core_technical"
+          },
+          {
+            "chunk_id": "chunk-8e97f0de538e3c968d94a00d47d0aea8",
+            "material_id": "mat-497a39b1461022f8a8a0efca",
+            "result_kind": "evidence",
+            "revision_id": "ba190ff871d03c5228223335eb53a84a",
+            "role": "core_technical"
+          },
+          {
+            "chunk_id": "chunk-ec74bd5c1ebc243979c0eef5d0897a7c",
+            "material_id": "mat-2ff487f1491198a201050e9b",
+            "result_kind": "evidence",
+            "revision_id": "85001128ddf4686a076791cfd77ae1a1",
+            "role": "core_technical"
+          },
+          {
+            "chunk_id": "chunk-c1fff5d72e553dcfe177896837022bd7",
+            "material_id": "mat-1d73888cc5387e18c609491f",
+            "result_kind": "evidence",
+            "revision_id": "da7433b9a6492d93abc1bdbc70b59354",
+            "role": "core_technical"
+          }
+        ]
+      }
+    },
+    {
+      "anchor_role": "direct_source_support",
+      "answerability": "answerable",
+      "category": "serving_scheduling",
+      "error_type": null,
+      "expected_chunks": [
+        {
+          "chunk_id": "chunk-4b5b844374a3584f6c9e649523c15499",
+          "material_id": "mat-497a39b1461022f8a8a0efca",
+          "quote_characters": 47,
+          "quote_sha256": "6d28451c912342dcc4258ee8f07b145856d63bce7cb99771fb7ad5ffb1b37ddc"
+        }
+      ],
+      "expected_material_ids": [
+        "mat-497a39b1461022f8a8a0efca"
+      ],
+      "id": "57d027b41039be0c18c29879fa90c73f",
+      "language": "en",
+      "latency_seconds": 2.243120468221605,
+      "paired_id": "27f3a102d3339c33185c30c1ac733042",
+      "query": "Which two performance goals does ADOR say it balances?",
+      "scores": {
+        "hybrid": {
+          "all_expected_sources_at_5": 1,
+          "known_chunk_hit_at_10": 0,
+          "known_chunk_hit_at_5": 0,
+          "known_source_hit_at_1": 1,
+          "known_source_hit_at_10": 1,
+          "known_source_hit_at_5": 1,
+          "reciprocal_rank": 1.0
+        },
+        "hybrid_evidence": {
+          "all_expected_sources_at_5": 1,
+          "known_chunk_hit_at_10": 0,
+          "known_chunk_hit_at_5": 0,
+          "known_source_hit_at_1": 1,
+          "known_source_hit_at_10": 1,
+          "known_source_hit_at_5": 1,
+          "reciprocal_rank": 1.0
+        }
+      },
+      "top5": {
+        "hybrid": [
+          {
+            "chunk_id": "chunk-b4d17e89f8612c6cc17889c8649970b7",
+            "material_id": "mat-497a39b1461022f8a8a0efca",
+            "result_kind": "evidence",
+            "revision_id": "ba190ff871d03c5228223335eb53a84a",
+            "role": "core_technical"
+          },
+          {
+            "chunk_id": "chunk-90b1371ec94dd998a6c6b73959b35615",
+            "material_id": "mat-497a39b1461022f8a8a0efca",
+            "result_kind": "evidence",
+            "revision_id": "ba190ff871d03c5228223335eb53a84a",
+            "role": "core_technical"
+          },
+          {
+            "chunk_id": "chunk-c2b8e70ad2511dbc7817fad16d5801c2",
+            "material_id": "mat-497a39b1461022f8a8a0efca",
+            "result_kind": "evidence",
+            "revision_id": "ba190ff871d03c5228223335eb53a84a",
+            "role": "core_technical"
+          },
+          {
+            "chunk_id": "chunk-a1b5c10286db423a9384f114cfec3e97",
+            "material_id": "mat-1e00a678ed2d507598f3abea",
+            "result_kind": "evidence",
+            "revision_id": "bb98e09cbd1290440df0e949b07316d2",
+            "role": "supporting_method"
+          },
+          {
+            "chunk_id": "chunk-ec74bd5c1ebc243979c0eef5d0897a7c",
+            "material_id": "mat-2ff487f1491198a201050e9b",
+            "result_kind": "evidence",
+            "revision_id": "85001128ddf4686a076791cfd77ae1a1",
+            "role": "core_technical"
+          }
+        ],
+        "hybrid_evidence": [
+          {
+            "chunk_id": "chunk-b4d17e89f8612c6cc17889c8649970b7",
+            "material_id": "mat-497a39b1461022f8a8a0efca",
+            "result_kind": "evidence",
+            "revision_id": "ba190ff871d03c5228223335eb53a84a",
+            "role": "core_technical"
+          },
+          {
+            "chunk_id": "chunk-90b1371ec94dd998a6c6b73959b35615",
+            "material_id": "mat-497a39b1461022f8a8a0efca",
+            "result_kind": "evidence",
+            "revision_id": "ba190ff871d03c5228223335eb53a84a",
+            "role": "core_technical"
+          },
+          {
+            "chunk_id": "chunk-c2b8e70ad2511dbc7817fad16d5801c2",
+            "material_id": "mat-497a39b1461022f8a8a0efca",
+            "result_kind": "evidence",
+            "revision_id": "ba190ff871d03c5228223335eb53a84a",
+            "role": "core_technical"
+          },
+          {
+            "chunk_id": "chunk-a1b5c10286db423a9384f114cfec3e97",
+            "material_id": "mat-1e00a678ed2d507598f3abea",
+            "result_kind": "evidence",
+            "revision_id": "bb98e09cbd1290440df0e949b07316d2",
+            "role": "supporting_method"
+          },
+          {
+            "chunk_id": "chunk-ec74bd5c1ebc243979c0eef5d0897a7c",
+            "material_id": "mat-2ff487f1491198a201050e9b",
+            "result_kind": "evidence",
+            "revision_id": "85001128ddf4686a076791cfd77ae1a1",
+            "role": "core_technical"
+          }
+        ]
+      }
+    },
+    {
+      "anchor_role": "boundary_evidence_not_positive_answer",
+      "answerability": "unsupported",
+      "category": "hardware_architecture",
+      "error_type": null,
+      "expected_chunks": [
+        {
+          "chunk_id": "chunk-ead120a5a1bd3cf8940ebc5548ee3edf",
+          "material_id": "mat-17067a982938f79e0c706c65",
+          "quote_characters": 170,
+          "quote_sha256": "3c5603bc2af31779c10942ff26d7950d3f4c10dedfef87dac57abb8556121459"
+        }
+      ],
+      "expected_material_ids": [
+        "mat-17067a982938f79e0c706c65"
+      ],
+      "id": "53d69b98bdfcdbf7ae1f17bec5b7314c",
+      "language": "ko",
+      "latency_seconds": 2.1856841258704662,
+      "paired_id": "80e4d42edb5b8a19e412ff7a625d457f",
+      "query": "이 논문이 평가한 workload에 대해 실제 제작된 DCRA chiplet에서 측정한 post-silicon power 값은 얼마인가요?",
+      "scores": {
+        "hybrid": null,
+        "hybrid_evidence": null
+      },
+      "top5": {
+        "hybrid": [
+          {
+            "chunk_id": "chunk-a33b93288cfc77a29df23c12a893e71c",
+            "material_id": "mat-17067a982938f79e0c706c65",
+            "result_kind": "evidence",
+            "revision_id": "8af7236953d0333d2bc3aa58f5a2424e",
+            "role": "core_technical"
+          },
+          {
+            "chunk_id": "chunk-51cc6d089c225e9af95a4fd43ad74d81",
+            "material_id": "mat-872825b35a10b07f7a6e482f",
+            "result_kind": "evidence",
+            "revision_id": "672ce1b8377a40ddf32b9628be1c2a9d",
+            "role": "core_technical"
+          },
+          {
+            "chunk_id": "chunk-f0476e0a7c29fdf6054c6e79c01f380c",
+            "material_id": "mat-a5eb36271d357dd9e37457ca",
+            "result_kind": "evidence",
+            "revision_id": "f31954899b0db51f1e020a9ac1049578",
+            "role": "core_technical"
+          },
+          {
+            "chunk_id": "chunk-f6aaf1bc7679886b0d3dd000eb9226d3",
+            "material_id": "mat-17067a982938f79e0c706c65",
+            "result_kind": "evidence",
+            "revision_id": "8af7236953d0333d2bc3aa58f5a2424e",
+            "role": "core_technical"
+          },
+          {
+            "chunk_id": "chunk-3357e954aef2384da1bf954c7ddd9d37",
+            "material_id": "mat-17067a982938f79e0c706c65",
+            "result_kind": "evidence",
+            "revision_id": "8af7236953d0333d2bc3aa58f5a2424e",
+            "role": "core_technical"
+          }
+        ],
+        "hybrid_evidence": [
+          {
+            "chunk_id": "chunk-a33b93288cfc77a29df23c12a893e71c",
+            "material_id": "mat-17067a982938f79e0c706c65",
+            "result_kind": "evidence",
+            "revision_id": "8af7236953d0333d2bc3aa58f5a2424e",
+            "role": "core_technical"
+          },
+          {
+            "chunk_id": "chunk-51cc6d089c225e9af95a4fd43ad74d81",
+            "material_id": "mat-872825b35a10b07f7a6e482f",
+            "result_kind": "evidence",
+            "revision_id": "672ce1b8377a40ddf32b9628be1c2a9d",
+            "role": "core_technical"
+          },
+          {
+            "chunk_id": "chunk-f0476e0a7c29fdf6054c6e79c01f380c",
+            "material_id": "mat-a5eb36271d357dd9e37457ca",
+            "result_kind": "evidence",
+            "revision_id": "f31954899b0db51f1e020a9ac1049578",
+            "role": "core_technical"
+          },
+          {
+            "chunk_id": "chunk-f6aaf1bc7679886b0d3dd000eb9226d3",
+            "material_id": "mat-17067a982938f79e0c706c65",
+            "result_kind": "evidence",
+            "revision_id": "8af7236953d0333d2bc3aa58f5a2424e",
+            "role": "core_technical"
+          },
+          {
+            "chunk_id": "chunk-3357e954aef2384da1bf954c7ddd9d37",
+            "material_id": "mat-17067a982938f79e0c706c65",
+            "result_kind": "evidence",
+            "revision_id": "8af7236953d0333d2bc3aa58f5a2424e",
+            "role": "core_technical"
+          }
+        ]
+      }
+    },
+    {
+      "anchor_role": "boundary_evidence_not_positive_answer",
+      "answerability": "unsupported",
+      "category": "hardware_architecture",
+      "error_type": null,
+      "expected_chunks": [
+        {
+          "chunk_id": "chunk-ead120a5a1bd3cf8940ebc5548ee3edf",
+          "material_id": "mat-17067a982938f79e0c706c65",
+          "quote_characters": 170,
+          "quote_sha256": "3c5603bc2af31779c10942ff26d7950d3f4c10dedfef87dac57abb8556121459"
+        }
+      ],
+      "expected_material_ids": [
+        "mat-17067a982938f79e0c706c65"
+      ],
+      "id": "35ef5aa17c2a1cbec5bb13877bb3e131",
+      "language": "en",
+      "latency_seconds": 3.0237368661910295,
+      "paired_id": "80e4d42edb5b8a19e412ff7a625d457f",
+      "query": "What post-silicon power value did the study measure on a physically fabricated DCRA chiplet for the evaluated workloads?",
+      "scores": {
+        "hybrid": null,
+        "hybrid_evidence": null
+      },
+      "top5": {
+        "hybrid": [
+          {
+            "chunk_id": "chunk-a33b93288cfc77a29df23c12a893e71c",
+            "material_id": "mat-17067a982938f79e0c706c65",
+            "result_kind": "evidence",
+            "revision_id": "8af7236953d0333d2bc3aa58f5a2424e",
+            "role": "core_technical"
+          },
+          {
+            "chunk_id": "chunk-51cc6d089c225e9af95a4fd43ad74d81",
+            "material_id": "mat-872825b35a10b07f7a6e482f",
+            "result_kind": "evidence",
+            "revision_id": "672ce1b8377a40ddf32b9628be1c2a9d",
+            "role": "core_technical"
+          },
+          {
+            "chunk_id": "chunk-f0476e0a7c29fdf6054c6e79c01f380c",
+            "material_id": "mat-a5eb36271d357dd9e37457ca",
+            "result_kind": "evidence",
+            "revision_id": "f31954899b0db51f1e020a9ac1049578",
+            "role": "core_technical"
+          },
+          {
+            "chunk_id": "chunk-f6aaf1bc7679886b0d3dd000eb9226d3",
+            "material_id": "mat-17067a982938f79e0c706c65",
+            "result_kind": "evidence",
+            "revision_id": "8af7236953d0333d2bc3aa58f5a2424e",
+            "role": "core_technical"
+          },
+          {
+            "chunk_id": "chunk-efb51915f15b8494d049b2b36dfa5bcf",
+            "material_id": "mat-17067a982938f79e0c706c65",
+            "result_kind": "evidence",
+            "revision_id": "8af7236953d0333d2bc3aa58f5a2424e",
+            "role": "core_technical"
+          }
+        ],
+        "hybrid_evidence": [
+          {
+            "chunk_id": "chunk-a33b93288cfc77a29df23c12a893e71c",
+            "material_id": "mat-17067a982938f79e0c706c65",
+            "result_kind": "evidence",
+            "revision_id": "8af7236953d0333d2bc3aa58f5a2424e",
+            "role": "core_technical"
+          },
+          {
+            "chunk_id": "chunk-51cc6d089c225e9af95a4fd43ad74d81",
+            "material_id": "mat-872825b35a10b07f7a6e482f",
+            "result_kind": "evidence",
+            "revision_id": "672ce1b8377a40ddf32b9628be1c2a9d",
+            "role": "core_technical"
+          },
+          {
+            "chunk_id": "chunk-f0476e0a7c29fdf6054c6e79c01f380c",
+            "material_id": "mat-a5eb36271d357dd9e37457ca",
+            "result_kind": "evidence",
+            "revision_id": "f31954899b0db51f1e020a9ac1049578",
+            "role": "core_technical"
+          },
+          {
+            "chunk_id": "chunk-f6aaf1bc7679886b0d3dd000eb9226d3",
+            "material_id": "mat-17067a982938f79e0c706c65",
+            "result_kind": "evidence",
+            "revision_id": "8af7236953d0333d2bc3aa58f5a2424e",
+            "role": "core_technical"
+          },
+          {
+            "chunk_id": "chunk-efb51915f15b8494d049b2b36dfa5bcf",
+            "material_id": "mat-17067a982938f79e0c706c65",
+            "result_kind": "evidence",
+            "revision_id": "8af7236953d0333d2bc3aa58f5a2424e",
+            "role": "core_technical"
+          }
+        ]
+      }
+    },
+    {
+      "anchor_role": "boundary_evidence_not_positive_answer",
+      "answerability": "unsupported",
+      "category": "simulation_measurement",
+      "error_type": null,
+      "expected_chunks": [
+        {
+          "chunk_id": "chunk-0d5c38af12cd4ed0122ddd0633a57e9c",
+          "material_id": "mat-da8b50541891172a7595f301",
+          "quote_characters": 46,
+          "quote_sha256": "5dd24c5232cd475693a97665028f64f69ef3a893addf2528fcefaccd80947091"
+        }
+      ],
+      "expected_material_ids": [
+        "mat-da8b50541891172a7595f301"
+      ],
+      "id": "7808d0ccecbf1c9de6ebff1f3de362ad",
+      "language": "ko",
+      "latency_seconds": 2.288724838756025,
+      "paired_id": "8cd44ff24480c16b6a612dc00c80dfea",
+      "query": "getInitPhaseElapsedRealTime 예제의 SST 실행에서 실제로 출력된 초기화 시간은 몇 초인가요?",
+      "scores": {
+        "hybrid": null,
+        "hybrid_evidence": null
+      },
+      "top5": {
+        "hybrid": [
+          {
+            "chunk_id": "chunk-0d5c38af12cd4ed0122ddd0633a57e9c",
+            "material_id": "mat-da8b50541891172a7595f301",
+            "result_kind": "evidence",
+            "revision_id": "a053dcfd3dab3ad0c0c49aca9110e3d3",
+            "role": "core_technical"
+          },
+          {
+            "chunk_id": "chunk-b92a66f9ae6abc7baff1508ba2220b9f",
+            "material_id": "mat-19ca8a5533628d024d1210ee",
+            "result_kind": "evidence",
+            "revision_id": "c9208ccdfbab0240629097dcc86827f4",
+            "role": "core_technical"
+          },
+          {
+            "chunk_id": "chunk-c3d0769e1577c0624999ba695e3b21a8",
+            "material_id": "mat-62c86c03bf51ded55de97ec3",
+            "result_kind": "evidence",
+            "revision_id": "cc0c280410ba7fd7e93756b1b771515f",
+            "role": "core_technical"
+          },
+          {
+            "chunk_id": "chunk-a9ae18720055eb87e820a8b332faf8ee",
+            "material_id": "mat-c90c44feed1a765bbcc5aa12",
+            "result_kind": "evidence",
+            "revision_id": "e8b7f40eb6d66aa453195ae04056ab6b",
+            "role": "core_technical"
+          },
+          {
+            "chunk_id": "chunk-ee6ce47ce3051819976919718659a07b",
+            "material_id": "mat-07e7cdb28d47e47acc8c826f",
+            "result_kind": "evidence",
+            "revision_id": "9eb0019ab1c89f6dd0391f00b6b9bd23",
+            "role": "core_technical"
+          }
+        ],
+        "hybrid_evidence": [
+          {
+            "chunk_id": "chunk-0d5c38af12cd4ed0122ddd0633a57e9c",
+            "material_id": "mat-da8b50541891172a7595f301",
+            "result_kind": "evidence",
+            "revision_id": "a053dcfd3dab3ad0c0c49aca9110e3d3",
+            "role": "core_technical"
+          },
+          {
+            "chunk_id": "chunk-b92a66f9ae6abc7baff1508ba2220b9f",
+            "material_id": "mat-19ca8a5533628d024d1210ee",
+            "result_kind": "evidence",
+            "revision_id": "c9208ccdfbab0240629097dcc86827f4",
+            "role": "core_technical"
+          },
+          {
+            "chunk_id": "chunk-c3d0769e1577c0624999ba695e3b21a8",
+            "material_id": "mat-62c86c03bf51ded55de97ec3",
+            "result_kind": "evidence",
+            "revision_id": "cc0c280410ba7fd7e93756b1b771515f",
+            "role": "core_technical"
+          },
+          {
+            "chunk_id": "chunk-a9ae18720055eb87e820a8b332faf8ee",
+            "material_id": "mat-c90c44feed1a765bbcc5aa12",
+            "result_kind": "evidence",
+            "revision_id": "e8b7f40eb6d66aa453195ae04056ab6b",
+            "role": "core_technical"
+          },
+          {
+            "chunk_id": "chunk-ee6ce47ce3051819976919718659a07b",
+            "material_id": "mat-07e7cdb28d47e47acc8c826f",
+            "result_kind": "evidence",
+            "revision_id": "9eb0019ab1c89f6dd0391f00b6b9bd23",
+            "role": "core_technical"
+          }
+        ]
+      }
+    },
+    {
+      "anchor_role": "boundary_evidence_not_positive_answer",
+      "answerability": "unsupported",
+      "category": "simulation_measurement",
+      "error_type": null,
+      "expected_chunks": [
+        {
+          "chunk_id": "chunk-0d5c38af12cd4ed0122ddd0633a57e9c",
+          "material_id": "mat-da8b50541891172a7595f301",
+          "quote_characters": 46,
+          "quote_sha256": "5dd24c5232cd475693a97665028f64f69ef3a893addf2528fcefaccd80947091"
+        }
+      ],
+      "expected_material_ids": [
+        "mat-da8b50541891172a7595f301"
+      ],
+      "id": "8251a6cd5d21165d5d8abacbbf08203b",
+      "language": "en",
+      "latency_seconds": 2.6077998280525208,
+      "paired_id": "8cd44ff24480c16b6a612dc00c80dfea",
+      "query": "How many seconds did the SST execution in the getInitPhaseElapsedRealTime example actually print for initialization?",
+      "scores": {
+        "hybrid": null,
+        "hybrid_evidence": null
+      },
+      "top5": {
+        "hybrid": [
+          {
+            "chunk_id": "chunk-0d5c38af12cd4ed0122ddd0633a57e9c",
+            "material_id": "mat-da8b50541891172a7595f301",
+            "result_kind": "evidence",
+            "revision_id": "a053dcfd3dab3ad0c0c49aca9110e3d3",
+            "role": "core_technical"
+          },
+          {
+            "chunk_id": "chunk-b92a66f9ae6abc7baff1508ba2220b9f",
+            "material_id": "mat-19ca8a5533628d024d1210ee",
+            "result_kind": "evidence",
+            "revision_id": "c9208ccdfbab0240629097dcc86827f4",
+            "role": "core_technical"
+          },
+          {
+            "chunk_id": "chunk-ee6ce47ce3051819976919718659a07b",
+            "material_id": "mat-07e7cdb28d47e47acc8c826f",
+            "result_kind": "evidence",
+            "revision_id": "9eb0019ab1c89f6dd0391f00b6b9bd23",
+            "role": "core_technical"
+          },
+          {
+            "chunk_id": "chunk-a4d9477a8f0bf2d1f3107a589f32af04",
+            "material_id": "mat-ae8bb16ddd280e1e08a05646",
+            "result_kind": "evidence",
+            "revision_id": "9ae59c46f6eb0faf2712e6b4b9459ce4",
+            "role": "core_technical"
+          },
+          {
+            "chunk_id": "chunk-000390fac91ff14f512a42bfa385ec30",
+            "material_id": "mat-1e8fba6859064ae581d4d274",
+            "result_kind": "evidence",
+            "revision_id": "c4ba1793783d51c9ca903759196b35ef",
+            "role": "core_technical"
+          }
+        ],
+        "hybrid_evidence": [
+          {
+            "chunk_id": "chunk-0d5c38af12cd4ed0122ddd0633a57e9c",
+            "material_id": "mat-da8b50541891172a7595f301",
+            "result_kind": "evidence",
+            "revision_id": "a053dcfd3dab3ad0c0c49aca9110e3d3",
+            "role": "core_technical"
+          },
+          {
+            "chunk_id": "chunk-b92a66f9ae6abc7baff1508ba2220b9f",
+            "material_id": "mat-19ca8a5533628d024d1210ee",
+            "result_kind": "evidence",
+            "revision_id": "c9208ccdfbab0240629097dcc86827f4",
+            "role": "core_technical"
+          },
+          {
+            "chunk_id": "chunk-ee6ce47ce3051819976919718659a07b",
+            "material_id": "mat-07e7cdb28d47e47acc8c826f",
+            "result_kind": "evidence",
+            "revision_id": "9eb0019ab1c89f6dd0391f00b6b9bd23",
+            "role": "core_technical"
+          },
+          {
+            "chunk_id": "chunk-a4d9477a8f0bf2d1f3107a589f32af04",
+            "material_id": "mat-ae8bb16ddd280e1e08a05646",
+            "result_kind": "evidence",
+            "revision_id": "9ae59c46f6eb0faf2712e6b4b9459ce4",
+            "role": "core_technical"
+          },
+          {
+            "chunk_id": "chunk-000390fac91ff14f512a42bfa385ec30",
+            "material_id": "mat-1e8fba6859064ae581d4d274",
+            "result_kind": "evidence",
+            "revision_id": "c4ba1793783d51c9ca903759196b35ef",
+            "role": "core_technical"
+          }
+        ]
+      }
+    }
+  ],
+  "distinct_new900_anchor_sources": 14,
+  "errors": 0,
+  "evaluated_code_commit": "4a29d7f57e4cd599401fbcaec91104663bd761b8",
+  "future_use": "regression; never reuse as blind holdout",
+  "generated_at": "2026-10-26T00:44:22.390494+00:00",
+  "http_errors": 0,
+  "http_latency": {
+    "count": 6,
+    "max_seconds": 2.788381278514862,
+    "p50_seconds": 2.289897265844047,
+    "p95_seconds": 2.788381278514862
+  },
+  "latency": {
+    "count": 28,
+    "max_seconds": 5.13337664026767,
+    "p50_seconds": 2.3060984518378973,
+    "p95_seconds": 3.0237368661910295
+  },
+  "new_document_holdout": false,
+  "not_published": [
+    "literal quotes",
+    "document bodies or heads",
+    "vectors",
+    "generated model answers",
+    "private configuration"
+  ],
+  "partial_qrels": true,
+  "phase": "Q2",
+  "positive_correlated_bilingual_intents": 12,
+  "positive_queries": 24,
+  "private_qrels_sha256": "37869b2956f2448fa30c9575f4d4271623e3c9f57331c56c97a862f718dbf49e",
+  "private_results_sha256": "22a7b73a63bc1b4220d59a23c0b325cfcdb6ce80cc05eecbf69d5e1604888885",
+  "production_summary": {
+    "hybrid": {
+      "all_expected_sources_at_5": 1.0,
+      "denominator": 24,
+      "known_chunk_hit_at_10": 0.6666666666666666,
+      "known_chunk_hit_at_5": 0.6666666666666666,
+      "known_source_hit_at_1": 0.9583333333333334,
+      "known_source_hit_at_10": 1.0,
+      "known_source_hit_at_5": 1.0,
+      "reciprocal_rank": 0.9791666666666666
+    },
+    "hybrid_evidence": {
+      "all_expected_sources_at_5": 1.0,
+      "denominator": 24,
+      "known_chunk_hit_at_10": 0.6666666666666666,
+      "known_chunk_hit_at_5": 0.6666666666666666,
+      "known_source_hit_at_1": 0.9583333333333334,
+      "known_source_hit_at_10": 1.0,
+      "known_source_hit_at_5": 1.0,
+      "reciprocal_rank": 0.9791666666666666
+    }
+  },
+  "queries": 28,
+  "ranked_unit": "raw five chunk slots, without unique-material collapse",
+  "retrieval_policy": "retrieval-policy/v2.2",
+  "same_corpus_fresh_query_evaluation": true,
+  "schema_version": "dse-public-paired-retrieval/v1",
+  "status": "verified",
+  "unknown_intents": 2,
+  "unknown_queries": 4,
+  "unknown_retrieval_excluded_from_positive_denominator": true
+}

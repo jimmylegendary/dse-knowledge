@@ -1,10 +1,54 @@
 # DSE Knowledge Workbench — 지식·설계 판단·경험 환류
 
-상태: **100개 실제 Workbench의 v0.2 품질 보완 Q1 검증 통과 · 1,000개 확장 Q2 진행 중** · 기준일: 2026-10-25 KST. 145,748건은 수집 대상 목록이며 전체 본문 분석·KG 등록은 실행하지 않는다. 현재 결과와 기존 v0.1 결과를 아래에서 구분한다.
+상태: **실제 1,000개 Workbench의 품질 보완 Q2 검증 통과 · runtime v0.2.5** · 기준일: 2026-10-26 KST. 145,748건은 수집 대상 목록이며 전체 본문 분석·KG 등록은 실행하지 않았다. 현재 Q2 결과와 과거 Q1·v0.1 기록을 아래에서 구분한다.
 
 이 README는 DSE 결정별 지식 요구를 만들고, 허가된 source에서 evidence를 취득·구조화하며, hardware/kernel/experiment 결정에 쓰고 부족한 지식을 다시 수집하는 전체 구조를 설명한다. 2026-10-18 사용자 정정에 맞춘 상위 기준은 [2026-10-21-dse-knowledge-architecture.md](https://github.com/jimmylegendary/dse-knowledge/blob/docs/p0-episode-contracts/docs/superpowers/specs/2026-10-21-dse-knowledge-architecture.md)와 [2026-10-21-knowledge-architecture-plan.md](https://github.com/jimmylegendary/dse-knowledge/blob/docs/p0-episode-contracts/docs/superpowers/plans/2026-10-21-knowledge-architecture-plan.md)다. 이전 HAT native episode/adapter 계약은 세부 참고이며 이 architecture의 중심 gate가 아니다.
 
-## 지식 품질 보완 v0.2 — 실제 100개 전체 제품
+## 현재 Q2 — 실제 1,000개 전체 제품, v0.2.5
+
+Linux HTTP UI·기존 Supabase PostgreSQL·host Codex CLI `gpt-6.1-sol/max`·외부 `google/embeddinggemma-2`를 연결한 실제 제품이다. 원문 취득 → chunk/vector/FTS/KG → 출처 검색 → 하드웨어·커널 검토/실험 제안 → 판단 snapshot → feedback·Melete 조회를 실제 의존성으로 확인했다. UI에서도 질문을 직접 제출해 모델 응답과 이력의 원문 인용 링크까지 확인했다.
+
+| 항목 | 실제 결과 | 해석 범위 |
+|---|---|---|
+| 자료 | **1,000개 = 기존 100개 보존 + 신규 900개**, 9개 분야·28개 source family | fulltext 50,118,994자·18,518 chunks/768차원 vectors; 145,748개 전체 실행은 아님 |
+| 처리 상태 | 구조화 추출 완료 **960**, 참고 **16**, 검토 필요 **23**, 추출 실패 **1** | indexed inventory와 KG 완료를 구분하며, 실패를 성공으로 바꾸지 않음 |
+| KG 완료 gate | 전체 기술 역할 자료 **960/984 = 97.56%**, 기준 90% 통과 | Claim 없는 자료와 failed도 분모에 포함; 문서 전체 사실을 빠짐없이 추출했다는 뜻은 아님 |
+| Claim·문맥 | Claim **2,383**, annotation **2,374행** / annotation을 가진 distinct current Claim **2,373개** | parameters 2,048·conditions 2,711; annotation version 증가를 독립 검증 증가로 세지 않음 |
+| 단위·범위 | normalized 245 · not_numeric 3,836 · unit_unspecified 300 · unresolved 378 | 원문 값·조건·revision을 보존하며 미확인 단위를 추정하지 않음 |
+| Graph | **4,452 nodes · 4,506 edges**, 최대 component 635 sources | assertion 2,383 + topic 2,123; 주제 연결은 호환성·인과성·물리 검증이 아님 |
+| 원자료 검사 | raw artifact hash **1,000/1,000**, source/revision/chunk 집합·literal 감사 오류 **0** | 평가·feedback 후에도 1,000 material/revision과 기존 Claim/annotation의 변경·누락 0 |
+| 현재 검색 | `retrieval-policy/v2.2`: dense exact top40 + lexical/exact/graph fusion + 역할 상한 | 같은 read-only repeatable-read scope에서 count/거리순위 계산; 50,000 chunks 초과 시 embedding 전에 typed 503, ANN fallback 없음 |
+| 기존 공개 30개 회귀 | 정상 source Hit@5: 자료 탐색 **24/24**, 기술 근거 **23/24**, 오류 0 | 기존 navigation qrel 1건을 기술 근거로 승격하지 않고 분모에 유지 |
+| 기존 Q1 한·영 28개 회귀 | 정상 source Hit@1·Hit@5: 두 stream 모두 **24/24**, 오류 0 | 1,000 확장 직후 20/24였던 첫 결과와 수정 과정을 보존 |
+| 결과 독립 새 28개 질의 | 정상 source Hit@1 **23/24**, Hit@5 **24/24**, 지정 chunk Hit@5 **16/24**; 두 stream 동일 | source KO 12/12·EN 12/12, 지정 chunk KO 9/12·EN 7/12; 정상 12개 intent의 상관된 번역쌍 |
+| 새 검색 시간 | 28개 순차 질의 p50 **2.31s**·p95 **3.02s**; HTTP 6건 p50 **2.29s**·p95 **2.79s** | 작은 순차 표본이며 생산 용량·latency SLA가 아님 |
+| 실제 모델 시험 | 정답·expected ID 없이 `knowledge/input={}` 3건 성공; AI 원문 대조 **정상 2·적절한 unknown 1** | 36개 근거 occurrence/35개 current chunk와 인용 ID를 재검사. 사람·과학 검증 0 |
+| 전체 HTTP 흐름 | 실제 Supabase·Codex·embedding·HAT schema·Melete **18/18 통과** | HAT는 구조검증; native committee/runtime simulation·B300 실측·compiled kernel correctness는 미실행 |
+| UI·재시작 | desktop 1440 / mobile 요청 375(실제 376)에서 검색·판단 이력 수평 overflow **0**; UI 실제 모델 job 완료·원문 링크 **11개** | 재시작 후 판단 7건·feedback hash 동일, Melete feedback 재검색, 새 provider invocation 0 |
+| 자동 검사·백업 | `pytest` **458 passed**, 기존 warning 1; allow-list **18개 table**의 logical gzip/SQLite serialization·row count·integrity smoke 통과 | 원문 파일·Melete store·PG DDL/role·전체 PG restore/off-host 복구는 이 백업 검사 범위 밖 |
+
+새 질의는 최종 corpus·검색 코드·정책 hash를 먼저 고정한 뒤, 신규 900개 중 사전 제외집합과 겹치지 않는 자료에서 원문만 보고 작성했다. 14개 anchor의 revision/chunk/인용을 별도 검사하고 정상 12쌍·미지원 2쌍을 고정했다. 실제 모델 3건을 모두 마친 뒤 새 검색 결과를 열었고, 결과로 질문·정책·모델·prompt·통과 기준을 조정하지 않았다. **같은 corpus의 fresh-query 평가이며 new-document holdout이나 모든 agent의 절대적 source blindness를 주장하지 않는다.** 사용한 질문은 이제 회귀 자료다.
+
+모델 답변의 AI 원문 대조 판정과 Jev 보조 판정은 구분한다. Jev의 2개 batch/6개 per-case choice는 모두 `correct_unknown`이었고, 명시적인 current-source 근거가 있는 정상 2건에서 원문 대조와 불일치했다. 원문 근거를 우선했으며 Jev가 정상 응답을 확인했다고 보고하지 않는다. Reviewer는 답변·gold·rubric 고정 후 일부 probe trace를 열람했으므로 rank-blind 검토도 주장하지 않는다. 새 28개 raw 검색 결과는 reviewer가 열지 않았다.
+
+| 운영·사용량 | 실제 관측 | 상한·누락 |
+|---|---|---|
+| 수집 작업 시간창 | 신규 900개에 약 **15시간 12분**, 중단·보완 포함 약 **59.2개/시간** | 순수 엔진 throughput 또는 생산 SLA가 아님 |
+| 공간 | 수집 artifact 추가 약 **1.80GB**, 관측 PG database **410,867,379 bytes**, disk free 약 **61.1GB** | PG 수치는 전체 database이며 Supabase commercial plan/quota·청구서는 미확인 |
+| Host 제어 | 수집 전체 worker 최대 4·acquire 1·index 2, 서비스 CPU 200%·MemoryMax 4GiB·TasksMax 256 | 현재 app service lifetime peak 약 **340MiB**; 과거 collector 전체 peak를 이 값으로 대체하지 않음 |
+| 최종 시간창의 기록된 Codex 토큰 | 입력 **20,489,106**·출력 **5,164,671**·캐시 입력 **11,832,576** | 캐시는 입력의 부분집합; 일부 실패 응답의 사용량 미상 22건 |
+| Embedding·role 판단 | DeepInfra 입력 **14,870,244 tokens**, decision_models 입력 **3,162,317 tokens** | embedding prompt/total은 같은 값; 미상 embedding 응답 8건, provider별 tokenizer를 합산하지 않음 |
+| 호출·비용 | PG 기록 8,870행 중 stage receipt 4,066행 제외; provider operation 4,804행·관측 응답 하한 4,928 | wrapper attempt·operation·HTTP/모델 응답은 다름. source_role의 보고된 부분 비용 $0.132817314만 있으며 전체 지출은 미확인 |
+
+사용량 시간창은 batch 생성부터 `2026-10-26T00:36:39Z`까지의 모든 purpose를 포함하며 row별 batch 귀속을 증명하지 않는다. 개발 agent 사용량·외부 Jev QA·별도 직접 embedding 진단과 전체 infra/provider 청구서는 포함하지 않는다. Missing usage/cost를 0이나 무료로 바꾸지 않았다.
+
+공개 자료는 본문·인용·vector·생성 답변·credential을 제외한 metadata projection이다: [1,000개 자료 목록](https://github.com/jimmylegendary/dse-knowledge/blob/main/research/pilot1000/corpus-2026-10-26.json), [전체 수치와 검증 범위](https://github.com/jimmylegendary/dse-knowledge/blob/main/research/pilot1000/quality-v2-2026-10-26.json), [새 한·영 질의와 검색 결과](https://github.com/jimmylegendary/dse-knowledge/blob/main/research/pilot1000/retrieval-paired-2026-10-26.json). Literal quote는 hash로 대체했다. 평가 기준 code commit은 `4a29d7f57e4cd599401fbcaec91104663bd761b8`이며 이후 변경은 보고용 문서·metadata다.
+
+**현재 50,000-chunk exact scan 상한을 14만 개 자료에 대한 지원으로 확대 해석하지 않는다.** 더 큰 corpus의 ANN은 exact 기준 대비 recall·비용·latency를 별도로 검증해야 한다. 아래 Q1/v0.1 수치는 당시 기록으로 유지한다.
+
+## 과거 Q1 기록 — v0.2, 실제 100개 전체 제품
+
+이 절은 100개 단계에서 검증한 당시 결과다. 현재 규모와 검색 정책은 위 Q2 표를 기준으로 한다.
 
 기존 Linux HTTP UI·Supabase·host Codex CLI·외부 `google/embeddinggemma-2`를 그대로 사용한다. 원문/embedding/기존 Claim을 다시 생성하지 않고 source 역할, source-grounded 값·조건, topic 연결과 검색을 보완했다. 기존 회귀·새 holdout·실제 모델 판단·전체 연결 및 snapshot 저장을 확인했다.
 
