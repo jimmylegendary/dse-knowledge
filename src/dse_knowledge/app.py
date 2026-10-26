@@ -15,11 +15,14 @@ from .config import Settings
 from .db import Store
 from .decisions import DecisionEngine,JobLoop
 from .policies import validate_metrics,compare_experiments
-from .retrieval import Retriever, RetrievalCapacityError
+from .retrieval import (
+    Retriever, RetrievalCapacityError, RetrievalModeError, RetrievalUnavailableError,
+    RETRIEVAL_MODES, CONTEXT_MODEL_DEFAULT, CONTEXT_PROMPT_VERSION,
+)
 
 
 class Body(BaseModel):model_config=ConfigDict(extra='forbid',strict=True)
-class SearchBody(Body):query:str=Field(min_length=1,max_length=2000);category:str='';limit:int=Field(default=12,ge=1,le=30);purpose:Literal['auto','design','operations','discovery']='auto'
+class SearchBody(Body):query:str=Field(min_length=1,max_length=2000);category:str='';limit:int=Field(default=12,ge=1,le=30);purpose:Literal['auto','design','operations','discovery']='auto';retrieval_mode:Literal['baseline','contextual','rerank','contextual_rerank']|None=None
 class DecisionBody(Body):kind:Literal['hardware','kernel','experiment','knowledge'];question:str=Field(min_length=3,max_length=4000);input:dict=Field(default_factory=dict)
 class FeedbackBody(Body):decision_id:str;verdict:Literal['useful','incorrect','needs_evidence'];notes:str=Field(default='',max_length=8000)
 class Metric(Body):name:str=Field(min_length=1,max_length=80);value:float;unit:str=Field(min_length=1,max_length=50);direction:Literal['min','max']
@@ -28,7 +31,25 @@ class CompareBody(Body):baseline_id:str;candidate_id:str
 class HardwareBody(Body):source:str=Field(min_length=1,max_length=200000)
 
 
-def create_app(settings=None,store=None,embedding=None,chat=None,native=None,run_jobs=True):
+def _setting_flag(settings, name, default=False):
+    value=settings.get(name,'true' if default else 'false').strip().lower()
+    if value in ('1','true','yes','on'):return True
+    if value in ('0','false','no','off',''):return False
+    raise ValueError(f'{name} must be a boolean')
+
+
+def _retrieval_mode(settings, contextual_enabled, rerank_enabled):
+    configured=settings.get('DSE_RETRIEVAL_MODE','').strip()
+    if configured:
+        if configured not in RETRIEVAL_MODES:raise ValueError('retrieval_mode_configuration_invalid')
+        return configured
+    if contextual_enabled and rerank_enabled:return 'contextual_rerank'
+    if contextual_enabled:return 'contextual'
+    if rerank_enabled:return 'rerank'
+    return 'baseline'
+
+
+def create_app(settings=None,store=None,embedding=None,chat=None,native=None,contextual_index=None,reranker=None,run_jobs=True):
     settings=settings or Settings.load()
     if store is None:store=Store(settings)
     if embedding is None:
@@ -40,7 +61,26 @@ def create_app(settings=None,store=None,embedding=None,chat=None,native=None,run
     if native is None:
         from .integrations import NativeIntegrations
         native=NativeIntegrations(settings)
-    retriever=Retriever(store,embedding);engine=DecisionEngine(store,retriever,chat,native);jobs=JobLoop(store,engine)
+    contextual_enabled=_setting_flag(settings,'DSE_CONTEXTUAL_ENABLED')
+    rerank_enabled=_setting_flag(settings,'DSE_RERANK_ENABLED')
+    if contextual_index is None and contextual_enabled:
+        from .contextual_index import ContextualIndex
+        index_path=settings.get('DSE_CONTEXT_INDEX_PATH',str(settings.data_root/'contextual-index'))
+        contextual_index=ContextualIndex(index_path)
+    if reranker is None and rerank_enabled:
+        from .reranking import QwenReranker
+        reranker=QwenReranker(settings)
+    mode=_retrieval_mode(settings,contextual_enabled,rerank_enabled)
+    allow_mode_override=_setting_flag(settings,'DSE_RETRIEVAL_ALLOW_MODE_OVERRIDE')
+    try:rerank_candidate_limit=int(settings.get('DSE_RERANK_CANDIDATES','40'))
+    except (TypeError,ValueError,OverflowError):raise ValueError('rerank_candidate_limit_configuration_invalid') from None
+    retriever=Retriever(
+        store,embedding,contextual_index=contextual_index,reranker=reranker,default_mode=mode,
+        allow_mode_override=allow_mode_override,
+        context_model=settings.get('DSE_CONTEXT_CHAT_MODEL',CONTEXT_MODEL_DEFAULT),
+        prompt_version=CONTEXT_PROMPT_VERSION,rerank_candidate_limit=rerank_candidate_limit,
+    )
+    engine=DecisionEngine(store,retriever,chat,native);jobs=JobLoop(store,engine)
 
     @asynccontextmanager
     async def lifespan(app):
@@ -72,12 +112,21 @@ def create_app(settings=None,store=None,embedding=None,chat=None,native=None,run
     @app.exception_handler(RetrievalCapacityError)
     async def retrieval_capacity_error(request,exc):
         return JSONResponse({'detail':'Search unavailable for current corpus scope','code':exc.code},status_code=503)
+    @app.exception_handler(RetrievalModeError)
+    async def retrieval_mode_error(request,exc):
+        return JSONResponse({'detail':'Requested retrieval mode is not allowed','code':exc.code},status_code=400)
+    @app.exception_handler(RetrievalUnavailableError)
+    async def retrieval_unavailable_error(request,exc):
+        return JSONResponse({'detail':'Search unavailable for current retrieval configuration','code':exc.code},status_code=503)
     @app.exception_handler(Exception)
     async def safe_error(request,exc):return JSONResponse({'detail':'Operation failed; inspect private runtime verification'},status_code=503)
 
     def capabilities():
         return {'native':native.capabilities(),'chat':{'provider':settings.get('CHAT_PROVIDER'),'model':settings.get('CHAT_MODEL_ID')},
                 'embedding':{'provider':settings.get('EMBEDDING_PROVIDER'),'model':settings.get('EMBEDDING_MODEL_ID'),'dimensions':768},
+                'retrieval':{'default_mode':mode,'contextual_enabled':contextual_enabled,
+                             'rerank_enabled':rerank_enabled,'rerank_provider':settings.get('DSE_RERANK_PROVIDER'),
+                             'rerank_model':settings.get('DSE_RERANK_MODEL')},
                 'scope':'Quality v2 pilot; single operator HTTP self-host. Source assertions and proposed designs require scoped validation.',
                 'knowledge_quality':{'source_roles':True,'claim_context':'literal_grounded_unverified_association','topic_edges':'evidence_topic_not_property'},
                 'automatic_b300_dse':'not_implemented','performance_simulation':'native HAT run orchestration not yet enabled'}
@@ -103,7 +152,7 @@ def create_app(settings=None,store=None,embedding=None,chat=None,native=None,run
         if not result:raise HTTPException(404,'Material not found')
         return result
     @app.post('/api/search')
-    def search(body:SearchBody):return retriever.search(body.query,body.category,body.limit,purpose=body.purpose)
+    def search(body:SearchBody):return retriever.search(body.query,body.category,body.limit,purpose=body.purpose,retrieval_mode=body.retrieval_mode)
     @app.get('/api/collections')
     def collections():
         return {'items':store.rows('SELECT id,target,state,counters,created_at,updated_at FROM collection_batches ORDER BY created_at DESC LIMIT 20')}

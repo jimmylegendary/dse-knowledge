@@ -266,5 +266,160 @@ class Store:
     def invocation(self,provider,purpose,metadata):
         self.execute('INSERT INTO invocations(id,provider,purpose,metadata) VALUES(%s,%s,%s,%s)',(uuid.uuid4().hex,provider,purpose,Jsonb(metadata)))
 
+    def contextual_corpus_manifest(self, connection=None):
+        """Fingerprint the baseline-visible current-revision cohort without returning source text."""
+        sql = '''/* contextual_corpus_manifest */
+          WITH latest_revision AS MATERIALIZED (
+            SELECT DISTINCT ON (material_id) material_id,id AS revision_id
+            FROM revisions ORDER BY material_id,created_at DESC,id DESC
+          ), latest_content AS MATERIALIZED (
+            SELECT lr.material_id,lr.revision_id,r.sha256 AS revision_sha256,
+                   md5(r.content) AS normalized_content_md5,m.category,m.role
+            FROM latest_revision lr JOIN revisions r
+              ON r.material_id=lr.material_id AND r.id=lr.revision_id
+            JOIN materials m ON m.id=lr.material_id
+          ), current_chunks AS MATERIALIZED (
+            SELECT c.material_id,c.revision_id,c.id AS chunk_id,c.start_offset,c.end_offset,
+                   lc.revision_sha256,lc.normalized_content_md5,lc.category,lc.role
+            FROM chunks c JOIN latest_content lc
+              ON lc.material_id=c.material_id AND lc.revision_id=c.revision_id
+          ), eligible_chunks AS MATERIALIZED (
+            SELECT * FROM current_chunks
+            WHERE COALESCE(role,'unclassified') <> 'out_of_scope'
+          )
+          SELECT md5(COALESCE((SELECT string_agg(
+                   concat_ws(chr(31),material_id,revision_id,revision_sha256,
+                     normalized_content_md5,category,chunk_id,
+                     start_offset::text,end_offset::text),
+                   chr(30) ORDER BY material_id,start_offset,chunk_id) FROM eligible_chunks),'')) AS corpus_hash,
+                 (SELECT count(DISTINCT material_id)::bigint FROM eligible_chunks) AS source_count,
+                 (SELECT count(*)::bigint FROM eligible_chunks) AS chunk_count,
+                 (SELECT count(DISTINCT material_id)::bigint FROM current_chunks) AS canonical_source_count,
+                 (SELECT count(*)::bigint FROM current_chunks) AS canonical_chunk_count'''
+        if connection is not None:
+            row = connection.execute(sql).fetchone()
+        else:
+            with self.connection() as conn:
+                row = conn.execute(sql).fetchone()
+        if not isinstance(row, dict):
+            raise ValueError('contextual_corpus_manifest_invalid')
+        corpus_hash = row.get('corpus_hash')
+        source_count = row.get('source_count')
+        chunk_count = row.get('chunk_count')
+        canonical_source_count = row.get('canonical_source_count')
+        canonical_chunk_count = row.get('canonical_chunk_count')
+        if (not isinstance(corpus_hash, str) or len(corpus_hash) != 32
+                or type(source_count) is not int or source_count <= 0
+                or type(chunk_count) is not int or chunk_count <= 0 or chunk_count > 50000
+                or type(canonical_source_count) is not int or canonical_source_count < source_count
+                or type(canonical_chunk_count) is not int or canonical_chunk_count < chunk_count):
+            raise ValueError('contextual_corpus_manifest_invalid')
+        return {'corpus_hash': corpus_hash, 'source_count': source_count, 'chunk_count': chunk_count,
+                'canonical_source_count': canonical_source_count,
+                'canonical_chunk_count': canonical_chunk_count}
+
+    def contextual_document_refs(self):
+        return self.rows('''WITH latest_revision AS MATERIALIZED (
+              SELECT DISTINCT ON (material_id) material_id,id AS revision_id
+              FROM revisions ORDER BY material_id,created_at DESC,id DESC)
+            SELECT m.id AS material_id,r.id AS revision_id,r.sha256 AS revision_sha256,
+                   r.metadata->>'normalized_content_sha256' AS stored_normalized_content_sha256,m.category
+            FROM materials m JOIN latest_revision lr ON lr.material_id=m.id
+            JOIN revisions r ON r.id=lr.revision_id
+            WHERE EXISTS (SELECT 1 FROM chunks c WHERE c.material_id=m.id AND c.revision_id=r.id)
+              AND COALESCE(m.role,'unclassified') <> 'out_of_scope'
+            ORDER BY m.id''')
+
+    def contextual_document(self, material_id, revision_id):
+        document = self.one('''SELECT m.id AS material_id,r.id AS revision_id,r.sha256 AS revision_sha256,
+                r.metadata,m.category,r.content
+            FROM materials m JOIN revisions r ON r.material_id=m.id
+            WHERE m.id=%s AND r.id=%s''', (material_id, revision_id))
+        if not document:
+            raise ValueError('contextual_source_revision_unavailable')
+        normalized_sha256 = hashlib.sha256(document['content'].encode('utf-8')).hexdigest()
+        stored_sha256 = (document.get('metadata') or {}).get('normalized_content_sha256')
+        if stored_sha256 and stored_sha256 != normalized_sha256:
+            raise ValueError('contextual_normalized_content_hash_mismatch')
+        chunks = self.rows('''SELECT id,start_offset,end_offset,text FROM chunks
+            WHERE material_id=%s AND revision_id=%s ORDER BY start_offset,id''', (material_id, revision_id))
+        if not chunks:
+            raise ValueError('contextual_source_chunks_unavailable')
+        return {**document, 'normalized_content_sha256': normalized_sha256, 'chunks': chunks}
+
+    def contextual_normalized_content_manifest(self):
+        """Stream current normalized bodies and validate any stored normalized hash metadata."""
+        from .contextual_index import normalized_content_manifest_hash
+
+        sql = '''WITH latest_revision AS MATERIALIZED (
+              SELECT DISTINCT ON (material_id) material_id,id AS revision_id
+              FROM revisions ORDER BY material_id,created_at DESC,id DESC)
+            SELECT m.id AS material_id,r.id AS revision_id,r.sha256 AS revision_sha256,
+                   r.metadata->>'normalized_content_sha256' AS normalized_content_sha256,r.content
+            FROM materials m JOIN latest_revision lr ON lr.material_id=m.id
+            JOIN revisions r ON r.id=lr.revision_id
+            WHERE EXISTS (SELECT 1 FROM chunks c WHERE c.material_id=m.id AND c.revision_id=r.id)
+              AND COALESCE(m.role,'unclassified') <> 'out_of_scope'
+            ORDER BY m.id'''
+        sources = []
+        with self.connection() as connection:
+            with connection.cursor(name='dse_contextual_normalized_manifest') as cursor:
+                cursor.execute(sql)
+                while rows := cursor.fetchmany(16):
+                    for row in rows:
+                        normalized_sha256 = hashlib.sha256(row['content'].encode('utf-8')).hexdigest()
+                        if (row.get('normalized_content_sha256')
+                                and row['normalized_content_sha256'] != normalized_sha256):
+                            raise ValueError('contextual_normalized_content_hash_mismatch')
+                        sources.append({
+                            'material_id': row['material_id'], 'revision_id': row['revision_id'],
+                            'revision_sha256': row['revision_sha256'],
+                            'normalized_content_sha256': normalized_sha256,
+                        })
+        return normalized_content_manifest_hash(sources)
+
+    def contextual_hydrate_candidates(self, candidates, connection=None):
+        """Rebind projected IDs to current PostgreSQL revisions before ranking payloads."""
+        if not isinstance(candidates, (list, tuple)):
+            raise ValueError('contextual_candidate_set_invalid')
+        expected = {}
+        for item in candidates:
+            if not isinstance(item, dict):
+                raise ValueError('contextual_candidate_set_invalid')
+            chunk_id, material_id, revision_id = (item.get('chunk_id'), item.get('material_id'), item.get('revision_id'))
+            if not all(isinstance(value, str) and value for value in (chunk_id, material_id, revision_id)):
+                raise ValueError('contextual_candidate_set_invalid')
+            binding = (material_id, revision_id)
+            if chunk_id in expected and expected[chunk_id] != binding:
+                raise ValueError('contextual_candidate_binding_conflict')
+            expected[chunk_id] = binding
+        if not expected:
+            return []
+        ids = list(expected)
+        sql = '''/* contextual_candidate_hydration */
+          WITH latest_revision AS MATERIALIZED (
+            SELECT DISTINCT ON (material_id) material_id,id AS revision_id
+            FROM revisions ORDER BY material_id,created_at DESC,id DESC
+          )
+          SELECT c.id AS chunk_id,c.material_id,c.revision_id,c.start_offset,c.end_offset,c.text,
+                 m.title,m.url,m.source,m.category,m.scope,m.role,m.role_metadata
+          FROM chunks c JOIN materials m ON m.id=c.material_id
+          JOIN latest_revision lr ON lr.material_id=c.material_id AND lr.revision_id=c.revision_id
+          WHERE c.id=ANY(%s::text[])
+            AND COALESCE(m.role,'unclassified') <> 'out_of_scope'
+          ORDER BY array_position(%s::text[],c.id)'''
+        if connection is not None:
+            rows = connection.execute(sql, (ids, ids)).fetchall()
+        else:
+            rows = self.rows(sql, (ids, ids))
+        indexed = {str(row['chunk_id']): row for row in rows}
+        if set(indexed) != set(expected):
+            raise ValueError('contextual_candidate_stale')
+        for chunk_id, (material_id, revision_id) in expected.items():
+            row = indexed[chunk_id]
+            if row.get('material_id') != material_id or row.get('revision_id') != revision_id:
+                raise ValueError('contextual_candidate_stale')
+        return [indexed[chunk_id] for chunk_id in ids]
+
     def ingest_event(self,mid,status,detail):
         self.execute('INSERT INTO ingest_events(id,material_id,status,detail) VALUES(%s,%s,%s,%s)',(uuid.uuid4().hex,str(mid),status,Jsonb(detail)))

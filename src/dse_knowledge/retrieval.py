@@ -6,10 +6,12 @@ import threading
 import time
 import uuid
 import math
+import hashlib
 from collections import OrderedDict
 from copy import deepcopy
 
 from .db import vector_literal
+from .contextual import CONTEXT_PROMPT_FINGERPRINT
 from .providers import EMBEDDING_DIMENSIONS, EMBEDDING_MODEL
 
 
@@ -44,7 +46,13 @@ _BROAD_TOPIC_KEYS = frozenset({
     "ai", "artificial-intelligence", "gpu", "gpus", "llm", "llms", "machine-learning",
     "performance", "software", "hardware", "accelerator", "accelerators",
 })
-_CHANNEL_WEIGHTS = {"dense": 1.0, "lexical": 0.45, "exact": 0.25, "graph": 0.18}
+_CHANNEL_WEIGHTS = {
+    "dense": 1.0, "lexical": 0.45, "context_dense": 1.0,
+    "context_bm25": 0.45, "exact": 0.25, "graph": 0.18,
+}
+RETRIEVAL_MODES = frozenset({"baseline", "contextual", "rerank", "contextual_rerank"})
+CONTEXT_MODEL_DEFAULT = "deepseek-ai/DeepSeek-V4.1-Flash-1017"
+CONTEXT_PROMPT_VERSION = CONTEXT_PROMPT_FINGERPRINT
 _DENSE_PAYLOAD_FIELDS = (
     "c.id AS chunk_id,c.material_id,c.revision_id,c.start_offset,c.end_offset,c.text,"
     "m.title,m.url,m.source,m.category,m.scope,m.role,m.role_metadata"
@@ -59,6 +67,18 @@ class RetrievalCapacityError(RuntimeError):
         self.scope_count = scope_count
         self.scope_cap = scope_cap
         super().__init__(code)
+
+
+class RetrievalModeError(ValueError):
+    def __init__(self, code: str):
+        super().__init__(code)
+        self.code = code
+
+
+class RetrievalUnavailableError(RuntimeError):
+    def __init__(self, code: str):
+        super().__init__(code)
+        self.code = code
 
 
 def reciprocal_rank_fusion(channels, limit=12):
@@ -682,11 +702,168 @@ def _attach_projection(store, items: list[dict]) -> None:
 
 
 class Retriever:
-    def __init__(self, store, embedding):
+    def __init__(self, store, embedding, *, contextual_index=None, reranker=None,
+                 default_mode="baseline", allow_mode_override=False,
+                 context_model=CONTEXT_MODEL_DEFAULT, prompt_version=CONTEXT_PROMPT_VERSION,
+                 rerank_candidate_limit=40):
+        if default_mode not in RETRIEVAL_MODES:
+            raise ValueError("retrieval_mode_configuration_invalid")
+        if type(allow_mode_override) is not bool:
+            raise ValueError("retrieval_mode_override_configuration_invalid")
+        if type(rerank_candidate_limit) is not int or not 1 <= rerank_candidate_limit <= 40:
+            raise ValueError("rerank_candidate_limit_configuration_invalid")
         self.store = store
         self.embedding = embedding
+        self.contextual_index = contextual_index
+        self.reranker = reranker
+        self.default_mode = default_mode
+        self.allow_mode_override = allow_mode_override
+        self.context_model = context_model
+        self.prompt_version = prompt_version
+        provider, model, dimensions, _ = _embedding_identity(embedding, "document")
+        self.embedding_fingerprint = f"{provider}:{model}:{dimensions}"
+        self.rerank_candidate_limit = rerank_candidate_limit
 
-    def search(self, query, category="", limit=12, purpose="auto"):
+    def _resolve_mode(self, requested):
+        if requested is None:
+            mode = self.default_mode
+        elif not isinstance(requested, str) or requested not in RETRIEVAL_MODES:
+            raise RetrievalModeError("retrieval_mode_invalid")
+        elif requested != self.default_mode and not self.allow_mode_override:
+            raise RetrievalModeError("retrieval_mode_override_disabled")
+        else:
+            mode = requested
+        if mode in ("contextual", "contextual_rerank") and self.contextual_index is None:
+            raise RetrievalUnavailableError("contextual_retrieval_unavailable")
+        if mode in ("rerank", "contextual_rerank") and self.reranker is None:
+            raise RetrievalUnavailableError("reranker_unavailable")
+        return mode
+
+    def _contextual_channels(self, connection, query, category, vector):
+        from .contextual_index import ContextualIndexError
+        try:
+            manifest = self.store.contextual_corpus_manifest(connection=connection)
+            result = self.contextual_index.search(
+                query, vector, category, DENSE_CANDIDATE_LIMIT,
+                expected_corpus_hash=manifest["corpus_hash"],
+                embedding_fingerprint=self.embedding_fingerprint,
+                context_model=self.context_model,
+                prompt_version=self.prompt_version,
+            )
+            dense = result.get("dense")
+            bm25 = result.get("bm25")
+            contexts = result.get("contexts")
+            if (not isinstance(dense, list) or not isinstance(bm25, list) or not isinstance(contexts, dict)
+                    or any(not isinstance(key, str) or not isinstance(value, str) for key, value in contexts.items())):
+                raise RetrievalUnavailableError("contextual_index_response_invalid")
+            union = {}
+            for candidate in dense + bm25:
+                if not isinstance(candidate, dict):
+                    raise RetrievalUnavailableError("contextual_index_response_invalid")
+                chunk_id = candidate.get("chunk_id")
+                if not isinstance(chunk_id, str) or not chunk_id:
+                    raise RetrievalUnavailableError("contextual_index_response_invalid")
+                binding = (candidate.get("material_id"), candidate.get("revision_id"))
+                if not all(isinstance(value, str) and value for value in binding):
+                    raise RetrievalUnavailableError("contextual_index_binding_invalid")
+                chunk_hash = candidate.get("chunk_md5")
+                if not isinstance(chunk_hash, str) or not re.fullmatch(r"[0-9a-f]{32}", chunk_hash):
+                    raise RetrievalUnavailableError("contextual_index_binding_invalid")
+                binding = (*binding, chunk_hash)
+                if chunk_id in union and union[chunk_id] != binding:
+                    raise RetrievalUnavailableError("contextual_index_binding_invalid")
+                union[chunk_id] = binding
+            hydrated_rows = self.store.contextual_hydrate_candidates(
+                [{"chunk_id": chunk_id, "material_id": binding[0], "revision_id": binding[1]}
+                 for chunk_id, binding in union.items()],
+                connection=connection,
+            )
+            hydrated = {str(row["chunk_id"]): row for row in hydrated_rows}
+            if set(hydrated) != set(union):
+                raise RetrievalUnavailableError("contextual_candidate_stale")
+            for chunk_id, binding in union.items():
+                row = hydrated[chunk_id]
+                text = row.get("text")
+                if ((row.get("material_id"), row.get("revision_id")) != binding[:2]
+                        or not isinstance(text, str)
+                        or hashlib.md5(text.encode("utf-8")).hexdigest() != binding[2]):
+                    raise RetrievalUnavailableError("contextual_candidate_stale")
+            if set(contexts) != set(union):
+                raise RetrievalUnavailableError("contextual_index_context_missing")
+
+            def hydrate(channel):
+                rows = []
+                for candidate in channel:
+                    row = deepcopy(hydrated[candidate["chunk_id"]])
+                    row["contextual_channel_score"] = candidate.get("score")
+                    rows.append(row)
+                return rows
+
+            return hydrate(dense), hydrate(bm25), contexts, manifest
+        except RetrievalUnavailableError:
+            raise
+        except ContextualIndexError as exc:
+            raise RetrievalUnavailableError(exc.code) from None
+        except ValueError as exc:
+            raise RetrievalUnavailableError(str(exc) or "contextual_index_unavailable") from None
+        except Exception:
+            raise RetrievalUnavailableError("contextual_index_unavailable") from None
+
+    def _rerank_candidates(self, candidates, query, contexts, *, contextual):
+        eligible_roles = {"core_technical", "supporting_method", "integration_operations"}
+        pool = [item for item in candidates if item.get("role") in eligible_roles][:self.rerank_candidate_limit]
+        if not pool:
+            return candidates, {
+                "provider": None, "model": None, "candidate_count": 0,
+                "score_semantics": "relevance_not_answerability",
+            }
+        documents = []
+        for item in pool:
+            source_text = item.get("text")
+            if not isinstance(source_text, str) or not source_text:
+                raise RetrievalUnavailableError("reranker_candidate_text_invalid")
+            context = contexts.get(str(item["chunk_id"])) if contextual else None
+            if context:
+                documents.append("Retrieval hint (not evidence):\n" + context + "\n\nOriginal source chunk:\n" + source_text)
+            else:
+                documents.append(source_text)
+        try:
+            scores = self.reranker.rerank(query, documents)
+        except Exception as exc:
+            code = getattr(exc, "reason", "reranker_request_failed")
+            raise RetrievalUnavailableError(str(code)) from None
+        if not isinstance(scores, list) or len(scores) != len(pool):
+            raise RetrievalUnavailableError("reranker_score_count_mismatch")
+        normalized_scores = []
+        for score in scores:
+            if isinstance(score, bool) or not isinstance(score, (int, float)) or not math.isfinite(float(score)):
+                raise RetrievalUnavailableError("reranker_score_invalid")
+            normalized_scores.append(float(score))
+        for rank, (item, score) in enumerate(zip(pool, normalized_scores, strict=True), 1):
+            item["trace"]["original_rrf_score"] = item["rank"]
+            item["trace"]["reranker_relevance_score"] = score
+            item["trace"]["reranker_candidate_rank"] = rank
+        pool_ids = {item["chunk_id"] for item in pool}
+        ranked_pool = [item for _, item in sorted(
+            zip(normalized_scores, pool, strict=True),
+            key=lambda pair: (-pair[0], -pair[1]["rank"], pair[1]["chunk_id"]),
+        )]
+        remaining = [item for item in candidates if item["chunk_id"] not in pool_ids]
+        metadata = getattr(self.reranker, "last_metadata", {})
+        if not isinstance(metadata, dict):
+            metadata = {}
+        safe_keys = (
+            "provider", "model", "http_status", "latency_seconds", "input_tokens",
+            "inference_status", "estimated_cost", "cost_is_estimate", "score_semantics",
+        )
+        trace = {key: deepcopy(metadata[key]) for key in safe_keys if key in metadata}
+        trace.update(candidate_count=len(pool), score_semantics="relevance_not_answerability")
+        return ranked_pool + remaining, trace
+
+    def search(self, query, category="", limit=12, purpose="auto", retrieval_mode=None):
+        mode = self._resolve_mode(retrieval_mode)
+        use_contextual = mode in ("contextual", "contextual_rerank")
+        use_reranker = mode in ("rerank", "contextual_rerank")
         limit = max(1, min(int(limit), 30))
         if not isinstance(query, str):
             raise ValueError("Query required")
@@ -722,6 +899,8 @@ class Retriever:
         common = " FROM chunks c JOIN materials m ON m.id=c.material_id "
         category_args = (category, category)
         visible_role = "COALESCE(m.role,'unclassified') <> 'out_of_scope'"
+        contextual_bm25 = []
+        contextual_contexts = {}
         with self.store.connection() as connection:
             connection.execute("SET TRANSACTION ISOLATION LEVEL REPEATABLE READ, READ ONLY")
             scope_sql, scope_args = build_dense_scope_count_query(category)
@@ -742,17 +921,30 @@ class Retriever:
             embedding_vector, cache_hit, embedding_metadata = _query_embedding(
                 self.embedding, query, self.store,
             )
-            dense_sql, dense_args = build_exact_dense_candidates_query(category, embedding_vector)
-            dense = connection.execute(dense_sql, dense_args).fetchall()
-        dense_candidate_trace = {
-            "method": "exact_dense_scan",
-            "scope_count": scope_count,
-            "scope_cap": DENSE_EXACT_SCAN_CAP,
-            "candidate_limit": DENSE_CANDIDATE_LIMIT,
-            "policy_version": POLICY_VERSION,
-        }
+            if use_contextual:
+                dense, contextual_bm25, contextual_contexts, contextual_manifest = self._contextual_channels(
+                    connection, query, category, embedding_vector,
+                )
+                dense_candidate_trace = {
+                    "method": "contextual_index_numpy_exact_cosine",
+                    "scope_count": scope_count,
+                    "scope_cap": DENSE_EXACT_SCAN_CAP,
+                    "candidate_limit": DENSE_CANDIDATE_LIMIT,
+                    "policy_version": POLICY_VERSION,
+                    "corpus_hash": contextual_manifest["corpus_hash"],
+                }
+            else:
+                dense_sql, dense_args = build_exact_dense_candidates_query(category, embedding_vector)
+                dense = connection.execute(dense_sql, dense_args).fetchall()
+                dense_candidate_trace = {
+                    "method": "exact_dense_scan",
+                    "scope_count": scope_count,
+                    "scope_cap": DENSE_EXACT_SCAN_CAP,
+                    "candidate_limit": DENSE_CANDIDATE_LIMIT,
+                    "policy_version": POLICY_VERSION,
+                }
         lexical = []
-        if lexical_query:
+        if lexical_query and not use_contextual:
             lexical = self.store.rows(
                 "SELECT " + fields + common
                 + "WHERE (%s='' OR m.category=%s) AND " + visible_role
@@ -826,10 +1018,21 @@ class Retriever:
         else:
             graph_truncated = False
 
-        channels = {"dense": dense, "lexical": lexical, "exact": exact, "graph": graph}
+        if use_contextual:
+            channels = {
+                "context_dense": dense, "context_bm25": contextual_bm25,
+                "exact": exact, "graph": graph,
+            }
+        else:
+            channels = {"dense": dense, "lexical": lexical, "exact": exact, "graph": graph}
         candidates = _merge_ranked_channels(
             channels, topics, resolved_purpose, purpose_trace["uncertain"], features
         )
+        reranker_trace = None
+        if use_reranker:
+            candidates, reranker_trace = self._rerank_candidates(
+                candidates, query, contextual_contexts, contextual=use_contextual,
+            )
         items, locators, source_candidates = [], [], []
         for item in candidates:
             if item.get("role") == "out_of_scope":
@@ -854,16 +1057,25 @@ class Retriever:
                 source_candidates.append(item)
 
         items, item_anchor = _semantic_anchor_order(items, dense, "items")
+        if use_reranker:
+            items.sort(key=lambda item: (
+                item["trace"].get("reranker_relevance_score") is None,
+                -item["trace"].get("reranker_relevance_score", 0.0),
+                -item["rank"], item["chunk_id"],
+            ))
         items = _diverse_with_backfill(items, limit)
         locators = _diverse_with_backfill(locators, limit)
         source_candidates, source_anchor = _semantic_anchor_order(
             source_candidates, dense, "source_results", include_navigation=True,
         )
+        if use_reranker:
+            source_candidates = items + locators
         source_results = _diverse_with_backfill(source_candidates, limit)
         all_selected = items + locators + source_results
         _attach_projection(self.store, all_selected)
         for item in all_selected:
             item["trace"].update({
+                "retrieval_mode": mode,
                 "query_embedding_cache_hit": cache_hit,
                 "query_embedding_task": embedding_metadata.get("task", "search_query"),
                 "purpose_rule": purpose_trace["rule"],
@@ -878,8 +1090,17 @@ class Retriever:
                 "graph_discarded_link_count": item.get("graph_discarded_link_count", 0),
             })
 
+        limitations = [
+            "Retrieval ranks source evidence; it does not establish physical buildability or measured performance.",
+            "Unclassified sources are marked needs_review and design use of operations sources is limited to workflow/interface references.",
+        ]
+        if use_contextual:
+            limitations.append("Generated contextual text is a retrieval hint; returned text and citations remain source-bound.")
+        if use_reranker:
+            limitations.append("Reranker relevance is not calibrated answerability, factual verification, or evidence authority.")
         return {
             "query": query,
+            "retrieval_mode": mode,
             "purpose": resolved_purpose,
             "purpose_trace": purpose_trace,
             "items": items,
@@ -897,11 +1118,9 @@ class Retriever:
                 "truncated": graph_truncated,
             },
             "policy_version": POLICY_VERSION,
+            "reranker_trace": reranker_trace,
             "trace_id": uuid.uuid4().hex,
             "query_embedding_cache_hit": cache_hit,
             "query_embedding_usage": embedding_metadata.get("usage", {}),
-            "limitations": [
-                "Retrieval ranks source evidence; it does not establish physical buildability or measured performance.",
-                "Unclassified sources are marked needs_review and design use of operations sources is limited to workflow/interface references.",
-            ],
+            "limitations": limitations,
         }
