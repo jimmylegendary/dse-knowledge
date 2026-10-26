@@ -1,26 +1,32 @@
 # DSE Knowledge Workbench — 지식·설계 판단·경험 환류
 
-상태: **실제 1,000개 Workbench · 500건 retrieval challenge 평가 완료 · contextual retrieval/rerank 적용 검증 진행 중** · runtime v0.2.5 · 기준일: 2026-10-26 KST. 145,748건은 수집 대상 목록이며 전체 본문 분석·KG 등록은 실행하지 않았다. 아래의 기존 Q2 소규모 결과와 이번 500건 결과를 구분한다.
+상태: **실제 1,000개 Workbench · LLM 문맥 보강 + Qwen 8B 적용 · 네 구성의 500건 retrieval challenge 평가 완료** · runtime v0.2.5 / retrieval-policy v2.3 · 기준일: 2026-10-26 KST. 145,748건은 수집 대상 목록이며 전체 본문 분석·KG 등록은 실행하지 않았다. 아래의 기존 Q2 소규모 결과와 이번 500건 결과를 구분한다.
 
 이 README는 DSE 결정별 지식 요구를 만들고, 허가된 source에서 evidence를 취득·구조화하며, hardware/kernel/experiment 결정에 쓰고 부족한 지식을 다시 수집하는 전체 구조를 설명한다. 2026-10-18 사용자 정정에 맞춘 상위 기준은 [2026-10-21-dse-knowledge-architecture.md](https://github.com/jimmylegendary/dse-knowledge/blob/docs/p0-episode-contracts/docs/superpowers/specs/2026-10-21-dse-knowledge-architecture.md)와 [2026-10-21-knowledge-architecture-plan.md](https://github.com/jimmylegendary/dse-knowledge/blob/docs/p0-episode-contracts/docs/superpowers/plans/2026-10-21-knowledge-architecture-plan.md)다. 이전 HAT native episode/adapter 계약은 세부 참고이며 이 architecture의 중심 gate가 아니다.
 
-## 고정 500건 검색 평가 — Qwen reranker 비교
+## 고정 500건 검색 평가 — 문맥 보강·Qwen reranker 비교
 
-동일한 질문과 정답으로 Qwen3-Reranker-4B/8B를 calibration 100건에서 비교했다. 모든 근거 그룹 Hit@5 → Chunk MRR@5 → 낮은 grey-zone FPR 순으로 **8B를 선택**했고, 선택한 8B만 test 500건을 실행했다. 두 크기의 calibration은 각각 100/100, 선택한 8B test는 500/500 성공·오류 0이다.
+동일한 질문과 정답으로 baseline/contextual-only/Qwen 8B/combined를 각각 test 500건과 별도 calibration 100건에서 평가했다. Qwen 4B/8B 선택에도 calibration만 사용했다. 모든 근거 그룹 Hit@5 → Chunk MRR@5 → 낮은 grey-zone FPR 순으로 **8B를 선택**했고, 네 구성의 calibration으로 기본 구성을 **문맥 보강 + Qwen 8B**로 정한 뒤 test를 열었다. Test 결과로 질문·정답·prompt·ranking·threshold를 바꾸지 않았다.
 
-| 항목 | Baseline | Qwen 8B rerank |
-|---|---:|---:|
-| Source Hit@5 | 95.0% | **97.7%** |
-| Chunk Hit@5 | 66.7% | **93.7%** |
-| Chunk MRR@5 | 0.533 | **0.859** |
-| 모든 chunk 근거 그룹 Hit@5 | 63.3% | **89.3%** |
-| AUROC | 0.693 | **0.922** |
-| 정상 TPR | 83.7% | **94.3%** |
-| OOD FPR | 16.0% | **0.0%** |
-| Grey-zone FPR | 71.0% | **40.0%** |
-| 진단 gate | FAIL | **FAIL: grey-zone 목표 20% 초과** |
+| 항목 | Baseline | LLM 문맥 보강 | Qwen 8B | 문맥 + Qwen 8B |
+|---|---:|---:|---:|---:|
+| Source Hit@5 | 95.0% | 98.0% | 97.7% | **99.3%** |
+| Chunk Hit@5 | 66.7% | 76.3% | 93.7% | **95.7%** |
+| Chunk MRR@5 | 0.533 | 0.624 | 0.859 | **0.880** |
+| 모든 chunk 근거 그룹 Hit@5 | 63.3% | 73.0% | 89.3% | **90.3%** |
+| AUROC | 0.693 | 0.681 | 0.922 | **0.931** |
+| Average Precision | 0.765 | 0.743 | **0.947** | 0.945 |
+| 정상 TPR | 83.7% | 88.0% | 94.3% | **95.7%** |
+| OOD FPR | 16.0% | 12.0% | **0.0%** | **0.0%** |
+| Grey-zone FPR | 71.0% | 83.0% | 40.0% | **39.0%** |
+| In-domain missing FPR | 63.3% | 73.3% | 26.7% | **20.0%** |
+| 진단 gate | FAIL | FAIL | FAIL | **FAIL: grey-zone 목표 20% 초과** |
 
-LLM Contextual Retrieval의 전체 eligible 인덱스 **999개 자료·18,512개 chunk**를 구축했다. 정본 1,000개·18,518개 중 `out_of_scope` 1개·6 chunks는 검색 인덱스에서 제외한다. Whole document와 각 chunk로 만든 짧은 문맥을 원문에 붙여 embedding 및 실제 FTS5 BM25를 구성한다. 문맥은 검색 힌트이며, PostgreSQL 원문·Claim·인용을 대체하지 않는다. 네 구성의 calibration은 각각 100/100 성공했고, 정해둔 품질 기준으로 기본 구성을 **문맥 보강 + Qwen 8B**로 선택했다. Contextual-only와 combined의 500건 test는 진행 중이다. 검색 점수가 높아져도 질문의 모든 조건을 충족했다는 뜻은 아니다.
+각 test는 **500/500 성공·오류 0**, calibration도 구성마다 100/100 성공했다. 별도 4B calibration 100건까지 유효 case 실행은 2,500건이다. 이는 같은 500개 test 질문을 네 번 평가한 결과이며 2,000개의 독립 질문 표본은 아니다. Hit·MRR은 지원 가능한 300건의 items stream, binary 분별력은 모호 20건을 제외한 480건, OOD 50건·grey-zone 100건·in-domain missing 30건을 기준으로 한다. Source relevance와 질문 전체의 답변 가능성을 구분해야 한다. 문맥만 추가하면 검색은 개선돼도 grey-zone 분별력은 나빠질 수 있다.
+
+LLM Contextual Retrieval의 전체 eligible 인덱스 **999개 자료·18,512개 chunk**를 구축했다. 정본 1,000개·18,518개 중 `out_of_scope` 1개·6 chunks는 검색 인덱스에서 제외한다. Whole document와 각 chunk로 만든 짧은 문맥을 원문에 붙여 embedding 및 실제 FTS5 BM25를 구성한다. 문맥은 검색 힌트이며, PostgreSQL 원문·Claim·인용을 대체하지 않는다. 기본 구성은 실제 검색 UI뿐 아니라 hardware/kernel/experiment 판단의 공통 retriever에도 적용했다.
+
+실제 HTTP·Supabase·Codex CLI·HAT schema·Melete 연동은 rerank-only와 combined에서 각각 **18/18 통과**했다. 첫 rerank-only 검증의 Codex 360초 timeout은 보존하고, 완료한 판단 두 건을 재사용하며 실패한 호출만 600초로 재시도했다. 서비스 재시작 후 corpus·index pointer·판단 snapshot 3건의 hash가 같고 Codex 재호출은 0건이었다. 자동 테스트 **581 passed**, 기존 warning 1개이며 report 전용 5개와 실제 contextual 500건의 재계산·잘못된 index receipt 거부도 별도 확인했다. [실제 연동 기록](https://github.com/jimmylegendary/dse-knowledge/blob/main/research/eval500/results/integration-2026-10-26.json), [재시작 검증](https://github.com/jimmylegendary/dse-knowledge/blob/main/research/eval500/results/service-restart-2026-10-26.json). HAT는 구조검증이며 native committee/B300 simulation·실측·compiled kernel correctness는 이 실행 범위 밖이다.
 
 인덱스 구축과 서비스는 같은 SQLite 엔진을 사용한다. 실제 개발/서비스 Python의 SQLite 3.50.4/3.54.0 차이로 FTS 무결성 오류가 발생한 것을 최소 재현하고, 서비스 엔진에서 FTS만 재구성했다. 원문 binding·생성 문맥·vector·FTS content digest를 보존했으며 복구 시 LLM/embedding 재호출은 0이다. 이후 engine version을 generation ID·manifest에 포함하고, 다른 engine의 인덱스를 reader가 거부한다. [구축 기록](https://github.com/jimmylegendary/dse-knowledge/blob/main/research/eval500/results/context-index-build.json), [호환성·복구 기록](https://github.com/jimmylegendary/dse-knowledge/blob/main/research/eval500/results/fts-compatibility-recovery.json)을 공개했다. Generation에 기록된 추정 비용 약 $5.23은 실패·진단·다른 profile·평가·Codex·infra·전체 청구서를 제외한 범위다.
 

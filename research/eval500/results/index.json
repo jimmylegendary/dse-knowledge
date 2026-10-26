@@ -2,7 +2,7 @@
   "schema_version": "retrieval-evaluation-report/v1",
   "test_sha256": "d4bc5ea35e7128d1a72ccafbf72ea1b5e36fb428cbf3a7c395db9059de5655a9",
   "case_count": 500,
-  "selected_run": "rerank-8b",
+  "selected_run": "contextual-rerank-8b",
   "runs": [
     {
       "id": "baseline",
@@ -17,15 +17,31 @@
       "model": "Qwen/Qwen3-Reranker-8B",
       "journal_payload_sha256": "73c5ee3cc36688a1f135d5ccd3b595292f35925d8729b5d5afdcc13db5b0f361",
       "journal_gzip_sha256": "12df7472bfe8601332ed50bb3df5da2e556725b163e3cc81291f6a3709fcd5c9"
+    },
+    {
+      "id": "contextual",
+      "label": "Contextual · LLM + BM25",
+      "model": "none",
+      "journal_payload_sha256": "1a119ac721798c910e2d5f3014b55b8ccdb39e86321ad60552190968c53468b0",
+      "journal_gzip_sha256": "de3cdbb82faab07ca3d2455400ea37116b7f0aa519f47bc30cb8ea533a19b4b2"
+    },
+    {
+      "id": "contextual-rerank-8b",
+      "label": "Contextual + Qwen 8B",
+      "model": "Qwen/Qwen3-Reranker-8B",
+      "journal_payload_sha256": "c84d1daa46f0e16a2cac22b27066db034ef5b051567d97128b8a2ed6eccf86ce",
+      "journal_gzip_sha256": "1bbfb384dd65e5fd065d6edbab5b73f21bbf70e718f30e365af421c62211a1e2"
     }
   ],
-  "report_sha256": "2fd3a6c83f044a35673cfec661e8af81cbba7507d394662468cdc97be612e92b",
+  "report_sha256": "c0aa2efd37e8576a8c2bd2e3b1817a1c96d70d283e8ad28ec2db90b5e6a0c462",
   "notes": [
-    "이 판본은 동일한 frozen test 500건의 baseline과 선택된 Qwen 8B reranker 결과를 보고한다. Contextual-only와 combined는 전체 문맥 인덱스 구축 후 같은 입력으로 평가한다.",
-    "모델 선택은 별도 calibration 100건에서만 수행했다. Test 결과를 보고 질문·정답·모델·threshold를 바꾸지 않았다.",
-    "처음 baseline calibration의 optional graph_rank=null 변환 오류, 처음 rerank calibration의 미평가 보충 항목 변환 오류는 무효 attempt로 따로 보존했고 품질 점수 비교에 넣지 않았다.",
-    "API 지연은 cache·외부 provider·동시 요청 경합을 포함한 관측값이며 latency SLA나 독립된 처리 용량 측정이 아니다.",
-    "공개 run_id·trace_id·hash·loopback URL은 재현을 위한 비밀이 아닌 provenance다. 원문 본문·생성 문맥·벡터·credential은 공개하지 않는다."
+    "동일한 frozen test 500건과 별도 calibration 100건으로 baseline, LLM contextual-only, Qwen 8B rerank-only, combined를 평가했다. 각 test는 같은 500개 질문이며 2,000개의 독립 질문을 새로 만든 것이 아니다.",
+    "Qwen 4B/8B 선택과 기본 검색 구성은 calibration만 사용했다. 기본 구성은 모든 chunk 근거 그룹@5 → chunk MRR@5 → 낮은 grey-zone FPR → 고정된 단순 구성 우선순위 순으로 정했다. Test 결과로 질문·정답·prompt·알고리즘·threshold를 바꾸지 않았다.",
+    "문맥 생성에 평가 질문·label을 제공하지 않았다. 원문과 generated context는 분리하고, 원문·Claim·vector를 재생성하거나 정본 근거로 문맥을 승격하지 않았다.",
+    "첫 baseline/rerank calibration의 schema 호환 오류는 무효 attempt로 보존했다. Context 구축 중 ID 오타 응답은 strict하게 거부한 뒤 짧은 request-local ID를 사용했다. SQLite engine 변경에 따른 FTS 호환성은 자체 최소재현·derived index rebuild·원자료/문맥/vector hash 보존 검증으로 해결했다.",
+    "새 두 구성의 calibration은 검색 요청 최대 4개(2개 run×각 2개 worker)를 병렬 처리했고, 두 test는 run별 2개 worker로 순서대로 실행했다. API 지연은 cache·외부 provider·동시 작업 경합을 포함한 관측값이며 latency SLA가 아니다.",
+    "Public run_id·trace_id·hash·loopback URL은 비밀이 아닌 provenance다. 원문 본문·생성 문맥·벡터·credential은 공개하지 않는다. Context 생성의 기록된 비용은 해당 generation의 관측 범위이며 전체 청구서가 아니다.",
+    "실제 HTTP·PG·Codex CLI·HAT schema·Melete 연동은 rerank-only와 combined에서 각각 18/18 통과했다. 첫 Codex 360초 timeout은 보존하고 완료한 두 판단을 재사용하며 실패 호출만 600초로 재시도했다. Runtime 자동 테스트 581개, report 전용 5개가 통과했고 재시작 후 판단 snapshot 3건·corpus·index hash가 같으며 Codex 재호출은 0건이다. HAT native committee/B300 simulation·실측·compiled kernel correctness는 수행하지 않았다."
   ],
   "model_selection": {
     "schema_version": "calibration-model-selection/v1",
@@ -75,5 +91,109 @@
       }
     ]
   },
-  "operating_mode_selection": {}
+  "operating_mode_selection": {
+    "schema_version": "calibration-operating-mode-selection/v1",
+    "uses_test_results": false,
+    "selected_at": "2026-10-26T12:52:02.930280+00:00",
+    "policy_sha256": "1e3b068a2f829e7417b059542be857ec57fbe35f180d294fd017268816b9510a",
+    "policy": {
+      "schema_version": "calibration-operating-mode-policy/v1",
+      "scope": "Choose the UI and DecisionEngine default after contextual calibration, before opening contextual test outcomes.",
+      "uses_test_results": false,
+      "selection": [
+        "max items.chunk_all_groups_hit_at_5",
+        "max items.chunk_mrr_at_5",
+        "min near_boundary_fpr",
+        "fixed simpler-mode tie break"
+      ],
+      "tie_preference": [
+        "baseline",
+        "rerank",
+        "contextual",
+        "contextual_rerank"
+      ],
+      "reranker": "Qwen/Qwen3-Reranker-8B",
+      "reranker_selection_reference": "model-selection.json",
+      "evaluation_workers_per_run": 2,
+      "test_use": "Report all four frozen test results without changing questions, qrels, prompt, algorithm or threshold.",
+      "score_semantics": "Ranking and relevance proxies are not calibrated answerability probabilities. All quality gates are reported even if the selected mode fails a boundary gate."
+    },
+    "candidates": [
+      {
+        "id": "baseline",
+        "mode": "baseline",
+        "quality_tuple": [
+          0.8166666666666667,
+          0.6963888888888888,
+          -0.7,
+          0
+        ],
+        "all_chunk_groups_hit_at_5": 0.8166666666666667,
+        "chunk_mrr_at_5": 0.6963888888888888,
+        "near_boundary_fpr": 0.7,
+        "calibration_cases": 100,
+        "summary_sha256": "75c15ac3cddd26d874274a6371cd027042ebf9849b780300e15c66b467b1214a"
+      },
+      {
+        "id": "rerank-8b",
+        "mode": "rerank",
+        "quality_tuple": [
+          0.95,
+          0.9116666666666667,
+          -0.25,
+          -1
+        ],
+        "all_chunk_groups_hit_at_5": 0.95,
+        "chunk_mrr_at_5": 0.9116666666666667,
+        "near_boundary_fpr": 0.25,
+        "calibration_cases": 100,
+        "summary_sha256": "3e07f56c933b3f2267f4c778f419c25ceed1f8c51658135fca227459995e2660"
+      },
+      {
+        "id": "contextual",
+        "mode": "contextual",
+        "quality_tuple": [
+          0.7833333333333333,
+          0.763888888888889,
+          -0.65,
+          -2
+        ],
+        "all_chunk_groups_hit_at_5": 0.7833333333333333,
+        "chunk_mrr_at_5": 0.763888888888889,
+        "near_boundary_fpr": 0.65,
+        "calibration_cases": 100,
+        "summary_sha256": "2c70bdc1b1280c4ea253904754d2e98d90ff0bc8d9894c80f3f15408bb853cc9"
+      },
+      {
+        "id": "contextual-rerank-8b",
+        "mode": "contextual_rerank",
+        "quality_tuple": [
+          0.95,
+          0.9291666666666667,
+          -0.3,
+          -3
+        ],
+        "all_chunk_groups_hit_at_5": 0.95,
+        "chunk_mrr_at_5": 0.9291666666666667,
+        "near_boundary_fpr": 0.3,
+        "calibration_cases": 100,
+        "summary_sha256": "611444ab7420e0a52cf3bd4ac1b1d3fee4f2d8d6ed462eac7763a99597118f6d"
+      }
+    ],
+    "selected": {
+      "id": "contextual-rerank-8b",
+      "mode": "contextual_rerank",
+      "quality_tuple": [
+        0.95,
+        0.9291666666666667,
+        -0.3,
+        -3
+      ],
+      "all_chunk_groups_hit_at_5": 0.95,
+      "chunk_mrr_at_5": 0.9291666666666667,
+      "near_boundary_fpr": 0.3,
+      "calibration_cases": 100,
+      "summary_sha256": "611444ab7420e0a52cf3bd4ac1b1d3fee4f2d8d6ed462eac7763a99597118f6d"
+    }
+  }
 }

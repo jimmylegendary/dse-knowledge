@@ -1,0 +1,76 @@
+{
+  "schema_version": "calibration-metadata-archives/v1",
+  "calibration_case_sha256": "c053fcedb176c569bd898a0dcf9d2c7358e8e557e1ad5259ba0188efcc2a63dd",
+  "unique_calibration_cases": 100,
+  "mode_model_runs": 5,
+  "valid_case_evaluations": 500,
+  "new_model_calls": 0,
+  "archives": [
+    {
+      "id": "baseline",
+      "file": "baseline-calibration.jsonl.gz",
+      "cases": 100,
+      "journal_payload_sha256": "a7a043d9e5ad401f32c3a4641580d52ae817cfe2820019d7b92f58f90ef8cb44",
+      "gzip_sha256": "37a4885662718c07358522f3de9e50865b1bc290c524f7368e9db5acb0ba4155",
+      "evaluator_input_summary_file": "baseline-calibration-input-summary.json",
+      "evaluator_input_summary_sha256": "75c15ac3cddd26d874274a6371cd027042ebf9849b780300e15c66b467b1214a",
+      "public_projected_summary_file": "baseline-calibration-summary.json",
+      "public_projected_summary_sha256": "8b9fc525cdf29cb5cc549ce6dec30879aaff98e64255099e1701d8f675e71112",
+      "score_name": "max_technical_rrf_proxy",
+      "threshold_file_sha256": null
+    },
+    {
+      "id": "rerank-4b",
+      "file": "rerank-4b-calibration.jsonl.gz",
+      "cases": 100,
+      "journal_payload_sha256": "e5ba5a3d71b84ecfd5367aab730cb41c1e5d7ce54973abd673a08f66fd9bbddc",
+      "gzip_sha256": "cb9e985d95c3954b575481ea2421b87ad9492461ab5379fac75c76aa2a96b811",
+      "evaluator_input_summary_file": "rerank-4b-calibration-input-summary.json",
+      "evaluator_input_summary_sha256": "a74dada68461cca300778cf7c968e1ddfe8fa74f35aa96b436d78bb47a1336f5",
+      "public_projected_summary_file": "rerank-4b-calibration-summary.json",
+      "public_projected_summary_sha256": "7746c41f4f9da661ba072dab206c23d3ac85dc5d953cddf9787bf0758341d6cc",
+      "score_name": "max_reranker_relevance_proxy",
+      "threshold_file_sha256": null
+    },
+    {
+      "id": "rerank-8b",
+      "file": "rerank-8b-calibration.jsonl.gz",
+      "cases": 100,
+      "journal_payload_sha256": "fb644f3487aace4be146406e6a59e82f1157a00c6bb2fb6052da0a819141ee6b",
+      "gzip_sha256": "05c1286df072bd89b0cb5131dbf7204c9f40844f1ada91bb24c70d77ddbd6176",
+      "evaluator_input_summary_file": "rerank-8b-calibration-input-summary.json",
+      "evaluator_input_summary_sha256": "3e07f56c933b3f2267f4c778f419c25ceed1f8c51658135fca227459995e2660",
+      "public_projected_summary_file": "rerank-8b-calibration-summary.json",
+      "public_projected_summary_sha256": "23034d5ddf0321769335c0575cbedcbd99c774e03914379114f4113f2a27957a",
+      "score_name": "max_reranker_relevance_proxy",
+      "threshold_file_sha256": null
+    },
+    {
+      "id": "contextual",
+      "file": "contextual-calibration.jsonl.gz",
+      "cases": 100,
+      "journal_payload_sha256": "3faef5a5193e9a9e628f95ff51d63e1c299335f6eefabe31a12386b8d5055bae",
+      "gzip_sha256": "9b73e6070404533b119a9077f45309eb95810e4b2ff8e135f1dc50604bceec05",
+      "evaluator_input_summary_file": "contextual-calibration-input-summary.json",
+      "evaluator_input_summary_sha256": "2c70bdc1b1280c4ea253904754d2e98d90ff0bc8d9894c80f3f15408bb853cc9",
+      "public_projected_summary_file": "contextual-calibration-summary.json",
+      "public_projected_summary_sha256": "a4f1b04dc426085fdc6b163101d39bd7c93266c50c0645ad78750ce0fd8b6dea",
+      "score_name": "max_technical_rrf_proxy",
+      "threshold_file_sha256": null
+    },
+    {
+      "id": "contextual-rerank-8b",
+      "file": "contextual-rerank-8b-calibration.jsonl.gz",
+      "cases": 100,
+      "journal_payload_sha256": "76d24decd9e623c46cad5d25b73642dd50c1773e06e3604dcbf7ae0123f2755a",
+      "gzip_sha256": "60812815aef745c0282e30a814fb7f3d3d6f951b1d4a61072a1edbe036970ad4",
+      "evaluator_input_summary_file": "contextual-rerank-8b-calibration-input-summary.json",
+      "evaluator_input_summary_sha256": "611444ab7420e0a52cf3bd4ac1b1d3fee4f2d8d6ed462eac7763a99597118f6d",
+      "public_projected_summary_file": "contextual-rerank-8b-calibration-summary.json",
+      "public_projected_summary_sha256": "be74b0c2f23f0b430246edbd3d24d92eaebf2ba8e409ad4590f59952cae2c0fa",
+      "score_name": "max_reranker_relevance_proxy",
+      "threshold_file_sha256": null
+    }
+  ],
+  "scope": "All five valid calibration runs including unselected Qwen4B. Invalid early attempts are excluded and retained privately. Metadata only; no source bodies, generated contexts, vectors or credentials."
+}

@@ -1,0 +1,47 @@
+{
+  "schema_version": "selected-retrieval-restart-proof/v1",
+  "status": "PASS",
+  "before": {
+    "corpus": {
+      "corpus_hash": "888ec709b7e89f739746de455d1959f8",
+      "source_count": 999,
+      "chunk_count": 18512,
+      "canonical_source_count": 1000,
+      "canonical_chunk_count": 18518
+    },
+    "decision_hashes": {
+      "a390682a680b4a8da322f1eb1a70ec8e": "4e764c7c3128f41b61fe011ebf326e94ae8d43330e49a382b94bf13376af7a95",
+      "233e550e50c24e53a03b04ab529b1a28": "185b2ceb6830210cd0e18b0df4d2f6e5c763d540cee436e7a88b5bbae5e42eff",
+      "0e8fdf4f852d43c2b35b86d6a4d31514": "0406d56ffd08673aa78044eacbb284a433b44679a2a50295704e2146c08a180e"
+    },
+    "codex_invocations": 1158,
+    "active_pointer_sha256": "5d73a98146de0027dbbc8fdc88e740241e71c2db141c800fde43df7786533af0"
+  },
+  "after": {
+    "corpus": {
+      "corpus_hash": "888ec709b7e89f739746de455d1959f8",
+      "source_count": 999,
+      "chunk_count": 18512,
+      "canonical_source_count": 1000,
+      "canonical_chunk_count": 18518
+    },
+    "decision_hashes": {
+      "a390682a680b4a8da322f1eb1a70ec8e": "4e764c7c3128f41b61fe011ebf326e94ae8d43330e49a382b94bf13376af7a95",
+      "233e550e50c24e53a03b04ab529b1a28": "185b2ceb6830210cd0e18b0df4d2f6e5c763d540cee436e7a88b5bbae5e42eff",
+      "0e8fdf4f852d43c2b35b86d6a4d31514": "0406d56ffd08673aa78044eacbb284a433b44679a2a50295704e2146c08a180e"
+    },
+    "codex_invocations": 1158,
+    "active_pointer_sha256": "5d73a98146de0027dbbc8fdc88e740241e71c2db141c800fde43df7786533af0"
+  },
+  "default_mode": "contextual_rerank",
+  "rerank_model": "Qwen/Qwen3-Reranker-8B",
+  "context_model": "deepseek-ai/DeepSeek-V4.1-Flash",
+  "decision_snapshots_preserved": 3,
+  "new_codex_invocations": 0,
+  "health": {
+    "status": "ok",
+    "database": "connected",
+    "client_pooler_tls": true,
+    "version": "0.2.5"
+  }
+}

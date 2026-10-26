@@ -42,6 +42,8 @@ Corpus가 달라지면 gold의 revision/chunk binding을 다시 검증해야 한
 
 ## Contextual Retrieval과 Qwen 비교 재현
 
+공개 [calibration-archives.json](https://github.com/jimmylegendary/dse-knowledge/blob/main/research/eval500/results/calibration-archives.json)은 유효 calibration 5개 실행의 metadata journal gzip과 원본 evaluator summary, 정리한 공개 summary의 파일명·SHA를 연결한다. 선택 기록의 `summary_sha256`는 `*-calibration-input-summary.json` 원본 bytes의 hash이며, 다시 직렬화한 공개 `*-calibration-summary.json`의 hash와 구분한다. Test와 calibration의 실제 원문·생성 문맥·vector·credential은 포함하지 않는다.
+
 원문 1,000개·18,518 chunks의 정본은 유지하고, 검색 eligible 999개·18,512 chunks의 별도 contextual projection을 사용한다. `out_of_scope` 1개·6 chunks는 제외한다. 외부 LLM에 whole document와 chunk를 제공해 retrieval hint를 생성하고, hint+원문으로 EmbeddingGemma 2 vector와 FTS5 BM25를 만든다. 서비스와 **같은 Python 환경·SQLite engine**으로 `python scripts/build-contextual-index.py`를 실행한다. 새 corpus/index를 만들기 전에 source 권한·model/env와 비용 범위를 확인한다. 이 명령은 외부 API를 실제 호출한다.
 
 | 구성 | `--retrieval-mode` | `--score-name` |
@@ -55,4 +57,4 @@ Corpus가 달라지면 gold의 revision/chunk binding을 다시 검증해야 한
 
 Generic evaluator CLI는 model 변경 자체를 금지하지 않는다. 이 실험의 관리 workflow는 호출 전후 `/api/capabilities`의 실제 mode/provider/model, runtime/evaluator file hash, embedding profile, active index pointer·file·manifest hash를 고정하고 매 응답의 returned mode와 reranker model을 대조했다. Calibration/test의 profile과 threshold hash가 같은 실행만 승인했다. Contextual report에는 complete active index receipt와 별도로 지정한 expected index file hash가 필요하다. 원자료가 달라졌거나 index engine이 다르면 검사 우회 대신 새 generation을 구축한다.
 
-실제 완료된 실행만 HTML에 게시한다. R1 HTML은 baseline/rerank 두 완료 실행이며, 두 contextual test가 모두 500건 완료된 후 네 구성의 최종 HTML로 갱신한다. 각 구성은 같은 500개 질문을 반복 평가하므로 2,000개의 독립 질문 표본으로 합산하지 않는다. 실행 성공과 TPR/OOD/grey-zone 품질 gate를 구분한다. Generated context나 높은 reranker relevance는 답변 충분성·Claim 권위·HAT buildability를 증명하지 않는다.
+실제 완료된 실행만 HTML에 게시한다. 최종 HTML은 baseline/contextual/rerank/combined 네 구성 각각 500/500 성공·오류 0의 결과다. 각 구성은 같은 500개 질문을 반복 평가하므로 2,000개의 독립 질문 표본으로 합산하지 않는다. 실행 성공과 TPR/OOD/grey-zone 품질 gate를 구분한다. Combined는 Chunk Hit@5 95.7%·MRR@5 0.880이지만 grey-zone FPR 39%로 목표 20%를 넘는다. Generated context나 높은 reranker relevance는 답변 충분성·Claim 권위·HAT buildability를 증명하지 않는다. 이전 R1의 두 완료 구성은 Git history에 남는다.
