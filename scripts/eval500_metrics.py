@@ -116,9 +116,14 @@ def _validate_case(case: object, *, stage: str, seen_ids: set[str]) -> dict:
         raise EvalContractError("insufficient cases require qualified_answer or abstain")
     if not _nonempty_string(case.get("boundary_type")):
         raise EvalContractError("case boundary_type is required")
-    for field in ("gold_rationale", "missing_information"):
-        if not isinstance(case.get(field), str):
-            raise EvalContractError(f"case {field} must be a string")
+    if not isinstance(case.get("gold_rationale"), str):
+        raise EvalContractError("case gold_rationale must be a string")
+    missing_information = case.get("missing_information")
+    if isinstance(missing_information, list):
+        if any(not isinstance(item, str) for item in missing_information):
+            raise EvalContractError("case missing_information must contain only strings")
+    elif not isinstance(missing_information, str):
+        raise EvalContractError("case missing_information must be a string or array of strings")
 
     groups = case.get("evidence_groups")
     if not isinstance(groups, list):
