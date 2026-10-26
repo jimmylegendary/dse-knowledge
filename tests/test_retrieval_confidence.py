@@ -276,28 +276,48 @@ def test_primary_score_uses_max_items_rank_score_not_response_order():
 
 def test_primary_score_selects_reranker_proxy_without_rrf_fallback():
     result = response(0.7, items=[
-        {'trace': {'rank_score': 0.7, 'reranker_relevance_score': 0.2}},
-        {'trace': {'rank_score': 0.4, 'reranker_relevance_score': 0.9}},
+        {'trace': {'rank_score': 0.7, 'reranker_candidate_rank': 1, 'reranker_relevance_score': 0.2}},
+        {'trace': {'rank_score': 0.4, 'reranker_candidate_rank': 2, 'reranker_relevance_score': 0.9}},
     ])
     assert metrics.primary_score(result, score_name='max_reranker_relevance_proxy') == pytest.approx(0.9)
     assert metrics.primary_score(response(0.0, items=[]), score_name='max_reranker_relevance_proxy') == 0.0
-    with pytest.raises(metrics.EvalScoreError, match='reranker_relevance_score'):
+    with pytest.raises(metrics.EvalScoreError, match='no scored reranker candidates'):
         metrics.primary_score(response(0.7), score_name='max_reranker_relevance_proxy')
     for value in (-0.25, 1.01, float('nan'), float('inf'), True):
         with pytest.raises(metrics.EvalScoreError, match=r'\[0,1\]'):
             metrics.primary_score(
-                response(0.7, items=[{'trace': {'rank_score': 0.7, 'reranker_relevance_score': value}}]),
+                response(0.7, items=[{'trace': {'rank_score': 0.7, 'reranker_candidate_rank': 1, 'reranker_relevance_score': value}}]),
                 score_name='max_reranker_relevance_proxy',
             )
 
 
-def test_reranker_proxy_uses_scored_subset_and_skips_only_unmarked_unclassified_backfill():
+def test_reranker_proxy_uses_candidate_rank_marker_and_skips_unmarked_core_backfill():
     result = response(0.7, items=[
-        {'role': 'unclassified', 'trace': {'rank_score': 0.9}},
+        {'role': 'core_technical', 'trace': {'rank_score': 0.9}},
         {'role': 'core_technical', 'trace': {'rank_score': 0.7, 'reranker_candidate_rank': 1, 'reranker_relevance_score': 0.63}},
         {'role': 'supporting_method', 'trace': {'rank_score': 0.6, 'reranker_candidate_rank': 2, 'reranker_relevance_score': 0.88}},
     ])
     assert metrics.primary_score(result, score_name='max_reranker_relevance_proxy') == pytest.approx(0.88)
+    assert len(result['items']) == 3
+
+
+def test_reranker_proxy_matches_actual_eleven_scored_and_one_unmarked_core_item():
+    items = [
+        {
+            'role': 'core_technical',
+            'trace': {
+                'rank_score': 0.02 - index / 1000,
+                'reranker_candidate_rank': index,
+                'reranker_relevance_score': 0.91 - index / 100,
+            },
+        }
+        for index in range(1, 12)
+    ]
+    items.append({'role': 'core_technical', 'trace': {'rank_score': 0.01}})
+    result = response(0.02, items=items)
+    assert metrics.primary_score(result, score_name='max_reranker_relevance_proxy') == pytest.approx(0.90)
+    assert len(result['items']) == 12
+    assert sum('reranker_candidate_rank' in item['trace'] for item in result['items']) == 11
 
 
 def test_reranker_proxy_errors_when_nonempty_items_have_no_scored_candidate():
@@ -309,16 +329,26 @@ def test_reranker_proxy_errors_when_nonempty_items_have_no_scored_candidate():
 
 
 @pytest.mark.parametrize('items', [
-    [{'role': 'core_technical', 'trace': {'rank_score': 0.7}}],
-    [{'role': 'unclassified', 'trace': {'rank_score': 0.7, 'reranker_candidate_rank': 3}}],
+    [{'role': 'core_technical', 'trace': {'rank_score': 0.7, 'reranker_candidate_rank': 3}}],
+    [{'role': 'core_technical', 'trace': {'rank_score': 0.7, 'reranker_relevance_score': 0.6}}],
     [
         {'role': 'core_technical', 'trace': {'rank_score': 0.7, 'reranker_candidate_rank': 1, 'reranker_relevance_score': 0.6}},
-        {'role': 'unclassified', 'trace': {'rank_score': 0.8, 'reranker_candidate_rank': 2}},
+        {'role': 'core_technical', 'trace': {'rank_score': 0.8, 'reranker_candidate_rank': 2}},
     ],
 ])
-def test_reranker_proxy_errors_on_missing_declared_candidate_score_or_no_scored_candidate(items):
-    with pytest.raises(metrics.EvalScoreError, match='reranker_relevance_score'):
+def test_reranker_proxy_errors_when_score_and_candidate_rank_are_incomplete(items):
+    with pytest.raises(metrics.EvalScoreError, match='must be provided together'):
         metrics.primary_score(response(0.7, items=items), score_name='max_reranker_relevance_proxy')
+
+
+@pytest.mark.parametrize('candidate_rank', [0, 41, 1.5, True])
+def test_reranker_proxy_requires_candidate_rank_between_one_and_forty(candidate_rank):
+    result = response(0.7, items=[{
+        'role': 'core_technical',
+        'trace': {'rank_score': 0.7, 'reranker_candidate_rank': candidate_rank, 'reranker_relevance_score': 0.6},
+    }])
+    with pytest.raises(metrics.EvalScoreError, match='integer in 1..40'):
+        metrics.primary_score(result, score_name='max_reranker_relevance_proxy')
 
 
 def test_projection_keeps_rerank_provenance_but_strips_private_metadata():
@@ -415,6 +445,7 @@ def test_reranker_proxy_calibration_identity_includes_mode_and_score_name(tmp_pa
             result = response(0.1)
             result['retrieval_mode'] = payload['retrieval_mode']
             result['items'][0]['trace']['reranker_relevance_score'] = score_by_query[payload['query']]
+            result['items'][0]['trace']['reranker_candidate_rank'] = 1
             result['items'][0]['trace']['original_rrf_score'] = result['items'][0]['trace']['rank_score']
             result['reranker_trace'] = {
                 'score_semantics': 'relevance_not_answerability', 'candidate_count': 1,
@@ -435,6 +466,7 @@ def test_reranker_proxy_calibration_identity_includes_mode_and_score_name(tmp_pa
     assert transport.requests[0]['retrieval_mode'] == 'contextual_rerank'
     assert report['threshold']['threshold'] == pytest.approx(0.8)
     assert '[0,1]' in threshold['score_definition']
+    assert 'items with neither candidate rank nor reranker score are skipped as unscored backfill' in threshold['score_definition']
     assert all(row['score'] in {0.2, 0.8} for row in report['case_results'])
 
     request_count = len(transport.requests)

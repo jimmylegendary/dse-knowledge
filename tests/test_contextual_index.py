@@ -121,6 +121,21 @@ def build_index(path, docs, contextualizer, embedding, *, expected_hash=None):
     return builder.activate()
 
 
+def test_completed_generation_reopens_without_repeating_provider_calls(tmp_path):
+    doc = document("material-a", "revision-a", "Alpha source passage.",
+                   [chunk("chunk-a", "Alpha source passage.")])
+    contextualizer, embedding = FakeContextualizer(), FakeEmbedding()
+    first = build_index(tmp_path / "index", [doc], contextualizer, embedding)
+    pointer = (tmp_path / "index/active.json").read_bytes()
+    calls = (len(contextualizer.calls), len(embedding.calls))
+
+    second = build_index(tmp_path / "index", [doc], contextualizer, embedding)
+
+    assert second == first
+    assert (len(contextualizer.calls), len(embedding.calls)) == calls
+    assert (tmp_path / "index/active.json").read_bytes() == pointer
+
+
 def test_raw_revision_and_normalized_content_hashes_are_distinct_and_rekey_generations(tmp_path):
     raw_artifact_sha256 = hashlib.sha256(b"raw HTML artifact that is normalized before indexing").hexdigest()
     first_doc = document(

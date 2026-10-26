@@ -124,7 +124,13 @@ def create_app(settings=None,store=None,embedding=None,chat=None,native=None,con
     def capabilities():
         return {'native':native.capabilities(),'chat':{'provider':settings.get('CHAT_PROVIDER'),'model':settings.get('CHAT_MODEL_ID')},
                 'embedding':{'provider':settings.get('EMBEDDING_PROVIDER'),'model':settings.get('EMBEDDING_MODEL_ID'),'dimensions':768},
-                'retrieval':{'default_mode':mode,'contextual_enabled':contextual_enabled,
+                'retrieval':{'default_mode':mode,'allow_mode_override':allow_mode_override,
+                             'available_modes':['baseline']+(['contextual'] if contextual_enabled else [])
+                               +(['rerank'] if rerank_enabled else [])
+                               +(['contextual_rerank'] if contextual_enabled and rerank_enabled else []),
+                             'contextual_enabled':contextual_enabled,
+                             'context_model':settings.get('DSE_CONTEXT_CHAT_MODEL',CONTEXT_MODEL_DEFAULT) if contextual_enabled else None,
+                             'context_prompt_version':CONTEXT_PROMPT_VERSION if contextual_enabled else None,
                              'rerank_enabled':rerank_enabled,'rerank_provider':settings.get('DSE_RERANK_PROVIDER'),
                              'rerank_model':settings.get('DSE_RERANK_MODEL')},
                 'scope':'Quality v2 pilot; single operator HTTP self-host. Source assertions and proposed designs require scoped validation.',

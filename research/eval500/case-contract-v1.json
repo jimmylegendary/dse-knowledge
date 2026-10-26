@@ -1,0 +1,38 @@
+{
+  "schema_version": "dse-retrieval-eval500/v1",
+  "test": {"supported": 300, "insufficient": 180, "ambiguous": 20, "ko": 250, "en": 250},
+  "calibration": {"supported": 60, "insufficient": 36, "ambiguous": 4, "ko": 50, "en": 50},
+  "positive_tiers": {"d1_clear": [75, 15], "d2_semantic": [75, 15], "d3_implicit": [75, 15], "d4_multiconstraint": [75, 15]},
+  "tier_language_quotas": {
+    "test": {"d1_clear": {"ko": 38, "en": 37}, "d2_semantic": {"ko": 37, "en": 38}, "d3_implicit": {"ko": 38, "en": 37}, "d4_multiconstraint": {"ko": 37, "en": 38}},
+    "calibration": {"d1_clear": {"ko": 8, "en": 7}, "d2_semantic": {"ko": 7, "en": 8}, "d3_implicit": {"ko": 8, "en": 7}, "d4_multiconstraint": {"ko": 7, "en": 8}}
+  },
+  "negative_types": {"ood": [50, 10], "wrong_revision": [30, 6], "unseen_feature": [25, 5], "missing_quantity": [20, 4], "unsupported_derivation": [25, 5], "in_domain_missing": [30, 6], "underspecified": [20, 4]},
+  "case_required_fields": ["id", "split", "language", "category", "difficulty", "intent_group", "query", "answerability", "expected_action", "boundary_type", "evidence_groups", "nearby_evidence", "gold_rationale", "missing_information"],
+  "answerability": ["supported", "insufficient", "ambiguous"],
+  "expected_action": ["answer", "qualified_answer", "abstain", "clarify"],
+  "action_rules": {
+    "supported": "answer: the full question is supportable from required evidence groups; short paraphrased answer_fact required",
+    "insufficient": "qualified_answer when nearby sources support only a part and missing part must be explicitly withheld; abstain when no useful supported part exists. Neither counts as full-question sufficient.",
+    "ambiguous": "clarify: multiple materially different interpretations or missing required slots prevent a unique scoped answer; high source relevance is allowed"
+  },
+  "evidence_group_shape": {"group_id": "g1", "requirement": "paraphrased fact required by question", "answer_fact": "short paraphrased source-bound answer, no copied quote", "alternatives": [{"material_id": "", "revision_id": "", "chunk_id": "", "source_url": "", "text_sha256": ""}]},
+  "group_semantics": "all groups required (AND); within each group any listed alternative chunk suffices (OR). Any-hit, all-source-groups-hit and all-chunk-groups-hit reported separately.",
+  "nearby_evidence_shape": {"material_id": "", "revision_id": "", "chunk_id": "", "source_url": "", "text_sha256": ""},
+  "absence_scope": "frozen-corpus support, not world truth; nearby packet alone cannot prove global absence. Root full-corpus witness checks and independent review before freeze. Unresolved labels replaced before results or marked not_evaluable, never inferred from test retrieval failure.",
+  "score_policy": {
+    "primary_score": "maximum finite trace.rank_score across technical items; empty technical result =>0; missing/malformed score=>error not zero",
+    "name": "max_technical_rrf_proxy",
+    "probability": false,
+    "positive_class": "supported",
+    "negative_class": "insufficient",
+    "ambiguous": "excluded from primary binary AUROC/AUPRC/confusion; separate clarification slice, no low-relevance requirement",
+    "calibration_target_positive_coverage": 0.9,
+    "threshold_selection": "largest threshold with calibration supported TPR>=0.90 under score>=threshold; ties preserved. Test threshold never refit.",
+    "challenge_gate": {"test_supported_tpr_min": 0.9, "test_ood_fpr_max": 0.1, "test_near_boundary_fpr_max": 0.2},
+    "gate_meaning": "pre-registered diagnostic targets, not validated deployment safety guarantees; failure is a reportable result and never triggers hidden policy tuning",
+    "auc": "tie-aware ROC AUC; average precision for PR AUC with distinct-score tie groups; no Brier/ECE on RRF",
+    "uncertainty": "intent-cluster bootstrap with fixed seed, report group count and challenge prevalence"
+  },
+  "authoring_rules": ["no test retrieval/results access", "no Q2 query reuse", "calibration/test material and intent groups disjoint", "language tiers alternate 38/37 and 37/38 to reach exact totals", "public text is newly authored query/rationale/paraphrased fact only; original source snippets stay private"]
+}

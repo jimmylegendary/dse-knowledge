@@ -33,7 +33,7 @@ Secret 값은 root만 owner-only env에 연결한다. Runtime env keys는 `DSE_C
 
 첫 reranker calibration 결과를 열기 전에 다음 순서를 고정한다. 동일한 rerank-only calibration 100건에서 4B/8B를 비교한다: 정상 질문의 `chunk_all_groups_hit_at_5`가 높은 모델 → 동률이면 `chunk_mrr_at_5`가 높은 모델 → 다시 동률이면 고정 TPR≥0.90 threshold에서 near-boundary FPR이 낮은 모델 → 완전 동률이면 4B. 지연·usage는 별도로 보고하며 품질을 속도·가격과 임의의 단일 점수로 합치지 않는다. 선택한 동일 모델로 rerank-only와 combined의 test를 수행한다. 운영 기본 모드도 각 모드의 calibration에 같은 품질 우선순위를 적용해 정하고 test로 재선정하지 않는다.
 
-`max_reranker_relevance_proxy`의 지원 domain은 normalized relevance `[0,1]`다. 실제 rerank를 받은 후보 subset의 최대값을 쓰며, 점수를 받지 않은 unclassified backfill은 제외한다. 기술 candidate의 누락·비유한 값·범위 밖 값은 오류다. 비어 있는 items는 0이지만 nonempty에 scored 후보가 전혀 없는 경우는 미측정 오류다. Signed logits를 이 proxy에 그대로 넣거나 임의 sigmoid·clipping으로 변환하지 않는다. `[0,1]`은 표현 범위이며 답변 가능성의 확률을 뜻하지 않는다.
+`max_reranker_relevance_proxy`의 지원 domain은 normalized relevance `[0,1]`다. 실제 rerank를 받은 후보 subset의 최대값을 쓴다. `reranker_candidate_rank`와 `reranker_relevance_score`가 모두 없는 항목은 role과 무관하게 미평가 backfill로 제외한다. 한쪽만 있거나 rank가 정수 1..40이 아니거나 score가 비유한·범위 밖이면 오류다. 비어 있는 items는 0이지만 nonempty에 scored 후보가 전혀 없는 경우는 미측정 오류다. Semantic-anchor 보충 때문에 최종 12개 모두가 rerank됐다고 주장하지 않는다. Signed logits를 이 proxy에 그대로 넣거나 임의 sigmoid·clipping으로 변환하지 않는다. `[0,1]`은 표현 범위이며 답변 가능성의 확률을 뜻하지 않는다.
 
 Runner의 mode/score/request/corpus/case identity 외에 root matrix workflow가 model을 고정한다. 각 run 시작·종료의 `/api/capabilities`에서 provider/model/config를 확인하고 모든 row의 returned mode·`reranker_trace.model`을 검증한다. calibration과 test의 provider/model/index profile이 같은지 확인한 뒤만 비교한다. Generic CLI만 별도로 호출하면 model pin이 자동 보장되지 않는 상한을 명시한다. 새 identity 필드가 없는 기존 journal의 암묵적 resume는 허용하지 않는다.
 

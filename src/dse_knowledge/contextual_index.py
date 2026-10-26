@@ -310,7 +310,8 @@ class ContextualIndexBuilder:
         self._manifest = self._base_manifest()
         if self._already_complete:
             stored = self._load_db_manifest(self.final_path)
-            if not stored.get("complete") or stored != self._manifest | {"complete": True, "usage": stored.get("usage", {})}:
+            expected = self._manifest | {"complete": True, "usage": stored.get("usage", {})}
+            if not stored.get("complete") or any(stored.get(key) != value for key, value in expected.items()):
                 raise ContextualIndexError("contextual_index_generation_invalid")
             self._manifest = stored
         else:

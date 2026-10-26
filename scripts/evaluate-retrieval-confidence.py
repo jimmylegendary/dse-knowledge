@@ -107,8 +107,9 @@ def _score_definition(score_name: str) -> str:
         return "maximum finite item.trace.rank_score; empty items score 0; malformed scores are errors"
     return (
         "maximum item.trace.reranker_relevance_score in [0,1] among scored items; empty items score 0; "
-        "unclassified backfill without a candidate rank is skipped; missing or malformed candidate scores "
-        "and no scored candidates are errors; relevance is not answerability"
+        "items with neither candidate rank nor reranker score are skipped as unscored backfill; "
+        "score and rank must be paired; invalid candidate ranks, malformed scores, and no scored candidates "
+        "are errors; relevance is not answerability"
     )
 
 

@@ -39,7 +39,7 @@
     overviewMaterials: { items: [], total: null, loading: false, error: null },
     materials: { items: [], total: null, offset: 0, limit: 10, query: "", category: "", loading: false, error: null },
     materialDetail: null, selectedMaterialId: null, materialDetailLoading: false, materialDetailError: null,
-    retrieval: { query: "", category: "", purpose: "auto", loading: false, error: null, response: null },
+    retrieval: { query: "", category: "", purpose: "auto", mode: "", loading: false, error: null, response: null },
     graph: { query: "", loading: false, error: null, response: null, selectedId: null },
     decisions: { items: [], loading: false, error: null, selectedId: null, detail: null, detailError: null, loadingDetail: false },
     decisionKind: "hardware", jobs: readStoredJobs(), jobResult: null,
@@ -578,9 +578,24 @@
     renderRetrieval();
     const body = { query: model.query.trim(), limit: 12, purpose: model.purpose || "auto" };
     if (model.category) body.category = model.category;
+    if (model.mode && state.capabilities?.retrieval?.allow_mode_override === true) body.retrieval_mode = model.mode;
     try { model.response = await api("/api/search", { method: "POST", body }); }
     catch (error) { model.error = safeError(error); }
     finally { model.loading = false; if (state.view === "retrieval") renderRetrieval(); }
+  }
+  function populateRetrievalModes(select) {
+    const selected = state.retrieval.mode;
+    select.replaceChildren();
+    const defaults = text("option", "서버 기본 구성"); defaults.value = ""; select.append(defaults);
+    const config = state.capabilities?.retrieval;
+    if (config?.allow_mode_override === true) {
+      const names = { baseline: "기본 검색", contextual: "문맥 보강 검색", rerank: "재정렬 검색", contextual_rerank: "문맥 보강 + 재정렬" };
+      for (const value of config.available_modes || []) {
+        if (!names[value]) continue;
+        const option = text("option", names[value]); option.value = value; select.append(option);
+      }
+    }
+    select.value = [...select.options].some(option => option.value === selected) ? selected : "";
   }
   function renderRetrieval() {
     page.replaceChildren();
@@ -608,15 +623,20 @@
     const limitLabel = text("label", "결과 수"); limitLabel.htmlFor = "retrieval-limit";
     const limit = el("input", "input"); limit.id = "retrieval-limit"; limit.type = "text"; limit.value = "12"; limit.readOnly = true; limit.setAttribute("aria-describedby", "retrieval-limit-note");
     limitField.append(limitLabel, limit, text("span", "한 번에 표시하는 결과 수", "field-hint"));
+    const modeField = el("div", "field");
+    const modeLabel = text("label", "검색 구성"); modeLabel.htmlFor = "retrieval-mode";
+    const mode = el("select", "select"); mode.id = "retrieval-mode";
+    populateRetrievalModes(mode);
+    modeField.append(modeLabel, mode, text("span", "문맥 보강과 재정렬을 비교할 수 있습니다. 검색 점수는 답변 가능성의 확률이 아닙니다.", "field-hint"));
     const actions = el("div", "form-actions span-full");
     const submit = button("근거 검색", null, "button", "submit");
     submit.disabled = state.retrieval.loading;
     actions.append(submit);
     form.addEventListener("submit", event => {
       event.preventDefault(); state.retrieval.query = query.value; state.retrieval.category = category.value;
-      state.retrieval.purpose = purpose.value; runRetrieval();
+      state.retrieval.purpose = purpose.value; state.retrieval.mode = mode.value; runRetrieval();
     });
-    add(form, queryField, categoryField, purposeField, limitField, actions); formPanel.append(form);
+    add(form, queryField, categoryField, purposeField, modeField, limitField, actions); formPanel.append(form);
     const results = el("section", "surface overview-section");
     const header = el("div", "surface-header"); add(header, text("div", "검색 결과", ""));
     const heading = el("div"); add(heading, text("h2", "검색 결과"), text("p", "원문 인용 구간과 검색 순위")); header.replaceChildren(heading);
@@ -780,7 +800,10 @@
     if (url && safeUrl(url)) { meta.append(text("span", "·")); meta.append(link("원문", url)); }
     add(copy, title, meta);
     const rank = valueAt(item, "rank");
-    head.append(copy, text("span", rank === undefined ? `#${index + 1}` : `검색 점수 ${asText(rank)}`, "rank-pill"));
+    const rerankScore = valueAt(valueAt(item, "trace"), "reranker_relevance_score");
+    const scoreLabel = typeof rerankScore === "number" ? `관련도 ${rerankScore.toFixed(4)}`
+      : rank === undefined ? `#${index + 1}` : `검색 점수 ${asText(rank)}`;
+    head.append(copy, text("span", scoreLabel, "rank-pill"));
     row.append(head);
     row.append(text("p", asText(valueAt(item, "text", "excerpt"), "검색 구간 본문이 없습니다."), "result-excerpt"));
 
@@ -817,6 +840,15 @@
     const resolvedPurpose = valueAt(response, "purpose") ?? valueAt(purposeTrace, "resolved");
     const selectedPurpose = valueAt(purposeTrace, "requested") ?? state.retrieval.purpose ?? "auto";
     const purposeBox = el("div", "trace-line");
+    const modeNames = { baseline: "기본 검색", contextual: "문맥 보강", rerank: "재정렬", contextual_rerank: "문맥 보강 + 재정렬" };
+    const returnedMode = valueAt(response, "retrieval_mode");
+    if (modeNames[returnedMode]) {
+      const configuration = el("div", "trace-line");
+      configuration.append(text("strong", "검색 구성"), text("span", modeNames[returnedMode]));
+      const model = valueAt(valueAt(response, "reranker_trace"), "model");
+      if (model) configuration.append(text("span", asText(model)));
+      body.append(configuration);
+    }
     add(purposeBox, text("strong", "PURPOSE"),
       text("span", `${asText(selectedPurpose)} → ${asText(resolvedPurpose, "분류 없음")}`),
       text("span", `policy ${asText(valueAt(response, "policy_version"), asText(valueAt(purposeTrace, "version"), "버전 없음"))}`),
@@ -1633,7 +1665,14 @@
   function renderCurrentView() {
     if (state.view === "overview") { renderOverview(); loadOverview(); }
     else if (state.view === "materials") { renderMaterials(); loadMaterials(); }
-    else if (state.view === "retrieval") renderRetrieval();
+    else if (state.view === "retrieval") {
+      renderRetrieval();
+      if (!state.capabilities) api("/api/capabilities").then(capabilities => {
+        state.capabilities = capabilities;
+        const mode = $("#retrieval-mode");
+        if (state.view === "retrieval" && mode) populateRetrievalModes(mode);
+      }).catch(error => { state.capabilitiesError = safeError(error); });
+    }
     else if (state.view === "graph") { renderGraph(); loadGraph(); }
     else if (state.view === "decisions") { renderDecisions(); loadDecisionList(); state.jobs.filter(job => !jobState({ status: job.status }).terminal).forEach(job => pollJob(job.id)); }
     else if (state.view === "experiments") { renderExperiments(); loadExperiments(); }

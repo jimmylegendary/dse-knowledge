@@ -277,16 +277,16 @@ def primary_score(search_result: object, *, score_name: str = SCORE_NAME) -> flo
             if not isinstance(item, dict) or not isinstance(item.get("trace"), dict):
                 raise EvalScoreError("nonempty items must have trace.reranker_relevance_score")
             trace = item["trace"]
-            candidate_declared = "reranker_candidate_rank" in trace
-            if candidate_declared:
-                candidate_rank = trace["reranker_candidate_rank"]
-                if (isinstance(candidate_rank, bool) or not isinstance(candidate_rank, int)
-                        or candidate_rank < 1):
-                    raise EvalScoreError("reranker_candidate_rank must be a positive integer")
-            if "reranker_relevance_score" not in trace:
-                if item.get("role") == "unclassified" and not candidate_declared:
-                    continue
-                raise EvalScoreError("reranker_relevance_score missing for a reranker candidate")
+            rank_present = "reranker_candidate_rank" in trace
+            score_present = "reranker_relevance_score" in trace
+            if not rank_present and not score_present:
+                continue
+            if rank_present != score_present:
+                raise EvalScoreError("reranker score and candidate rank must be provided together")
+            candidate_rank = trace["reranker_candidate_rank"]
+            if (isinstance(candidate_rank, bool) or not isinstance(candidate_rank, int)
+                    or not 1 <= candidate_rank <= 40):
+                raise EvalScoreError("reranker_candidate_rank must be an integer in 1..40")
             value = trace["reranker_relevance_score"]
             if (isinstance(value, bool) or not isinstance(value, (int, float))
                     or value < 0 or value > 1 or not math.isfinite(value)):
