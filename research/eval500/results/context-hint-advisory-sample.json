@@ -1,0 +1,150 @@
+{
+  "schema_version": "context-hint-advisory-sample/v1",
+  "advisory_only": true,
+  "model": "typesafe/jev-1.13-20260917",
+  "sample_count": 9,
+  "selection": "One completed short document per category, ordered by source ID, fitting the whole-source 23000-byte advisory-state limit. Large documents are skipped, never truncated. This is a small convenience sample, not a corpus accuracy estimate.",
+  "criteria": [
+    "grounded_useful",
+    "unsupported_addition",
+    "unhelpful_or_wrong_location",
+    "uncertain"
+  ],
+  "rows": [
+    {
+      "material_id": "mat-00f16b925301e464820c9ed7",
+      "revision_id": "0a192c9337c55af162f66f815b02c033",
+      "chunk_id": "chunk-f4b76c8c9fd6026856d7f4fa1fed4a2a",
+      "category": "compiler_kernel",
+      "context_sha256": "9aa16bcac66d5f4db8568fc234d43efedb35884078ceb6266fe2c0e7af28647c",
+      "source_sha256": "1a5649ca64c4c0c1d2e922e8b1c59e99db39a264d3434487eebe3dff075f1db5",
+      "choice": "grounded_useful",
+      "probabilities": {
+        "grounded_useful": 1,
+        "unsupported_addition": 0,
+        "unhelpful_or_wrong_location": 0,
+        "uncertain": 0
+      }
+    },
+    {
+      "material_id": "mat-79babee8838b2e208c287a53",
+      "revision_id": "350748b0a5b9ca2eabb3a23850c24bce",
+      "chunk_id": "chunk-7261b9f7df10fdf764376dd65d52ab8b",
+      "category": "dse_optimization",
+      "context_sha256": "07ec3d3e7a8363a1d81ff77e58299b27a241a6ef0b96870b1311c5e52e8f643e",
+      "source_sha256": "5bfbc69c8aa946938f1f56b5121aabab5ce85c03dd362d7c0e8da3533bbaac03",
+      "choice": "grounded_useful",
+      "probabilities": {
+        "grounded_useful": 1,
+        "unsupported_addition": 0,
+        "unhelpful_or_wrong_location": 0,
+        "uncertain": 0
+      }
+    },
+    {
+      "material_id": "mat-1acf9c4b3f1708283f808b1b",
+      "revision_id": "cc2491e9e1b8704a873a4c945e113c8f",
+      "chunk_id": "chunk-c43dbfd5add31ed8837ebaf837c52f8a",
+      "category": "hardware_architecture",
+      "context_sha256": "5cb5d3a04ccb30223254a4c0f39efb9f00f1ee85d6cef57e383e6a40cee8e353",
+      "source_sha256": "48c28f58dfbfa4bfbd46f71cc0cb4b7a00f125542f7d77611451a5d8932c7b45",
+      "choice": "grounded_useful",
+      "probabilities": {
+        "grounded_useful": 1,
+        "unsupported_addition": 0,
+        "unhelpful_or_wrong_location": 0,
+        "uncertain": 0
+      }
+    },
+    {
+      "material_id": "mat-8b666e24e63019d402dd9bbf",
+      "revision_id": "5c6d4050c79ca25222770fd1aff3371d",
+      "chunk_id": "chunk-c32caa500dd1253b005f27b71418c143",
+      "category": "llm_model_workload",
+      "context_sha256": "7119280320807fd2b80510acb38f462704d45b4e03a00e5db65d7c3bf13064a2",
+      "source_sha256": "7c4bcb0da10cfc75ba80df3260f682eda899c8c99dceb9222fd4af7f62e30636",
+      "choice": "grounded_useful",
+      "probabilities": {
+        "grounded_useful": 0.99,
+        "unsupported_addition": 0,
+        "unhelpful_or_wrong_location": 0.01,
+        "uncertain": 0
+      }
+    },
+    {
+      "material_id": "mat-3e1bc953770ea1d734893396",
+      "revision_id": "2a0e84c4979326afdbf3d50ed6de9521",
+      "chunk_id": "chunk-4593b1d1c42ff2cbce09f50dfb89d33b",
+      "category": "memory_interconnect",
+      "context_sha256": "729a171cc7f99c46f13756ae751869f111fc5598f2bd811739be026179d46624",
+      "source_sha256": "ccfca57683c2f77ba334fa4042f9e24a9e90e238495d13270631411ad50fca9e",
+      "choice": "grounded_useful",
+      "probabilities": {
+        "grounded_useful": 0.99,
+        "unsupported_addition": 0,
+        "unhelpful_or_wrong_location": 0.01,
+        "uncertain": 0
+      }
+    },
+    {
+      "material_id": "mat-1cbced6ed8edf4ebd21e3ea0",
+      "revision_id": "ee3c66efddb43c20ff5f86944dffa75f",
+      "chunk_id": "chunk-b33c7f1159a76f29f3c3c1590fdbdfc9",
+      "category": "power_thermal_packaging",
+      "context_sha256": "e5d12f1eb53af9893cb2f4760b5d63c05dc544d3ee67f91b502678a2f0cc0053",
+      "source_sha256": "78dcdd24e039f61d39f332af2e47ef79d0de0f5534b185feff924a5bcdd609bd",
+      "choice": "grounded_useful",
+      "probabilities": {
+        "grounded_useful": 0.89,
+        "unsupported_addition": 0.1,
+        "unhelpful_or_wrong_location": 0.01,
+        "uncertain": 0
+      }
+    },
+    {
+      "material_id": "mat-24bcefb267a421d1896bbbe3",
+      "revision_id": "9d28a085cb80795e7cb53b03de8e3a46",
+      "chunk_id": "chunk-1f3cdc88dc8b1d0c9e7d64f9c2b92528",
+      "category": "provenance_experiment",
+      "context_sha256": "848995899a1ec44d94b697399dd887bd56ce4149e29921e6f5173807a681b76d",
+      "source_sha256": "787faf508bbb0bb686064209bca37868e1a405fc7fb680347c028a14736599d3",
+      "choice": "grounded_useful",
+      "probabilities": {
+        "grounded_useful": 1,
+        "unsupported_addition": 0,
+        "unhelpful_or_wrong_location": 0,
+        "uncertain": 0
+      }
+    },
+    {
+      "material_id": "mat-0347bdb156ac2a5c7e222cc7",
+      "revision_id": "83da2f87d4b690459f62e2433c0c600f",
+      "chunk_id": "chunk-c41c13fba89bb4627ac8a719ed662e97",
+      "category": "serving_scheduling",
+      "context_sha256": "4478c426b03e0211152661e531076ea2b49e58e93afbba441564e2724fc26c71",
+      "source_sha256": "5de9a983b74f6599a2c9bf510458c0c063f67604da5d4b8f74a1c214e25be877",
+      "choice": "grounded_useful",
+      "probabilities": {
+        "grounded_useful": 1,
+        "unsupported_addition": 0,
+        "unhelpful_or_wrong_location": 0,
+        "uncertain": 0
+      }
+    },
+    {
+      "material_id": "mat-01c8b167d2551cc1941d10e1",
+      "revision_id": "811acf7ee6db270bdf4f9e3f677f345a",
+      "chunk_id": "chunk-ca849c86b76c6fa15304c1cafd33f6d1",
+      "category": "simulation_measurement",
+      "context_sha256": "a3bda57edf6ee552536c4c83861dff0d12bc9f4b88e370a80dab41cdca12a450",
+      "source_sha256": "9071f0393da8a7275bd5f357add6a842687196d4de6f4730e528da04e2093a68",
+      "choice": "grounded_useful",
+      "probabilities": {
+        "grounded_useful": 0.94,
+        "unsupported_addition": 0.05,
+        "unhelpful_or_wrong_location": 0.01,
+        "uncertain": 0
+      }
+    }
+  ]
+}

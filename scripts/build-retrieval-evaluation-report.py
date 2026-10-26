@@ -158,10 +158,35 @@ def public_run(definition, cases, destination):
                  "runtime_source_hashes": before["source_code"], "evaluator_source_hashes": before["evaluator_code"],
                  "provider": before["provider"], "model": before["model"], "mode": before["mode"],
                  "embedding_profile": before["embedding"]}
+        if mode in {"contextual", "contextual_rerank"}:
+            index = before.get("index")
+            active = index.get("active", {}) if isinstance(index, dict) else {}
+            index_manifest = active.get("manifest", {})
+            if (index_manifest.get("complete") is not True
+                    or not isinstance(index_manifest.get("context_model"), str)
+                    or not index_manifest.get("context_model")
+                    or not index_manifest.get("prompt_version")
+                    or not index_manifest.get("fts_sqlite_version")
+                    or type(index_manifest.get("source_count")) is not int
+                    or index_manifest["source_count"] <= 0
+                    or type(index_manifest.get("chunk_count")) is not int
+                    or index_manifest["chunk_count"] <= 0
+                    or not all(isinstance(active.get(key), str) and re.fullmatch(r"[0-9a-f]{64}", active[key])
+                               for key in ("file_sha256", "manifest_sha256"))):
+                raise ValueError("contextual_active_index_profile_required")
+            expected_index = definition.get("expected_index_file_sha256")
+            if not isinstance(expected_index, str) or not re.fullmatch(r"[0-9a-f]{64}", expected_index):
+                raise ValueError("contextual_index_artifact_binding_required")
+            if active["file_sha256"] != expected_index:
+                raise ValueError("contextual_index_artifact_binding_mismatch")
         if before["index"]:
             active = before["index"]["active"]
             audit.update(index_generation_id=active["generation_id"], index_file_sha256=active["file_sha256"],
-                         index_manifest_sha256=active["manifest_sha256"])
+                         index_manifest_sha256=active["manifest_sha256"],
+                         index_fts_sqlite_version=active["manifest"]["fts_sqlite_version"],
+                         index_context_prompt_version=active["manifest"]["prompt_version"],
+                         index_eligible_sources=active["manifest"]["source_count"],
+                         index_eligible_chunks=active["manifest"]["chunk_count"])
             context_model = active["manifest"]["context_model"]
     results = {row["case_id"]: row["result"] for row in rows}
     per_case_ranking = {
@@ -271,6 +296,7 @@ def main():
         "case_sha256": digest(case_file), "freeze": json.loads((case_file.parent / "freeze-v1.json").read_text()),
         "notes": manifest.get("notes", []), "selected_run": manifest.get("selected_run", runs[0]["id"]),
         "model_selection": manifest.get("model_selection", {}),
+        "operating_mode_selection": manifest.get("operating_mode_selection", {}),
         "infra": manifest.get("infra", {}), "runs": runs,
         "cases": [{key: case.get(key) for key in (
             "id", "language", "difficulty", "category", "query", "answerability", "boundary_type",
@@ -279,6 +305,12 @@ def main():
     }
     if payload["selected_run"] not in {run["id"] for run in runs}:
         raise ValueError("selected_run_not_in_report")
+    operating = payload["operating_mode_selection"]
+    if operating and (operating.get("uses_test_results") is not False
+                      or operating.get("selected", {}).get("id") != payload["selected_run"]
+                      or not {candidate["id"] for candidate in operating.get("candidates", [])}
+                          .issubset({run["id"] for run in runs})):
+        raise ValueError("operating_selection_binding_mismatch")
     check_projection(payload)
     data = json.dumps(payload, ensure_ascii=False, separators=(",", ":"), allow_nan=False)
     # HTML parsing must never interpret query content as a script terminator.
@@ -294,6 +326,7 @@ def main():
              "runs": [{key: run[key] for key in ("id", "label", "model", "journal_payload_sha256", "journal_gzip_sha256")}
                       for run in runs], "report_sha256": digest(staged_html),
              "notes": payload["notes"], "model_selection": payload["model_selection"]}
+    index["operating_mode_selection"] = payload["operating_mode_selection"]
     for artifact in sorted(staged_destination.iterdir()):
         if artifact != staged_html:
             artifact.replace(destination / artifact.name)

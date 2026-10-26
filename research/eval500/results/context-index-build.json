@@ -1,0 +1,48 @@
+{
+  "schema_version": "contextual-index-build-evidence/v1",
+  "manifest": {
+    "chunk_count": 18512,
+    "complete": true,
+    "context_model": "deepseek-ai/DeepSeek-V4.1-Flash",
+    "corpus_hash": "888ec709b7e89f739746de455d1959f8",
+    "eligible_chunk_count": 18512,
+    "eligible_source_count": 999,
+    "embedding_dimensions": 768,
+    "embedding_fingerprint": "deepinfra:google/embeddinggemma-2:768",
+    "fts_sqlite_version": "3.54.0",
+    "generation_id": "a98c1e91912bae44be63f2b6abd79c07",
+    "normalized_content_manifest_sha256": "e2122bca2e94d179260067a847757a3c79040343820d9929fcb37704dc06053c",
+    "prompt_version": "whole-document-chunk-context/v1:fcb946a5694f6db54c76d1292e14b46c889cfc9562332ed555fdfc2d7b1a87ec",
+    "schema_version": 2,
+    "source_count": 999,
+    "source_revision_manifest_sha256": "7df28d6ece2c91f2e334ed921242aec2523af3ee63b55caa776b104148b3e549",
+    "usage": {
+      "completion_tokens": 1865426,
+      "estimated_cost": 5.231161656,
+      "prompt_tokens": 61093892,
+      "total_tokens": 62959318
+    },
+    "source_hashes": {
+      "revision_manifest_sha256": "7df28d6ece2c91f2e334ed921242aec2523af3ee63b55caa776b104148b3e549",
+      "normalized_content_manifest_sha256": "e2122bca2e94d179260067a847757a3c79040343820d9929fcb37704dc06053c"
+    },
+    "context_lengths": {
+      "count": 18512,
+      "word_count_total": 693356,
+      "word_count_min": 10,
+      "word_count_max": 100,
+      "char_count_total": 5091409,
+      "char_count_min": 86,
+      "char_count_max": 711
+    },
+    "canonical_source_count": 1000,
+    "canonical_chunk_count": 18518
+  },
+  "active_pointer_sha256": "5d73a98146de0027dbbc8fdc88e740241e71c2db141c800fde43df7786533af0",
+  "index_file_sha256": "475450849dc882382c6ee6c4c6deb3414c4abf15d432e96c9902269f3b0bdd5a",
+  "index_bytes": 212639744,
+  "cost_scope": "Recorded usage/estimated cost for this complete generation; excludes uncached failed top-level attempts, provider probes, other profiles, evaluation reranking, Codex, infrastructure and full billing.",
+  "canonical_text_changed": false,
+  "context_is_retrieval_hint_only": true,
+  "capacity_limit_eligible_chunks": 50000
+}

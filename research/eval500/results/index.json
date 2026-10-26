@@ -9,17 +9,17 @@
       "label": "Baseline · RRF",
       "model": "none",
       "journal_payload_sha256": "ee1c98a27b7cb3a4f385eb89477c7f2a93299dd9be135304d7dd9116c1774665",
-      "journal_gzip_sha256": "e761f7caaae8abdb4b6f20a0e394113352361171654b5be53591dfd14762c0bd"
+      "journal_gzip_sha256": "bf39d4eab7c5fbac33b74edc55f6b5374b98ec4abb3b09b3eb14964fe8fff769"
     },
     {
       "id": "rerank-8b",
       "label": "Rerank · Qwen 8B",
       "model": "Qwen/Qwen3-Reranker-8B",
       "journal_payload_sha256": "73c5ee3cc36688a1f135d5ccd3b595292f35925d8729b5d5afdcc13db5b0f361",
-      "journal_gzip_sha256": "9a0a1d52d5af0c63bf7d7874598be56035e200d89c5e711406b685a90f3f5cf4"
+      "journal_gzip_sha256": "12df7472bfe8601332ed50bb3df5da2e556725b163e3cc81291f6a3709fcd5c9"
     }
   ],
-  "report_sha256": "f29a6bb1e19be723da7f5a05b878d1af6d7c2e7cd427c23f1465f0b36bd07f53",
+  "report_sha256": "2fd3a6c83f044a35673cfec661e8af81cbba7507d394662468cdc97be612e92b",
   "notes": [
     "이 판본은 동일한 frozen test 500건의 baseline과 선택된 Qwen 8B reranker 결과를 보고한다. Contextual-only와 combined는 전체 문맥 인덱스 구축 후 같은 입력으로 평가한다.",
     "모델 선택은 별도 calibration 100건에서만 수행했다. Test 결과를 보고 질문·정답·모델·threshold를 바꾸지 않았다.",
@@ -74,5 +74,6 @@
         "near_boundary_fpr": 0.25
       }
     ]
-  }
+  },
+  "operating_mode_selection": {}
 }

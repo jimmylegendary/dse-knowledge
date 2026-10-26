@@ -1,0 +1,119 @@
+{
+  "schema_version": "retrieval-real-integration-evidence/v1",
+  "runtime_core_commit": "2a662a8",
+  "canonical_sources": 1000,
+  "canonical_chunks": 18518,
+  "context_eligible_sources": 999,
+  "context_eligible_chunks": 18512,
+  "dependencies": [
+    "Linux HTTP service",
+    "Supabase PostgreSQL",
+    "host Codex CLI gpt-6.1-sol/max",
+    "DeepInfra EmbeddingGemma 2 and Qwen 8B",
+    "hat-schema structural validation",
+    "Melete ingest/query and feedback memory"
+  ],
+  "runs": [
+    {
+      "mode": "rerank",
+      "reranker_model": "Qwen/Qwen3-Reranker-8B",
+      "status": "complete",
+      "checks_passed": 18,
+      "checks_failed": 0,
+      "checks": {
+        "inventory": true,
+        "search_source_roundtrip": true,
+        "graph_source_link": true,
+        "native_minimal_dram_twin": true,
+        "native_component_bundle_boundary": true,
+        "experiment_unit_equivalent": true,
+        "experiment_pareto_tradeoff": true,
+        "experiment_missing_metric": true,
+        "experiment_cohort_mismatch": true,
+        "experiment_fixture_cleanup": true,
+        "job_hardware_submitted": true,
+        "job_hardware_result": true,
+        "needs_evidence_feedback_and_melete_query": true,
+        "job_kernel_submitted": true,
+        "job_kernel_result": true,
+        "job_experiment_submitted": true,
+        "job_experiment_result": true,
+        "experiment_snapshot_contains_feedback_memory": true
+      },
+      "jobs": [
+        {
+          "kind": "hardware",
+          "job_id": "531d6817a8a545d78a6a7e4c7282510d"
+        },
+        {
+          "kind": "kernel",
+          "job_id": "1abdf4a16dc84fff8b42a5198d51a790"
+        },
+        {
+          "kind": "experiment",
+          "job_id": "d14e6f3215e54d8ca78f5c721bdbe051"
+        }
+      ],
+      "private_report_sha256": "a961c5bc38e43daec754a4f80660aa13015c89bba11b5ca69ddadb1e4c5545de"
+    },
+    {
+      "mode": "contextual_rerank",
+      "reranker_model": "Qwen/Qwen3-Reranker-8B",
+      "status": "complete",
+      "checks_passed": 18,
+      "checks_failed": 0,
+      "checks": {
+        "inventory": true,
+        "search_source_roundtrip": true,
+        "graph_source_link": true,
+        "native_minimal_dram_twin": true,
+        "native_component_bundle_boundary": true,
+        "experiment_unit_equivalent": true,
+        "experiment_pareto_tradeoff": true,
+        "experiment_missing_metric": true,
+        "experiment_cohort_mismatch": true,
+        "experiment_fixture_cleanup": true,
+        "job_hardware_submitted": true,
+        "job_hardware_result": true,
+        "needs_evidence_feedback_and_melete_query": true,
+        "job_kernel_submitted": true,
+        "job_kernel_result": true,
+        "job_experiment_submitted": true,
+        "job_experiment_result": true,
+        "experiment_snapshot_contains_feedback_memory": true
+      },
+      "jobs": [
+        {
+          "kind": "hardware",
+          "job_id": "a390682a680b4a8da322f1eb1a70ec8e"
+        },
+        {
+          "kind": "kernel",
+          "job_id": "233e550e50c24e53a03b04ab529b1a28"
+        },
+        {
+          "kind": "experiment",
+          "job_id": "0e8fdf4f852d43c2b35b86d6a4d31514"
+        }
+      ],
+      "private_report_sha256": "742a4f17d68c5348368c061f2f737451abde55e32e6295bafb3c7cc5774ecff2"
+    }
+  ],
+  "preserved_first_attempt": {
+    "mode": "rerank",
+    "checks_passed": 16,
+    "checks_failed": 2,
+    "cause": "codex_timeout",
+    "timeout_seconds": 360,
+    "retry_timeout_seconds": 600,
+    "completed_model_jobs_reused": 2,
+    "failed_report_sha256": "a658225c0dfb814f747895e22d96bec2329eb2e595c23281e69a9f4bdf2a7a9b"
+  },
+  "scope": {
+    "native_hat_committee_evaluated": false,
+    "B300_hardware_or_simulation_evaluated": false,
+    "compiled_kernel_correctness_evaluated": false,
+    "scientific_source_claims_independently_verified": false
+  },
+  "privacy": "Metadata only; source bodies, generated answers/contexts, vectors and credentials are excluded."
+}

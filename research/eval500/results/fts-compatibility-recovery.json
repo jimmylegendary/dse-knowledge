@@ -1,0 +1,80 @@
+{
+  "schema_version": "fts-compatibility-evidence/v1",
+  "minimal_control": {
+    "creator_sqlite": "3.50.4",
+    "creator_integrity": "ok",
+    "reader_sqlite": "3.54.0",
+    "reader_integrity": "malformed inverted index for FTS5 table main.t",
+    "control_text_description": "ASCII before/after separated by Unicode U+FFFF"
+  },
+  "recovery": {
+    "schema_version": "fts-derived-index-recovery/v1",
+    "sqlite_version": "3.54.0",
+    "generation_id": "71e28defd9e926633d017436fa9ec83f",
+    "integrity_before": [
+      "malformed inverted index for FTS5 table main.passages_fts"
+    ],
+    "integrity_after": [
+      "ok"
+    ],
+    "preserved": true,
+    "before": {
+      "source_bindings_digest": {
+        "rows": 999,
+        "sha256": "3d1132d5e32c8dd2997a832af83c2d2bf8b362519da4117b2beab5fc71998d42"
+      },
+      "context_text_digest": {
+        "rows": 18512,
+        "sha256": "d350e9f2d777769979f2fcd7e94c332d734ebac6cb69f9098eab9f33ae8097c0"
+      },
+      "vectors_digest": {
+        "rows": 18512,
+        "sha256": "132f3fbe5790ffd5fe82a2bcf5a3770d62b448fea5d1a39d9b18636e2809bea1"
+      },
+      "fts_content_digest": {
+        "rows": 18512,
+        "sha256": "776be719a89c8bb4abc4f607853b0b49d36cd1d16bc092d41dc9080cf37f886d"
+      }
+    },
+    "after": {
+      "source_bindings_digest": {
+        "rows": 999,
+        "sha256": "3d1132d5e32c8dd2997a832af83c2d2bf8b362519da4117b2beab5fc71998d42"
+      },
+      "context_text_digest": {
+        "rows": 18512,
+        "sha256": "d350e9f2d777769979f2fcd7e94c332d734ebac6cb69f9098eab9f33ae8097c0"
+      },
+      "vectors_digest": {
+        "rows": 18512,
+        "sha256": "132f3fbe5790ffd5fe82a2bcf5a3770d62b448fea5d1a39d9b18636e2809bea1"
+      },
+      "fts_content_digest": {
+        "rows": 18512,
+        "sha256": "776be719a89c8bb4abc4f607853b0b49d36cd1d16bc092d41dc9080cf37f886d"
+      }
+    },
+    "new_llm_calls": 0,
+    "new_embedding_calls": 0,
+    "rebuild_seconds": 3.9746661940589547,
+    "official_method": "https://www.sqlite.org/fts5.html#the_rebuild_command"
+  },
+  "profile_migration": {
+    "schema_version": "fts-engine-profile-migration/v1",
+    "prior_generation_id": "71e28defd9e926633d017436fa9ec83f",
+    "generation_id": "a98c1e91912bae44be63f2b6abd79c07",
+    "fts_sqlite_version": "3.54.0",
+    "preserved": true,
+    "logical_hashes": {
+      "source_bindings_sha256": "3d1132d5e32c8dd2997a832af83c2d2bf8b362519da4117b2beab5fc71998d42",
+      "context_text_sha256": "d350e9f2d777769979f2fcd7e94c332d734ebac6cb69f9098eab9f33ae8097c0",
+      "vectors_sha256": "132f3fbe5790ffd5fe82a2bcf5a3770d62b448fea5d1a39d9b18636e2809bea1",
+      "fts_content_sha256": "776be719a89c8bb4abc4f607853b0b49d36cd1d16bc092d41dc9080cf37f886d"
+    },
+    "source_count": 999,
+    "chunk_count": 18512,
+    "new_llm_calls": 0,
+    "new_embedding_calls": 0
+  },
+  "strict_integrity_gate_retained": true
+}

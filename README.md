@@ -20,7 +20,9 @@
 | Grey-zone FPR | 71.0% | **40.0%** |
 | 진단 gate | FAIL | **FAIL: grey-zone 목표 20% 초과** |
 
-LLM Contextual Retrieval도 구현했고 현재 전체 문맥 인덱스를 구축 중이다. Whole document와 각 chunk로 만든 짧은 문맥을 원문에 붙여 embedding 및 실제 FTS5 BM25를 구성한다. 문맥은 검색 힌트이며, PostgreSQL 원문·Claim·인용을 대체하지 않는다. 완성 후 contextual-only와 combined도 같은 frozen 데이터로 평가한다. 검색 점수가 높아져도 질문의 모든 조건을 충족했다는 뜻은 아니다.
+LLM Contextual Retrieval의 전체 eligible 인덱스 **999개 자료·18,512개 chunk**를 구축했다. 정본 1,000개·18,518개 중 `out_of_scope` 1개·6 chunks는 검색 인덱스에서 제외한다. Whole document와 각 chunk로 만든 짧은 문맥을 원문에 붙여 embedding 및 실제 FTS5 BM25를 구성한다. 문맥은 검색 힌트이며, PostgreSQL 원문·Claim·인용을 대체하지 않는다. 네 구성의 calibration은 각각 100/100 성공했고, 정해둔 품질 기준으로 기본 구성을 **문맥 보강 + Qwen 8B**로 선택했다. Contextual-only와 combined의 500건 test는 진행 중이다. 검색 점수가 높아져도 질문의 모든 조건을 충족했다는 뜻은 아니다.
+
+인덱스 구축과 서비스는 같은 SQLite 엔진을 사용한다. 실제 개발/서비스 Python의 SQLite 3.50.4/3.54.0 차이로 FTS 무결성 오류가 발생한 것을 최소 재현하고, 서비스 엔진에서 FTS만 재구성했다. 원문 binding·생성 문맥·vector·FTS content digest를 보존했으며 복구 시 LLM/embedding 재호출은 0이다. 이후 engine version을 generation ID·manifest에 포함하고, 다른 engine의 인덱스를 reader가 거부한다. [구축 기록](https://github.com/jimmylegendary/dse-knowledge/blob/main/research/eval500/results/context-index-build.json), [호환성·복구 기록](https://github.com/jimmylegendary/dse-knowledge/blob/main/research/eval500/results/fts-compatibility-recovery.json)을 공개했다. Generation에 기록된 추정 비용 약 $5.23은 실패·진단·다른 profile·평가·Codex·infra·전체 청구서를 제외한 범위다.
 
 Standalone HTML: [retrieval-evaluation-2026-10-26.html](https://github.com/jimmylegendary/dse-knowledge/blob/main/web/reports/retrieval-evaluation-2026-10-26.html). 실행 중인 Workbench의 **500건 검색 평가** 메뉴에서도 열 수 있다. 질문별 검색 순위·정답·FP/FN, 난이도·언어·경계 유형을 필터로 검토한다.
 
