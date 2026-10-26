@@ -1,0 +1,72 @@
+{
+  "schema_version": "dse-eval500-freeze/v1",
+  "frozen_at": "2026-10-26T09:02:46.368896+00:00",
+  "status": "independent_source_review_complete_before_retrieval",
+  "dataset_version": "v1",
+  "files": {
+    "calibration": {
+      "path": "research/eval500/calibration-v1.jsonl",
+      "sha256": "c053fcedb176c569bd898a0dcf9d2c7358e8e557e1ad5259ba0188efcc2a63dd",
+      "rows": 100,
+      "labels": {
+        "insufficient": 36,
+        "ambiguous": 4,
+        "supported": 60
+      },
+      "languages": {
+        "ko": 50,
+        "en": 50
+      }
+    },
+    "test": {
+      "path": "research/eval500/test-v1.jsonl",
+      "sha256": "d4bc5ea35e7128d1a72ccafbf72ea1b5e36fb428cbf3a7c395db9059de5655a9",
+      "rows": 500,
+      "labels": {
+        "supported": 300,
+        "insufficient": 180,
+        "ambiguous": 20
+      },
+      "languages": {
+        "ko": 250,
+        "en": 250
+      }
+    },
+    "protocol": {
+      "path": "research/eval500/protocol-v1.json",
+      "sha256": "2f067fc626d13fec6b35aca3d9c255bd2c63df103a4a3c31f4ba9a06fb53424e"
+    }
+  },
+  "author_input_sha256": {
+    "positive-cases.jsonl": "923f3ee36416e858907212535c5b04a1636ced4088cb91a37d638fc9c246d12f",
+    "negative-cases.jsonl": "d277dc1e6be45270191a64c51394e78113497ac750c83cfe181bb77c359cdf5e"
+  },
+  "corpus_manifest_sha256": "4de7a9d2b59dad4ae31bb4a33c20ce9e4ebfa113f647111211d747eb2f56179d",
+  "corpus_counts": {
+    "materials": 1000,
+    "revisions": 1000,
+    "chunks": 18518,
+    "claims": 2383
+  },
+  "baseline_code_commit": "790a77b9e5a10df945567022f03d05bc433c19f9",
+  "baseline_policy": "retrieval-policy/v2.2",
+  "question_order_seed": 20261026,
+  "test_outcome_used_to_tune_questions_or_thresholds": false,
+  "qrels": "partial source/chunk evidence; AND groups with OR alternatives",
+  "generated_answers_or_full_corpus_relevance_judgments_evaluated": false,
+  "canonical_source_unchanged": true,
+  "gold_review": "AI-authored, independent AI source review with root adjudication; not human/scientific validation",
+  "source_texts_vectors_credentials_published": false,
+  "author_status_fields": "historical authoring metadata; independent source-scope acceptance is recorded by this freeze manifest",
+  "absence_scope": "full query support in the frozen indexed corpus, not world-fact falsity; version-applicability-unbound qualifies as insufficient",
+  "future_use": "regression after publication; not a future blind holdout",
+  "independent_review_receipts": {
+    "positive": "positive-independent-review.jsonl",
+    "negative": "dataset-review.jsonl"
+  },
+  "limits": [
+    "500 questions are not 500 independent sources or intents",
+    "Challenge class prevalence is designed, not production prevalence",
+    "RRF/reranker relevance are not calibrated answerability confidence"
+  ]
+}
