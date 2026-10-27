@@ -11,9 +11,22 @@ from collections import Counter, defaultdict
 POLICY_VERSION = "retrieval-policy/v2.2"
 SCORE_NAME = "max_technical_rrf_proxy"
 RERANKER_SCORE_NAME = "max_reranker_relevance_proxy"
-SCORE_NAMES = frozenset({SCORE_NAME, RERANKER_SCORE_NAME})
+JEV_SCORE_NAME = "jev_direct_support_proxy"
+SCORE_NAMES = frozenset({SCORE_NAME, RERANKER_SCORE_NAME, JEV_SCORE_NAME})
 RETRIEVAL_MODES = frozenset({"baseline", "contextual", "rerank", "contextual_rerank"})
 RESULT_CHANNELS = frozenset({"dense", "lexical", "context_dense", "context_bm25", "exact", "graph"})
+EVIDENCE_ADVICE_VERSION = "jev-evidence-advice/v1"
+EVIDENCE_ADVICE_STATUSES = frozenset({"assessed", "disabled", "unavailable", "skipped_over_budget", "skipped_prompt_budget"})
+EVIDENCE_ADVICE_CHOICES = frozenset({
+    "direct_support_candidate", "partial_support", "condition_mismatch",
+    "conflicting_evidence", "no_support", "uncertain",
+})
+EVIDENCE_ADVICE_SCORE_KIND = "uncalibrated_direct_support_probability"
+EVIDENCE_ADVICE_USAGE_KEYS = frozenset({
+    "input_tokens", "output_tokens", "total_tokens", "cached_input_tokens",
+    "prompt_tokens", "completion_tokens", "inputTokens", "outputTokens",
+    "totalTokens", "cachedInputTokens", "estimated_cost", "cost", "costUsd",
+})
 SUPPORTED = "supported"
 INSUFFICIENT = "insufficient"
 AMBIGUOUS = "ambiguous"
@@ -260,15 +273,20 @@ def source_material_hashes(cases: list[dict]) -> list[str]:
     return sorted(hashlib.sha256(material_id.encode("utf-8")).hexdigest() for material_id in _case_material_ids(cases))
 
 
-def primary_score(search_result: object, *, score_name: str = SCORE_NAME) -> float:
+def primary_score(search_result: object, *, score_name: str = SCORE_NAME) -> float | None:
     """Return the selected finite item-level proxy; never substitute another score."""
-    if score_name not in SCORE_NAMES:
+    if not isinstance(score_name, str) or score_name not in SCORE_NAMES:
         raise EvalScoreError("unsupported score_name")
     if not isinstance(search_result, dict):
         raise EvalScoreError("search result must be an object")
     items = search_result.get("items")
     if not isinstance(items, list):
         raise EvalScoreError("search result items must be an array")
+    if score_name == JEV_SCORE_NAME:
+        advice = _project_evidence_advice(search_result.get("evidence_advice"))
+        if advice["status"] != "assessed":
+            return None
+        return float(advice["support_score"])
     if not items:
         return 0.0
     if score_name == RERANKER_SCORE_NAME:
@@ -328,6 +346,149 @@ def _copy_if_type(source: dict, key: str, target: dict, *, types: tuple[type, ..
     if isinstance(value, float) and not math.isfinite(value):
         raise EvalScoreError(f"nonfinite metadata field {key}")
     target[key] = value
+
+
+def _advice_number(value: object, *, field: str, integer: bool = False, maximum: int | None = None):
+    if integer:
+        valid = isinstance(value, int) and not isinstance(value, bool)
+    else:
+        valid = isinstance(value, (int, float)) and not isinstance(value, bool)
+    if not valid:
+        raise EvalScoreError(f"{field} must be a nonnegative number")
+    try:
+        finite = math.isfinite(float(value))
+    except (OverflowError, TypeError, ValueError):
+        finite = False
+    if not finite or value < 0 or maximum is not None and value > maximum:
+        raise EvalScoreError(f"{field} is out of range")
+    return value
+
+
+def _project_evidence_advice(value: object) -> dict:
+    if not isinstance(value, dict):
+        raise EvalScoreError("evidence_advice must be an object")
+    status = value.get("status")
+    choice = value.get("choice")
+    valid_choice = (
+        isinstance(choice, str) and choice in EVIDENCE_ADVICE_CHOICES
+        or choice is None and status != "assessed"
+    )
+    if (value.get("schema_version") != EVIDENCE_ADVICE_VERSION
+            or value.get("policy_version") != EVIDENCE_ADVICE_VERSION
+            or not isinstance(value.get("status"), str)
+            or value.get("status") not in EVIDENCE_ADVICE_STATUSES
+            or value.get("advisory_only") is not True
+            or not valid_choice
+            or value.get("score_kind") != EVIDENCE_ADVICE_SCORE_KIND):
+        raise EvalScoreError("evidence_advice envelope is invalid")
+    status = value["status"]
+    support_score = value.get("support_score")
+    if status == "assessed":
+        if (isinstance(support_score, bool) or not isinstance(support_score, (int, float))
+                or support_score < 0 or support_score > 1 or not math.isfinite(support_score)):
+            raise EvalScoreError("evidence_advice.support_score must be finite and within [0,1]")
+    elif support_score is not None:
+        raise EvalScoreError("unassessed evidence_advice must have null support_score")
+
+    evidence_ids = value.get("evidence_ids")
+    if (not isinstance(evidence_ids, list) or len(evidence_ids) > 12
+            or any(not isinstance(item, str) or not item or len(item) > 256 for item in evidence_ids)
+            or len(evidence_ids) != len(set(evidence_ids))):
+        raise EvalScoreError("evidence_advice.evidence_ids is invalid")
+
+    projection = value.get("projection")
+    if not isinstance(projection, dict):
+        raise EvalScoreError("evidence_advice.projection must be an object")
+    projected_items = []
+    raw_items = projection.get("items", [])
+    if not isinstance(raw_items, list) or len(raw_items) > 12:
+        raise EvalScoreError("evidence_advice.projection.items is invalid")
+    for item in raw_items:
+        if not isinstance(item, dict):
+            raise EvalScoreError("evidence_advice.projection item must be an object")
+        clean = {}
+        for key in ("chunk_id", "revision_id"):
+            _copy_if_type(item, key, clean, types=(str,), required=True)
+            if not clean[key] or len(clean[key]) > 256:
+                raise EvalScoreError(f"evidence_advice.projection.{key} is invalid")
+        for key in ("source_text_bytes", "excerpt_text_bytes"):
+            clean[key] = _advice_number(item.get(key), field=f"evidence_advice.projection.{key}", integer=True)
+        if clean["excerpt_text_bytes"] > clean["source_text_bytes"]:
+            raise EvalScoreError("evidence_advice excerpt exceeds source byte count")
+        _copy_if_type(item, "truncated", clean, types=(bool,), required=True)
+        projected_items.append(clean)
+
+    projected_projection = {}
+    for key in ("total_evidence", "selected_evidence", "omitted_evidence", "truncated_evidence",
+                "state_bytes", "request_bytes"):
+        if key in projection:
+            maximum = 24000 if key == "state_bytes" else 30000 if key == "request_bytes" else None
+            projected_projection[key] = _advice_number(
+                projection[key], field=f"evidence_advice.projection.{key}", integer=True, maximum=maximum,
+            )
+    if "excerpt_only" in projection:
+        _copy_if_type(projection, "excerpt_only", projected_projection, types=(bool,), required=True)
+        if projected_projection["excerpt_only"] is not True:
+            raise EvalScoreError("evidence_advice projection must be excerpt-only")
+    if "items" in projection:
+        projected_projection["items"] = projected_items
+    if status == "assessed" and projected_projection.get("excerpt_only") is not True:
+        raise EvalScoreError("assessed evidence_advice must declare an excerpt-only projection")
+
+    metadata = value.get("metadata")
+    if not isinstance(metadata, dict):
+        raise EvalScoreError("evidence_advice.metadata must be an object")
+    projected_metadata = {}
+    string_keys = ("provider", "model_selected", "model_reported", "request_id", "error_code")
+    for key in string_keys:
+        if key in metadata and metadata[key] is not None:
+            _copy_if_type(metadata, key, projected_metadata, types=(str,))
+            if len(projected_metadata[key]) > 256:
+                raise EvalScoreError(f"evidence_advice.metadata.{key} is too long")
+        elif key in metadata:
+            projected_metadata[key] = None
+    for key in ("request_state_sha256", "request_sha256", "input_sha256"):
+        if key in metadata and metadata[key] is not None:
+            raw_hash = metadata[key]
+            if not isinstance(raw_hash, str) or re.fullmatch(r"[a-fA-F0-9]{64}", raw_hash) is None:
+                raise EvalScoreError(f"evidence_advice.metadata.{key} is invalid")
+            projected_metadata[key] = raw_hash.lower()
+        elif key in metadata:
+            projected_metadata[key] = None
+    if "latency_ms" in metadata:
+        projected_metadata["latency_ms"] = _advice_number(metadata["latency_ms"], field="evidence_advice.metadata.latency_ms")
+    if "provider_calls" in metadata:
+        projected_metadata["provider_calls"] = _advice_number(
+            metadata["provider_calls"], field="evidence_advice.metadata.provider_calls", integer=True,
+        )
+    if "cache_hit" in metadata:
+        _copy_if_type(metadata, "cache_hit", projected_metadata, types=(bool,), required=True)
+    if "usage" in metadata:
+        usage = metadata["usage"]
+        if not isinstance(usage, dict):
+            raise EvalScoreError("evidence_advice.metadata.usage must be an object")
+        projected_usage = {}
+        for key, usage_value in usage.items():
+            if key not in EVIDENCE_ADVICE_USAGE_KEYS:
+                continue
+            projected_usage[key] = _advice_number(
+                usage_value, field=f"evidence_advice.metadata.usage.{key}",
+                integer=key not in {"estimated_cost", "cost", "costUsd"},
+            )
+        projected_metadata["usage"] = projected_usage
+
+    return {
+        "schema_version": EVIDENCE_ADVICE_VERSION,
+        "status": status,
+        "advisory_only": True,
+        "choice": value["choice"],
+        "support_score": support_score,
+        "score_kind": EVIDENCE_ADVICE_SCORE_KIND,
+        "policy_version": EVIDENCE_ADVICE_VERSION,
+        "evidence_ids": evidence_ids,
+        "projection": projected_projection,
+        "metadata": projected_metadata,
+    }
 
 
 def _project_item(item: object, *, slot: int) -> dict:
@@ -421,6 +582,8 @@ def project_search_result(search_result: object, *, limit: int = 12) -> dict:
     if retrieval_mode not in RETRIEVAL_MODES:
         raise EvalScoreError("missing or invalid retrieval_mode")
     projected["retrieval_mode"] = retrieval_mode
+    if "evidence_advice" in search_result:
+        projected["evidence_advice"] = _project_evidence_advice(search_result["evidence_advice"])
     purpose_trace = search_result.get("purpose_trace")
     if isinstance(purpose_trace, dict):
         allowed = ("requested", "resolved", "rule", "uncertain", "version")

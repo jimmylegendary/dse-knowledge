@@ -35,8 +35,10 @@ import eval500_metrics as metrics
 DEFAULT_BASE_URL = "http://127.0.0.1:8080"
 EXPECTED_POLICY_VERSION = metrics.POLICY_VERSION
 HTTP_TIMEOUT_SECONDS = 60
+JEV_HTTP_TIMEOUT_SECONDS = 180
 MAX_RETRIES = 2
 MAX_HTTP_ATTEMPTS = MAX_RETRIES + 1
+MAX_JEV_HTTP_ATTEMPTS = 1
 MAX_RETRY_SLEEP_SECONDS = 30.0
 MAX_WORKERS = 2
 MAX_RESPONSE_BYTES = 2_500_000
@@ -97,14 +99,28 @@ def _validated_score_name(value: str) -> str:
     return value
 
 
-def _request_body(retrieval_mode: str) -> dict:
-    return {**REQUEST_BODY, "retrieval_mode": _validated_retrieval_mode(retrieval_mode)}
+def _validated_evidence_advice(value: str) -> str:
+    if not isinstance(value, str) or value not in {"off", "jev"}:
+        raise EvaluationRunError("invalid_evidence_advice")
+    return value
+
+
+def _request_body(retrieval_mode: str, evidence_advice: str = "off", *, legacy_without_advice: bool = False) -> dict:
+    body = {**REQUEST_BODY, "retrieval_mode": _validated_retrieval_mode(retrieval_mode)}
+    if not legacy_without_advice:
+        body["evidence_advice"] = _validated_evidence_advice(evidence_advice)
+    return body
 
 
 def _score_definition(score_name: str) -> str:
     score_name = _validated_score_name(score_name)
     if score_name == metrics.SCORE_NAME:
         return "maximum finite item.trace.rank_score; empty items score 0; malformed scores are errors"
+    if score_name == metrics.JEV_SCORE_NAME:
+        return (
+            "assessed evidence_advice.support_score only; unavailable/disabled/skipped advice has null score; "
+            "uncalibrated direct-support proxy, not answerability probability or action"
+        )
     return (
         "maximum item.trace.reranker_relevance_score in [0,1] among scored items; empty items score 0; "
         "items with neither candidate rank nor reranker score are skipped as unscored backfill; "
@@ -121,11 +137,11 @@ class HTTPTransport:
         self._urlopen = urlopen
         self._sleep = sleep_fn or time.sleep
 
-    def _open(self, request):
+    def _open(self, request, *, timeout_seconds=HTTP_TIMEOUT_SECONDS):
         if self._urlopen is not None:
-            return self._urlopen(request, timeout=HTTP_TIMEOUT_SECONDS)
+            return self._urlopen(request, timeout=timeout_seconds)
         opener = urllib.request.build_opener(urllib.request.ProxyHandler({}))
-        return opener.open(request, timeout=HTTP_TIMEOUT_SECONDS)
+        return opener.open(request, timeout=timeout_seconds)
 
     @staticmethod
     def _header(headers, name: str):
@@ -148,7 +164,8 @@ class HTTPTransport:
     def post_search(self, payload: dict) -> SearchResponse:
         legacy_fields = {"query", "category", "limit", "purpose"}
         mode_fields = legacy_fields | {"retrieval_mode"}
-        if not isinstance(payload, dict) or set(payload) not in (legacy_fields, mode_fields):
+        advice_fields = mode_fields | {"evidence_advice"}
+        if not isinstance(payload, dict) or set(payload) not in (legacy_fields, mode_fields, advice_fields):
             raise SearchRequestError("invalid_request_shape")
         if not isinstance(payload.get("query"), str) or not payload["query"].strip() or len(payload["query"]) > 2000:
             raise SearchRequestError("invalid_request_query")
@@ -156,22 +173,29 @@ class HTTPTransport:
             raise SearchRequestError("request_policy_mismatch")
         if "retrieval_mode" in payload and payload.get("retrieval_mode") not in metrics.RETRIEVAL_MODES:
             raise SearchRequestError("invalid_request_retrieval_mode")
+        if ("evidence_advice" in payload
+                and (not isinstance(payload.get("evidence_advice"), str)
+                     or payload.get("evidence_advice") not in {"off", "jev"})):
+            raise SearchRequestError("invalid_request_evidence_advice")
         encoded = json.dumps(payload, ensure_ascii=False, separators=(",", ":")).encode("utf-8")
         request = urllib.request.Request(
             self.base_url + "/api/search", data=encoded,
             headers={"Content-Type": "application/json", "Accept": "application/json"},
             method="POST",
         )
-        for attempt in range(1, MAX_HTTP_ATTEMPTS + 1):
+        advice_enabled = payload.get("evidence_advice", "off") == "jev"
+        max_attempts = MAX_JEV_HTTP_ATTEMPTS if advice_enabled else MAX_HTTP_ATTEMPTS
+        timeout_seconds = JEV_HTTP_TIMEOUT_SECONDS if advice_enabled else HTTP_TIMEOUT_SECONDS
+        for attempt in range(1, max_attempts + 1):
             try:
-                response = self._open(request)
+                response = self._open(request, timeout_seconds=timeout_seconds)
                 with response:
                     status = getattr(response, "status", None)
                     if not isinstance(status, int):
                         status = response.getcode()
                     headers = getattr(response, "headers", None)
                     if status != 200:
-                        if status in TRANSIENT_HTTP_STATUSES and attempt < MAX_HTTP_ATTEMPTS:
+                        if status in TRANSIENT_HTTP_STATUSES and attempt < max_attempts:
                             self._sleep(self._retry_delay(attempt, headers))
                             continue
                         raise SearchRequestError(f"http_{status}", http_status=status, attempts=attempt)
@@ -198,7 +222,7 @@ class HTTPTransport:
             except urllib.error.HTTPError as error:
                 status = getattr(error, "code", None)
                 headers = getattr(error, "headers", None)
-                if status in TRANSIENT_HTTP_STATUSES and attempt < MAX_HTTP_ATTEMPTS:
+                if status in TRANSIENT_HTTP_STATUSES and attempt < max_attempts:
                     self._sleep(self._retry_delay(attempt, headers))
                     continue
                 raise SearchRequestError(
@@ -209,11 +233,11 @@ class HTTPTransport:
             except SearchRequestError:
                 raise
             except (urllib.error.URLError, TimeoutError, ConnectionError, OSError):
-                if attempt < MAX_HTTP_ATTEMPTS:
+                if attempt < max_attempts:
                     self._sleep(self._retry_delay(attempt))
                     continue
                 raise SearchRequestError("transport_error", attempts=attempt) from None
-        raise SearchRequestError("transport_error", attempts=MAX_HTTP_ATTEMPTS)
+        raise SearchRequestError("transport_error", attempts=max_attempts)
 
 
 def _read_case_file(path: Path, stage: str) -> tuple[list[dict], str, dict]:
@@ -468,9 +492,11 @@ def _write_private_json_no_overwrite(path: Path, value: dict) -> str:
 
 
 def _threshold_policy(path: Path, corpus_manifest_sha256: str, case_contract_sha256: str, *,
-                      retrieval_mode: str = "baseline", score_name: str = metrics.SCORE_NAME) -> tuple[dict, str]:
+                      retrieval_mode: str = "baseline", score_name: str = metrics.SCORE_NAME,
+                      evidence_advice: str = "off") -> tuple[dict, str]:
     retrieval_mode = _validated_retrieval_mode(retrieval_mode)
     score_name = _validated_score_name(score_name)
+    evidence_advice = _validated_evidence_advice(evidence_advice)
     value, digest = _load_private_json(path)
     if (value.get("schema_version") != THRESHOLD_SCHEMA_VERSION
             or value.get("runner_version") != RUNNER_VERSION
@@ -480,7 +506,8 @@ def _threshold_policy(path: Path, corpus_manifest_sha256: str, case_contract_sha
     if (value.get("policy_version") != EXPECTED_POLICY_VERSION
             or value.get("corpus_manifest_sha256") != corpus_manifest_sha256
             or value.get("case_contract_sha256") != case_contract_sha256
-            or value.get("retrieval_mode") != retrieval_mode):
+            or value.get("retrieval_mode") != retrieval_mode
+            or value.get("evidence_advice", "off") != evidence_advice):
         raise EvaluationRunError("threshold_identity_mismatch")
     if value.get("score_name") != score_name or value.get("comparison") != ">=":
         raise EvaluationRunError("threshold_identity_mismatch")
@@ -488,10 +515,13 @@ def _threshold_policy(path: Path, corpus_manifest_sha256: str, case_contract_sha
     if (isinstance(threshold, bool) or not isinstance(threshold, (int, float))
             or not math.isfinite(threshold)
             or (score_name == metrics.SCORE_NAME and threshold < 0)
-            or (score_name == metrics.RERANKER_SCORE_NAME and not 0 <= threshold <= 1)):
+            or (score_name in {metrics.RERANKER_SCORE_NAME, metrics.JEV_SCORE_NAME} and not 0 <= threshold <= 1)):
         raise EvaluationRunError("threshold_identity_mismatch")
-    if value.get("request") != _request_body(retrieval_mode):
-        raise EvaluationRunError("threshold_identity_mismatch")
+    request = value.get("request")
+    if request != _request_body(retrieval_mode, evidence_advice):
+        legacy_off = evidence_advice == "off" and "evidence_advice" not in value
+        if not legacy_off or request != _request_body(retrieval_mode, evidence_advice, legacy_without_advice=True):
+            raise EvaluationRunError("threshold_identity_mismatch")
     if value.get("target_supported_tpr") != 0.90 or value.get("probability") is not False:
         raise EvaluationRunError("threshold_identity_mismatch")
     calibration_hash = value.get("calibration_case_manifest_sha256")
@@ -507,13 +537,16 @@ def _threshold_policy(path: Path, corpus_manifest_sha256: str, case_contract_sha
 
 def _case_result_record(case: dict, *, index: int, response_body: dict | None, error: SearchRequestError | None,
                         latency: float, retrieval_mode: str = "baseline",
-                        score_name: str = metrics.SCORE_NAME) -> dict:
+                        score_name: str = metrics.SCORE_NAME,
+                        evidence_advice: str = "off") -> dict:
     retrieval_mode = _validated_retrieval_mode(retrieval_mode)
     score_name = _validated_score_name(score_name)
+    evidence_advice = _validated_evidence_advice(evidence_advice)
     metadata = {
         "event": "case_result", "case_index": index, "case_id": case["id"],
         "split": case["split"], "query": case["query"], "language": case["language"],
         "retrieval_mode": retrieval_mode, "score_name": score_name,
+        "evidence_advice": evidence_advice,
         "category": case["category"], "difficulty": case["difficulty"],
         "intent_group": case["intent_group"], "answerability": case["answerability"],
         "expected_action": case["expected_action"], "boundary_type": case["boundary_type"],
@@ -535,11 +568,33 @@ def _case_result_record(case: dict, *, index: int, response_body: dict | None, e
             raise metrics.EvalScoreError("retrieval_mode_mismatch")
         score = metrics.primary_score(response_body, score_name=score_name)
         projection = metrics.project_search_result(response_body, limit=12)
+        advice = projection.get("evidence_advice")
+        if evidence_advice == "jev" and not isinstance(advice, dict):
+            raise metrics.EvalScoreError("missing evidence_advice envelope")
     except metrics.EvalScoreError:
         metadata.update({"status": "error", "error_type": "response_schema_error", "score": None, "result": None, "http_status": 200})
         if case["answerability"] == metrics.SUPPORTED:
             metadata["ranking"] = {
                 stream: metrics.ranking_metrics(case, {}, stream=stream, limit=12)
+                for stream in ("source_results", "items")
+            }
+        return metadata
+    if evidence_advice == "jev" and advice["status"] != "assessed":
+        error_types = {
+            "disabled": "advisor_disabled",
+            "unavailable": "advisor_unavailable",
+            "skipped_over_budget": "advisor_skipped_over_budget",
+            "skipped_prompt_budget": "advisor_skipped_prompt_budget",
+        }
+        metadata.update({
+            "status": "error",
+            "error_type": error_types[advice["status"]],
+            "score": None if score_name == metrics.JEV_SCORE_NAME else score,
+            "result": projection,
+        })
+        if case["answerability"] == metrics.SUPPORTED:
+            metadata["ranking"] = {
+                stream: metrics.ranking_metrics(case, projection, stream=stream, limit=12)
                 for stream in ("source_results", "items")
             }
         return metadata
@@ -562,10 +617,32 @@ def _response_parts(value) -> tuple[dict, int, int, int]:
 
 def _summary_from_records(stage: str, cases: list[dict], records: list[dict], threshold: dict | None, *,
                           bootstrap_replicates: int, retrieval_mode: str = "baseline",
-                          score_name: str = metrics.SCORE_NAME) -> dict:
+                          score_name: str = metrics.SCORE_NAME,
+                          evidence_advice: str = "off") -> dict:
+    evidence_advice = _validated_evidence_advice(evidence_advice)
     by_id = {record["case_id"]: record for record in records if record.get("event") == "case_result"}
     ordered = [by_id[case["id"]] for case in cases if case["id"] in by_id]
     errors = [record for record in ordered if record.get("status") != "ok"]
+    advice_status_counts = Counter()
+    assessed_case_ids = set()
+    if evidence_advice == "jev":
+        for record in ordered:
+            advice = (record.get("result") or {}).get("evidence_advice")
+            status = advice.get("status") if isinstance(advice, dict) else "missing"
+            advice_status_counts[status] += 1
+            if status == "assessed":
+                assessed_case_ids.add(record["case_id"])
+        missing_records = len(cases) - len(ordered)
+        if missing_records:
+            advice_status_counts["no_record"] += missing_records
+    valid_assessed_semantic_denominator = None
+    if evidence_advice == "jev" and score_name == metrics.JEV_SCORE_NAME:
+        valid_assessed_semantic_denominator = sum(
+            record["case_id"] in assessed_case_ids
+            and record.get("score") is not None
+            and record.get("answerability") in {metrics.SUPPORTED, metrics.INSUFFICIENT}
+            for record in ordered
+        )
     score_records = [{
         "case_id": record["case_id"], "intent_group": record["intent_group"],
         "answerability": record["answerability"], "boundary_type": record["boundary_type"],
@@ -586,6 +663,13 @@ def _summary_from_records(stage: str, cases: list[dict], records: list[dict], th
         "runtime_version_status": RUNTIME_VERSION_STATUS,
         "retrieval_mode": _validated_retrieval_mode(retrieval_mode),
         "score_name": _validated_score_name(score_name),
+        "evidence_advice": {
+            "mode": evidence_advice,
+            "status_counts": dict(advice_status_counts),
+            "assessed_count": len(assessed_case_ids),
+            "unassessed_count": len(cases) - len(assessed_case_ids) if evidence_advice == "jev" else 0,
+            "valid_assessed_semantic_denominator": valid_assessed_semantic_denominator,
+        },
         "probability": False,
         "actual_confidence": "not_provided",
         "actual_action": "not_evaluated",
@@ -604,6 +688,7 @@ def _summary_from_records(stage: str, cases: list[dict], records: list[dict], th
             "roc_auc": metrics.roc_auc(score_records),
             "average_precision": metrics.average_precision(score_records),
             "scored_binary_denominator": sum(record.get("answerability") in {metrics.SUPPORTED, metrics.INSUFFICIENT} and record.get("score") is not None for record in score_records),
+            "valid_assessed_semantic_denominator": valid_assessed_semantic_denominator,
             "binary_denominator": sum(case["answerability"] in {metrics.SUPPORTED, metrics.INSUFFICIENT} for case in cases),
             "ambiguous_excluded_from_binary": sum(case["answerability"] == metrics.AMBIGUOUS for case in cases),
         },
@@ -621,6 +706,11 @@ def _summary_from_records(stage: str, cases: list[dict], records: list[dict], th
             **challenge,
             "quality_gates": gates,
         }
+        if evidence_advice == "jev":
+            all_advice_assessed = execution_passed and len(assessed_case_ids) == len(cases)
+            gates["checks"]["evidence_advice_all_assessed"] = all_advice_assessed
+            gates["passed"] = bool(gates.get("passed")) and all_advice_assessed
+            report["test_metrics" if stage == "test" else "development_metrics"]["quality_gates"] = gates
         report["quality_gates"] = gates
         if stage == "test":
             report["bootstrap"] = metrics.intent_cluster_bootstrap(
@@ -633,15 +723,19 @@ def _summary_from_records(stage: str, cases: list[dict], records: list[dict], th
 def run_stage(*, stage: str, cases_path: Path, journal_path: Path, corpus_manifest_sha256: str,
               base_url: str = DEFAULT_BASE_URL, threshold_path: Path, transport=None,
               resume: bool = False, bootstrap_replicates: int = BOOTSTRAP_REPLICATES,
-              retrieval_mode: str = "baseline", score_name: str = metrics.SCORE_NAME) -> dict:
+              retrieval_mode: str = "baseline", score_name: str = metrics.SCORE_NAME,
+              evidence_advice: str = "off") -> dict:
     if stage not in {"calibration", "test"}:
         raise EvaluationRunError("invalid_stage")
     if bootstrap_replicates < 1:
         raise EvaluationRunError("invalid_bootstrap_replicates")
     retrieval_mode = _validated_retrieval_mode(retrieval_mode)
     score_name = _validated_score_name(score_name)
+    evidence_advice = _validated_evidence_advice(evidence_advice)
     if score_name == metrics.RERANKER_SCORE_NAME and retrieval_mode not in {"rerank", "contextual_rerank"}:
         raise EvaluationRunError("score_requires_reranker_mode")
+    if score_name == metrics.JEV_SCORE_NAME and evidence_advice != "jev":
+        raise EvaluationRunError("score_requires_jev_evidence_advice")
     cases_path = Path(cases_path)
     journal_path = Path(journal_path)
     threshold_path = Path(threshold_path)
@@ -657,6 +751,7 @@ def run_stage(*, stage: str, cases_path: Path, journal_path: Path, corpus_manife
         threshold_value, threshold_file_sha = _threshold_policy(
             threshold_path, corpus_manifest_sha256, contract_sha,
             retrieval_mode=retrieval_mode, score_name=score_name,
+            evidence_advice=evidence_advice,
         )
         threshold_case_hashes = threshold_value.get("calibration_case_id_sha256", [])
         if set(metrics.case_id_hashes(cases)).intersection(threshold_case_hashes):
@@ -683,8 +778,9 @@ def run_stage(*, stage: str, cases_path: Path, journal_path: Path, corpus_manife
         "policy_version": EXPECTED_POLICY_VERSION,
         "retrieval_mode": retrieval_mode,
         "score_name": score_name,
+        "evidence_advice": evidence_advice,
         "base_url": base_url,
-        "request": _request_body(retrieval_mode),
+        "request": _request_body(retrieval_mode, evidence_advice),
         "threshold_file_sha256": threshold_file_sha,
     }
     http = transport or HTTPTransport(base_url)
@@ -698,7 +794,7 @@ def run_stage(*, stage: str, cases_path: Path, journal_path: Path, corpus_manife
 
         def execute_case(index_case):
             index, case = index_case
-            payload = {"query": case["query"], **_request_body(retrieval_mode)}
+            payload = {"query": case["query"], **_request_body(retrieval_mode, evidence_advice)}
             started = time.monotonic()
             try:
                 value = http.post_search(payload)
@@ -710,7 +806,7 @@ def run_stage(*, stage: str, cases_path: Path, journal_path: Path, corpus_manife
                 record = _case_result_record(
                     case, index=index, response_body=body, error=None,
                     latency=time.monotonic() - started, retrieval_mode=retrieval_mode,
-                    score_name=score_name,
+                    score_name=score_name, evidence_advice=evidence_advice,
                 )
                 record["http_status"] = status
                 record["http_attempts"] = attempts
@@ -720,14 +816,14 @@ def run_stage(*, stage: str, cases_path: Path, journal_path: Path, corpus_manife
                 return _case_result_record(
                     case, index=index, response_body=None, error=error,
                     latency=time.monotonic() - started, retrieval_mode=retrieval_mode,
-                    score_name=score_name,
+                    score_name=score_name, evidence_advice=evidence_advice,
                 )
             except Exception:
                 safe_error = SearchRequestError("internal_evaluation_error")
                 return _case_result_record(
                     case, index=index, response_body=None, error=safe_error,
                     latency=time.monotonic() - started, retrieval_mode=retrieval_mode,
-                    score_name=score_name,
+                    score_name=score_name, evidence_advice=evidence_advice,
                 )
 
         if pending:
@@ -752,13 +848,14 @@ def run_stage(*, stage: str, cases_path: Path, journal_path: Path, corpus_manife
                     "runtime_version_status": RUNTIME_VERSION_STATUS,
                     "retrieval_mode": retrieval_mode,
                     "score_name": score_name,
+                    "evidence_advice": evidence_advice,
                     "probability": False,
                     "threshold": selected["threshold"],
                     "target_supported_tpr": selected["target_tpr"],
                     "calibration_supported_tpr": selected["supported_tpr"],
                     "comparison": ">=",
                     "policy_version": EXPECTED_POLICY_VERSION,
-                    "request": _request_body(retrieval_mode),
+                    "request": _request_body(retrieval_mode, evidence_advice),
                     "corpus_manifest_sha256": corpus_manifest_sha256,
                     "case_contract_sha256": contract_sha,
                     "calibration_case_manifest_sha256": case_sha,
@@ -770,7 +867,7 @@ def run_stage(*, stage: str, cases_path: Path, journal_path: Path, corpus_manife
                 _write_private_json_no_overwrite(threshold_path, policy)
                 frozen_hash = hashlib.sha256(threshold_path.read_bytes()).hexdigest()
                 if not any(record.get("event") == "threshold_frozen" for record in journal.records):
-                    journal.append({"event": "threshold_frozen", "threshold_file_sha256": frozen_hash, "threshold": policy["threshold"], "retrieval_mode": retrieval_mode, "score_name": score_name, "policy_version": EXPECTED_POLICY_VERSION})
+                    journal.append({"event": "threshold_frozen", "threshold_file_sha256": frozen_hash, "threshold": policy["threshold"], "retrieval_mode": retrieval_mode, "score_name": score_name, "evidence_advice": evidence_advice, "policy_version": EXPECTED_POLICY_VERSION})
                 threshold_value = policy
             elif threshold_path.exists() and resume:
                 frozen, _digest = _load_private_json(threshold_path)
@@ -779,7 +876,12 @@ def run_stage(*, stage: str, cases_path: Path, journal_path: Path, corpus_manife
                         or frozen.get("case_contract_sha256") != contract_sha
                         or frozen.get("retrieval_mode") != retrieval_mode
                         or frozen.get("score_name") != score_name
-                        or frozen.get("request") != _request_body(retrieval_mode)
+                        or frozen.get("evidence_advice", "off") != evidence_advice
+                        or frozen.get("request") not in (
+                            _request_body(retrieval_mode, evidence_advice),
+                            _request_body(retrieval_mode, evidence_advice, legacy_without_advice=True)
+                            if evidence_advice == "off" else {},
+                        )
                         or frozen.get("calibration_case_id_sha256") != metrics.case_id_hashes(cases)):
                     raise EvaluationRunError("threshold_identity_mismatch")
                 threshold_value = frozen
@@ -787,11 +889,12 @@ def run_stage(*, stage: str, cases_path: Path, journal_path: Path, corpus_manife
             stage, cases, journal.records, threshold_value,
             bootstrap_replicates=bootstrap_replicates,
             retrieval_mode=retrieval_mode, score_name=score_name,
+            evidence_advice=evidence_advice,
         )
         report["case_manifest_sha256"] = case_sha
         report["case_contract_sha256"] = contract_sha
         report["corpus_manifest_sha256"] = corpus_manifest_sha256
-        report["request"] = _request_body(retrieval_mode)
+        report["request"] = _request_body(retrieval_mode, evidence_advice)
         report["case_distribution"] = distributions
         report["run_id"] = journal.run_id
         report["journal_sha256"] = hashlib.sha256(journal_path.read_bytes()).hexdigest()
@@ -811,8 +914,9 @@ def build_parser() -> argparse.ArgumentParser:
             "Examples (run calibration first, then freeze its threshold for test):\n"
             "  python scripts/evaluate-retrieval-confidence.py --stage calibration --cases calibration.jsonl --journal calibration.journal.jsonl --threshold-output calibration-threshold.json --corpus-manifest-sha256 <sha256>\n"
             "  python scripts/evaluate-retrieval-confidence.py --stage test --cases test.jsonl --journal test.journal.jsonl --threshold-input calibration-threshold.json --corpus-manifest-sha256 <same-sha256>\n"
-            "  Add --retrieval-mode and --score-name identically to calibration and test to compare a frozen mode/score pair.\n"
-            "  Add --resume only for the exact same stage, case file, corpus, API base URL, policy, mode, score, request, and threshold identity."
+            "  Add --retrieval-mode, --evidence-advice, and --score-name identically to calibration and test to compare a frozen policy/score pair.\n"
+            "  Jev advice scores are uncalibrated direct-support proxies; actual answer/action remains not evaluated.\n"
+            "  Add --resume only for the exact same stage, case file, corpus, API base URL, policy, mode, advice, score, request, and threshold identity."
         ),
         formatter_class=argparse.RawDescriptionHelpFormatter,
     )
@@ -822,7 +926,8 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--corpus-manifest-sha256", required=True, help="Frozen source/chunk snapshot manifest SHA-256.")
     parser.add_argument("--base-url", default=DEFAULT_BASE_URL)
     parser.add_argument("--retrieval-mode", choices=sorted(metrics.RETRIEVAL_MODES), default="baseline", help="API retrieval mode; calibration and test thresholds are isolated per mode.")
-    parser.add_argument("--score-name", choices=sorted(metrics.SCORE_NAMES), default=metrics.SCORE_NAME, help="Rank-derived proxy selected for calibration and test; reranker relevance is not answerability.")
+    parser.add_argument("--evidence-advice", choices=("off", "jev"), default="off", help="Request optional Jev evidence advice; default off preserves existing search behavior.")
+    parser.add_argument("--score-name", choices=sorted(metrics.SCORE_NAMES), default=metrics.SCORE_NAME, help="Rank-derived or Jev direct-support proxy; neither is answerability probability.")
     parser.add_argument("--resume", action="store_true", help="Resume missing case rows from a journal with identical manifest/policy identity.")
     parser.add_argument("--threshold-output", type=Path, help="Calibration stage: create frozen owner-only threshold JSON without overwriting.")
     parser.add_argument("--threshold-input", type=Path, help="Test stage: require a frozen calibration threshold JSON.")
@@ -848,6 +953,7 @@ def main(argv=None) -> int:
             base_url=args.base_url, threshold_path=threshold_path,
             resume=args.resume, bootstrap_replicates=args.bootstrap_replicates,
             retrieval_mode=args.retrieval_mode, score_name=args.score_name,
+            evidence_advice=args.evidence_advice,
         )
     except EvaluationRunError as error:
         print(json.dumps({"status": "failed", "error_type": error.code}, separators=(",", ":")))
@@ -855,7 +961,7 @@ def main(argv=None) -> int:
     summary = {key: report.get(key) for key in (
         "stage", "status", "execution_gate_passed", "case_count", "recorded_case_count",
         "success_count", "error_count", "case_distribution", "group_counts",
-        "retrieval_mode", "score_name", "probability", "actual_confidence", "actual_action",
+        "retrieval_mode", "evidence_advice", "score_name", "probability", "actual_confidence", "actual_action",
         "actual_abstention", "threshold_is_proxy_only", "threshold_proxy_enforcement",
         "score_metrics", "development_metrics", "test_metrics", "rankings", "bootstrap",
         "threshold", "quality_gates", "policy_version", "runner_version",

@@ -126,6 +126,38 @@ def response(score, *, items=None, source_results=None):
     }
 
 
+def evidence_advice(status='assessed', score=0.75, *, choice='direct_support_candidate', projection=None, metadata=None):
+    if projection is None:
+        projection = ({
+            'total_evidence': 1, 'selected_evidence': 1, 'omitted_evidence': 0,
+            'truncated_evidence': 0, 'state_bytes': 100, 'request_bytes': 200,
+            'excerpt_only': True,
+            'items': [{'chunk_id': 'chunk-1', 'revision_id': 'revision-1',
+                       'source_text_bytes': 100, 'excerpt_text_bytes': 100, 'truncated': False}],
+        } if status == 'assessed' else {})
+    return {
+        'schema_version': 'jev-evidence-advice/v1',
+        'status': status,
+        'advisory_only': True,
+        'choice': choice,
+        'support_score': score if status == 'assessed' else None,
+        'score_kind': 'uncalibrated_direct_support_probability',
+        'policy_version': 'jev-evidence-advice/v1',
+        'evidence_ids': ['chunk-1'] if status == 'assessed' else [],
+        'projection': projection,
+        'metadata': metadata or {},
+    }
+
+
+def jev_search_response(score, *, status='assessed', choice='direct_support_candidate'):
+    result = response(0.01)
+    result['retrieval_mode'] = 'contextual_rerank'
+    if status != 'assessed' and choice == 'direct_support_candidate':
+        choice = None
+    result['evidence_advice'] = evidence_advice(status, score, choice=choice)
+    return result
+
+
 def captured_canary_metadata_result(*, graph_rank=None):
     """Metadata-only fixture matching the captured v2.2 response shape."""
     item = {
@@ -351,6 +383,48 @@ def test_reranker_proxy_requires_candidate_rank_between_one_and_forty(candidate_
         metrics.primary_score(result, score_name='max_reranker_relevance_proxy')
 
 
+def test_jev_direct_support_proxy_uses_assessed_support_score_only():
+    result = response(0.99)
+    result['evidence_advice'] = evidence_advice(score=0.0)
+    assert metrics.primary_score(result, score_name='jev_direct_support_proxy') == 0.0
+    result['evidence_advice'] = evidence_advice(score=0.72)
+    assert metrics.primary_score(result, score_name='jev_direct_support_proxy') == pytest.approx(0.72)
+
+
+@pytest.mark.parametrize('status', ['disabled', 'unavailable', 'skipped_over_budget', 'skipped_prompt_budget'])
+def test_jev_unassessed_cases_have_null_score_not_zero(status):
+    result = response(0.99)
+    result['evidence_advice'] = evidence_advice(status=status)
+    assert metrics.primary_score(result, score_name='jev_direct_support_proxy') is None
+
+
+def test_jev_unavailable_empty_advice_with_null_choice_is_a_valid_unassessed_result():
+    raw = response(0.5)
+    raw['evidence_advice'] = evidence_advice('unavailable', None)
+    raw['evidence_advice']['choice'] = None
+
+    projected = metrics.project_search_result(raw)
+
+    assert projected['evidence_advice']['status'] == 'unavailable'
+    assert projected['evidence_advice']['choice'] is None
+    assert projected['evidence_advice']['support_score'] is None
+
+
+@pytest.mark.parametrize('advice', [
+    {**evidence_advice(), 'support_score': None},
+    {**evidence_advice(), 'support_score': float('nan')},
+    {**evidence_advice(), 'support_score': 1.01},
+    {**evidence_advice('unavailable'), 'support_score': 0.0},
+    {**evidence_advice(), 'schema_version': 'other'},
+    {**evidence_advice(), 'choice': 'invented'},
+])
+def test_jev_direct_support_proxy_rejects_malformed_envelopes(advice):
+    result = response(0.99)
+    result['evidence_advice'] = advice
+    with pytest.raises(metrics.EvalScoreError):
+        metrics.primary_score(result, score_name='jev_direct_support_proxy')
+
+
 def test_projection_keeps_rerank_provenance_but_strips_private_metadata():
     raw = response(0.7)
     raw['retrieval_mode'] = 'contextual_rerank'
@@ -407,6 +481,118 @@ def test_projection_rejects_malformed_nested_reranker_inference_status(status):
     raw['reranker_trace'] = {'inference_status': status}
     with pytest.raises(metrics.EvalScoreError, match='inference_status'):
         metrics.project_search_result(raw)
+
+
+def test_jev_advice_projection_keeps_bounded_metadata_and_drops_private_payload():
+    raw = response(0.99)
+    raw['evidence_advice'] = evidence_advice(
+        projection={
+            'total_evidence': 2, 'selected_evidence': 1, 'omitted_evidence': 1,
+            'truncated_evidence': 1, 'state_bytes': 1200, 'request_bytes': 1500,
+            'excerpt_only': True,
+            'items': [{
+                'chunk_id': 'chunk-1', 'revision_id': 'revision-1',
+                'source_text_bytes': 4000, 'excerpt_text_bytes': 600, 'truncated': True,
+                'text': 'private source excerpt', 'quote': 'private quote',
+            }],
+            'raw_excerpt': 'private source excerpt',
+        },
+        metadata={
+            'provider': 'decision_models', 'model_selected': 'typesafe/jev-1.13',
+            'model_reported': 'typesafe/jev-1.13', 'request_id': 'request-safe-id',
+            'latency_ms': 25.5, 'cache_hit': False, 'error_code': None,
+            'request_state_sha256': 'a' * 64, 'request_sha256': 'b' * 64,
+            'input_sha256': 'c' * 64, 'provider_calls': 1,
+            'usage': {'input_tokens': 100, 'output_tokens': 12, 'total_tokens': 112,
+                      'estimated_cost': 0.001, 'inputTokens': 554,
+                      'costUsd': 0.000023268, 'raw_body': 'must not appear'},
+            'prompt': 'must not appear', 'raw_response': 'must not appear',
+        },
+    )
+
+    projected = metrics.project_search_result(raw)
+
+    assert projected['evidence_advice'] == {
+        'schema_version': 'jev-evidence-advice/v1',
+        'status': 'assessed', 'advisory_only': True,
+        'choice': 'direct_support_candidate', 'support_score': 0.75,
+        'score_kind': 'uncalibrated_direct_support_probability',
+        'policy_version': 'jev-evidence-advice/v1', 'evidence_ids': ['chunk-1'],
+        'projection': {
+            'total_evidence': 2, 'selected_evidence': 1, 'omitted_evidence': 1,
+            'truncated_evidence': 1, 'state_bytes': 1200, 'request_bytes': 1500,
+            'excerpt_only': True,
+            'items': [{'chunk_id': 'chunk-1', 'revision_id': 'revision-1',
+                       'source_text_bytes': 4000, 'excerpt_text_bytes': 600, 'truncated': True}],
+        },
+        'metadata': {
+            'provider': 'decision_models', 'model_selected': 'typesafe/jev-1.13',
+            'model_reported': 'typesafe/jev-1.13', 'request_id': 'request-safe-id',
+            'latency_ms': 25.5, 'cache_hit': False, 'error_code': None,
+            'request_state_sha256': 'a' * 64, 'request_sha256': 'b' * 64,
+            'input_sha256': 'c' * 64, 'provider_calls': 1,
+                'usage': {'input_tokens': 100, 'output_tokens': 12, 'total_tokens': 112,
+                          'estimated_cost': 0.001, 'inputTokens': 554,
+                          'costUsd': 0.000023268},
+        },
+    }
+    serialized = json.dumps(projected)
+    for forbidden in ('private source excerpt', 'private quote', 'raw_body', 'raw_response', 'must not appear', 'prompt'):
+        assert forbidden not in serialized
+
+
+def test_unassessed_jev_case_keeps_search_result_and_ranking_but_has_null_score():
+    case = next(case for case in cases_for('calibration') if case['answerability'] == 'supported')
+    record = runner._case_result_record(
+        case, index=0, response_body=jev_search_response(None, status='unavailable'),
+        error=None, latency=0.1, retrieval_mode='contextual_rerank',
+        evidence_advice='jev', score_name='jev_direct_support_proxy',
+    )
+
+    assert record['status'] == 'error'
+    assert record['error_type'] == 'advisor_unavailable'
+    assert record['score'] is None
+    assert record['result']['evidence_advice']['status'] == 'unavailable'
+    assert record['ranking']['items']['source_any_hit_at_5'] == 0
+
+
+def test_jev_summary_keeps_full_denominators_and_fails_quality_gate_on_any_unassessed_case():
+    cases = cases_for('calibration')
+    records = []
+    unassessed_id = cases[0]['id']
+    for index, case in enumerate(cases):
+        if case['answerability'] == 'supported':
+            score, choice = 0.9, 'direct_support_candidate'
+        elif case['answerability'] == 'insufficient':
+            score, choice = 0.1, 'no_support'
+        else:
+            score, choice = 0.5, 'uncertain'
+        status = 'unavailable' if case['id'] == unassessed_id else 'assessed'
+        record = runner._case_result_record(
+            case, index=index, response_body=jev_search_response(score if status == 'assessed' else None,
+                                                                  status=status, choice=choice),
+            error=None, latency=0.01, retrieval_mode='contextual_rerank',
+            evidence_advice='jev', score_name='jev_direct_support_proxy',
+        )
+        records.append(record)
+
+    report = runner._summary_from_records(
+        'calibration', cases, records, {'threshold': 0.5}, bootstrap_replicates=10,
+        retrieval_mode='contextual_rerank', score_name='jev_direct_support_proxy',
+        evidence_advice='jev',
+    )
+
+    assert report['case_count'] == report['recorded_case_count'] == 100
+    assert report['error_count'] == 1 and report['execution_gate_passed'] is False
+    assert report['evidence_advice']['assessed_count'] == 99
+    assert report['evidence_advice']['unassessed_count'] == 1
+    assert report['score_metrics']['binary_denominator'] == 96
+    assert report['score_metrics']['valid_assessed_semantic_denominator'] == 95
+    assert report['score_metrics']['ambiguous_excluded_from_binary'] == 4
+    assert report['case_results'][0]['score'] is None
+    assert report['case_results'][0]['result']['items']
+    assert report['development_metrics']['quality_gates']['passed'] is False
+    assert report['actual_action'] == 'not_evaluated'
 
 
 def test_public_case_contract_is_preferred_and_private_legacy_is_fallback(tmp_path, monkeypatch):
@@ -499,6 +685,98 @@ def test_reranker_proxy_calibration_identity_includes_mode_and_score_name(tmp_pa
                 invalid_path, 'a' * 64, runner._case_contract_sha256(),
                 retrieval_mode='contextual_rerank', score_name='max_reranker_relevance_proxy',
             )
+
+
+def test_jev_calibration_binds_advice_mode_and_score_to_request_journal_and_threshold(tmp_path):
+    cases = cases_for('calibration')
+    cases_path = tmp_path / 'calibration.jsonl'
+    write_cases(cases_path, cases)
+    threshold_path = tmp_path / 'jev-threshold.json'
+    journal_path = tmp_path / 'jev.journal.jsonl'
+    score_by_query = {
+        case['query']: (0.8 if case['answerability'] == 'supported' else 0.2)
+        for case in cases
+    }
+
+    class JevTransport:
+        def __init__(self):
+            self.requests = []
+
+        def post_search(self, payload):
+            self.requests.append(dict(payload))
+            score = score_by_query[payload['query']]
+            choice = 'direct_support_candidate' if score == 0.8 else 'no_support'
+            return jev_search_response(score, choice=choice)
+
+    transport = JevTransport()
+    report = runner.run_stage(
+        stage='calibration', cases_path=cases_path, journal_path=journal_path,
+        corpus_manifest_sha256='a' * 64, threshold_path=threshold_path,
+        transport=transport, retrieval_mode='contextual_rerank',
+        evidence_advice='jev', score_name='jev_direct_support_proxy',
+    )
+    header = json.loads(journal_path.read_text().splitlines()[0])
+    threshold = json.loads(threshold_path.read_text())
+    assert report['evidence_advice']['mode'] == 'jev'
+    assert header['evidence_advice'] == threshold['evidence_advice'] == 'jev'
+    assert header['score_name'] == threshold['score_name'] == 'jev_direct_support_proxy'
+    assert transport.requests[0]['evidence_advice'] == 'jev'
+    assert threshold['threshold'] == pytest.approx(0.8)
+    assert report['actual_action'] == 'not_evaluated'
+
+    with pytest.raises(runner.EvaluationRunError, match='threshold_identity_mismatch'):
+        runner._threshold_policy(
+            threshold_path, 'a' * 64, runner._case_contract_sha256(),
+            retrieval_mode='contextual_rerank', score_name='jev_direct_support_proxy',
+            evidence_advice='off',
+        )
+
+    request_count = len(transport.requests)
+    with pytest.raises(runner.EvaluationRunError, match='journal_identity_mismatch'):
+        runner.run_stage(
+            stage='calibration', cases_path=cases_path, journal_path=journal_path,
+            corpus_manifest_sha256='a' * 64, threshold_path=threshold_path,
+            transport=transport, retrieval_mode='contextual_rerank',
+            evidence_advice='off', score_name='max_technical_rrf_proxy', resume=True,
+        )
+    assert len(transport.requests) == request_count
+
+
+def test_pre_jev_off_threshold_artifact_remains_readable(tmp_path):
+    path = tmp_path / 'legacy-off-threshold.json'
+    policy = {
+        'schema_version': runner.THRESHOLD_SCHEMA_VERSION,
+        'stage': 'calibration_frozen_threshold',
+        'runner_version': runner.RUNNER_VERSION,
+        'runtime_version_status': runner.RUNTIME_VERSION_STATUS,
+        'retrieval_mode': 'baseline',
+        'score_name': metrics.SCORE_NAME,
+        'probability': False,
+        'threshold': 0.5,
+        'target_supported_tpr': 0.90,
+        'comparison': '>=',
+        'policy_version': POLICY,
+        'request': {
+            'category': '', 'limit': 12, 'purpose': 'auto',
+            'retrieval_mode': 'baseline',
+        },
+        'corpus_manifest_sha256': 'a' * 64,
+        'case_contract_sha256': runner._case_contract_sha256(),
+        'calibration_case_manifest_sha256': 'b' * 64,
+        'calibration_case_id_sha256': ['c' * 64],
+        'calibration_intent_group_sha256': ['d' * 64],
+        'calibration_source_material_sha256': ['e' * 64],
+    }
+    runner._write_private_json_no_overwrite(path, policy)
+
+    loaded, digest = runner._threshold_policy(
+        path, 'a' * 64, runner._case_contract_sha256(),
+        retrieval_mode='baseline', score_name=metrics.SCORE_NAME,
+        evidence_advice='off',
+    )
+
+    assert loaded == policy
+    assert len(digest) == 64
 
 
 @pytest.mark.parametrize('items', [
@@ -721,6 +999,51 @@ def test_http_transport_sends_explicit_retrieval_mode_and_rejects_unknown_mode()
         })
 
 
+def test_http_transport_sends_evidence_advice_and_rejects_unknown_setting():
+    calls = []
+    payload_bytes = json.dumps(response(0.5)).encode()
+    fake_response = FakeResponse(payload_bytes, headers={'Content-Length': str(len(payload_bytes))})
+    transport = runner.HTTPTransport(
+        'http://127.0.0.1:8080',
+        urlopen=lambda request, timeout: calls.append((request, timeout)) or fake_response,
+        sleep_fn=lambda _delay: None,
+    )
+    transport.post_search({
+        'query': 'synthetic', 'category': '', 'limit': 12, 'purpose': 'auto',
+        'retrieval_mode': 'contextual_rerank', 'evidence_advice': 'jev',
+    })
+    assert json.loads(calls[0][0].data)['evidence_advice'] == 'jev'
+    assert calls[0][1] == 180
+    with pytest.raises(runner.SearchRequestError, match='invalid_request_evidence_advice'):
+        transport.post_search({
+            'query': 'synthetic', 'category': '', 'limit': 12, 'purpose': 'auto',
+            'retrieval_mode': 'contextual_rerank', 'evidence_advice': 'invented',
+        })
+
+
+def test_http_transport_does_not_retry_jev_requests_and_uses_advisor_timeout_window():
+    calls = []
+    sleeps = []
+
+    def urlopen(request, timeout):
+        calls.append((request, timeout))
+        raise HTTPError(request.full_url, 429, 'busy', {'Retry-After': '1'}, None)
+
+    transport = runner.HTTPTransport(
+        'http://127.0.0.1:8080', urlopen=urlopen, sleep_fn=sleeps.append,
+    )
+    with pytest.raises(runner.SearchRequestError, match='http_429') as error:
+        transport.post_search({
+            'query': 'synthetic', 'category': '', 'limit': 12, 'purpose': 'auto',
+            'retrieval_mode': 'contextual_rerank', 'evidence_advice': 'jev',
+        })
+
+    assert error.value.attempts == 1
+    assert len(calls) == 1
+    assert calls[0][1] >= 180
+    assert sleeps == []
+
+
 def test_http_transport_fails_without_reading_oversize_body_or_leaking_it():
     huge = FakeResponse(b'x' * (runner.MAX_RESPONSE_BYTES + 1), headers={})
     sleeps = []
@@ -747,9 +1070,10 @@ class FakeTransport:
         self.max_active = 0
 
     def post_search(self, payload):
-        assert set(payload) == {'query', 'category', 'limit', 'purpose', 'retrieval_mode'}
+        assert set(payload) == {'query', 'category', 'limit', 'purpose', 'retrieval_mode', 'evidence_advice'}
         assert payload['category'] == '' and payload['limit'] == 12 and payload['purpose'] == 'auto'
         assert payload['retrieval_mode'] in metrics.RETRIEVAL_MODES
+        assert payload['evidence_advice'] in {'off', 'jev'}
         with self.lock:
             self.requests.append(dict(payload))
             self.active += 1
@@ -796,7 +1120,8 @@ def test_calibration_then_test_is_resumable_threshold_frozen_and_group_disjoint(
     assert calibration_transport.max_active == 2
     assert calibration['threshold']['threshold'] == pytest.approx(0.9)
     assert calibration['threshold']['calibration_case_id_sha256'] == metrics.case_id_hashes(calibration_cases)
-    assert set(calibration_transport.requests[0]) == {'query', 'category', 'limit', 'purpose', 'retrieval_mode'}
+    assert set(calibration_transport.requests[0]) == {'query', 'category', 'limit', 'purpose', 'retrieval_mode', 'evidence_advice'}
+    assert calibration_transport.requests[0]['evidence_advice'] == 'off'
     assert all((path.stat().st_mode & 0o777) == 0o600 for path in (calibration_journal, threshold_path))
 
     request_count = len(calibration_transport.requests)
@@ -1109,12 +1434,14 @@ def test_cli_defaults_to_baseline_rrf_and_exposes_four_modes_and_two_scores():
     ])
     assert args.retrieval_mode == 'baseline'
     assert args.score_name == 'max_technical_rrf_proxy'
+    assert args.evidence_advice == 'off'
     assert runner.build_parser().parse_args([
         '--stage', 'test', '--cases', 'test.jsonl', '--journal', 'run.jsonl',
         '--corpus-manifest-sha256', 'a' * 64, '--threshold-input', 'threshold.json',
         '--retrieval-mode', 'contextual_rerank',
         '--score-name', 'max_reranker_relevance_proxy',
-    ]).retrieval_mode == 'contextual_rerank'
+        '--evidence-advice', 'jev',
+    ]).evidence_advice == 'jev'
 
 
 def test_reranker_score_requires_a_rerank_mode_before_http(tmp_path):
