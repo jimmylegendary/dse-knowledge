@@ -35,7 +35,7 @@ Threshold **0.3**은 calibration 100건에서만 정해 고정했고, test 500�
 | Jev 입력 token (test) | 4,226,751 |
 | 응답에 보고된 Jev 비용 (test / calibration) | $0.178 / $0.035 (비용 미보고 1회) |
 | Jev 지연 p50 / p95 | 480 ms / 680 ms |
-| 검색 HTTP 전체 지연 p50 / p95 | 9.6 s / 18.2 s (최초 실행의 성공 88건 기준) |
+| 검색 HTTP 전체 지연 p50 / p95 | 9.9 s / 25.9 s (최종 500건; 최초 실행의 성공 88건은 9.6 s / 18.2 s) |
 
 **실제 연동.** HTTP·Supabase·Codex CLI·HAT schema·Melete 경로에서 **17/18 통과**했다. hardware·kernel·experiment 판단 3건 모두 Jev 판단이 생성기에 전달되고 snapshot과 결과에 같은 값으로 남았다. hardware 판단은 필수 규칙 위반으로 거절(`constraint_rejected`)되어, 규칙 판정이 Jev보다 우선함을 확인했다. 실패 1건: 새 피드백은 저장과 별도 조회에 성공했지만, 일반적인 후속 실험 질문에서 상위 경험으로 선택되지 않았다. 이 실패는 판정을 바꾸지 않고 그대로 기록했다. HAT는 구조 검증이며 B300 simulation·실측은 범위 밖이다.
 
