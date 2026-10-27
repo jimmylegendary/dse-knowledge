@@ -4,11 +4,14 @@ from __future__ import annotations
 import hashlib
 import json
 import math
+import os
 import re
 import bisect
+import selectors
 import subprocess
 import tempfile
 import time
+from datetime import datetime
 from pathlib import Path
 from typing import Any
 
@@ -421,8 +424,10 @@ def _validate_value(value: Any, evidence_ids: list[str]) -> bool:
 
 
 def _safe_usage(value: Any) -> dict[str, int | float]:
-    if not isinstance(value, dict):
+    if value is None:
         return {}
+    if not isinstance(value, dict):
+        raise ValueError("usage_invalid")
     result: dict[str, int | float] = {}
     names = {
         "input_tokens": ("input_tokens", "inputTokens"),
@@ -431,14 +436,24 @@ def _safe_usage(value: Any) -> dict[str, int | float]:
     }
     for destination, alternatives in names.items():
         for key in alternatives:
-            amount = value.get(key)
-            if type(amount) is int and amount >= 0:
+            if key not in value:
+                continue
+            amount = value[key]
+            if type(amount) is int and 0 <= amount <= 2**63 - 1:
                 result[destination] = amount
                 break
+            raise ValueError("usage_invalid")
     cost = value.get("costUsd", value.get("cost_usd"))
-    if (not isinstance(cost, bool) and isinstance(cost, (int, float))
-            and math.isfinite(float(cost)) and float(cost) >= 0):
-        result["cost_usd"] = float(cost)
+    if "costUsd" in value or "cost_usd" in value:
+        if isinstance(cost, bool) or not isinstance(cost, (int, float)) or cost < 0:
+            raise ValueError("usage_invalid")
+        try:
+            cost_value = float(cost)
+        except (OverflowError, ValueError):
+            raise ValueError("usage_invalid") from None
+        if not math.isfinite(cost_value):
+            raise ValueError("usage_invalid")
+        result["cost_usd"] = cost_value
     return result
 
 
@@ -485,8 +500,16 @@ def _validated_response(reply: Any) -> tuple[str, float, str | None, str | None,
         raise ValueError("jev_response_invalid")
     requested = reply.get("requestedModel")
     returned = reply.get("returnedModel")
+    dated_model = False
+    if isinstance(returned, str):
+        match = re.fullmatch(re.escape(MODEL) + r"-(\d{8})", returned)
+        if match:
+            try:
+                dated_model = datetime.strptime(match.group(1), "%Y%m%d").strftime("%Y%m%d") == match.group(1)
+            except ValueError:
+                dated_model = False
     if (requested != MODEL or not isinstance(returned, str)
-            or not (returned == MODEL or re.fullmatch(re.escape(MODEL) + r"-\d{8}", returned))):
+            or not (returned == MODEL or dated_model)):
         raise ValueError("model_mismatch")
     answers = reply.get("answers")
     if not isinstance(answers, dict) or set(answers) != {"evidence_assessment"}:
@@ -501,10 +524,17 @@ def _validated_response(reply: Any) -> tuple[str, float, str | None, str | None,
         raise ValueError("probabilities_invalid")
     probabilities = {}
     for label, value in raw_probabilities.items():
-        if (isinstance(value, bool) or not isinstance(value, (int, float))
-                or not math.isfinite(float(value)) or not 0 <= float(value) <= 1):
+        if isinstance(value, bool) or not isinstance(value, (int, float)):
             raise ValueError("probabilities_invalid")
-        probabilities[label] = float(value)
+        if isinstance(value, int):
+            if value < 0 or value > 1:
+                raise ValueError("probabilities_invalid")
+            probability = float(value)
+        else:
+            if not math.isfinite(value) or not 0 <= value <= 1:
+                raise ValueError("probabilities_invalid")
+            probability = value
+        probabilities[label] = probability
     if abs(sum(probabilities.values()) - 1.0) > 0.01:
         raise ValueError("probabilities_invalid")
     support_score = probabilities["direct_support_candidate"]
@@ -536,6 +566,98 @@ class JevEvidenceAdvisor:
             self._cache = ValidatedCache(self.settings.data_root / "jev-advice-cache")
         return self._cache
 
+    @staticmethod
+    def _stop_process(process) -> None:
+        try:
+            process.kill()
+        except (OSError, ProcessLookupError):
+            pass
+        try:
+            process.wait(timeout=1)
+        except subprocess.TimeoutExpired:
+            try:
+                process.kill()
+            except (OSError, ProcessLookupError):
+                pass
+            try:
+                process.wait(timeout=1)
+            except subprocess.TimeoutExpired:
+                pass
+        stream = getattr(process, "stdout", None)
+        if stream is not None:
+            try:
+                stream.close()
+            except OSError:
+                pass
+
+    @classmethod
+    def _capture_stdout(cls, process, *, timeout: int, started: float) -> tuple[bytes, int]:
+        stream = getattr(process, "stdout", None)
+        if stream is None:
+            cls._stop_process(process)
+            raise _JevFailure("provider_failed", provider_calls=1)
+        selector = selectors.DefaultSelector()
+        captured = bytearray()
+        deadline = started + timeout
+        try:
+            descriptor = stream.fileno()
+            os.set_blocking(descriptor, False)
+            selector.register(descriptor, selectors.EVENT_READ)
+            while True:
+                remaining = deadline - time.monotonic()
+                if remaining <= 0:
+                    raise _JevFailure("timeout", provider_calls=1,
+                                      latency_ms=max(0, round((time.monotonic()-started)*1000)))
+                events = selector.select(remaining)
+                if not events:
+                    raise _JevFailure("timeout", provider_calls=1,
+                                      latency_ms=max(0, round((time.monotonic()-started)*1000)))
+                reached_eof = False
+                for key, _ in events:
+                    read_limit = min(64 * 1024, MAX_RESPONSE_BYTES + 1 - len(captured))
+                    if read_limit <= 0:
+                        raise _JevFailure("response_too_large", provider_calls=1,
+                                          latency_ms=max(0, round((time.monotonic()-started)*1000)))
+                    try:
+                        chunk = os.read(key.fd, read_limit)
+                    except BlockingIOError:
+                        continue
+                    if not chunk:
+                        try:
+                            selector.unregister(key.fd)
+                        except (KeyError, ValueError):
+                            pass
+                        reached_eof = True
+                        break
+                    captured.extend(chunk)
+                    if len(captured) > MAX_RESPONSE_BYTES:
+                        raise _JevFailure("response_too_large", provider_calls=1,
+                                          latency_ms=max(0, round((time.monotonic()-started)*1000)))
+                if reached_eof:
+                    remaining = deadline - time.monotonic()
+                    if remaining <= 0:
+                        raise _JevFailure("timeout", provider_calls=1,
+                                          latency_ms=max(0, round((time.monotonic()-started)*1000)))
+                    try:
+                        return_code = process.wait(timeout=remaining)
+                    except subprocess.TimeoutExpired:
+                        raise _JevFailure("timeout", provider_calls=1,
+                                          latency_ms=max(0, round((time.monotonic()-started)*1000))) from None
+                    return bytes(captured), return_code
+        except _JevFailure:
+            cls._stop_process(process)
+            raise
+        except (OSError, ValueError, selectors.Error):
+            cls._stop_process(process)
+            raise _JevFailure("provider_failed", provider_calls=1,
+                              latency_ms=max(0, round((time.monotonic()-started)*1000))) from None
+        finally:
+            selector.close()
+            try:
+                stream.close()
+            except OSError:
+                pass
+
     def _request(self, request: dict[str, Any], timeout: int) -> tuple[Any, int]:
         cli = self.settings.get("DSE_DECISION_MODEL_CLI", DEFAULT_CLI)
         if not isinstance(cli, str) or not cli.strip():
@@ -553,23 +675,18 @@ class JevEvidenceAdvisor:
                 raise _JevFailure("request_unavailable") from None
             started = time.monotonic()
             try:
-                completed = subprocess.run(
+                process = subprocess.Popen(
                     [cli.strip(), "decide", "--file", str(request_path)],
                     stdin=subprocess.DEVNULL, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL,
-                    timeout=timeout, check=False,
+                    bufsize=0, shell=False,
                 )
-            except subprocess.TimeoutExpired:
-                elapsed = max(0, round((time.monotonic() - started) * 1000))
-                raise _JevFailure("timeout", provider_calls=1, latency_ms=elapsed) from None
             except OSError:
                 elapsed = max(0, round((time.monotonic() - started) * 1000))
                 raise _JevFailure("cli_unavailable", provider_calls=0, latency_ms=elapsed) from None
+            stdout, return_code = self._capture_stdout(process, timeout=timeout, started=started)
             latency_ms = max(0, round((time.monotonic() - started) * 1000))
-            stdout = completed.stdout
-            if completed.returncode != 0:
+            if return_code != 0:
                 raise _JevFailure("provider_failed", provider_calls=1, latency_ms=latency_ms)
-            if not isinstance(stdout, bytes) or len(stdout) > MAX_RESPONSE_BYTES:
-                raise _JevFailure("response_too_large", provider_calls=1, latency_ms=latency_ms)
             try:
                 parsed = json.loads(stdout.decode("utf-8"))
             except (UnicodeDecodeError, json.JSONDecodeError):
@@ -669,7 +786,8 @@ class JevEvidenceAdvisor:
         except ValueError as exc:
             code = str(exc)
             if code not in {
-                "model_mismatch", "choice_invalid", "probabilities_invalid", "jev_response_invalid",
+                "model_mismatch", "choice_invalid", "probabilities_invalid", "usage_invalid",
+                "jev_response_invalid",
             }:
                 code = "provider_failed"
             latency_ms = max(0, round((time.monotonic() - started) * 1000))

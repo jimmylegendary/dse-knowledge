@@ -1,9 +1,11 @@
 import importlib
 import hashlib
 import json
+import os
 import stat
+import subprocess
+import threading
 from pathlib import Path
-from types import SimpleNamespace
 
 import pytest
 
@@ -56,17 +58,66 @@ def settings(tmp_path, **overrides):
     return Settings(values)
 
 
-def install_fake_cli(monkeypatch, response):
+class ControlledPopen:
+    def __init__(self, argv, *, raw, hang=False, returncode=0):
+        self.argv=list(argv);self.returncode=None;self.killed=False
+        self._stop=threading.Event();self._done=threading.Event();self._exit_code=returncode
+        read_fd,self._write_fd=os.pipe()
+        self.stdout=os.fdopen(read_fd,'rb',buffering=0)
+        self._raw=raw;self._hang=hang
+        self._thread=threading.Thread(target=self._write_output,daemon=True)
+        self._thread.start()
+
+    def _write_output(self):
+        try:
+            if self._hang:
+                self._stop.wait()
+            else:
+                for start in range(0,len(self._raw),4096):
+                    if self._stop.is_set():break
+                    view=memoryview(self._raw[start:start+4096])
+                    while view and not self._stop.is_set():
+                        try:view=view[os.write(self._write_fd,view):]
+                        except (BrokenPipeError,OSError):return
+        finally:
+            try:os.close(self._write_fd)
+            except OSError:pass
+            self.returncode=-9 if self.killed else self._exit_code
+            self._done.set()
+
+    def poll(self):
+        return self.returncode if self._done.is_set() else None
+
+    def wait(self,timeout=None):
+        if not self._done.wait(timeout):
+            raise subprocess.TimeoutExpired(self.argv,timeout)
+        return self.returncode
+
+    def kill(self):
+        self.killed=True;self._stop.set()
+        try:self.stdout.close()
+        except OSError:pass
+
+
+def install_fake_cli(monkeypatch, response=None, *, raw=None, hang=False, returncode=0):
     module = importlib.import_module("dse_knowledge.jev_advice")
     calls = []
 
-    def run(argv, **kwargs):
+    def popen(argv, **kwargs):
         path = Path(argv[argv.index("--file") + 1])
-        calls.append({"argv": list(argv), "kwargs": kwargs, "request": json.loads(path.read_text())})
-        raw = json.dumps(response, ensure_ascii=False, separators=(",", ":"), allow_nan=True).encode("utf-8")
-        return SimpleNamespace(returncode=0, stdout=raw)
+        request=json.loads(path.read_text())
+        output=raw
+        if output is None:
+            output=json.dumps(response,ensure_ascii=False,separators=(",",":"),allow_nan=True).encode('utf-8')
+        process=ControlledPopen(argv,raw=output,hang=hang,returncode=returncode)
+        calls.append({"argv":list(argv),"kwargs":kwargs,"request":request,"process":process})
+        return process
 
-    monkeypatch.setattr(module.subprocess, "run", run)
+    def forbidden_run(*args,**kwargs):
+        raise AssertionError("Jev adapter tests must never invoke a real provider CLI")
+
+    monkeypatch.setattr(module.subprocess,"Popen",popen)
+    monkeypatch.setattr(module.subprocess,"run",forbidden_run)
     return module, calls
 
 
@@ -207,11 +258,14 @@ def test_explicit_condition_mismatch_and_missing_condition_are_separate_choices(
 @pytest.mark.parametrize("bad_reply", [
     reply(returned="other-model"),
     reply(returned=MODEL + "-preview"),
+    reply(returned=MODEL + "-20261399"),
     reply(returned="typesafe/jev-1.14"),
     reply(choice="made_up_choice"),
     reply(probs={"direct_support_candidate": 1.0}),
     reply(probs=probabilities(direct_support_candidate=float("nan"))),
     reply(probs=probabilities(direct_support_candidate=0.80)),
+    reply(probs=probabilities(direct_support_candidate=10**400)),
+    reply(extra={"usage": {"inputTokens": 3, "costUsd": 10**400}}),
 ])
 def test_malformed_model_or_probability_is_unavailable_with_null_score(tmp_path, monkeypatch, bad_reply):
     module, calls = install_fake_cli(monkeypatch, bad_reply)
@@ -222,26 +276,22 @@ def test_malformed_model_or_probability_is_unavailable_with_null_score(tmp_path,
     assert result["support_score"] is None
     assert result["choice"] is None
     assert result["metadata"]["provider_calls"] == 1
-    assert result["metadata"]["error_code"] in {"model_mismatch", "choice_invalid", "probabilities_invalid"}
+    assert result["metadata"]["error_code"] in {
+        "model_mismatch", "choice_invalid", "probabilities_invalid", "usage_invalid",
+    }
     assert len(calls) == 1
 
 
 def test_timeout_and_missing_cli_are_nonfatal_safe_provider_failures(tmp_path, monkeypatch):
-    module = importlib.import_module("dse_knowledge.jev_advice")
-    calls = []
-
-    def timeout(argv, **kwargs):
-        calls.append((argv, kwargs))
-        raise module.subprocess.TimeoutExpired(argv, kwargs["timeout"], stderr=b"private-stderr")
-
-    monkeypatch.setattr(module.subprocess, "run", timeout)
-    timed_out = module.JevEvidenceAdvisor(settings(tmp_path / "timeout")).assess("query", [evidence()])
+    module,calls=install_fake_cli(monkeypatch,reply(),hang=True)
+    timed_out = module.JevEvidenceAdvisor(settings(
+        tmp_path / "timeout", DSE_JEV_TIMEOUT_SECONDS="1",
+    )).assess("query", [evidence()])
 
     def missing(argv, **kwargs):
-        calls.append((argv, kwargs))
         raise FileNotFoundError("private-cli-path")
 
-    monkeypatch.setattr(module.subprocess, "run", missing)
+    monkeypatch.setattr(module.subprocess,"Popen",missing)
     missing_cli = module.JevEvidenceAdvisor(settings(
         tmp_path / "missing", DSE_DECISION_MODEL_CLI="/private/path/decision-model",
     )).assess("query", [evidence()])
@@ -252,12 +302,51 @@ def test_timeout_and_missing_cli_are_nonfatal_safe_provider_failures(tmp_path, m
     assert missing_cli["metadata"]["error_code"] == "cli_unavailable"
     assert timed_out["metadata"]["provider_calls"] == 1
     assert missing_cli["metadata"]["provider_calls"] == 0
-    assert len(calls) == 2
+    assert len(calls) == 1
+    assert calls[0]["process"].killed is True
     serialized = json.dumps([timed_out, missing_cli], ensure_ascii=False)
     assert "private-stderr" not in serialized and "private-cli-path" not in serialized
     assert "/private/path/decision-model" not in serialized
-    assert calls[0][1]["stdin"] == module.subprocess.DEVNULL
-    assert calls[0][1]["stderr"] == module.subprocess.DEVNULL
+    assert calls[0]["kwargs"]["stdin"] == module.subprocess.DEVNULL
+    assert calls[0]["kwargs"]["stderr"] == module.subprocess.DEVNULL
+    assert calls[0]["kwargs"]["stdout"] == module.subprocess.PIPE
+    assert calls[0]["kwargs"]["shell"] is False
+
+
+def test_returned_model_revision_is_a_real_calendar_date_and_large_numbers_fail_closed():
+    module=importlib.import_module("dse_knowledge.jev_advice")
+    invalid_date=reply(returned=MODEL+"-20261399")
+    with pytest.raises(ValueError,match="model_mismatch"):
+        module._validated_response(invalid_date)
+
+    huge_probability=reply(probs=probabilities(direct_support_candidate=10**400))
+    with pytest.raises(ValueError,match="probabilities_invalid"):
+        module._validated_response(huge_probability)
+
+    huge_usage=reply(extra={"usage":{"inputTokens":4,"costUsd":10**400}})
+    with pytest.raises(ValueError,match="usage_invalid"):
+        module._validated_response(huge_usage)
+
+
+def test_cli_capture_stops_at_max_response_plus_one_and_kills_provider(tmp_path, monkeypatch):
+    module, calls = install_fake_cli(monkeypatch, raw=b"x" * 20_000)
+    monkeypatch.setattr(module,"MAX_RESPONSE_BYTES",64)
+    read_sizes=[]
+    original_read=module.os.read
+    def bounded_read(descriptor,size):
+        read_sizes.append(size)
+        return original_read(descriptor,size)
+    monkeypatch.setattr(module.os,"read",bounded_read)
+
+    result=module.JevEvidenceAdvisor(settings(tmp_path)).assess("query",[evidence()])
+
+    assert result["status"]=="unavailable"
+    assert result["support_score"] is None
+    assert result["metadata"]["error_code"]=="response_too_large"
+    assert result["metadata"]["provider_calls"]==1
+    assert calls[0]["process"].killed is True
+    assert max(read_sizes)<=65
+    assert calls[0]["process"].stdout.closed is True
 
 
 def test_over_budget_rules_are_not_truncated_or_sent(tmp_path, monkeypatch):
