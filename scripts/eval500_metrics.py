@@ -22,10 +22,18 @@ EVIDENCE_ADVICE_CHOICES = frozenset({
     "conflicting_evidence", "no_support", "uncertain",
 })
 EVIDENCE_ADVICE_SCORE_KIND = "uncalibrated_direct_support_probability"
+EVIDENCE_ADVICE_ERROR_CODES = frozenset({
+    "jev_input_invalid", "jev_state_over_budget", "timeout_configuration_invalid",
+    "cache_unavailable", "provider_failed", "timeout", "response_too_large",
+    "cli_unavailable", "request_unavailable", "response_invalid_json", "model_mismatch",
+    "choice_invalid", "probabilities_invalid", "usage_invalid", "jev_response_invalid",
+    "cache_write_failed", "advisor_error", "evidence_advice_unavailable",
+})
+EVIDENCE_ADVICE_GENERIC_ERROR = "advisor_error_unrecognized"
 EVIDENCE_ADVICE_USAGE_KEYS = frozenset({
     "input_tokens", "output_tokens", "total_tokens", "cached_input_tokens",
     "prompt_tokens", "completion_tokens", "inputTokens", "outputTokens",
-    "totalTokens", "cachedInputTokens", "estimated_cost", "cost", "costUsd",
+    "totalTokens", "cachedInputTokens", "estimated_cost", "cost", "cost_usd", "costUsd",
 })
 SUPPORTED = "supported"
 INSUFFICIENT = "insufficient"
@@ -283,7 +291,7 @@ def primary_score(search_result: object, *, score_name: str = SCORE_NAME) -> flo
     if not isinstance(items, list):
         raise EvalScoreError("search result items must be an array")
     if score_name == JEV_SCORE_NAME:
-        advice = _project_evidence_advice(search_result.get("evidence_advice"))
+        advice = project_evidence_advice(search_result.get("evidence_advice"))
         if advice["status"] != "assessed":
             return None
         return float(advice["support_score"])
@@ -364,7 +372,7 @@ def _advice_number(value: object, *, field: str, integer: bool = False, maximum:
     return value
 
 
-def _project_evidence_advice(value: object) -> dict:
+def project_evidence_advice(value: object) -> dict:
     if not isinstance(value, dict):
         raise EvalScoreError("evidence_advice must be an object")
     status = value.get("status")
@@ -439,7 +447,7 @@ def _project_evidence_advice(value: object) -> dict:
     if not isinstance(metadata, dict):
         raise EvalScoreError("evidence_advice.metadata must be an object")
     projected_metadata = {}
-    string_keys = ("provider", "model_selected", "model_reported", "request_id", "error_code")
+    string_keys = ("provider", "model_selected", "model_reported", "request_id")
     for key in string_keys:
         if key in metadata and metadata[key] is not None:
             _copy_if_type(metadata, key, projected_metadata, types=(str,))
@@ -447,6 +455,14 @@ def _project_evidence_advice(value: object) -> dict:
                 raise EvalScoreError(f"evidence_advice.metadata.{key} is too long")
         elif key in metadata:
             projected_metadata[key] = None
+    if "error_code" in metadata:
+        error_code = metadata["error_code"]
+        if error_code is None:
+            projected_metadata["error_code"] = None
+        elif isinstance(error_code, str) and error_code in EVIDENCE_ADVICE_ERROR_CODES:
+            projected_metadata["error_code"] = error_code
+        else:
+            projected_metadata["error_code"] = EVIDENCE_ADVICE_GENERIC_ERROR
     for key in ("request_state_sha256", "request_sha256", "input_sha256"):
         if key in metadata and metadata[key] is not None:
             raw_hash = metadata[key]
@@ -473,7 +489,7 @@ def _project_evidence_advice(value: object) -> dict:
                 continue
             projected_usage[key] = _advice_number(
                 usage_value, field=f"evidence_advice.metadata.usage.{key}",
-                integer=key not in {"estimated_cost", "cost", "costUsd"},
+                integer=key not in {"estimated_cost", "cost", "cost_usd", "costUsd"},
             )
         projected_metadata["usage"] = projected_usage
 
@@ -583,7 +599,7 @@ def project_search_result(search_result: object, *, limit: int = 12) -> dict:
         raise EvalScoreError("missing or invalid retrieval_mode")
     projected["retrieval_mode"] = retrieval_mode
     if "evidence_advice" in search_result:
-        projected["evidence_advice"] = _project_evidence_advice(search_result["evidence_advice"])
+        projected["evidence_advice"] = project_evidence_advice(search_result["evidence_advice"])
     purpose_trace = search_result.get("purpose_trace")
     if isinstance(purpose_trace, dict):
         allowed = ("requested", "resolved", "rule", "uncertain", "version")

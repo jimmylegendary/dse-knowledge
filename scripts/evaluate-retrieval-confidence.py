@@ -566,16 +566,42 @@ def _case_result_record(case: dict, *, index: int, response_body: dict | None, e
     try:
         if response_body.get("retrieval_mode") != retrieval_mode:
             raise metrics.EvalScoreError("retrieval_mode_mismatch")
-        score = metrics.primary_score(response_body, score_name=score_name)
-        projection = metrics.project_search_result(response_body, limit=12)
-        advice = projection.get("evidence_advice")
-        if evidence_advice == "jev" and not isinstance(advice, dict):
-            raise metrics.EvalScoreError("missing evidence_advice envelope")
+        core_response = dict(response_body)
+        has_advice = "evidence_advice" in core_response
+        raw_advice = core_response.pop("evidence_advice", None)
+        projection = metrics.project_search_result(core_response, limit=12)
+        advice = None
+        if has_advice:
+            try:
+                advice = metrics.project_evidence_advice(raw_advice)
+            except metrics.EvalScoreError:
+                if evidence_advice == "off":
+                    advice = None
+            else:
+                projection["evidence_advice"] = advice
+        advice_invalid = evidence_advice == "jev" and (not has_advice or advice is None)
+        if score_name == metrics.JEV_SCORE_NAME:
+            if advice is None and not advice_invalid:
+                raise metrics.EvalScoreError("missing evidence_advice envelope")
+            score = advice["support_score"] if advice is not None else None
+        else:
+            score = metrics.primary_score(core_response, score_name=score_name)
     except metrics.EvalScoreError:
         metadata.update({"status": "error", "error_type": "response_schema_error", "score": None, "result": None, "http_status": 200})
         if case["answerability"] == metrics.SUPPORTED:
             metadata["ranking"] = {
                 stream: metrics.ranking_metrics(case, {}, stream=stream, limit=12)
+                for stream in ("source_results", "items")
+            }
+        return metadata
+    if evidence_advice == "jev" and advice_invalid:
+        metadata.update({
+            "status": "error", "error_type": "advisor_invalid_advice",
+            "score": None, "result": projection,
+        })
+        if case["answerability"] == metrics.SUPPORTED:
+            metadata["ranking"] = {
+                stream: metrics.ranking_metrics(case, projection, stream=stream, limit=12)
                 for stream in ("source_results", "items")
             }
         return metadata
@@ -589,7 +615,7 @@ def _case_result_record(case: dict, *, index: int, response_body: dict | None, e
         metadata.update({
             "status": "error",
             "error_type": error_types[advice["status"]],
-            "score": None if score_name == metrics.JEV_SCORE_NAME else score,
+            "score": None,
             "result": projection,
         })
         if case["answerability"] == metrics.SUPPORTED:

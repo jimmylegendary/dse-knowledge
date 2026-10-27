@@ -410,6 +410,34 @@ def test_jev_unavailable_empty_advice_with_null_choice_is_a_valid_unassessed_res
     assert projected['evidence_advice']['support_score'] is None
 
 
+def test_evidence_advice_unknown_error_code_is_replaced_before_public_projection():
+    raw = response(0.5)
+    advice = evidence_advice('unavailable', None, choice=None, metadata={
+        'error_code': 'provider failed: api_key=private-sentinel',
+    })
+    raw['evidence_advice'] = advice
+
+    projected = metrics.project_search_result(raw)['evidence_advice']
+
+    assert projected['metadata']['error_code'] == 'advisor_error_unrecognized'
+    assert 'api_key=private-sentinel' not in json.dumps(projected)
+
+    for safe_code in ('timeout', 'advisor_error', 'evidence_advice_unavailable'):
+        advice['metadata']['error_code'] = safe_code
+        assert metrics.project_evidence_advice(advice)['metadata']['error_code'] == safe_code
+
+
+def test_evidence_advice_normalized_usage_fields_are_preserved_as_numbers():
+    raw = response(0.5)
+    raw['evidence_advice'] = evidence_advice('assessed', 0.7, metadata={
+        'usage': {'input_tokens': 23, 'cost_usd': 0.0042},
+    })
+
+    projected = metrics.project_search_result(raw)['evidence_advice']
+
+    assert projected['metadata']['usage'] == {'input_tokens': 23, 'cost_usd': 0.0042}
+
+
 @pytest.mark.parametrize('advice', [
     {**evidence_advice(), 'support_score': None},
     {**evidence_advice(), 'support_score': float('nan')},
@@ -554,6 +582,29 @@ def test_unassessed_jev_case_keeps_search_result_and_ranking_but_has_null_score(
     assert record['score'] is None
     assert record['result']['evidence_advice']['status'] == 'unavailable'
     assert record['ranking']['items']['source_any_hit_at_5'] == 0
+
+
+def test_malformed_jev_advice_preserves_valid_search_projection_and_ranking():
+    case = next(case for case in cases_for('calibration') if case['answerability'] == 'supported')
+    case['evidence_groups'][0]['alternatives'] = [{
+        'material_id': 'material-1', 'revision_id': 'revision-1', 'chunk_id': 'chunk-1',
+    }]
+    body = response(0.8)
+    body['evidence_advice'] = evidence_advice(score=1.2)
+
+    record = runner._case_result_record(
+        case, index=0, response_body=body, error=None, latency=0.1,
+        evidence_advice='jev', score_name='jev_direct_support_proxy',
+    )
+
+    assert record['status'] == 'error'
+    assert record['error_type'] == 'advisor_invalid_advice'
+    assert record['score'] is None
+    assert [item['chunk_id'] for item in record['result']['items']] == ['chunk-1']
+    assert 'evidence_advice' not in record['result']
+    assert record['ranking']['items']['source_any_hit_at_1'] == 1
+    assert record['ranking']['source_results']['source_any_hit_at_1'] == 1
+    assert 'must not appear in public output' not in json.dumps(record)
 
 
 def test_jev_summary_keeps_full_denominators_and_fails_quality_gate_on_any_unassessed_case():
@@ -776,6 +827,28 @@ def test_pre_jev_off_threshold_artifact_remains_readable(tmp_path):
     )
 
     assert loaded == policy
+    assert len(digest) == 64
+
+
+def test_published_contextual_rerank_threshold_accepts_legacy_off_request_shape(tmp_path):
+    public_summary = json.loads(
+        (ROOT / 'research/eval500/results/contextual-rerank-8b-calibration-input-summary.json').read_text()
+    )
+    threshold = public_summary['threshold']
+    assert threshold['retrieval_mode'] == 'contextual_rerank'
+    assert threshold['score_name'] == 'max_reranker_relevance_proxy'
+    assert 'evidence_advice' not in threshold
+    assert 'evidence_advice' not in threshold['request']
+    threshold_path = tmp_path / 'published-v1-threshold.json'
+    runner._write_private_json_no_overwrite(threshold_path, threshold)
+
+    loaded, digest = runner._threshold_policy(
+        threshold_path, threshold['corpus_manifest_sha256'], threshold['case_contract_sha256'],
+        retrieval_mode='contextual_rerank', score_name='max_reranker_relevance_proxy',
+        evidence_advice='off',
+    )
+
+    assert loaded['request'] == threshold['request']
     assert len(digest) == 64
 
 
