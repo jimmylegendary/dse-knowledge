@@ -23,7 +23,7 @@ HTTP 검색 → 기존 hybrid/contextual/rerank → Jev의 조건부 근거 검�
 
 ## Provider와 입력
 
-새 `JevEvidenceAdvisor(settings)`는 기존 shared `decision-model` CLI의 general profile을 사용한다. 기본 CLI는 `/home/jimmy/.local/bin/decision-model`, 설정 override는 `DSE_DECISION_MODEL_CLI`, timeout은 `DSE_JEV_TIMEOUT_SECONDS`(기본 120)다. 모델은 `typesafe/jev-1.13`으로 확인한다. 자동 재시도·모델 fallback·새 credential 복사는 없다. subprocess는 argv, stdin DEVNULL, stderr 미노출, bounded stdout을 사용한다.
+새 `JevEvidenceAdvisor(settings)`는 기존 shared `decision-model` CLI의 general profile을 사용한다. 기본 CLI는 `/home/jimmy/.local/bin/decision-model`, 설정 override는 `DSE_DECISION_MODEL_CLI`, timeout은 `DSE_JEV_TIMEOUT_SECONDS`(기본 120)다. requestedModel은 `typesafe/jev-1.13`으로 확인하고 returnedModel은 그 exact name 또는 `typesafe/jev-1.13-YYYYMMDD` 형식의 동일 모델 revision만 허용한다. 실제 smoke에서 returnedModel `typesafe/jev-1.13-20260917`을 확인했다. 자동 재시도·모델 fallback·새 credential 복사는 없다. subprocess는 argv, stdin DEVNULL, stderr 미노출, bounded stdout을 사용한다.
 
 공개 인터페이스:
 
@@ -58,6 +58,10 @@ API 및 decision은 source의 원문이나 순위를 바꾸지 않는다. one ag
 
 Owner-only cache는 full query/rules/evidence identity와 source text hash, projection/prompt/model/schema version에 묶인다. 동일 입력은 재사용하고 입력·revision·policy가 바뀌면 재사용하지 않는다. thread-safe atomic replace와 기존 private-path 규칙을 따른다. raw excerpt와 private prompt는 Git에 내보내지 않는다.
 
+공개 projection 필드는 `total_evidence`, `selected_evidence`, `omitted_evidence`, `truncated_evidence`, `state_bytes`, `request_bytes`, `excerpt_only=true`, `items`다. items에는 `chunk_id`, `revision_id`, `source_text_bytes`, `excerpt_text_bytes`, `truncated`만 허용한다. 공개 metadata는 `provider`, `model_selected`, `model_reported`, `request_id`, `latency_ms`, `cache_hit`, `usage`, `error_code`, `request_state_sha256`, `request_sha256`, `input_sha256`, `provider_calls`로 제한한다. usage도 알려진 수치 필드만 재투영하며, cache hit에서 새 provider_calls는 0이다. 기존 호출의 usage와 이번 호출의 실제 비용을 섞지 않는다.
+
+Envelope top-level `consumed_by_generator`는 boolean이다. search에서는 false, decision에서는 최종 생성 prompt에 advice를 실제 넣었을 때만 true다.
+
 ## Runtime 연결
 
 - 설정 `DSE_JEV_EVIDENCE_ENABLED` 기본 false. `Settings.load`는 기존 owner-only 파일 규칙으로 `jev.env`도 읽는다.
@@ -72,6 +76,8 @@ Owner-only cache는 full query/rules/evidence identity와 source text hash, proj
 현재 contextual_rerank 결과는 ranking baseline이다. Jev는 ranking을 바꾸지 않으므로 Hit/MRR 변화는 기대하지 않으며 회귀 여부를 확인한다. 새 score는 `jev_direct_support_proxy`, API request의 `evidence_advice=jev`와 결합한다. 기존 score/threshold는 의미가 다르므로 덮어쓰지 않는다. 모든 journal/threshold identity에 evidence_advice를 넣는다.
 
 100건 calibration → threshold freeze → 동일 policy의 500건 test를 순서대로 실행한다. test 결과로 prompt·score·threshold를 조정하지 않는다. 이전 500건은 공개된 회귀 세트이므로 독립적인 새 일반화 검증이라고 표현하지 않는다. 기존 baseline artifact를 재사용하고 같은 retrieval mode/자료 snapshot/정책을 확인한다. actual LLM answer/action은 500 검색 score에서 추정하지 않는다.
+
+Jev 미평가 case는 runner의 `status=error`, `score=null`, 안전한 error_type으로 기록하되 정상 search result projection은 유지한다. 따라서 ranking은 실제 반환 items로 계산하고 semantic score는 valid-assessed만 사용한다. HTTP/provider 장애를 근거 부재나 정상 abstention으로 재분류하지 않는다.
 
 보고: Source/Chunk Hit@k, MRR, evidence-group coverage, score ROC-AUC/AP, supported TPR, OOD/grey/missing FPR, 운영 오류·skip·cache 비율, latency 및 provider usage/cost(제공되는 경우), supported 질문의 불필요한 보류 proxy를 분리한다. ambiguous 질문은 기존 binary denominator 규칙을 유지한다. gate는 기존 TPR ≥ .90, OOD FPR ≤ .10, grey FPR ≤ .20이며 필수 표본 0이면 not_evaluated다. 모든 test case가 유효한 provider 판단이어야 품질 gate PASS를 주장한다.
 

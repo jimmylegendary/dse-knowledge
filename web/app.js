@@ -830,6 +830,31 @@
     if (neighbors) row.append(neighbors);
     return row;
   }
+  function renderEvidenceAdvice(advice) {
+    if (!isObject(advice) || advice.status === "disabled") return null;
+    const labels = {
+      direct_support_candidate: "직접 근거 후보 있음",
+      partial_support: "일부 근거만 있음",
+      condition_mismatch: "요청과 다른 조건의 근거",
+      conflicting_evidence: "근거 간 충돌 검토 필요",
+      no_support: "발췌문에서 근거를 찾지 못함",
+      uncertain: "추가 확인 필요"
+    };
+    const box = el("section", "evidence-card");
+    box.setAttribute("aria-label", "Jev 근거 검토");
+    box.append(text("strong", "Jev 근거 검토", "small"));
+    if (advice.status === "assessed" && advice.advisory_only === true) {
+      box.append(text("p", labels[advice.choice] ?? "추가 확인 필요", "result-excerpt"));
+      const count = Array.isArray(advice.evidence_ids) ? advice.evidence_ids.length : 0;
+      box.append(text("p", `${count}개 근거의 발췌문을 검토한 제안입니다. 원문과 적용 조건을 함께 확인해야 하며 사실·성능 검증을 뜻하지 않습니다.`, "small muted"));
+    } else {
+      const message = advice.status === "skipped_over_budget" || advice.status === "skipped_prompt_budget"
+        ? "검토 범위를 담을 수 없어 이번 Jev 검토는 생략됐습니다."
+        : "이번 Jev 검토를 완료하지 못했습니다. 이 상태는 근거가 없다는 판정이 아닙니다.";
+      box.append(text("p", message, "small muted"));
+    }
+    return box;
+  }
   function renderRetrievalResponse(body, response) {
     const items = listOf(valueAt(response, "items") ?? response);
     const locators = listOf(valueAt(response, "locators"));
@@ -849,6 +874,8 @@
       if (model) configuration.append(text("span", asText(model)));
       body.append(configuration);
     }
+    const evidenceAdvice = renderEvidenceAdvice(valueAt(response, "evidence_advice"));
+    if (evidenceAdvice) body.append(evidenceAdvice);
     add(purposeBox, text("strong", "PURPOSE"),
       text("span", `${asText(selectedPurpose)} → ${asText(resolvedPurpose, "분류 없음")}`),
       text("span", `policy ${asText(valueAt(response, "policy_version"), asText(valueAt(purposeTrace, "version"), "버전 없음"))}`),
@@ -1305,6 +1332,8 @@
     const kind = valueAt(detail, "kind") ?? state.jobs.find(job => job.id === state.decisions.selectedId)?.kind;
     add(body, text("span", `${asText(kind, "판단")} · ${fmtDate(valueAt(detail, "created_at", "createdAt"))}`, "detail-eyebrow"), text("h3", asText(question, "판단 결과")));
     const result = valueAt(detail, "result") ?? detail;
+    const evidenceAdvice = renderEvidenceAdvice(valueAt(result, "evidence_advice"));
+    if (evidenceAdvice) body.append(evidenceAdvice);
     const summary = isObject(result) ? valueAt(result, "answer", "summary", "recommendation", "verdict") : result;
     if (summary !== undefined && (typeof summary === "string" || typeof summary === "number")) body.append(text("p", String(summary), "result-excerpt"));
     body.append(text("pre", safeJson(result), "json-result"));
