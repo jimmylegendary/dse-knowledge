@@ -127,14 +127,20 @@ def test_report_cannot_pass_with_failed_calibration(tmp_path):
     assert result['quality_gate']=='FAIL'
 
 
-def write_journal(tmp_path, paths, *, hidden_failure=False):
+def write_journal(tmp_path, paths, *, hidden_failure=False, hidden_failure_count=1,
+                  latency_success=None, latency_error=None):
     records=[]
     for i in range(500):
         advice={'schema_version':'jev-evidence-advice/v1','advisory_only':True,
                 'status':'assessed','support_score':.9,'choice':'direct_support_candidate'}
-        if hidden_failure and i==0: advice.update(status='unavailable',support_score=None)
-        records.append({'event':'case_result','case_id':str(i),'query':'public diagnostic query',
-                        'status':'ok','score':.9,'result':{'evidence_advice':advice}})
+        failed=hidden_failure and i<hidden_failure_count
+        if failed: advice.update(status='unavailable',support_score=None)
+        record={'event':'case_result','case_id':str(i),'query':'public diagnostic query',
+                'status':'error' if failed else 'ok','score':None if failed else .9,
+                'result':{'evidence_advice':advice}}
+        if latency_success is not None:
+            record['latency_seconds']=latency_error if failed else latency_success
+        records.append(record)
     journal=tmp_path/'journal.jsonl';journal.write_text(''.join(json.dumps(x)+'\n' for x in records))
     test=json.loads(paths[2].read_text());test['journal_sha256']=hashlib.sha256(journal.read_bytes()).hexdigest()
     paths[2].write_text(json.dumps(test))
@@ -154,9 +160,95 @@ def test_report_rejects_http_success_with_unavailable_advice(tmp_path):
         load_builder().build_report(*paths,tmp_path/'report.html',journal_path=journal)
 
 
+def test_partial_report_labels_conditional_metrics_and_uses_success_latency_only(tmp_path):
+    paths=summaries(tmp_path)
+    test=json.loads(paths[2].read_text());test.update(success_count=400,error_count=100)
+    test['quality_gates']={'passed':True};paths[2].write_text(json.dumps(test))
+    journal=write_journal(tmp_path,paths,hidden_failure=True,hidden_failure_count=100,
+                          latency_success=2.0,latency_error=100.0)
+    out=tmp_path/'report.html';result=load_builder().build_report(*paths,out,journal_path=journal)
+    text=out.read_text()
+    assert result['quality_gate']=='FAIL'
+    assert '전체 500건 비교 불완전' in text
+    assert 'valid-assessed 조건부 지표' in text
+    assert '성공 HTTP 요청 기준 p50 2.00s · p95 2.00s' in text
+    assert '오류 응답의 빠른 반환은 latency 개선으로 계산하지 않습니다' in text
+    assert '실패 case는 ranking이 missing' in text
+    assert 'ROC-AUC, AP와 subgroup FPR의 유효 분모는 서로 다를 수 있습니다' in text
+
+
 def test_report_pass_requires_validated_journal_and_threshold(tmp_path):
     paths=summaries(tmp_path);journal=write_journal(tmp_path,paths)
     test=json.loads(paths[2].read_text());test['quality_gates']={'passed':True}
     paths[2].write_text(json.dumps(test));out=tmp_path/'report.html'
     result=load_builder().build_report(*paths,out,journal_path=journal,threshold_path=tmp_path/'threshold.json')
     assert result['quality_gate']=='PASS'
+
+
+def operations(tmp_path):
+    common = dict(initial_case_count=100, initial_success_count=100,
+                  initial_error_count=0, final_assessed_count=100,
+                  recovery_rounds=[], total_http_attempts=100,
+                  jev_usage={'reported_input_tokens':12000,'reported_cost_usd':.02,
+                             'reported_provider_calls':100,'unreported_cost_calls':0},
+                  latency={'initial_http_p50':1.2,'initial_http_p95':2.4,
+                           'jev_provider_p50_ms':200,'jev_provider_p95_ms':500})
+    test = dict(common, initial_case_count=500, initial_success_count=496,
+                initial_error_count=4, final_assessed_count=500,
+                recovery_rounds=[{'retried_cases':2,'success_count':1,'error_count':1,
+                                  'parent_journal_sha256':'a'*64,'journal_sha256':'c'*64},
+                                 {'retried_cases':3,'success_count':3,'error_count':0,
+                                  'parent_journal_sha256':'c'*64,'journal_sha256':'b'*64}],
+                total_http_attempts=505,
+                jev_usage={'reported_input_tokens':60000,'reported_cost_usd':.12,
+                           'reported_provider_calls':505,'unreported_cost_calls':4})
+    value={'schema_version':'jev-evaluation-operations/v1',
+           'phases':{'calibration':common,'test':test},
+           'source_body':'PRIVATE OPERATIONS BODY MUST NOT APPEAR'}
+    path=tmp_path/'operations.json';path.write_text(json.dumps(value));return path
+
+
+def test_report_separates_first_attempt_failure_from_final_quality_pass(tmp_path):
+    paths=summaries(tmp_path);journal=write_journal(tmp_path,paths)
+    test=json.loads(paths[2].read_text());test['quality_gates']={'passed':True}
+    paths[2].write_text(json.dumps(test))
+    ops=operations(tmp_path);ops_data=json.loads(ops.read_text())
+    ops_data['phases']['test']['recovery_rounds'][1]['journal_sha256']=test['journal_sha256']
+    ops.write_text(json.dumps(ops_data));out=tmp_path/'report.html'
+    result=load_builder().build_report(*paths,out,journal_path=journal,
+        threshold_path=tmp_path/'threshold.json',operations_path=ops)
+    text=out.read_text()
+    assert result['quality_gate']=='PASS'
+    assert result['initial_execution_gate']=='FAIL'
+    assert '최종 유효점수 품질 gate' in text
+    assert '496 / 500' in text and '505' in text and '복구 성공' in text
+    assert 'source_body' not in text and 'PRIVATE OPERATIONS BODY MUST NOT APPEAR' not in text
+
+
+def test_report_without_operations_marks_first_attempt_unassessed(tmp_path):
+    paths=summaries(tmp_path);out=tmp_path/'report.html'
+    load_builder().build_report(*paths,out)
+    text=out.read_text()
+    assert '최초 시도 신뢰도 미평가' in text
+    assert '첫 시도 성공률 100%' not in text
+
+
+def test_report_exposes_ambiguous_reference_metric_and_case_filters(tmp_path):
+    paths=summaries(tmp_path)
+    for path in (paths[0],paths[2]):
+        data=json.loads(path.read_text())
+        data['test_metrics']['ambiguous_predicted_supported_rate']=.25
+        path.write_text(json.dumps(data))
+    out=tmp_path/'report.html';load_builder().build_report(*paths,out)
+    text=out.read_text()
+    assert '모호 질문 지원 점수 초과율' in text
+    assert '참고 · 실제 clarify 행동 미평가' in text
+    assert 'id="language-filter"' in text and 'id="difficulty-filter"' in text
+
+
+def test_report_rejects_malformed_operations_counts(tmp_path):
+    paths=summaries(tmp_path);ops=operations(tmp_path)
+    value=json.loads(ops.read_text());value['phases']['test']['initial_success_count']=501
+    ops.write_text(json.dumps(value))
+    with pytest.raises(ValueError,match='operations'):
+        load_builder().build_report(*paths,tmp_path/'report.html',operations_path=ops)
