@@ -1,0 +1,15 @@
+{
+  "schema_version": "evaluation-recovery/v1",
+  "parent_journal_sha256": "f8905c15442b763c9f71b1247c5ca02f2849951f09abcc8e317ebc7d32157b68",
+  "parent_case_count": 100,
+  "parent_success_count": 99,
+  "parent_error_count": 1,
+  "reused_case_count": 99,
+  "retried_case_ids": [
+    "9d0aca8595b058b7a7998a040f8a9f6f"
+  ],
+  "reused_records_sha256": "a6756f4e601482bc30f5264e619781288ca0e91a43dff8be165b2609eaab24f8",
+  "original_journal_preserved": true,
+  "model_or_score_policy_changed": false,
+  "additional_attempts_not_independent_cases": true
+}

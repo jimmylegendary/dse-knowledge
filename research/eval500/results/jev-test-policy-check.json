@@ -1,0 +1,5 @@
+{
+  "schema_version": "jev-test-policy-check/v1",
+  "all_files_and_threshold_unchanged": true,
+  "frozen_policy_sha256": "955178a9502f9ab9ed8ee8ba306d8bd9a7235bc1a744bd584b49afcb163724f7"
+}

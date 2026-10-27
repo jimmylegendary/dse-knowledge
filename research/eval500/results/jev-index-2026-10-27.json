@@ -1,0 +1,121 @@
+{
+  "actual_generated_answers_evaluated_by_500": false,
+  "calibration_case_manifest_sha256": "c053fcedb176c569bd898a0dcf9d2c7358e8e557e1ad5259ba0188efcc2a63dd",
+  "corpus_manifest_sha256": "4de7a9d2b59dad4ae31bb4a33c20ce9e4ebfa113f647111211d747eb2f56179d",
+  "evaluation_method": "live_http",
+  "files": {
+    "jev-calibration-initial.jsonl.gz": {
+      "bytes": 311508,
+      "cases": 100,
+      "payload_sha256": "f8905c15442b763c9f71b1247c5ca02f2849951f09abcc8e317ebc7d32157b68",
+      "sha256": "f19e2e5c72d18c5949e16d82da32154a4657454fc15ba342483bbf34db535d1b"
+    },
+    "jev-calibration-recovery.json": {
+      "bytes": 551,
+      "sha256": "090eb3a4e3a58c2b07231cc8aebdc13edd829a98f6a511ef2de8dce591995c90"
+    },
+    "jev-calibration-summary.json": {
+      "bytes": 22581,
+      "omitted_keys": [
+        "case_results",
+        "errors"
+      ],
+      "per_case_data": "published_journal",
+      "private_source_sha256": "cb1010a006810095ab1a581e8fbf4dcadef8b3ce001792bfe2d647b4cd86221c",
+      "sha256": "2df59b718a1eb123ed94e0300abe9c1ed2ee95064c7c9071cdb843b395ca8ab4"
+    },
+    "jev-calibration.jsonl.gz": {
+      "bytes": 314376,
+      "cases": 100,
+      "payload_sha256": "34767e374b90a291bb9c5c0cff71fe1a8dbcffe1fe946d00a8fb7df878eec94d",
+      "sha256": "6507816e25cd006060cbdcf6dd405e232ae7c790867b76140f2a4bd65be7092e"
+    },
+    "jev-frozen-policy.json": {
+      "bytes": 1292,
+      "sha256": "955178a9502f9ab9ed8ee8ba306d8bd9a7235bc1a744bd584b49afcb163724f7"
+    },
+    "jev-integration-2026-10-27.json": {
+      "bytes": 5962,
+      "sha256": "06109002e6a0e9b5f891ac620206d248e3f0ac6ee2e15ff29c1d9261284a08fa"
+    },
+    "jev-operations-2026-10-27.json": {
+      "bytes": 2438,
+      "sha256": "f09f5a8b5e7a687e6337e9e72fd7cb56d537533e7fa35ecf3b418a6aa9d86d85"
+    },
+    "jev-test-initial-policy-check.json": {
+      "bytes": 189,
+      "sha256": "54176d3f00a1255ea5adbba60d446e3605be65144a99337ebd4cf282fdc95a62"
+    },
+    "jev-test-initial-summary.json": {
+      "bytes": 23443,
+      "omitted_keys": [
+        "case_results",
+        "errors"
+      ],
+      "per_case_data": "published_journal",
+      "private_source_sha256": "d16b425c70e63764f6f8ec48cef659aa3745b8347e015b6245b4f5f8fd03f9ac",
+      "sha256": "bc7916202c8ed01d4189c58320a710ae3b3f2fe87288b265f8bcb735edeb7488"
+    },
+    "jev-test-initial.jsonl.gz": {
+      "bytes": 340448,
+      "cases": 500,
+      "payload_sha256": "18ae834fc9ccec24dfa8fcbc3f0cdc730b03a83ba306e6960d41e0a0a226e1f1",
+      "sha256": "ae7c702759a506a470f4b31242a964a04bd0b6f467820032cbb240742c458822"
+    },
+    "jev-test-policy-check.json": {
+      "bytes": 189,
+      "sha256": "54176d3f00a1255ea5adbba60d446e3605be65144a99337ebd4cf282fdc95a62"
+    },
+    "jev-test-recovery.json": {
+      "bytes": 16101,
+      "sha256": "5ec4b96206b995724791b6f56de6fc3a385fd61503611b22d88a0862bd797dfc"
+    },
+    "jev-test-summary.json": {
+      "bytes": 23470,
+      "omitted_keys": [
+        "case_results",
+        "errors"
+      ],
+      "per_case_data": "published_journal",
+      "private_source_sha256": "251ecd5344791e5568eef39b0643891b42b6024e0adc7a6e68f057397bbe2b92",
+      "sha256": "cf7242806a0ead0ed15b132b546f2e4ef6302fd68cc4d91a89da7ca4df85ba6c"
+    },
+    "jev-test.jsonl.gz": {
+      "bytes": 1567162,
+      "cases": 500,
+      "payload_sha256": "fa46360a971774ac498693e62c32628cf0e0acb44aed0f20ccbc2c97f07c33c2",
+      "sha256": "acab64a12edffcaef6063bbfd8db1b66450ac6e1043a738296f8d09c8e4edeef"
+    },
+    "jev-threshold.json": {
+      "bytes": 15970,
+      "sha256": "bc8ab83b2733d52584aa28e65b7f13fea3341de6e32d0ff2de1fdc38532515a9"
+    }
+  },
+  "html": {
+    "bytes": 205213,
+    "path": "web/reports/jev-evaluation-2026-10-27.html",
+    "sha256": "9d1d1712dcaa75af92f58dccd97fc92f0a715801ad12a757b62d57d50bd91355"
+  },
+  "policy_freeze_runtime_commit": "e588e6ec9e033332a53bde41d1c80df16dc86377",
+  "public_regression_not_new_blind_holdout": true,
+  "runtime_version": "0.2.6",
+  "schema_version": "dse-jev-evaluation-artifacts/v1",
+  "source_bodies_vectors_credentials_published": false,
+  "test_case_count": 500,
+  "test_case_manifest_sha256": "d4bc5ea35e7128d1a72ccafbf72ea1b5e36fb428cbf3a7c395db9059de5655a9",
+  "test_quality_gate": {
+    "checks": {
+      "evidence_advice_all_assessed": true,
+      "near_boundary_fpr": true,
+      "ood_fpr": true,
+      "supported_tpr": true
+    },
+    "passed": true,
+    "targets": {
+      "near_boundary_fpr_max": 0.2,
+      "ood_fpr_max": 0.1,
+      "supported_tpr_min": 0.9
+    }
+  },
+  "test_valid_assessed_count": 500
+}

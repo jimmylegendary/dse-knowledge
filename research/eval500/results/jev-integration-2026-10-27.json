@@ -1,0 +1,172 @@
+{
+  "schema_version": "jev-native-integration/v1",
+  "runtime_version": "0.2.6",
+  "initial_checks": {
+    "total": 18,
+    "passed": 16,
+    "failed": [
+      "job_experiment_result",
+      "experiment_snapshot_contains_feedback_memory"
+    ],
+    "by_name": {
+      "inventory": true,
+      "search_source_roundtrip": true,
+      "graph_source_link": true,
+      "native_minimal_dram_twin": true,
+      "native_component_bundle_boundary": true,
+      "experiment_unit_equivalent": true,
+      "experiment_pareto_tradeoff": true,
+      "experiment_missing_metric": true,
+      "experiment_cohort_mismatch": true,
+      "experiment_fixture_cleanup": true,
+      "job_hardware_submitted": true,
+      "job_hardware_result": true,
+      "needs_evidence_feedback_and_melete_query": true,
+      "job_kernel_submitted": true,
+      "job_kernel_result": true,
+      "job_experiment_submitted": true,
+      "job_experiment_result": false,
+      "experiment_snapshot_contains_feedback_memory": false
+    }
+  },
+  "after_credit_recovery_checks": {
+    "total": 18,
+    "passed": 17,
+    "failed": [
+      "experiment_snapshot_contains_feedback_memory"
+    ],
+    "by_name": {
+      "inventory": true,
+      "search_source_roundtrip": true,
+      "graph_source_link": true,
+      "native_minimal_dram_twin": true,
+      "native_component_bundle_boundary": true,
+      "experiment_unit_equivalent": true,
+      "experiment_pareto_tradeoff": true,
+      "experiment_missing_metric": true,
+      "experiment_cohort_mismatch": true,
+      "experiment_fixture_cleanup": true,
+      "job_hardware_submitted": true,
+      "job_hardware_result": true,
+      "needs_evidence_feedback_and_melete_query": true,
+      "job_kernel_submitted": true,
+      "job_kernel_result": true,
+      "job_experiment_submitted": true,
+      "job_experiment_result": true,
+      "experiment_snapshot_contains_feedback_memory": false
+    }
+  },
+  "initial_private_report_sha256": "7d6cea83d592fc4211dbf735ef3347b3b04192c46c427a401850c7e9f2a52aa1",
+  "recovered_private_report_sha256": "27a1c23d3907e82d43d878997cf59d8b285bb8c83bb693f44ae2a6b9de0f4071",
+  "recovery": {
+    "schema_version": "live-verification-recovery/v1",
+    "parent_report_sha256": "7d6cea83d592fc4211dbf735ef3347b3b04192c46c427a401850c7e9f2a52aa1",
+    "retained_job_ids": [
+      "61bbd9207d4c474ab59ea5b8e689561d",
+      "eee1e81742794761817120a6b739b8b8"
+    ],
+    "failed_original_job_id": "123faeb4635f4ba7a9f7f1d1f68fb7d5",
+    "only_retried_kind": "experiment",
+    "original_report_preserved": true,
+    "credit_restoration_confirmed_by_user": true
+  },
+  "jobs": [
+    {
+      "kind": "hardware",
+      "job_id": "61bbd9207d4c474ab59ea5b8e689561d",
+      "decision_status": "constraint_rejected",
+      "advice_status": "assessed",
+      "advice_choice": "partial_support",
+      "advice_consumed_by_generator": true,
+      "result_snapshot_advice_equal": true,
+      "mandatory_validation_status": "reject",
+      "findings_count": 3,
+      "evidence_chunk_count": 11,
+      "melete_receipt_status": "recorded",
+      "experience_status": "found",
+      "experience_item_count": 4,
+      "omitted_experience": 0,
+      "model_provider": "codex_cli",
+      "model_reported": null
+    },
+    {
+      "kind": "kernel",
+      "job_id": "eee1e81742794761817120a6b739b8b8",
+      "decision_status": "insufficient_evidence",
+      "advice_status": "assessed",
+      "advice_choice": "partial_support",
+      "advice_consumed_by_generator": true,
+      "result_snapshot_advice_equal": true,
+      "mandatory_validation_status": null,
+      "findings_count": 3,
+      "evidence_chunk_count": 9,
+      "melete_receipt_status": "recorded",
+      "experience_status": "found",
+      "experience_item_count": 4,
+      "omitted_experience": 0,
+      "model_provider": "codex_cli",
+      "model_reported": null
+    },
+    {
+      "kind": "experiment",
+      "job_id": "782697d1e1aa48aa99c4fcf72c3475dc",
+      "decision_status": "insufficient_evidence",
+      "advice_status": "assessed",
+      "advice_choice": "partial_support",
+      "advice_consumed_by_generator": true,
+      "result_snapshot_advice_equal": true,
+      "mandatory_validation_status": null,
+      "findings_count": 3,
+      "evidence_chunk_count": 11,
+      "melete_receipt_status": "recorded",
+      "experience_status": "found",
+      "experience_item_count": 4,
+      "omitted_experience": 0,
+      "model_provider": "codex_cli",
+      "model_reported": null
+    }
+  ],
+  "feedback_write_read": {
+    "feedback_id": "b501b5475b024cb7a3252f998250fb39",
+    "feedback_api_status": "stored",
+    "canonical_feedback_row_found": true,
+    "gap_reopened": true,
+    "feedback_receipt_memory_ids": [
+      "mem_01a17c1f28517aa0b92c60a4f030e649"
+    ],
+    "feedback_source_event_found": true,
+    "feedback_memory_match": true
+  },
+  "specific_fresh_feedback_snapshot_gate": {
+    "passed": false,
+    "details": {
+      "status": "found",
+      "items_count": 4,
+      "feedback_id": "b501b5475b024cb7a3252f998250fb39",
+      "feedback_memory_ids": [
+        "mem_01a17c1f28517aa0b92c60a4f030e649"
+      ],
+      "snapshot_memory_ids": [
+        "mem_01a171dfeab97fa4bb28902686094879",
+        "mem_01a1759a2fbc75cfb1ef9f6893532b62",
+        "mem_01a17849cfe97a1592c9b18db62b393f",
+        "mem_01a1782e3db078809211e975a5fa8ddb"
+      ],
+      "feedback_memory_found": false
+    }
+  },
+  "interpretation": {
+    "fresh_feedback_stored_and_requeried": true,
+    "specific_fresh_memory_selected_for_generic_followup": false,
+    "prompt_budget_did_not_drop_experience_items": true,
+    "diagnosis_is_scope_and_trace_inference_not_scientific_validation": true,
+    "original_failed_gate_preserved": true,
+    "test_marker_or_forced_memory_injection_added": false
+  },
+  "scope": {
+    "hat_checks": "structural_only",
+    "physical_feasibility": "not_assessed",
+    "b300_simulation_or_measurement": "not_performed",
+    "generated_answers_500": "not_evaluated"
+  }
+}

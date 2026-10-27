@@ -1,0 +1,24 @@
+{
+  "schema_version": "jev-live-evaluation-freeze/v1",
+  "frozen_at": "2026-10-27T06:41:36.584249+00:00",
+  "runtime_commit": "e588e6ec9e033332a53bde41d1c80df16dc86377",
+  "evaluation_method": "live_http",
+  "base_url": "http://127.0.0.1:8084",
+  "retrieval_mode": "contextual_rerank",
+  "evidence_advice": "jev",
+  "score_name": "jev_direct_support_proxy",
+  "threshold": 0.3,
+  "threshold_sha256": "bc8ab83b2733d52584aa28e65b7f13fea3341de6e32d0ff2de1fdc38532515a9",
+  "file_sha256": {
+    "src/dse_knowledge/jev_advice.py": "69c1777ef3282f6d379c3083b91ec5c33c5af8be6a2923b3d506cd398dde60ee",
+    "scripts/eval500_metrics.py": "dbbc15471debf904b57b96222b1ef815156483e42edf131e4e42ddfd76ecbd6a",
+    "scripts/evaluate-retrieval-confidence.py": "0409e8d9a54d78fe4b3e04d3e710e3a02695a0603ea4a09abf785226466449b2",
+    "research/eval500/calibration-v1.jsonl": "c053fcedb176c569bd898a0dcf9d2c7358e8e557e1ad5259ba0188efcc2a63dd",
+    "research/eval500/test-v1.jsonl": "d4bc5ea35e7128d1a72ccafbf72ea1b5e36fb428cbf3a7c395db9059de5655a9"
+  },
+  "calibration_journal_sha256": "34767e374b90a291bb9c5c0cff71fe1a8dbcffe1fe946d00a8fb7df878eec94d",
+  "calibration_recovery_recorded": true,
+  "public_regression_not_new_blind_holdout": true,
+  "test_outcome_used_to_tune_policy": false,
+  "concurrency": 2
+}

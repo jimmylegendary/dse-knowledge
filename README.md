@@ -1,6 +1,45 @@
 # DSE Knowledge Workbench — 지식·설계 판단·경험 환류
 
-상태: **실제 1,000개 Workbench · LLM 문맥 보강 + Qwen 8B 적용 · 네 구성의 500건 retrieval challenge 평가 완료** · runtime v0.2.5 / retrieval-policy v2.3 · 기준일: 2026-10-26 KST. 145,748건은 수집 대상 목록이며 전체 본문 분석·KG 등록은 실행하지 않았다. 아래의 기존 Q2 소규모 결과와 이번 500건 결과를 구분한다.
+상태: **실제 1,000개 Workbench · LLM 문맥 보강 + Qwen 8B 적용 · Jev 근거 판단 보조 추가, 500건 재평가 품질 gate PASS** · runtime v0.2.6 / retrieval-policy v2.3 / jev-evidence-advice v1 · 기준일: 2026-10-27 KST. 145,748건은 수집 대상 목록이며 전체 본문 분석·KG 등록은 실행하지 않았다. 아래의 기존 Q2 소규모 결과와 500건 결과들을 구분한다.
+
+## Jev 근거 판단 보조 — 500건 재평가 (v0.2.6, 2026-10-27)
+
+검색(문맥 보강 + Qwen 8B reranker)과 순위는 그대로 두고, 검색된 근거가 질문을 **직접 뒷받침하는지** 공용 판단 모델 Jev(`typesafe/jev-1.13`)가 판정하는 보조 신호를 추가했다. 결과는 검색 응답과 hardware/kernel/experiment 판단 snapshot에 `evidence_advice`로 남고, Workbench 검색·판단 화면에 "검토 제안"으로 표시된다. Jev 판단은 인용 검증·필수 규칙 판정·답변 허가를 대체하지 않는다. Jev 호출 실패는 "근거 없음(0점)"이 아니라 별도 상태로 남긴다. Neo4j graph는 검토 후 이번 범위에서 제외했다.
+
+Threshold **0.3**은 calibration 100건에서만 정해 고정했고, test 500건 결과로 prompt·threshold를 바꾸지 않았다. "기존"은 2026-10-26에 같은 500건으로 평가한 문맥 + Qwen 8B 결과다(최대 reranker 점수, threshold 0.981).
+
+| 항목 | 기존: 문맥 + Qwen 8B | Jev 추가 | 목표 |
+|---|---:|---:|---:|
+| 정상 TPR | 95.7% (287/300) | 91.3% (274/300) | ≥ 90% |
+| OOD FPR | 0.0% (0/50) | 0.0% (0/50) | ≤ 10% |
+| Grey-zone FPR | 39.0% (39/100) | **11.0% (11/100)** | ≤ 20% |
+| In-domain missing FPR | 20.0% (6/30) | **6.7% (2/30)** | — |
+| 근거 부족 전체 FPR | 25.0% (45/180) | **7.2% (13/180)** | — |
+| Precision | 86.4% | **95.5%** | — |
+| AUROC (95% 구간) | 0.931 (0.905–0.954) | **0.977 (0.966–0.987)** | — |
+| Average Precision (95% 구간) | 0.945 (0.917–0.970) | **0.987 (0.979–0.992)** | — |
+| 모호 20건 중 threshold 이상 | 70% (14/20) | 50% (10/20) | 참고값 |
+| 품질 gate | FAIL: grey-zone | **PASS** | 위 3개 목표 |
+| Source Hit@5 / Chunk Hit@5 | 99.3% / 95.7% | 99.3% / 95.7% | 순위 불변 |
+| Chunk MRR@5 | 0.880 | 0.881 | — |
+
+같은 질문끼리 비교하면 기존 grey-zone 오탐 39건 중 32건을 Jev가 걸러냈고, 기존에 맞던 grey-zone 4건을 새로 오탐했다. 정상 질문은 22건을 새로 놓치고 9건을 새로 찾아 TPR이 4.4%p 낮아졌지만 목표 90% 안이다. 95% 구간은 intent 378개 단위 bootstrap 1,000회이며 source 간 상관은 반영하지 않는다. 같은 공개 test 500건을 다시 쓴 회귀 평가이고 새 blind holdout이 아니다. 모호 질문 수치는 실제 clarify 행동을 평가한 값이 아니며, 500개 생성 답변의 품질도 평가하지 않았다. 지표는 원 journal과 공개 qrels로 별도 재계산해 요약값과 모두 일치함을 확인했다.
+
+같은 질문을 다시 검색하면 315/500건에서 반환 순서가 2026-10-26 기록과 달랐다. Jev는 순위를 바꾸지 않으며(자동 테스트로 확인), 원인은 reranker 점수의 실행 간 변동이다. 공유 item 3,708개 중 3,707개의 점수가 달랐고 중앙값 |Δ|는 0.0004, 최대 0.044다. Hit@k는 같고 Chunk MRR@5만 0.8803 → 0.8808로 바뀌었다. 오늘 점수로 기존 threshold 판정을 다시 내리면 480건 중 1건만 바뀌므로 비교 결론에는 영향이 없다.
+
+**실행 기록.** 최초 test 실행은 500건 중 **88건만 성공**했다. EmbeddingGemma2(DeepInfra)가 잔액 부족으로 HTTP 402를 반환해 411건이 HTTP 503, 1건이 Jev 호출 실패로 끝났다. 충전 후 같은 정책으로 실패한 412건만 다시 실행해 **412/412 성공**했다. 최초 실패 기록과 재실행 journal을 hash로 연결해 함께 공개한다. 따라서 최초 실행 gate는 FAIL, 최종 유효 점수의 품질 gate는 PASS로 따로 표시한다. Calibration도 HTTP 503 1건만 재실행해 100/100을 채웠다.
+
+| 운영 항목 | 값 |
+|---|---:|
+| Jev 호출 (test / calibration) | 500 / 98회 (calibration 2건은 cache) |
+| Jev 입력 token (test) | 4,226,751 |
+| 응답에 보고된 Jev 비용 (test / calibration) | $0.178 / $0.035 (비용 미보고 1회) |
+| Jev 지연 p50 / p95 | 480 ms / 680 ms |
+| 검색 HTTP 전체 지연 p50 / p95 | 9.6 s / 18.2 s (최초 실행의 성공 88건 기준) |
+
+**실제 연동.** HTTP·Supabase·Codex CLI·HAT schema·Melete 경로에서 **17/18 통과**했다. hardware·kernel·experiment 판단 3건 모두 Jev 판단이 생성기에 전달되고 snapshot과 결과에 같은 값으로 남았다. hardware 판단은 필수 규칙 위반으로 거절(`constraint_rejected`)되어, 규칙 판정이 Jev보다 우선함을 확인했다. 실패 1건: 새 피드백은 저장과 별도 조회에 성공했지만, 일반적인 후속 실험 질문에서 상위 경험으로 선택되지 않았다. 이 실패는 판정을 바꾸지 않고 그대로 기록했다. HAT는 구조 검증이며 B300 simulation·실측은 범위 밖이다.
+
+공개 파일: [jev-evaluation-2026-10-27.html](https://github.com/jimmylegendary/dse-knowledge/blob/main/web/reports/jev-evaluation-2026-10-27.html)(실행 중인 Workbench의 **Jev 근거 판단 평가** 메뉴에서도 열림), [jev-index-2026-10-27.json](https://github.com/jimmylegendary/dse-knowledge/blob/main/research/eval500/results/jev-index-2026-10-27.json)(파일 hash 목록), [jev-test-summary.json](https://github.com/jimmylegendary/dse-knowledge/blob/main/research/eval500/results/jev-test-summary.json), [jev-test.jsonl.gz](https://github.com/jimmylegendary/dse-knowledge/blob/main/research/eval500/results/jev-test.jsonl.gz), [jev-test-initial.jsonl.gz](https://github.com/jimmylegendary/dse-knowledge/blob/main/research/eval500/results/jev-test-initial.jsonl.gz)(최초 실패 포함), [jev-operations-2026-10-27.json](https://github.com/jimmylegendary/dse-knowledge/blob/main/research/eval500/results/jev-operations-2026-10-27.json), [jev-integration-2026-10-27.json](https://github.com/jimmylegendary/dse-knowledge/blob/main/research/eval500/results/jev-integration-2026-10-27.json), [jev-frozen-policy.json](https://github.com/jimmylegendary/dse-knowledge/blob/main/research/eval500/results/jev-frozen-policy.json). 설계·계획: [2026-10-27-jev-evidence-advice-design.md](https://github.com/jimmylegendary/dse-knowledge/blob/main/docs/superpowers/specs/2026-10-27-jev-evidence-advice-design.md), [2026-10-27-jev-evidence-advice.md](https://github.com/jimmylegendary/dse-knowledge/blob/main/docs/superpowers/plans/2026-10-27-jev-evidence-advice.md). 원문 본문·생성 문맥·벡터·credential은 포함하지 않는다.
 
 이 README는 DSE 결정별 지식 요구를 만들고, 허가된 source에서 evidence를 취득·구조화하며, hardware/kernel/experiment 결정에 쓰고 부족한 지식을 다시 수집하는 전체 구조를 설명한다. 2026-10-18 사용자 정정에 맞춘 상위 기준은 [2026-10-21-dse-knowledge-architecture.md](https://github.com/jimmylegendary/dse-knowledge/blob/docs/p0-episode-contracts/docs/superpowers/specs/2026-10-21-dse-knowledge-architecture.md)와 [2026-10-21-knowledge-architecture-plan.md](https://github.com/jimmylegendary/dse-knowledge/blob/docs/p0-episode-contracts/docs/superpowers/plans/2026-10-21-knowledge-architecture-plan.md)다. 이전 HAT native episode/adapter 계약은 세부 참고이며 이 architecture의 중심 gate가 아니다.
 

@@ -1,0 +1,71 @@
+{
+  "notes": {
+    "cached_usage_not_recounted": true,
+    "diagnostic_requests_excluded_from_benchmark_attempts": true,
+    "initial_embedding_http402_diagnosed": true,
+    "initial_failures_preserved": true,
+    "provider_cost_is_reported_only_not_total_invoice": true,
+    "user_confirmed_credit_restoration": true
+  },
+  "phases": {
+    "calibration": {
+      "final_assessed_count": 100,
+      "initial_case_count": 100,
+      "initial_error_count": 1,
+      "initial_journal_sha256": "f8905c15442b763c9f71b1247c5ca02f2849951f09abcc8e317ebc7d32157b68",
+      "initial_success_count": 99,
+      "jev_usage": {
+        "reported_cost_usd": 0.034988604,
+        "reported_input_tokens": 833062,
+        "reported_provider_calls": 98,
+        "unreported_cost_calls": 0
+      },
+      "latency": {
+        "initial_http_p50": 10.122216815128922,
+        "initial_http_p95": 16.509734229184687,
+        "jev_provider_p50_ms": 481.5,
+        "jev_provider_p95_ms": 716
+      },
+      "recovery_rounds": [
+        {
+          "error_count": 0,
+          "journal_sha256": "34767e374b90a291bb9c5c0cff71fe1a8dbcffe1fe946d00a8fb7df878eec94d",
+          "parent_journal_sha256": "f8905c15442b763c9f71b1247c5ca02f2849951f09abcc8e317ebc7d32157b68",
+          "retried_cases": 1,
+          "success_count": 1
+        }
+      ],
+      "total_http_attempts": 101
+    },
+    "test": {
+      "final_assessed_count": 500,
+      "initial_case_count": 500,
+      "initial_error_count": 412,
+      "initial_journal_sha256": "18ae834fc9ccec24dfa8fcbc3f0cdc730b03a83ba306e6960d41e0a0a226e1f1",
+      "initial_success_count": 88,
+      "jev_usage": {
+        "reported_cost_usd": 0.177523542,
+        "reported_input_tokens": 4226751,
+        "reported_provider_calls": 500,
+        "unreported_cost_calls": 1
+      },
+      "latency": {
+        "initial_http_p50": 9.591469429899007,
+        "initial_http_p95": 18.162292201071978,
+        "jev_provider_p50_ms": 480.0,
+        "jev_provider_p95_ms": 680
+      },
+      "recovery_rounds": [
+        {
+          "error_count": 0,
+          "journal_sha256": "fa46360a971774ac498693e62c32628cf0e0acb44aed0f20ccbc2c97f07c33c2",
+          "parent_journal_sha256": "18ae834fc9ccec24dfa8fcbc3f0cdc730b03a83ba306e6960d41e0a0a226e1f1",
+          "retried_cases": 412,
+          "success_count": 412
+        }
+      ],
+      "total_http_attempts": 912
+    }
+  },
+  "schema_version": "jev-evaluation-operations/v1"
+}
