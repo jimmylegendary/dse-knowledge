@@ -60,7 +60,7 @@ def settings(tmp_path, **overrides):
 
 class ControlledPopen:
     def __init__(self, argv, *, raw, hang=False, returncode=0):
-        self.argv=list(argv);self.returncode=None;self.killed=False
+        self.argv=list(argv);self.returncode=None;self.killed=False;self.wait_calls=0
         self._stop=threading.Event();self._done=threading.Event();self._exit_code=returncode
         read_fd,self._write_fd=os.pipe()
         self.stdout=os.fdopen(read_fd,'rb',buffering=0)
@@ -89,6 +89,7 @@ class ControlledPopen:
         return self.returncode if self._done.is_set() else None
 
     def wait(self,timeout=None):
+        self.wait_calls+=1
         if not self._done.wait(timeout):
             raise subprocess.TimeoutExpired(self.argv,timeout)
         return self.returncode
@@ -347,6 +348,23 @@ def test_cli_capture_stops_at_max_response_plus_one_and_kills_provider(tmp_path,
     assert calls[0]["process"].killed is True
     assert max(read_sizes)<=65
     assert calls[0]["process"].stdout.closed is True
+
+
+def test_stdout_oserror_is_normalized_after_kill_reap_and_close(tmp_path, monkeypatch):
+    module,calls=install_fake_cli(monkeypatch,reply())
+    def broken_read(*args,**kwargs):
+        raise OSError("private stdout read failure")
+    monkeypatch.setattr(module.os,"read",broken_read)
+
+    result=module.JevEvidenceAdvisor(settings(tmp_path)).assess("query",[evidence()])
+
+    assert result["status"]=="unavailable"
+    assert result["support_score"] is None
+    assert result["metadata"]["error_code"]=="provider_failed"
+    process=calls[0]["process"]
+    assert process.killed is True
+    assert process.wait_calls>=1
+    assert process.stdout.closed is True
 
 
 def test_over_budget_rules_are_not_truncated_or_sent(tmp_path, monkeypatch):

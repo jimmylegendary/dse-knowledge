@@ -647,7 +647,7 @@ class JevEvidenceAdvisor:
         except _JevFailure:
             cls._stop_process(process)
             raise
-        except (OSError, ValueError, selectors.Error):
+        except (OSError, ValueError):
             cls._stop_process(process)
             raise _JevFailure("provider_failed", provider_calls=1,
                               latency_ms=max(0, round((time.monotonic()-started)*1000))) from None
