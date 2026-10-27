@@ -173,7 +173,7 @@ def test_partial_report_labels_conditional_metrics_and_uses_success_latency_only
     assert 'valid-assessed 조건부 지표' in text
     assert '성공 HTTP 요청 기준 p50 2.00s · p95 2.00s' in text
     assert '오류 응답의 빠른 반환은 latency 개선으로 계산하지 않습니다' in text
-    assert '실패 case는 ranking이 missing' in text
+    assert 'HTTP/검색 실패는 ranking이 누락될 수 있지만 advisor-only 오류는 정상 검색 ranking을 보존합니다' in text
     assert 'ROC-AUC, AP와 subgroup FPR의 유효 분모는 서로 다를 수 있습니다' in text
 
 
@@ -186,14 +186,14 @@ def test_report_pass_requires_validated_journal_and_threshold(tmp_path):
 
 
 def operations(tmp_path):
-    common = dict(initial_case_count=100, initial_success_count=100,
+    common = dict(initial_journal_sha256='d'*64, initial_case_count=100, initial_success_count=100,
                   initial_error_count=0, final_assessed_count=100,
                   recovery_rounds=[], total_http_attempts=100,
                   jev_usage={'reported_input_tokens':12000,'reported_cost_usd':.02,
                              'reported_provider_calls':100,'unreported_cost_calls':0},
                   latency={'initial_http_p50':1.2,'initial_http_p95':2.4,
                            'jev_provider_p50_ms':200,'jev_provider_p95_ms':500})
-    test = dict(common, initial_case_count=500, initial_success_count=496,
+    test = dict(common, initial_journal_sha256='a'*64, initial_case_count=500, initial_success_count=496,
                 initial_error_count=4, final_assessed_count=500,
                 recovery_rounds=[{'retried_cases':2,'success_count':1,'error_count':1,
                                   'parent_journal_sha256':'a'*64,'journal_sha256':'c'*64},
@@ -210,6 +210,7 @@ def operations(tmp_path):
 
 def test_report_separates_first_attempt_failure_from_final_quality_pass(tmp_path):
     paths=summaries(tmp_path);journal=write_journal(tmp_path,paths)
+    cal=json.loads(paths[1].read_text());cal['journal_sha256']='d'*64;paths[1].write_text(json.dumps(cal))
     test=json.loads(paths[2].read_text());test['quality_gates']={'passed':True}
     paths[2].write_text(json.dumps(test))
     ops=operations(tmp_path);ops_data=json.loads(ops.read_text())
@@ -248,7 +249,31 @@ def test_report_exposes_ambiguous_reference_metric_and_case_filters(tmp_path):
 
 def test_report_rejects_malformed_operations_counts(tmp_path):
     paths=summaries(tmp_path);ops=operations(tmp_path)
+    cal=json.loads(paths[1].read_text());cal['journal_sha256']='d'*64;paths[1].write_text(json.dumps(cal))
+    test=json.loads(paths[2].read_text());test['journal_sha256']='b'*64;paths[2].write_text(json.dumps(test))
     value=json.loads(ops.read_text());value['phases']['test']['initial_success_count']=501
     ops.write_text(json.dumps(value))
     with pytest.raises(ValueError,match='operations'):
+        load_builder().build_report(*paths,tmp_path/'report.html',operations_path=ops)
+
+
+def test_report_rejects_initial_journal_binding_mismatch(tmp_path):
+    paths=summaries(tmp_path)
+    cal=json.loads(paths[1].read_text());cal['journal_sha256']='d'*64;paths[1].write_text(json.dumps(cal))
+    test=json.loads(paths[2].read_text());test['journal_sha256']='b'*64;paths[2].write_text(json.dumps(test))
+    ops=operations(tmp_path);value=json.loads(ops.read_text())
+    value['phases']['calibration']['initial_journal_sha256']='e'*64
+    ops.write_text(json.dumps(value))
+    with pytest.raises(ValueError,match='operations_journal'):
+        load_builder().build_report(*paths,tmp_path/'report.html',operations_path=ops)
+
+
+def test_report_rejects_recovery_parent_that_differs_from_initial_journal(tmp_path):
+    paths=summaries(tmp_path)
+    cal=json.loads(paths[1].read_text());cal['journal_sha256']='d'*64;paths[1].write_text(json.dumps(cal))
+    test=json.loads(paths[2].read_text());test['journal_sha256']='b'*64;paths[2].write_text(json.dumps(test))
+    ops=operations(tmp_path);value=json.loads(ops.read_text())
+    value['phases']['test']['recovery_rounds'][0]['parent_journal_sha256']='f'*64
+    ops.write_text(json.dumps(value))
+    with pytest.raises(ValueError,match='operations_recovery_invalid'):
         load_builder().build_report(*paths,tmp_path/'report.html',operations_path=ops)

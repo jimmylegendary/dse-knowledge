@@ -95,11 +95,14 @@ def _operations(path, calibration, test):
     result = {}
     for name, expected_count, summary in (('calibration', 100, calibration), ('test', 500, test)):
         phase = phases.get(name)
-        required = ('initial_case_count', 'initial_success_count', 'initial_error_count',
+        required = ('initial_journal_sha256', 'initial_case_count', 'initial_success_count', 'initial_error_count',
                     'final_assessed_count', 'recovery_rounds', 'total_http_attempts',
                     'jev_usage', 'latency')
         if not isinstance(phase, dict) or any(key not in phase for key in required):
             raise ValueError('operations_phase_invalid')
+        initial_journal = phase['initial_journal_sha256']
+        if not isinstance(initial_journal, str) or not re.fullmatch(r'[0-9a-f]{64}', initial_journal):
+            raise ValueError('operations_journal_invalid')
         def count(key):
             item = phase[key]
             if type(item) is not int or item < 0:
@@ -118,7 +121,7 @@ def _operations(path, calibration, test):
         if not isinstance(rounds, list):
             raise ValueError('operations_recovery_invalid')
         previous_errors = initial_errors
-        previous_journal = None
+        previous_journal = initial_journal
         retried_total = 0
         for round_ in rounds:
             if not isinstance(round_, dict):
@@ -134,7 +137,7 @@ def _operations(path, calibration, test):
             if (retried < 1 or retried > previous_errors or succeeded + failed != retried
                     or not isinstance(parent_hash, str) or not re.fullmatch(r'[0-9a-f]{64}', parent_hash)
                     or not isinstance(journal_hash, str) or not re.fullmatch(r'[0-9a-f]{64}', journal_hash)
-                    or (previous_journal is not None and parent_hash != previous_journal)):
+                    or parent_hash != previous_journal):
                 raise ValueError('operations_recovery_invalid')
             retried_total += retried
             previous_errors = previous_errors - retried + failed
@@ -143,7 +146,7 @@ def _operations(path, calibration, test):
                 or final_assessed != initial_success + sum(item['success_count'] for item in rounds)
                 or previous_errors != summary.get('error_count')):
             raise ValueError('operations_counts_disagree')
-        if rounds and summary.get('journal_sha256') != previous_journal:
+        if summary.get('journal_sha256') != previous_journal:
             raise ValueError('operations_journal_disagrees')
         usage = phase['jev_usage']
         if not isinstance(usage, dict):
@@ -308,7 +311,8 @@ def build_report(baseline_path, calibration_path, test_path, output_path, *, jou
     if partial_run:
         partial_notice = ('<section class="review-section"><div class="review-note"><p><strong>전체 500건 비교 불완전 · valid-assessed 조건부 지표</strong> · '
                           f"Calibration 오류 {calibration['error_count']} / 100, Test 오류 {test['error_count']} / 500입니다.</p>"
-                          '<p>실패 case는 ranking이 missing이므로 Hit/MRR 변화만으로 Jev 효과를 해석할 수 없습니다. '
+                          '<p>HTTP/검색 실패는 ranking이 누락될 수 있지만 advisor-only 오류는 정상 검색 ranking을 보존합니다. '
+                          '실패 원인을 구분해 해석해야 하며, Hit/MRR 변화만으로 Jev 효과를 단정할 수 없습니다. '
                           'ROC-AUC, AP와 subgroup FPR의 유효 분모는 서로 다를 수 있습니다. 오류 응답의 빠른 반환은 latency 개선으로 계산하지 않습니다.</p></div></section>')
     # HTML script-breaking sequences are escaped even in previously public queries.
     data=json.dumps({'cases':cases,'threshold':threshold},ensure_ascii=False,allow_nan=False).replace('<','\\u003c').replace('>','\\u003e').replace('&','\\u0026')
