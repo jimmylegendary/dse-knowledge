@@ -265,3 +265,89 @@ def test_oversized_mandatory_rules_fail_before_chat_provider_call():
     assert chat.prompts==[]
     assert retriever.calls==0
     assert native.calls==0
+
+
+class _DecisionAdvisor:
+    def __init__(self, *, choice='direct_support_candidate', support_score=0.8):
+        self.calls=[];self.choice=choice;self.support_score=support_score
+    def assess(self, query, evidence, *, kind='knowledge', required_rules=None):
+        self.calls.append({'query':query,'evidence':evidence,'kind':kind,'required_rules':required_rules})
+        return {
+            'schema_version':'jev-evidence-advice/v1','status':'assessed','advisory_only':True,
+            'choice':self.choice,'support_score':self.support_score,
+            'score_kind':'uncalibrated_direct_support_probability','policy_version':'jev-evidence-advice/v1',
+            'evidence_ids':[item['chunk_id'] for item in evidence],
+            'projection':{'total_evidence':len(evidence),'selected_evidence':len(evidence),
+                          'omitted_evidence':0,'truncated_evidence':0,'state_bytes':100,
+                          'request_bytes':200,'excerpt_only':True,'items':[]},
+            'metadata':{'provider':'decision_models','provider_calls':1},
+            'consumed_by_generator':False,
+        }
+
+
+def test_jev_advice_is_built_from_final_fitted_evidence_and_recorded_in_result_and_snapshot():
+    store=_CaptureStore();chat=_DecisionChat();retriever=_DecisionRetriever()
+    advisor=_DecisionAdvisor()
+    engine=DecisionEngine(store,retriever,chat,_DecisionNative({'status':'no_match','items':[]}),advisor)
+    payload={'kind':'hardware','question':'Check the source passage','input':{'required_rules':[]}}
+
+    engine.decide(payload)
+
+    captured=store.snapshot.obj if hasattr(store.snapshot,'obj') else store.snapshot
+    stored_result=store.result.obj if hasattr(store.result,'obj') else store.result
+    prompt=chat.prompts[0]
+    source_section=prompt.split('\nSOURCE_DATA\n',1)[1].split('\nEXPERIENCE_DATA\n',1)[0]
+    prompt_source=json.loads(source_section)
+    assert advisor.calls[0]['query']==payload['question']
+    assert advisor.calls[0]['kind']=='hardware'
+    assert advisor.calls[0]['required_rules']==[]
+    assert advisor.calls[0]['evidence']==prompt_source
+    assert 'JEV_ADVISORY_ONLY' in prompt
+    assert 'uncalibrated_direct_support_probability' in prompt
+    assert stored_result['evidence_advice']['status']=='assessed'
+    assert stored_result['evidence_advice']['consumed_by_generator'] is True
+    assert captured['evidence_advice']==stored_result['evidence_advice']
+    assert captured['consumed_by_generator'] is True
+    assert captured['chunk_ids']==['source-1']
+
+
+def test_jev_advice_cannot_override_incomplete_mandatory_rule_validation():
+    store=_CaptureStore();chat=_DecisionChat();advisor=_DecisionAdvisor(support_score=0.99)
+    engine=DecisionEngine(
+        store,_DecisionRetriever(),chat,_DecisionNative({'status':'no_match','items':[]}),advisor,
+    )
+
+    engine.decide({'kind':'knowledge','question':'Check this source',
+                   'input':{'required_rules':['must_support_tensorcore']}})
+
+    stored_result=store.result.obj if hasattr(store.result,'obj') else store.result
+    assert stored_result['evidence_advice']['choice']=='direct_support_candidate'
+    assert stored_result['mandatory_validation']['status']=='incomplete'
+    assert stored_result['status']=='insufficient_evidence'
+
+
+def test_jev_advice_is_dropped_when_final_prompt_has_no_reserved_room():
+    payload={'kind':'knowledge','question':'summarize this source','input':{'required_rules':[]}}
+    system=decision_module._decision_system_prompt()
+    retrieved=_DecisionRetriever().search(payload['question'],limit=12,purpose='auto')
+    evidence,budget=decision_module.bounded_evidence(retrieved['items'])
+    base_prompt,_,_,_=decision_module.fit_decision_prompt(
+        system,payload,[],evidence,{'status':'no_match','items':[]},base_context_budget=budget,
+    )
+    monkeypatch_values=(decision_module.CODEX_MAX_PROMPT_CHARS,decision_module.CODEX_MAX_PROMPT_BYTES)
+    decision_module.CODEX_MAX_PROMPT_CHARS=len(base_prompt)+8
+    decision_module.CODEX_MAX_PROMPT_BYTES=len(base_prompt.encode('utf-8'))+8
+    try:
+        store=_CaptureStore();chat=_DecisionChat();advisor=_DecisionAdvisor()
+        DecisionEngine(store,_DecisionRetriever(),chat,_DecisionNative({'status':'no_match','items':[]}),advisor).decide(payload)
+    finally:
+        decision_module.CODEX_MAX_PROMPT_CHARS,decision_module.CODEX_MAX_PROMPT_BYTES=monkeypatch_values
+
+    stored_result=store.result.obj if hasattr(store.result,'obj') else store.result
+    snapshot=store.snapshot.obj if hasattr(store.snapshot,'obj') else store.snapshot
+    assert chat.prompts==[base_prompt]
+    assert stored_result['evidence_advice']['status']=='skipped_prompt_budget'
+    assert stored_result['evidence_advice']['support_score'] is None
+    assert stored_result['evidence_advice']['choice'] is None
+    assert stored_result['evidence_advice']['consumed_by_generator'] is False
+    assert snapshot['consumed_by_generator'] is False

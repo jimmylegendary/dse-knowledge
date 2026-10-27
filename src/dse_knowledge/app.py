@@ -22,7 +22,7 @@ from .retrieval import (
 
 
 class Body(BaseModel):model_config=ConfigDict(extra='forbid',strict=True)
-class SearchBody(Body):query:str=Field(min_length=1,max_length=2000);category:str='';limit:int=Field(default=12,ge=1,le=30);purpose:Literal['auto','design','operations','discovery']='auto';retrieval_mode:Literal['baseline','contextual','rerank','contextual_rerank']|None=None
+class SearchBody(Body):query:str=Field(min_length=1,max_length=2000);category:str='';limit:int=Field(default=12,ge=1,le=30);purpose:Literal['auto','design','operations','discovery']='auto';retrieval_mode:Literal['baseline','contextual','rerank','contextual_rerank']|None=None;evidence_advice:Literal['off','jev']|None=None
 class DecisionBody(Body):kind:Literal['hardware','kernel','experiment','knowledge'];question:str=Field(min_length=3,max_length=4000);input:dict=Field(default_factory=dict)
 class FeedbackBody(Body):decision_id:str;verdict:Literal['useful','incorrect','needs_evidence'];notes:str=Field(default='',max_length=8000)
 class Metric(Body):name:str=Field(min_length=1,max_length=80);value:float;unit:str=Field(min_length=1,max_length=50);direction:Literal['min','max']
@@ -49,7 +49,7 @@ def _retrieval_mode(settings, contextual_enabled, rerank_enabled):
     return 'baseline'
 
 
-def create_app(settings=None,store=None,embedding=None,chat=None,native=None,contextual_index=None,reranker=None,run_jobs=True):
+def create_app(settings=None,store=None,embedding=None,chat=None,native=None,contextual_index=None,reranker=None,run_jobs=True,evidence_advisor=None):
     settings=settings or Settings.load()
     if store is None:store=Store(settings)
     if embedding is None:
@@ -63,6 +63,13 @@ def create_app(settings=None,store=None,embedding=None,chat=None,native=None,con
         native=NativeIntegrations(settings)
     contextual_enabled=_setting_flag(settings,'DSE_CONTEXTUAL_ENABLED')
     rerank_enabled=_setting_flag(settings,'DSE_RERANK_ENABLED')
+    evidence_advice_enabled=_setting_flag(settings,'DSE_JEV_EVIDENCE_ENABLED')
+    if evidence_advice_enabled:
+        if evidence_advisor is None:
+            from .jev_advice import JevEvidenceAdvisor
+            evidence_advisor=JevEvidenceAdvisor(settings)
+    else:
+        evidence_advisor=None
     if contextual_index is None and contextual_enabled:
         from .contextual_index import ContextualIndex
         index_path=settings.get('DSE_CONTEXT_INDEX_PATH',str(settings.data_root/'contextual-index'))
@@ -80,7 +87,7 @@ def create_app(settings=None,store=None,embedding=None,chat=None,native=None,con
         context_model=settings.get('DSE_CONTEXT_CHAT_MODEL',CONTEXT_MODEL_DEFAULT),
         prompt_version=CONTEXT_PROMPT_VERSION,rerank_candidate_limit=rerank_candidate_limit,
     )
-    engine=DecisionEngine(store,retriever,chat,native);jobs=JobLoop(store,engine)
+    engine=DecisionEngine(store,retriever,chat,native,evidence_advisor=evidence_advisor);jobs=JobLoop(store,engine)
 
     @asynccontextmanager
     async def lifespan(app):
@@ -132,7 +139,13 @@ def create_app(settings=None,store=None,embedding=None,chat=None,native=None,con
                              'context_model':settings.get('DSE_CONTEXT_CHAT_MODEL',CONTEXT_MODEL_DEFAULT) if contextual_enabled else None,
                              'context_prompt_version':CONTEXT_PROMPT_VERSION if contextual_enabled else None,
                              'rerank_enabled':rerank_enabled,'rerank_provider':settings.get('DSE_RERANK_PROVIDER'),
-                             'rerank_model':settings.get('DSE_RERANK_MODEL')},
+                             'rerank_model':settings.get('DSE_RERANK_MODEL'),
+                             'evidence_advice_enabled':evidence_advice_enabled,
+                             'evidence_advice_default':'jev' if evidence_advice_enabled else 'off',
+                             'evidence_advice_score_kind':'uncalibrated_direct_support_probability',
+                             'evidence_advice_changes_ranking':False,
+                             'evidence_advice_only':True,'evidence_advice_max_state_bytes':24000,
+                             'evidence_advice_max_request_bytes':30000,'evidence_advice_max_sources':12},
                 'scope':'Quality v2 pilot; single operator HTTP self-host. Source assertions and proposed designs require scoped validation.',
                 'knowledge_quality':{'source_roles':True,'claim_context':'literal_grounded_unverified_association','topic_edges':'evidence_topic_not_property'},
                 'automatic_b300_dse':'not_implemented','performance_simulation':'native HAT run orchestration not yet enabled'}
@@ -158,7 +171,32 @@ def create_app(settings=None,store=None,embedding=None,chat=None,native=None,con
         if not result:raise HTTPException(404,'Material not found')
         return result
     @app.post('/api/search')
-    def search(body:SearchBody):return retriever.search(body.query,body.category,body.limit,purpose=body.purpose,retrieval_mode=body.retrieval_mode)
+    def search(body:SearchBody):
+        requested=body.evidence_advice
+        default='jev' if evidence_advice_enabled else 'off'
+        mode=default if requested is None else requested
+        if mode=='jev' and not evidence_advice_enabled:
+            raise RetrievalUnavailableError('evidence_advice_not_enabled')
+        if requested is not None and mode!=default and not allow_mode_override:
+            raise RetrievalModeError('evidence_advice_override_disabled')
+        result=retriever.search(body.query,body.category,body.limit,purpose=body.purpose,retrieval_mode=body.retrieval_mode)
+        if mode=='off':
+            from .jev_advice import empty_advice
+            advice=empty_advice('disabled',total_evidence=len(result.get('items',[])))
+        elif evidence_advisor is None:
+            from .jev_advice import empty_advice
+            advice=empty_advice('unavailable',error_code='evidence_advice_unavailable',
+                                total_evidence=len(result.get('items',[])))
+        else:
+            from .jev_advice import empty_advice
+            try:
+                advice=evidence_advisor.assess(body.query,result.get('items',[]),kind='knowledge')
+            except Exception:
+                advice=empty_advice('unavailable',error_code='advisor_error',
+                                    total_evidence=len(result.get('items',[])))
+        advice['consumed_by_generator']=False
+        result['evidence_advice']=advice
+        return result
     @app.get('/api/collections')
     def collections():
         return {'items':store.rows('SELECT id,target,state,counters,created_at,updated_at FROM collection_batches ORDER BY created_at DESC LIMIT 20')}

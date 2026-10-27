@@ -1,6 +1,7 @@
 """Evidence-bounded DSE assistance and durable experiment feedback."""
 from __future__ import annotations
 import json
+import math
 import re
 import fcntl
 import os
@@ -253,14 +254,56 @@ neighbor 문맥은 자기 chunk_id로 인용한다. topic mentions는 같은 주
 findings는 제공된 chunk_id를 실제로 지지하는 citation으로 붙인다. 근거에 없는 B300 수치나 지원 ISA, kernel 정확성, 조립 가능성은 추측하지 않는다.
 mandatory required_rules 전체를 검토한다. 하나라도 확인 못하면 gaps에 각각 기입한다. evidence 상위k에 없다는 이유로 규칙을 생략하지 않는다.
 Melete 경험은 참고이며 독립적인 사실 검증이 아니다. 지식 부족이면 insufficient_evidence와 수집/실험 제안을 반환한다.
+JEV_ADVISORY_ONLY는 발췌 범위의 미검증 보조 판단이다. citation이나 사실·조건 일치 판정으로 인용하지 않는다. 반드시 source 원문과 대조하고, 이 advisory가 원문 또는 deterministic mandatory_validation과 충돌하면 원문과 deterministic 결과를 따른다.
 검증되지 않은 kernel 예시는 proposal에만 쓰며 실행·정확성·성능 보장을 하지 않는다. MetricVector는 가중합하지 않고 조건과 tradeoff를 설명한다.
 answer는 1,500자 안팎, findings는 핵심 근거 최대 3개, proposals는 최대 3개로 간결하게 작성한다.
 최종 JSON의 answer는 사람에게 이해 가능한 설명, findings는 근거있는 세부사항, gaps는 필요한 추가지식, next_steps/proposals는 다음 행동이다.'''
 
 
 class DecisionEngine:
-    def __init__(self,store,retriever,chat,native):
-        self.store=store;self.retriever=retriever;self.chat=chat;self.native=native;self.memory_lock=threading.RLock()
+    def __init__(self,store,retriever,chat,native,evidence_advisor=None):
+        self.store=store;self.retriever=retriever;self.chat=chat;self.native=native
+        self.evidence_advisor=evidence_advisor;self.memory_lock=threading.RLock()
+
+    def _evidence_advice(self,payload,evidence):
+        from .jev_advice import CHOICES,empty_advice
+        if self.evidence_advisor is None:
+            return empty_advice('disabled',total_evidence=len(evidence))
+        try:
+            advice=self.evidence_advisor.assess(
+                payload['question'],evidence,kind=payload.get('kind','knowledge'),
+                required_rules=payload.get('input',{}).get('required_rules',[]),
+            )
+        except Exception:
+            return empty_advice('unavailable',error_code='advisor_error',total_evidence=len(evidence))
+        if (not isinstance(advice,dict) or advice.get('schema_version')!='jev-evidence-advice/v1'
+                or advice.get('status') not in {'assessed','disabled','unavailable','skipped_over_budget','skipped_prompt_budget'}
+                or advice.get('advisory_only') is not True):
+            return empty_advice('unavailable',error_code='advisor_response_invalid',total_evidence=len(evidence))
+        advice=deepcopy(advice)
+        if advice['status']=='assessed':
+            score=advice.get('support_score')
+            if (advice.get('choice') not in CHOICES or isinstance(score,bool)
+                    or not isinstance(score,(int,float)) or not math.isfinite(float(score))
+                    or not 0<=float(score)<=1):
+                return empty_advice('unavailable',error_code='advisor_response_invalid',total_evidence=len(evidence))
+        else:
+            advice['support_score']=None
+            advice['choice']=None
+        advice['consumed_by_generator']=False
+        return advice
+
+    @staticmethod
+    def _advice_prompt_block(advice):
+        if advice.get('status')!='assessed':return None
+        projection=advice.get('projection') if isinstance(advice.get('projection'),dict) else {}
+        block={key:advice.get(key) for key in (
+            'advisory_only','policy_version','choice','support_score','score_kind','evidence_ids',
+        )}
+        block['projection']={key:projection.get(key) for key in (
+            'total_evidence','selected_evidence','omitted_evidence','truncated_evidence','excerpt_only','items',
+        )}
+        return '\nJEV_ADVISORY_ONLY\n'+json.dumps(block,ensure_ascii=False,separators=(',',':'))
 
     def decide(self,payload,decision_id=None):
         did=uuid.uuid4().hex if decision_id is None else decision_id
@@ -287,12 +330,33 @@ class DecisionEngine:
         except Exception:experiences={'status':'unavailable','items':[]}
         prompt,evidence,experiences,context_budget=fit_decision_prompt(
             system,payload,required,evidence,experiences,base_context_budget=source_budget)
+        advice=self._evidence_advice(payload,evidence)
+        advice_block=self._advice_prompt_block(advice)
+        consumed_by_generator=False
+        if advice_block is not None:
+            candidate_prompt=prompt+advice_block
+            chars,byte_count=_prompt_size(candidate_prompt)
+            if byte_count is not None and chars<=CODEX_MAX_PROMPT_CHARS and byte_count<=CODEX_MAX_PROMPT_BYTES:
+                prompt=candidate_prompt
+                consumed_by_generator=True
+            else:
+                advice['status']='skipped_prompt_budget'
+                advice['choice']=None
+                advice['support_score']=None
+                advice['metadata']['error_code']='jev_prompt_budget'
+        advice['consumed_by_generator']=consumed_by_generator
+        context_budget=deepcopy(context_budget)
+        context_budget['total_chars']=len(prompt)
+        context_budget['total_bytes']=len(prompt.encode('utf-8'))
+        context_budget['evidence_advice_consumed']=consumed_by_generator
         result=validate_decision(self.chat.complete(prompt,RESULT_SCHEMA),evidence)
         result['id']=did
+        result['evidence_advice']=advice
         result['melete']={'status':'pending','reason':'observation_not_delivered'}
         experience_items=experiences.get('items',[]) if isinstance(experiences,dict) else []
         snapshot={'policy':'source-snapshot-v2','chunk_ids':[x['chunk_id'] for x in evidence],'revision_ids':sorted({x['revision_id'] for x in evidence}),
                   'model_metadata':getattr(self.chat,'last_metadata',{}),'experience_refs':[i.get('memory_id') for i in experience_items],'experience_snapshot':experiences,'required_rules':required,'purpose':'decision_audit','reassessment_creates_new_record':True}
+        snapshot.update(evidence_advice=advice,consumed_by_generator=consumed_by_generator)
         retrieval_evidence_trace,retrieval_semantic_anchors=_retrieval_snapshot(
             retrieved.get('items',[]),evidence,retrieved.get('semantic_anchors'))
         snapshot.update(retrieval_policy=retrieved.get('policy_version'),retrieval_purpose=retrieved.get('purpose'),context_budget=context_budget,
@@ -308,7 +372,8 @@ class DecisionEngine:
             if report['status']=='reject':result['status']='constraint_rejected'
             elif report['status']=='incomplete':result['status']='insufficient_evidence'
             result['gaps']+=['필수 규칙의 추가 검증이 필요합니다: '+str(r['rule']) for r in report['rules'] if r['status']=='unknown']
-        memory_payload={'event_id':did,'event_type':'decision','actor':'assistant','decision_id':did,'text':json.dumps({'question':payload['question'],'result':result,'applicability_ref':did},ensure_ascii=False)[:16000],'source_event_ids':snapshot['chunk_ids']}
+        memory_result={key:value for key,value in result.items() if key!='evidence_advice'}
+        memory_payload={'event_id':did,'event_type':'decision','actor':'assistant','decision_id':did,'text':json.dumps({'question':payload['question'],'result':memory_result,'applicability_ref':did},ensure_ascii=False)[:16000],'source_event_ids':snapshot['chunk_ids']}
         with self.store.connection() as c:
             c.execute('INSERT INTO decisions(id,kind,question,input,result,evidence,snapshot) VALUES(%s,%s,%s,%s,%s,%s,%s)',
                       (did,payload['kind'],payload['question'],Jsonb(context),Jsonb(result),Jsonb(evidence),Jsonb(snapshot)))
@@ -317,6 +382,9 @@ class DecisionEngine:
                 c.execute('INSERT INTO gaps(id,decision_id,reason,next_action) VALUES(%s,%s,%s,%s)',(uuid.uuid4().hex,did,gap,'Collect source evidence or run a scoped experiment'))
             c.execute('INSERT INTO invocations(id,provider,purpose,metadata) VALUES(%s,%s,%s,%s)',
                       (uuid.uuid4().hex,'codex_cli','decision',Jsonb(getattr(self.chat,'last_metadata',{}))))
+            if self.evidence_advisor is not None:
+                c.execute('INSERT INTO invocations(id,provider,purpose,metadata) VALUES(%s,%s,%s,%s)',
+                          (uuid.uuid4().hex,'decision_models','evidence_advice',Jsonb(advice.get('metadata',{}))))
         receipt=self.retry_memory(did,memory_payload)
         result['melete']=receipt
         return result

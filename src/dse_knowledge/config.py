@@ -41,7 +41,7 @@ class Settings:
                 raise ValueError('Configuration directory must be owner-only')
         values = {}
         db_file = 'database.env' if admin else 'runtime-database.env'
-        for name in (db_file, 'llm.env', 'embedding.env', 'app.env', 'contextual.env', 'rerank.env'):
+        for name in (db_file, 'llm.env', 'embedding.env', 'app.env', 'contextual.env', 'rerank.env', 'jev.env'):
             p = root/name
             if p.exists():
                 values.update(read_env(p))
